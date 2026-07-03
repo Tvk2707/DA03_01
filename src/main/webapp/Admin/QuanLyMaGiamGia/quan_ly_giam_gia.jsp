@@ -1,3 +1,9 @@
+
+<%
+    request.setAttribute("pageTitle", "Quản Lý giảm giá");
+    request.setAttribute("activeMenu", "giamgia");
+%>
+
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="vi">
@@ -10,12 +16,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Common Layout CSS -->
-    <link rel="stylesheet" href="<%= request.getContextPath() %>css/layout.css">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>css/sidebar.css">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>css/header.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/sidebar.css">
+    <link rel="stylesheet" href="../css/header.css">
 
     <!-- Discount Page CSS -->
-    <link rel="stylesheet" href="<%= request.getContextPath() %>css/quan-ly-giam-gia.css">
+    <link rel="stylesheet" href="../css/quan_ly_giam_gia.css">
 </head>
 <body>
     <!-- Include Sidebar -->

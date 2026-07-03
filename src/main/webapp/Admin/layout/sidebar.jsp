@@ -57,7 +57,7 @@
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="#" class="menu-link">
+                    <a href="../QuanLyMaGiamGia/quan_ly_giam_gia.jsp" class="menu-link" <%= "giamgia".equals(request.getAttribute("activeMenu"))?"active":""%>>
                         <i class="fas fa-tags"></i>
                         <span>Quản lý giảm giá</span>
                     </a>
