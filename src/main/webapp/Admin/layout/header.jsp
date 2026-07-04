@@ -14,14 +14,6 @@
         </nav>
     </div>
 
-    <!-- Center: Search -->
-    <div class="header-center">
-        <div class="search-box">
-            <i class="fas fa-search"></i>
-            <input type="text" placeholder="Tìm kiếm toàn bộ...">
-        </div>
-    </div>
-
     <!-- Right: User Menu -->
     <div class="header-right">
         <!-- Notification -->

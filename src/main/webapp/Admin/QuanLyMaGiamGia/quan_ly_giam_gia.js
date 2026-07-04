@@ -1,68 +1,76 @@
 /**
- * Discount Management - Tab Switching & Filters
+ * Quản lý giảm giá - Tab Switching & Filters
+ * File: quan-ly-giam-gia.js
  */
 
 // ==================== TAB SWITCHING ====================
 
 /**
- * Show Coupon tab content
+ * Hiển thị tab Mã giảm giá
  */
 function showCoupon() {
-    // Update tab buttons
-    document.querySelectorAll('.tab').forEach(tab => {
+    // Cập nhật trạng thái tab
+    document.querySelectorAll('.tab').forEach(function(tab) {
         tab.classList.remove('tab--active');
     });
     document.querySelector('[data-tab="coupon"]').classList.add('tab--active');
 
-    // Update content visibility
+    // Cập nhật hiển thị nội dung
     document.getElementById('couponContent').classList.add('tab-content--active');
     document.getElementById('campaignContent').classList.remove('tab-content--active');
 
-    // Update create button text
-    document.getElementById('btnCreateText').textContent = 'Tạo mã giảm giá';
+    // Cập nhật nút tạo mới
+    var btnText = document.getElementById('btnCreateText');
+    if (btnText) {
+        btnText.textContent = 'Tạo mã giảm giá';
+    }
 }
 
 /**
- * Show Campaign tab content
+ * Hiển thị tab Đợt giảm giá sản phẩm
  */
 function showCampaign() {
-    // Update tab buttons
-    document.querySelectorAll('.tab').forEach(tab => {
+    // Cập nhật trạng thái tab
+    document.querySelectorAll('.tab').forEach(function(tab) {
         tab.classList.remove('tab--active');
     });
     document.querySelector('[data-tab="campaign"]').classList.add('tab--active');
 
-    // Update content visibility
+    // Cập nhật hiển thị nội dung
     document.getElementById('campaignContent').classList.add('tab-content--active');
     document.getElementById('couponContent').classList.remove('tab-content--active');
 
-    // Update create button text
-    document.getElementById('btnCreateText').textContent = 'Tạo đợt giảm giá';
+    // Cập nhật nút tạo mới
+    var btnText = document.getElementById('btnCreateText');
+    if (btnText) {
+        btnText.textContent = 'Tạo đợt giảm giá';
+    }
 }
 
-// ==================== FILTER FUNCTIONALITY ====================
+// ==================== KHỞI TẠO KHI DOM LOAD ====================
 
-/**
- * Filter coupons by type
- */
 document.addEventListener('DOMContentLoaded', function() {
-    const filterButtons = document.querySelectorAll('.filter-btn');
-    const couponCards = document.querySelectorAll('.coupon-card');
 
-    filterButtons.forEach(btn => {
+    // --- Filter chức năng ---
+    var filterButtons = document.querySelectorAll('.filter-btn');
+    var couponCards = document.querySelectorAll('.coupon-card');
+
+    filterButtons.forEach(function(btn) {
         btn.addEventListener('click', function() {
-            // Update active button
-            filterButtons.forEach(b => b.classList.remove('filter-btn--active'));
+            // Cập nhật nút active
+            filterButtons.forEach(function(b) {
+                b.classList.remove('filter-btn--active');
+            });
             this.classList.add('filter-btn--active');
 
-            const filter = this.dataset.filter;
+            var filter = this.dataset.filter;
 
-            // Filter cards
-            couponCards.forEach(card => {
+            // Lọc cards
+            couponCards.forEach(function(card) {
                 if (filter === 'all') {
                     card.style.display = 'block';
                 } else {
-                    const cardType = card.dataset.type;
+                    var cardType = card.dataset.type;
                     if (cardType === filter) {
                         card.style.display = 'block';
                     } else {
@@ -73,48 +81,108 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // ==================== CREATE BUTTON ====================
-    const createBtn = document.getElementById('btnCreate');
-    createBtn.addEventListener('click', function() {
-        const activeTab = document.querySelector('.tab--active').dataset.tab;
+    // --- Nút tạo mới ---
+    var createBtn = document.getElementById('btnCreate');
+    if (createBtn) {
+        createBtn.addEventListener('click', function() {
+            var activeTab = document.querySelector('.tab--active');
+            if (!activeTab) return;
 
-        if (activeTab === 'coupon') {
-            // Navigate to create coupon page
-            window.location.href = '/admin/discount/create-coupon';
-        } else {
-            // Navigate to create campaign page
-            window.location.href = '/admin/discount/create-campaign';
-        }
-    });
+            var tabName = activeTab.dataset.tab;
 
-    // ==================== COPY COUPON CODE ====================
-    const copyButtons = document.querySelectorAll('.btn-icon[title="Sao chép"]');
-    copyButtons.forEach(btn => {
+            if (tabName === 'coupon') {
+                // Điều hướng đến trang tạo mã giảm giá
+                // window.location.href = '/admin/discount/create-coupon';
+                alert('Chuyển đến trang tạo mã giảm giá');
+            } else {
+                // Điều hướng đến trang tạo đợt giảm giá
+                // window.location.href = '/admin/discount/create-campaign';
+                alert('Chuyển đến trang tạo đợt giảm giá');
+            }
+        });
+    }
+
+    // --- Sao chép mã giảm giá ---
+    var copyButtons = document.querySelectorAll('.btn-copy');
+    copyButtons.forEach(function(btn) {
         btn.addEventListener('click', function() {
-            const code = this.closest('.coupon-card__name').querySelector('.coupon-card__code').textContent;
+            var codeElement = this.closest('.coupon-card__name')
+                .querySelector('.coupon-card__code');
+            if (!codeElement) return;
 
-            // Copy to clipboard
-            navigator.clipboard.writeText(code).then(() => {
-                // Show feedback
-                const originalIcon = this.innerHTML;
-                this.innerHTML = '<i class="fas fa-check"></i>';
-                this.style.color = '#43a047';
+            var code = codeElement.textContent.trim();
 
-                setTimeout(() => {
-                    this.innerHTML = originalIcon;
-                    this.style.color = '';
-                }, 2000);
-            }).catch(err => {
-                console.error('Failed to copy:', err);
-            });
+            // Sao chép vào clipboard
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(code).then(function() {
+                    showCopyFeedback(btn);
+                }).catch(function(err) {
+                    console.error('Lỗi sao chép:', err);
+                    fallbackCopy(code, btn);
+                });
+            } else {
+                fallbackCopy(code, btn);
+            }
         });
     });
+
+    // --- Khởi tạo progress bars ---
+    initProgressBars();
 });
 
-// ==================== UTILITY FUNCTIONS ====================
+// ==================== HÀM TIỆN ÍCH ====================
 
 /**
- * Format currency
+ * Khởi tạo thanh tiến trình từ data-width
+ */
+function initProgressBars() {
+    var progressFills = document.querySelectorAll('.progress-bar__fill');
+    progressFills.forEach(function(fill) {
+        var width = fill.dataset.width || 0;
+        // Delay nhỏ để animation chạy mượt
+        setTimeout(function() {
+            fill.style.width = width + '%';
+        }, 100);
+    });
+}
+
+/**
+ * Hiển thị phản hồi khi sao chép thành công
+ */
+function showCopyFeedback(btn) {
+    var originalHTML = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-check"></i>';
+    btn.style.color = '#43a047';
+
+    setTimeout(function() {
+        btn.innerHTML = originalHTML;
+        btn.style.color = '';
+    }, 2000);
+}
+
+/**
+ * Sao chép fallback cho trình duyệt cũ
+ */
+function fallbackCopy(text, btn) {
+    var textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+
+    try {
+        document.execCommand('copy');
+        showCopyFeedback(btn);
+    } catch (err) {
+        console.error('Lỗi sao chép fallback:', err);
+    }
+
+    document.body.removeChild(textarea);
+}
+
+/**
+ * Format tiền tệ VND
  */
 function formatCurrency(amount) {
     return new Intl.NumberFormat('vi-VN', {
@@ -124,24 +192,9 @@ function formatCurrency(amount) {
 }
 
 /**
- * Calculate percentage
+ * Tính phần trăm
  */
 function calculatePercentage(used, total) {
+    if (total === 0) return 0;
     return Math.round((used / total) * 100);
-}
-
-/**
- * Update progress bar
- */
-function updateProgressBar(cardElement, used, total) {
-    const percentage = calculatePercentage(used, total);
-    const progressBar = cardElement.querySelector('.progress-bar__fill');
-    const percentageLabel = cardElement.querySelector('.progress-label span:last-child');
-
-    if (progressBar) {
-        progressBar.style.width = percentage + '%';
-    }
-    if (percentageLabel) {
-        percentageLabel.textContent = percentage + '%';
-    }
 }

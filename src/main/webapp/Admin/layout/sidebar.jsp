@@ -1,5 +1,9 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-
+<%
+    // Lấy activeMenu một lần, xử lý null để tránh NullPointerException
+    String activeMenu = (String) request.getAttribute("activeMenu");
+    if (activeMenu == null) activeMenu = "";
+%>
 
 <aside class="sidebar" id="sidebar">
     <!-- Logo -->
@@ -20,13 +24,7 @@
             <div class="menu-title">Kênh bán hàng</div>
             <ul class="menu-list">
                 <li class="menu-item">
-                    <a href="#" class="menu-link">
-                        <i class="fas fa-shopping-bag"></i>
-                        <span>Bán hàng online</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="#" class="menu-link">
+                    <a href="#" class="menu-link <%= "pos".equals(activeMenu) ? "active" : "" %>">
                         <i class="fas fa-cash-register"></i>
                         <span>Bán tại quầy (POS)</span>
                     </a>
@@ -39,37 +37,50 @@
             <div class="menu-title">Quản trị</div>
             <ul class="menu-list">
                 <li class="menu-item">
-                    <a href="../Thongke.jsp" class="menu-link <%= "dashboard".equals(request.getAttribute("activeMenu"))?"active":""%>">
+                    <a href="../Thongke.jsp" class="menu-link <%= "dashboard".equals(activeMenu) ? "active" : "" %>">
                         <i class="fas fa-chart-bar"></i>
                         <span>Thống kê</span>
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="#" class="menu-link">
+                    <a href="#" class="menu-link <%= "invoice".equals(activeMenu) ? "active" : "" %>">
                         <i class="fas fa-file-invoice"></i>
                         <span>Quản lý hoá đơn</span>
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="#" class="menu-link">
-                        <i class="fas fa-box"></i>
-                        <span>Quản lý sản phẩm</span>
+                    <a href="#" class="menu-link <%= "product".equals(activeMenu) ? "active" : "" %>">
+                        <div class="menu-link-wrapper">
+                            <i class="fas fa-box"></i>
+                            <span>Quản lý sản phẩm</span>
+                        </div>
+                        <i class="fas fa-chevron-down toggle-icon"></i> <!-- Thêm icon này -->
                     </a>
+                    <ul class="submenu">
+                        <li><a href="../QuanLySanPham/DanhMuc.jsp">Danh mục</a></li>
+                        <li><a href="#">Thương hiệu</a></li>
+                        <li><a href="#">Chất liệu</a></li>
+                        <li><a href="#">Kiểu dáng</a></li>
+                        <li><a href="#">Màu sắc</a></li>
+                        <li><a href="#">Kích Cỡ </a></li>
+                        <li><a href="#">Tròng Kính </a></li>
+                        <li><a href="#">Gọng Kính</a></li>
+                    </ul>
                 </li>
                 <li class="menu-item">
-                    <a href="../QuanLyMaGiamGia/quan_ly_giam_gia.jsp" class="menu-link" <%= "giamgia".equals(request.getAttribute("activeMenu"))?"active":""%>>
+                    <a href="../QuanLyMaGiamGia/quan_ly_giam_gia.jsp" class="menu-link <%= "discount".equals(activeMenu) ? "active" : "" %>">
                         <i class="fas fa-tags"></i>
                         <span>Quản lý giảm giá</span>
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="#" class="menu-link">
+                    <a href="#" class="menu-link <%= "customer".equals(activeMenu) ? "active" : "" %>">
                         <i class="fas fa-users"></i>
                         <span>Quản lý khách hàng</span>
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="#" class="menu-link">
+                    <a href="#" class="menu-link <%= "employee".equals(activeMenu) ? "active" : "" %>">
                         <i class="fas fa-user-tie"></i>
                         <span>Quản lý nhân viên</span>
                     </a>
@@ -101,7 +112,7 @@
 <div class="overlay" id="overlay"></div>
 
 <!-- Mobile Toggle Button -->
-<button class="sidebar-toggle" id="sidebarToggle">
+<button class="sidebar-toggle" id="sidebarToggle" type="button">
     <i class="fas fa-bars"></i>
 </button>
 
@@ -130,7 +141,20 @@
             if (window.innerWidth <= 1024) {
                 toggleSidebar();
             }
-        })
-    })
-</script>
+        });
+    });
+    // Xử lý đóng mở submenu
+    document.querySelectorAll('.menu-item').forEach(item => {
+        const link = item.querySelector('.menu-link');
+        const submenu = item.querySelector('.submenu');
 
+        if (link && submenu) {
+            link.addEventListener('click', (e) => {
+                if (link.getAttribute('href') === '#') {
+                    e.preventDefault();
+                    item.classList.toggle('open'); // Class này sẽ xoay icon
+                }
+            });
+        }
+    });
+</script>

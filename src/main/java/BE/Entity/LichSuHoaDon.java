@@ -1,33 +1,50 @@
-package com.eyewear.entity;
+package BE.Entity;
 
 import jakarta.persistence.*;
-import lombok.*;
-
+import java.util.List;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "lich_su_hoa_don")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class LichSuHoaDon {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_hoa_don", nullable = false)
+    @JoinColumn(name = "id_hoa_don")
     private HoaDon hoaDon;
 
-    @Column(name = "hanh_dong", length = 250)
+    @Column(name = "hanh_dong")
     private String hanhDong;
 
     @Column(name = "ngay_tao")
     private LocalDateTime ngayTao;
 
-    @Column(name = "ghi_chu", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "ghi_chu")
     private String ghiChu;
+
+    public LichSuHoaDon() {}
+
+    public LichSuHoaDon(Integer id, HoaDon hoaDon, String hanhDong, LocalDateTime ngayTao, String ghiChu) {
+        this.id = id;
+        this.hoaDon = hoaDon;
+        this.hanhDong = hanhDong;
+        this.ngayTao = ngayTao;
+        this.ghiChu = ghiChu;
+    }
+
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
+    public HoaDon getHoaDon() { return hoaDon; }
+    public void setHoaDon(HoaDon hoaDon) { this.hoaDon = hoaDon; }
+    public String getHanhDong() { return hanhDong; }
+    public void setHanhDong(String hanhDong) { this.hanhDong = hanhDong; }
+    public LocalDateTime getNgayTao() { return ngayTao; }
+    public void setNgayTao(LocalDateTime ngayTao) { this.ngayTao = ngayTao; }
+    public String getGhiChu() { return ghiChu; }
+    public void setGhiChu(String ghiChu) { this.ghiChu = ghiChu; }
 }

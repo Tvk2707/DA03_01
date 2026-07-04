@@ -1,10 +1,4 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: Admin
-  Date: 03/07/2026
-  Time: 00:32
-  To change this template use File | Settings | File Templates.
---%>
+
 <%
   request.setAttribute("pageTitle", "Thống kê");
   request.setAttribute("activeMenu", "dashboard");

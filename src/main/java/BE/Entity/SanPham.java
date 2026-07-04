@@ -1,21 +1,17 @@
-package com.eyewear.entity;
+package BE.Entity;
 
 import jakarta.persistence.*;
-import lombok.*;
-
+import java.util.List;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "san_pham")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class SanPham {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -42,13 +38,13 @@ public class SanPham {
     @JoinColumn(name = "id_trong_kinh")
     private TrongKinh trongKinh;
 
-    @Column(name = "ma_san_pham", unique = true, nullable = false, length = 50)
+    @Column(name = "ma_san_pham")
     private String maSanPham;
 
-    @Column(name = "ten_san_pham", nullable = false, length = 250)
+    @Column(name = "ten_san_pham")
     private String tenSanPham;
 
-    @Column(name = "mo_ta_chi_tiet", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "mo_ta_chi_tiet")
     private String moTaChiTiet;
 
     @Column(name = "ngay_tao")
@@ -58,5 +54,62 @@ public class SanPham {
     private LocalDateTime ngaySua;
 
     @Column(name = "trang_thai")
-    private Integer trangThai = 1;
+    private Integer trangThai;
+
+    @OneToMany(mappedBy = "sanPham")
+    private List<SanPhamChiTiet> sanPhamChiTiets;
+
+    @OneToMany(mappedBy = "sanPham")
+    private List<HinhAnhSanPham> hinhAnhSanPhams;
+
+    public SanPham() {}
+
+    public SanPham(Integer id, DanhMuc danhMuc, ThuongHieu thuongHieu, ChatLieu chatLieu, KieuDang kieuDang, GongKinh gongKinh, TrongKinh trongKinh, String maSanPham, String tenSanPham, String moTaChiTiet, LocalDateTime ngayTao, LocalDateTime ngaySua, Integer trangThai, List<SanPhamChiTiet> sanPhamChiTiets, List<HinhAnhSanPham> hinhAnhSanPhams) {
+        this.id = id;
+        this.danhMuc = danhMuc;
+        this.thuongHieu = thuongHieu;
+        this.chatLieu = chatLieu;
+        this.kieuDang = kieuDang;
+        this.gongKinh = gongKinh;
+        this.trongKinh = trongKinh;
+        this.maSanPham = maSanPham;
+        this.tenSanPham = tenSanPham;
+        this.moTaChiTiet = moTaChiTiet;
+        this.ngayTao = ngayTao;
+        this.ngaySua = ngaySua;
+        this.trangThai = trangThai;
+        this.sanPhamChiTiets = sanPhamChiTiets;
+        this.hinhAnhSanPhams = hinhAnhSanPhams;
+    }
+
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
+    public DanhMuc getDanhMuc() { return danhMuc; }
+    public void setDanhMuc(DanhMuc danhMuc) { this.danhMuc = danhMuc; }
+    public ThuongHieu getThuongHieu() { return thuongHieu; }
+    public void setThuongHieu(ThuongHieu thuongHieu) { this.thuongHieu = thuongHieu; }
+    public ChatLieu getChatLieu() { return chatLieu; }
+    public void setChatLieu(ChatLieu chatLieu) { this.chatLieu = chatLieu; }
+    public KieuDang getKieuDang() { return kieuDang; }
+    public void setKieuDang(KieuDang kieuDang) { this.kieuDang = kieuDang; }
+    public GongKinh getGongKinh() { return gongKinh; }
+    public void setGongKinh(GongKinh gongKinh) { this.gongKinh = gongKinh; }
+    public TrongKinh getTrongKinh() { return trongKinh; }
+    public void setTrongKinh(TrongKinh trongKinh) { this.trongKinh = trongKinh; }
+    public String getMaSanPham() { return maSanPham; }
+    public void setMaSanPham(String maSanPham) { this.maSanPham = maSanPham; }
+    public String getTenSanPham() { return tenSanPham; }
+    public void setTenSanPham(String tenSanPham) { this.tenSanPham = tenSanPham; }
+    public String getMoTaChiTiet() { return moTaChiTiet; }
+    public void setMoTaChiTiet(String moTaChiTiet) { this.moTaChiTiet = moTaChiTiet; }
+    public LocalDateTime getNgayTao() { return ngayTao; }
+    public void setNgayTao(LocalDateTime ngayTao) { this.ngayTao = ngayTao; }
+    public LocalDateTime getNgaySua() { return ngaySua; }
+    public void setNgaySua(LocalDateTime ngaySua) { this.ngaySua = ngaySua; }
+    public Integer getTrangThai() { return trangThai; }
+    public void setTrangThai(Integer trangThai) { this.trangThai = trangThai; }
+    public List<SanPhamChiTiet> getSanPhamChiTiets() { return sanPhamChiTiets; }
+    public void setSanPhamChiTiets(List<SanPhamChiTiet> sanPhamChiTiets) { this.sanPhamChiTiets = sanPhamChiTiets; }
+    public List<HinhAnhSanPham> getHinhAnhSanPhams() { return hinhAnhSanPhams; }
+    public void setHinhAnhSanPhams(List<HinhAnhSanPham> hinhAnhSanPhams) { this.hinhAnhSanPhams = hinhAnhSanPhams; }
 }
