@@ -1,0 +1,29 @@
+package com.eyewear.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "gong_kinh")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class GongKinh {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_hinh_dang_gong")
+    private HinhDangGong hinhDangGong;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_kieu_quai_kinh")
+    private KieuQuaiKinh kieuQuaiKinh;
+
+    @Column(name = "trang_thai")
+    private Integer trangThai = 1;
+}
