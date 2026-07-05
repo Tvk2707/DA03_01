@@ -188,11 +188,26 @@
     height: 4px;
     background-color: var(--border-color, #dee2e6);
     border-radius: 50%;
-    transition: background-color 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 .submenu li a:hover::before {
     background-color: var(--primary-color, #0d6efd);
+}
+
+/* Style cho submenu khi được active */
+.submenu li a.active {
+    background-color: var(--bg-color, #f8f9fa) !important;
+    color: var(--primary-color, #0d6efd) !important;
+    font-weight: 600;
+}
+
+/* Đổi màu và kích thước dấu chấm tròn khi mục con được active */
+.submenu li a.active::before {
+    background-color: var(--primary-color, #0d6efd);
+    width: 6px;
+    height: 6px;
+    left: -11px;
 }
 
 /* =========================================

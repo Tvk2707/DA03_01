@@ -3,6 +3,10 @@
     // Lấy activeMenu một lần, xử lý null để tránh NullPointerException
     String activeMenu = (String) request.getAttribute("activeMenu");
     if (activeMenu == null) activeMenu = "";
+
+    // Lấy activeSubMenu để highlight các mục con trong Quản lý sản phẩm
+    String activeSubMenu = (String) request.getAttribute("activeSubMenu");
+    if (activeSubMenu == null) activeSubMenu = "";
 %>
 
 <aside class="sidebar" id="sidebar">
@@ -48,25 +52,28 @@
                         <span>Quản lý hoá đơn</span>
                     </a>
                 </li>
-                <li class="menu-item">
+
+                <!-- Quản lý sản phẩm (Đã thêm class 'open' nếu activeMenu là product) -->
+                <li class="menu-item <%= "product".equals(activeMenu) ? "open" : "" %>">
                     <a href="#" class="menu-link <%= "product".equals(activeMenu) ? "active" : "" %>">
                         <div class="menu-link-wrapper">
                             <i class="fas fa-box"></i>
                             <span>Quản lý sản phẩm</span>
                         </div>
-                        <i class="fas fa-chevron-down toggle-icon"></i> <!-- Thêm icon này -->
+                        <i class="fas fa-chevron-down toggle-icon"></i>
                     </a>
                     <ul class="submenu">
-                        <li><a href="../QuanLySanPham/DanhMuc.jsp">Danh mục</a></li>
-                        <li><a href="#">Thương hiệu</a></li>
-                        <li><a href="#">Chất liệu</a></li>
-                        <li><a href="#">Kiểu dáng</a></li>
-                        <li><a href="#">Màu sắc</a></li>
-                        <li><a href="#">Kích Cỡ </a></li>
-                        <li><a href="#">Tròng Kính </a></li>
-                        <li><a href="#">Gọng Kính</a></li>
+                        <li><a href="../DanhMuc" class="<%= "category".equals(activeSubMenu) ? "active" : "" %>">Danh mục</a></li>
+                        <li><a href="#" class="<%= "brand".equals(activeSubMenu) ? "active" : "" %>">Thương hiệu</a></li>
+                        <li><a href="#" class="<%= "material".equals(activeSubMenu) ? "active" : "" %>">Chất liệu</a></li>
+                        <li><a href="#" class="<%= "style".equals(activeSubMenu) ? "active" : "" %>">Kiểu dáng</a></li>
+                        <li><a href="#" class="<%= "color".equals(activeSubMenu) ? "active" : "" %>">Màu sắc</a></li>
+                        <li><a href="#" class="<%= "size".equals(activeSubMenu) ? "active" : "" %>">Kích Cỡ</a></li>
+                        <li><a href="#" class="<%= "lens".equals(activeSubMenu) ? "active" : "" %>">Tròng Kính</a></li>
+                        <li><a href="#" class="<%= "frame".equals(activeSubMenu) ? "active" : "" %>">Gọng Kính</a></li>
                     </ul>
                 </li>
+
                 <li class="menu-item">
                     <a href="../QuanLyMaGiamGia/quan_ly_giam_gia.jsp" class="menu-link <%= "discount".equals(activeMenu) ? "active" : "" %>">
                         <i class="fas fa-tags"></i>
@@ -139,10 +146,14 @@
     document.querySelectorAll('.menu-link, .bottom-link').forEach(link => {
         link.addEventListener('click', () => {
             if (window.innerWidth <= 1024) {
-                toggleSidebar();
+                // Không đóng sidebar nếu click vào menu cha có chứa submenu
+                if (link.getAttribute('href') !== '#') {
+                    toggleSidebar();
+                }
             }
         });
     });
+
     // Xử lý đóng mở submenu
     document.querySelectorAll('.menu-item').forEach(item => {
         const link = item.querySelector('.menu-link');
@@ -152,7 +163,7 @@
             link.addEventListener('click', (e) => {
                 if (link.getAttribute('href') === '#') {
                     e.preventDefault();
-                    item.classList.toggle('open'); // Class này sẽ xoay icon
+                    item.classList.toggle('open'); // Class này sẽ xoay icon và mở submenu
                 }
             });
         }
