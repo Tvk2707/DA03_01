@@ -1,5 +1,6 @@
 package BE.dao.impl;
 
+import BE.Entity.DanhMuc;
 import BE.Entity.ThuongHieu;
 import BE.dao.ThuongHieuDao;
 import BE.Utils.EntityManagerUtlis;
@@ -31,6 +32,23 @@ public class ThuongHieuDaoImpl extends GenericDaoImpl<ThuongHieu, Integer> imple
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Lỗi khi tìm thương hiệu theo tên", e);
+        } finally {
+            em.close();
+        }
+    }
+    @Override
+    public List<ThuongHieu> searchByKeyword(String keyword) {
+        EntityManager em = EntityManagerUtlis.getEntityManager();
+        try {
+            String jpql = "SELECT t FROM ThuongHieu t WHERE " +
+                    "LOWER(t.tenThuongHieu) LIKE LOWER(:keyword) " +
+                    "ORDER BY t.id DESC";
+            TypedQuery<ThuongHieu> query = em.createQuery(jpql, ThuongHieu.class);
+            query.setParameter("keyword", "%" + keyword + "%");
+            return query.getResultList();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi tìm kiếm thương hiệu", e);
         } finally {
             em.close();
         }

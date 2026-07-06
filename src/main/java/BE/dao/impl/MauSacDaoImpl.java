@@ -1,5 +1,6 @@
 package BE.dao.impl;
 
+import BE.Entity.DanhMuc;
 import BE.Entity.MauSac;
 import BE.dao.MauSacDao;
 import BE.Utils.EntityManagerUtlis;
@@ -31,6 +32,23 @@ public class MauSacDaoImpl extends GenericDaoImpl<MauSac, Integer> implements Ma
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Lỗi khi tìm màu sắc theo tên", e);
+        } finally {
+            em.close();
+        }
+    }
+    @Override
+    public List<MauSac> searchByKeyword(String keyword) {
+        EntityManager em = EntityManagerUtlis.getEntityManager();
+        try {
+            String jpql = "SELECT m FROM MauSac m WHERE " +
+                    "LOWER(m.tenMau) LIKE LOWER(:keyword) " +
+                    "ORDER BY m.id DESC";
+            TypedQuery<MauSac> query = em.createQuery(jpql, MauSac.class);
+            query.setParameter("keyword", "%" + keyword + "%");
+            return query.getResultList();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi tìm kiếm màu sắc", e);
         } finally {
             em.close();
         }

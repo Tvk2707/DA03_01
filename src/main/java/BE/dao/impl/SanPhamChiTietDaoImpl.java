@@ -85,4 +85,53 @@ public class SanPhamChiTietDaoImpl extends GenericDaoImpl<SanPhamChiTiet, Intege
             em.close();
         }
     }
+    @Override
+    public List<SanPhamChiTiet> timKiem(Integer sanPhamId, String ma, Integer mauSacId, Integer kichCoId, Integer trangThai) {
+        EntityManager em = EntityManagerUtlis.getEntityManager();
+        try {
+            // Sửa câu JPQL: Thêm LEFT JOIN FETCH để tải luôn dữ liệu màu sắc và kích cỡ
+            StringBuilder jpql = new StringBuilder("SELECT s FROM SanPhamChiTiet s LEFT JOIN FETCH s.mauSac LEFT JOIN FETCH s.kichCo WHERE 1=1");
+
+            if (sanPhamId != null) {
+                jpql.append(" AND s.sanPham.id = :sanPhamId");
+            }
+            if (ma != null && !ma.trim().isEmpty()) {
+                jpql.append(" AND LOWER(s.ma) LIKE :ma");
+            }
+            if (mauSacId != null) {
+                jpql.append(" AND s.mauSac.id = :mauSacId");
+            }
+            if (kichCoId != null) {
+                jpql.append(" AND s.kichCo.id = :kichCoId");
+            }
+            if (trangThai != null) {
+                jpql.append(" AND s.trangThai = :trangThai");
+            }
+
+            TypedQuery<SanPhamChiTiet> query = em.createQuery(jpql.toString(), SanPhamChiTiet.class);
+
+            if (sanPhamId != null) {
+                query.setParameter("sanPhamId", sanPhamId);
+            }
+            if (ma != null && !ma.trim().isEmpty()) {
+                query.setParameter("ma", "%" + ma.trim().toLowerCase() + "%");
+            }
+            if (mauSacId != null) {
+                query.setParameter("mauSacId", mauSacId);
+            }
+            if (kichCoId != null) {
+                query.setParameter("kichCoId", kichCoId);
+            }
+            if (trangThai != null) {
+                query.setParameter("trangThai", trangThai);
+            }
+
+            return query.getResultList();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi tìm kiếm chi tiết sản phẩm", e);
+        } finally {
+            em.close();
+        }
+    }
 }

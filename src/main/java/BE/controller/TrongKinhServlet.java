@@ -1,5 +1,6 @@
 package BE.controller;
 
+import BE.Entity.ThuongHieu;
 import BE.Entity.TrongKinh;
 import BE.service.LookupService;
 import BE.service.impl.LookupServiceImpl;
@@ -34,9 +35,7 @@ public class TrongKinhServlet extends HttpServlet {
             case "/TrongKinh/edit":
                 showEditTrongKinh(request, response);
                 break;
-            case "/TrongKinh/delete":
-                deleteTrongKinh(request, response);
-                break;
+
         }
     }
 
@@ -50,24 +49,36 @@ public class TrongKinhServlet extends HttpServlet {
             case "/TrongKinh/update":
                 updateTrongKinh(request, response);
                 break;
+            case "/TrongKinh/delete":
+                deleteTrongKinh(request, response);
+                break;
         }
     }
 
     private void ShowTrongKinh(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<TrongKinh> items = lookupService.layTatCaTrongKinh();
+        String keyword = request.getParameter("keyword");
+        List<TrongKinh> items;
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            items = lookupService.timKiemTrongKinh(keyword);
+            request.setAttribute("keyword", keyword);
+        } else {
+            items = lookupService.layTatCaTrongKinh();
+        }
+        // List<TrongKinh> items = lookupService.layTatCaTrongKinh();
         request.setAttribute("items", items);
-        request.getRequestDispatcher("/view/trongkinh/List.jsp").forward(request, response);
+        request.getRequestDispatcher("/Admin/QuanLyBienThe/TrongKinh.jsp").forward(request, response);
     }
 
     private void showAddTrongKinh(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.getRequestDispatcher("/view/trongkinh/Add.jsp").forward(request, response);
+        request.getRequestDispatcher("/Admin/QuanLyBienThe/TrongKinh.jsp").forward(request, response);
     }
 
     private void showEditTrongKinh(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Integer id = Integer.parseInt(request.getParameter("id"));
         TrongKinh trongKinh = lookupService.layTrongKinhTheoId(id);
         request.setAttribute("trongKinh", trongKinh);
-        request.getRequestDispatcher("/view/trongkinh/Edit.jsp").forward(request, response);
+        request.getRequestDispatcher("/Admin/QuanLyBienThe/TrongKinh.jsp").forward(request, response);
     }
 
     private void insertTrongKinh(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -78,7 +89,7 @@ public class TrongKinhServlet extends HttpServlet {
         } catch (RuntimeException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("trongKinh", trongKinh);
-            request.getRequestDispatcher("/view/trongkinh/Add.jsp").forward(request, response);
+            request.getRequestDispatcher("/Admin/QuanLyBienThe/TrongKinh.jsp").forward(request, response);
         }
     }
 
@@ -91,7 +102,7 @@ public class TrongKinhServlet extends HttpServlet {
         } catch (RuntimeException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("trongKinh", trongKinh);
-            request.getRequestDispatcher("/view/trongkinh/Edit.jsp").forward(request, response);
+            request.getRequestDispatcher("/Admin/QuanLyBienThe/TrongKinh.jsp").forward(request, response);
         }
     }
 
@@ -103,8 +114,10 @@ public class TrongKinhServlet extends HttpServlet {
 
     private TrongKinh getTrongKinhFron(HttpServletRequest request) {
         String loaiTrong = request.getParameter("loaiTrong");
+        Integer trangthai = Integer.parseInt(request.getParameter("trangthai"));
         TrongKinh trongKinh = new TrongKinh();
         trongKinh.setLoaiTrong(loaiTrong);
+        trongKinh.setTrangThai(trangthai);
         return trongKinh;
     }
 }

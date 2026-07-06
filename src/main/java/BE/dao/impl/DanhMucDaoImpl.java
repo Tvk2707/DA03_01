@@ -35,4 +35,26 @@ public class DanhMucDaoImpl extends GenericDaoImpl<DanhMuc, Integer> implements 
             em.close();
         }
     }
+    
+    /**
+     * Tìm kiếm danh mục theo keyword (tìm trong mã hoặc tên)
+     */
+    @Override
+    public List<DanhMuc> searchByKeyword(String keyword) {
+        EntityManager em = EntityManagerUtlis.getEntityManager();
+        try {
+            String jpql = "SELECT d FROM DanhMuc d WHERE " +
+                    "LOWER(d.maDanhMuc) LIKE LOWER(:keyword) OR " +
+                    "LOWER(d.tenDanhMuc) LIKE LOWER(:keyword) " +
+                    "ORDER BY d.id DESC";
+            TypedQuery<DanhMuc> query = em.createQuery(jpql, DanhMuc.class);
+            query.setParameter("keyword", "%" + keyword + "%");
+            return query.getResultList();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi tìm kiếm danh mục", e);
+        } finally {
+            em.close();
+        }
+    }
 }

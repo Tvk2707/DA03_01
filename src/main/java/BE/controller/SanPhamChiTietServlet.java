@@ -66,13 +66,32 @@ public class SanPhamChiTietServlet extends HttpServlet {
     }
 
     private void ShowSanPhamChiTiet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        Integer sanPhamId = Integer.parseInt(request.getParameter("sanPhamId"));
-        List<SanPhamChiTiet> items = sanPhamChiTietService.layTheoSanPham(sanPhamId);
+        String sanPhamIdStr = request.getParameter("sanPhamId");
+        Integer sanPhamId = (sanPhamIdStr != null && !sanPhamIdStr.isEmpty()) ? Integer.parseInt(sanPhamIdStr) : null;
+
+        String ma = request.getParameter("ma");
+        String mauSacIdStr = request.getParameter("mauSacId");
+        String kichCoIdStr = request.getParameter("kichCoId");
+        String trangThaiStr = request.getParameter("trangThai");
+
+        Integer mauSacId = (mauSacIdStr != null && !mauSacIdStr.isEmpty()) ? Integer.parseInt(mauSacIdStr) : null;
+        Integer kichCoId = (kichCoIdStr != null && !kichCoIdStr.isEmpty()) ? Integer.parseInt(kichCoIdStr) : null;
+        Integer trangThai = (trangThaiStr != null && !trangThaiStr.isEmpty()) ? Integer.parseInt(trangThaiStr) : null;
+
+        List<SanPhamChiTiet> items = sanPhamChiTietService.timKiem(sanPhamId, ma, mauSacId, kichCoId, trangThai);
 
         request.setAttribute("items", items);
         request.setAttribute("sanPhamId", sanPhamId);
 
-        request.getRequestDispatcher("/WEB-INF/views/product/sanphamchitiet-list.jsp").forward(request, response);
+        // Giữ lại giá trị đã lọc để hiển thị lại trên form
+        request.setAttribute("searchMa", ma);
+        request.setAttribute("searchMauSacId", mauSacId);
+        request.setAttribute("searchKichCoId", kichCoId);
+        request.setAttribute("searchTrangThai", trangThaiStr);
+
+        setLookupAttributes(request);
+
+        request.getRequestDispatcher("/Admin/QuanLySanPham/QuanLySanPhamChiTiet.jsp").forward(request, response);
     }
 
     private void showAddSanPhamChiTiet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -81,7 +100,7 @@ public class SanPhamChiTietServlet extends HttpServlet {
         setLookupAttributes(request);
         request.setAttribute("sanPhamId", sanPhamId);
         request.setAttribute("action", "add");
-        request.getRequestDispatcher("/WEB-INF/views/product/sanphamchitiet-form.jsp").forward(request, response);
+        request.getRequestDispatcher("/Admin/QuanLySanPham/QuanLySanPhamChiTiet.jsp").forward(request, response);
     }
 
     private void showEditSanPhamChiTiet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -99,25 +118,26 @@ public class SanPhamChiTietServlet extends HttpServlet {
         setLookupAttributes(request);
         request.setAttribute("sanPhamId", sanPhamId);
         request.setAttribute("action", "edit");
-        request.getRequestDispatcher("/WEB-INF/views/product/sanphamchitiet-form.jsp").forward(request, response);
+        request.getRequestDispatcher("/Admin/QuanLySanPham/QuanLySanPhamChiTiet.jsp").forward(request, response);
     }
-
     private void insertSanPhamChiTiet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         Integer sanPhamId = Integer.parseInt(request.getParameter("sanPhamId"));
         SanPhamChiTiet sanPhamChiTiet = getSanPhamChiTietFron(request, sanPhamId);
 
-        if (sanPhamChiTiet.getSoLuongTon() != null && sanPhamChiTiet.getSoLuongTon() < 0) {
-            request.setAttribute("errorMessage", "Số lượng tồn phải >= 0!");
+        try {
+            if (sanPhamChiTiet.getSoLuongTon() != null && sanPhamChiTiet.getSoLuongTon() < 0) {
+                throw new RuntimeException("Số lượng tồn phải >= 0!");
+            }
+            sanPhamChiTietService.themBienThe(sanPhamChiTiet);
+            response.sendRedirect(request.getContextPath() + "/SanPhamChiTiet?sanPhamId=" + sanPhamId);
+        } catch (RuntimeException e) {
+            request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("sanPhamChiTiet", sanPhamChiTiet);
             setLookupAttributes(request);
             request.setAttribute("sanPhamId", sanPhamId);
             request.setAttribute("action", "add");
-            request.getRequestDispatcher("/WEB-INF/views/product/sanphamchitiet-form.jsp").forward(request, response);
-            return;
+            request.getRequestDispatcher("/Admin/QuanLySanPham/QuanLySanPhamChiTiet.jsp").forward(request, response);
         }
-
-        sanPhamChiTietService.themBienThe(sanPhamChiTiet);
-        response.sendRedirect(request.getContextPath() + "/SanPhamChiTiet?sanPhamId=" + sanPhamId);
     }
 
     private void updateSanPhamChiTiet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -132,7 +152,7 @@ public class SanPhamChiTietServlet extends HttpServlet {
             setLookupAttributes(request);
             request.setAttribute("sanPhamId", sanPhamId);
             request.setAttribute("action", "edit");
-            request.getRequestDispatcher("/WEB-INF/views/product/sanphamchitiet-form.jsp").forward(request, response);
+            request.getRequestDispatcher("/Admin/QuanLySanPham/QuanLySanPhamChiTiet.jsp").forward(request, response);
             return;
         }
 
@@ -161,7 +181,7 @@ public class SanPhamChiTietServlet extends HttpServlet {
         request.setAttribute("sanPhamChiTiet", sanPhamChiTiet);
         request.setAttribute("sanPhamId", sanPhamId);
         request.setAttribute("action", "tonkho");
-        request.getRequestDispatcher("/WEB-INF/views/product/sanphamchitiet-tonkho.jsp").forward(request, response);
+        request.getRequestDispatcher("/Admin/QuanLySanPham/QuanLySanPhamChiTiet.jsp").forward(request, response);
     }
 
     private void updateTonKho(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {

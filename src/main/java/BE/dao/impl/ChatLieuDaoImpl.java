@@ -1,6 +1,7 @@
 package BE.dao.impl;
 
 import BE.Entity.ChatLieu;
+import BE.Entity.DanhMuc;
 import BE.dao.ChatLieuDao;
 import BE.Utils.EntityManagerUtlis;
 import jakarta.persistence.EntityManager;
@@ -34,5 +35,24 @@ public class ChatLieuDaoImpl extends GenericDaoImpl<ChatLieu, Integer> implement
         } finally {
             em.close();
         }
+
     }
+        @Override
+        public List<ChatLieu> searchByKeyword(String keyword) {
+            EntityManager em = EntityManagerUtlis.getEntityManager();
+            try {
+                String jpql = "SELECT c FROM ChatLieu c WHERE " +
+                        "LOWER(c.tenChatLieu) LIKE LOWER(:keyword) " +
+                        "ORDER BY c.id DESC";
+                TypedQuery<ChatLieu> query = em.createQuery(jpql, ChatLieu.class);
+                query.setParameter("keyword", "%" + keyword + "%");
+                return query.getResultList();
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new RuntimeException("Lỗi khi tìm kiếm danh mục", e);
+            } finally {
+                em.close();
+            }
+        }
 }
+

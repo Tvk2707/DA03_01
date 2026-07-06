@@ -135,4 +135,8 @@ public class SanPhamChiTietServiceImpl implements SanPhamChiTietService {
         
         sanPhamChiTietDao.updateTonKho(sanPhamChiTietId, tonKhoMoi);
     }
+    @Override
+    public List<SanPhamChiTiet> timKiem(Integer sanPhamId, String ma, Integer mauSacId, Integer kichCoId, Integer trangThai) {
+        return sanPhamChiTietDao.timKiem(sanPhamId, ma, mauSacId, kichCoId, trangThai);
+    }
 }

@@ -55,22 +55,31 @@ public class DanhMucServlet extends HttpServlet {
     }
 
     private void ShowDanhMuc(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<DanhMuc> items = lookupService.layTatCaDanhMuc();
+        String keyword = request.getParameter("keyword");
+        List<DanhMuc> items;
+        
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            items = lookupService.timKiemDanhMuc(keyword);
+            request.setAttribute("keyword", keyword);
+        } else {
+            items = lookupService.layTatCaDanhMuc();
+        }
+        
         request.setAttribute("items", items);
         request.setAttribute("activeMenu", "product");    // Giữ menu cha mở và sáng lên
         request.setAttribute("activeSubMenu", "category"); // Làm sáng mục Danh mục
-        request.getRequestDispatcher("/Admin/QuanLySanPham/DanhMuc.jsp").forward(request, response);
+        request.getRequestDispatcher("/Admin/QuanLyBienThe/DanhMuc.jsp").forward(request, response);
     }
 
     private void showAddDanhMuc(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.getRequestDispatcher("/Admin/QuanLySanPham/DanhMuc.jsp").forward(request, response);
+        request.getRequestDispatcher("/Admin/QuanLyBienThe/DanhMuc.jsp").forward(request, response);
     }
 
     private void showEditDanhMuc(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Integer id = Integer.parseInt(request.getParameter("id"));
         DanhMuc danhMuc = lookupService.layDanhMucTheoId(id);
         request.setAttribute("danhMuc", danhMuc);
-        request.getRequestDispatcher("/Admin/QuanLySanPham/DanhMuc.jsp").forward(request, response);
+        request.getRequestDispatcher("/Admin/QuanLyBienThe/DanhMuc.jsp").forward(request, response);
     }
 
     private void insertDanhMuc(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -81,7 +90,7 @@ public class DanhMucServlet extends HttpServlet {
         } catch (RuntimeException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("danhMuc", danhMuc);
-            request.getRequestDispatcher("/Admin/QuanLySanPham/DanhMuc.jsp").forward(request, response);
+            request.getRequestDispatcher("/Admin/QuanLyBienThe/DanhMuc.jsp").forward(request, response);
         }
     }
 
@@ -94,7 +103,7 @@ public class DanhMucServlet extends HttpServlet {
         } catch (RuntimeException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("danhMuc", danhMuc);
-            request.getRequestDispatcher("/Admin/QuanLySanPham/DanhMuc.jsp").forward(request, response);
+            request.getRequestDispatcher("/Admin/QuanLyBienThe/DanhMuc.jsp").forward(request, response);
         }
     }
     private void deleteDanhMuc(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -116,7 +125,7 @@ public class DanhMucServlet extends HttpServlet {
             request.setAttribute("items", items);
 
             // Chuyển tiếp về lại trang giao diện chứ không để trắng trang
-            request.getRequestDispatcher("/Admin/QuanLySanPham/DanhMuc.jsp").forward(request, response);
+            request.getRequestDispatcher("/Admin/QuanLyBienThe/DanhMuc.jsp").forward(request, response);
         }
     }
 

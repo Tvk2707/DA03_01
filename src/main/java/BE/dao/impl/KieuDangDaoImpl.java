@@ -1,5 +1,6 @@
 package BE.dao.impl;
 
+import BE.Entity.DanhMuc;
 import BE.Entity.KieuDang;
 import BE.dao.KieuDangDao;
 import BE.Utils.EntityManagerUtlis;
@@ -31,6 +32,23 @@ public class KieuDangDaoImpl extends GenericDaoImpl<KieuDang, Integer> implement
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Lỗi khi tìm kiểu dáng theo tên", e);
+        } finally {
+            em.close();
+        }
+    }
+    @Override
+    public List<KieuDang> searchByKeyword(String keyword) {
+        EntityManager em = EntityManagerUtlis.getEntityManager();
+        try {
+            String jpql = "SELECT k FROM KieuDang k WHERE " +
+                    "LOWER(k.tenKieuDang) LIKE LOWER(:keyword) " +
+                    "ORDER BY k.id DESC";
+            TypedQuery<KieuDang> query = em.createQuery(jpql, KieuDang.class);
+            query.setParameter("keyword", "%" + keyword + "%");
+            return query.getResultList();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi tìm kiếm danh mục", e);
         } finally {
             em.close();
         }

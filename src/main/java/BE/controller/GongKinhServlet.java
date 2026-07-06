@@ -1,6 +1,8 @@
 package BE.controller;
 
 import BE.Entity.GongKinh;
+import BE.Entity.HinhDangGong;
+import BE.Entity.KieuQuaiKinh;
 import BE.service.LookupService;
 import BE.service.impl.LookupServiceImpl;
 import jakarta.servlet.*;
@@ -34,9 +36,7 @@ public class GongKinhServlet extends HttpServlet {
             case "/GongKinh/edit":
                 showEditGongKinh(request, response);
                 break;
-            case "/GongKinh/delete":
-                deleteGongKinh(request, response);
-                break;
+
         }
     }
 
@@ -50,48 +50,69 @@ public class GongKinhServlet extends HttpServlet {
             case "/GongKinh/update":
                 updateGongKinh(request, response);
                 break;
+            case "/GongKinh/delete":
+                deleteGongKinh(request, response);
+                break;
         }
     }
 
     private void ShowGongKinh(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<GongKinh> items = lookupService.layTatCaGongKinh();
+        String keyword = request.getParameter("keyword");
+        List<GongKinh> items;
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            items = lookupService.timKiemGongKinh(keyword);
+            request.setAttribute("keyword", keyword);
+        } else {
+            items = lookupService.layTatCaGongKinh();
+        }
         request.setAttribute("items", items);
-        request.getRequestDispatcher("/view/gongkinh/List.jsp").forward(request, response);
+
+        // Nạp danh sách cho 2 dropdown (form Thêm + form Sửa nằm chung trang này)
+        napDanhSachDungChung(request);
+
+        request.getRequestDispatcher("/Admin/QuanLyBienThe/GongKinh.jsp").forward(request, response);
     }
 
     private void showAddGongKinh(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.getRequestDispatcher("/view/gongkinh/Add.jsp").forward(request, response);
+        napDanhSachDungChung(request);
+        request.getRequestDispatcher("/Admin/QuanLyBienThe/GongKinh.jsp").forward(request, response);
     }
 
     private void showEditGongKinh(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Integer id = Integer.parseInt(request.getParameter("id"));
         GongKinh gongKinh = lookupService.layGongKinhTheoId(id);
         request.setAttribute("gongKinh", gongKinh);
-        request.getRequestDispatcher("/view/gongkinh/Edit.jsp").forward(request, response);
+        napDanhSachDungChung(request);
+        request.getRequestDispatcher("/Admin/QuanLyBienThe/GongKinh.jsp").forward(request, response);
     }
 
     private void insertGongKinh(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        GongKinh gongKinh = getGongKinhFron(request);
         try {
+            GongKinh gongKinh = getGongKinhFron(request);
             lookupService.themGongKinh(gongKinh);
             response.sendRedirect(request.getContextPath() + "/GongKinh");
-        } catch (RuntimeException e) {
-            request.setAttribute("errorMessage", e.getMessage());
-            request.setAttribute("gongKinh", gongKinh);
-            request.getRequestDispatcher("/view/gongkinh/Add.jsp").forward(request, response);
+        } catch (Exception e) {
+            // Bắt luôn cả NumberFormatException (chọn thiếu dropdown) lẫn RuntimeException từ service
+            request.setAttribute("errorMessage", "Thêm gọng kính thất bại: " + e.getMessage());
+            // Vẫn cần danh sách items để bảng không bị lỗi khi forward lại
+            request.setAttribute("items", lookupService.layTatCaGongKinh());
+            napDanhSachDungChung(request);
+            request.getRequestDispatcher("/Admin/QuanLyBienThe/GongKinh.jsp").forward(request, response);
         }
     }
 
     private void updateGongKinh(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        GongKinh gongKinh = getGongKinhFron(request);
-        gongKinh.setId((Integer ) Integer.parseInt(request.getParameter("id")));
         try {
+            GongKinh gongKinh = getGongKinhFron(request);
+            gongKinh.setId(Integer.parseInt(request.getParameter("id")));
             lookupService.capNhatGongKinh(gongKinh);
             response.sendRedirect(request.getContextPath() + "/GongKinh");
-        } catch (RuntimeException e) {
-            request.setAttribute("errorMessage", e.getMessage());
-            request.setAttribute("gongKinh", gongKinh);
-            request.getRequestDispatcher("/view/gongkinh/Edit.jsp").forward(request, response);
+        } catch (Exception e) {
+            request.setAttribute("errorMessage", "Cập nhật gọng kính thất bại: " + e.getMessage());
+            request.setAttribute("items", lookupService.layTatCaGongKinh());
+            napDanhSachDungChung(request);
+            request.getRequestDispatcher("/Admin/QuanLyBienThe/GongKinh.jsp").forward(request, response);
         }
     }
 
@@ -102,13 +123,51 @@ public class GongKinhServlet extends HttpServlet {
     }
 
     /**
-     * Lưu ý: GongKinh không validate tên trong service (chỉ check null),
-     * cần chỉnh sửa các trường tương ứng theo entity thực tế của bạn.
+     * Nạp danh sách Hình dáng gọng + Kiểu quai kính dùng cho 2 dropdown
+     * trong modal Thêm mới và modal Sửa (nằm chung trong GongKinh.jsp).
+     */
+    private void napDanhSachDungChung(HttpServletRequest request) {
+        request.setAttribute("hinhDangGong", lookupService.layTatCaHinhDangGong());
+        request.setAttribute("kieuQuaiKinh", lookupService.layTatCaKieuQuaiKinh());
+    }
+
+    /**
+     * Đọc dữ liệu từ form (name="hinhDangGong", name="kieuQuaiKinh", name="trangThai")
+     * và dựng lên đối tượng GongKinh tương ứng.
      */
     private GongKinh getGongKinhFron(HttpServletRequest request) {
-        int tenGongKinh = Integer.parseInt(request.getParameter("tenGongKinh"));
+        String hinhDangGongParam = request.getParameter("hinhDangGong");
+        String kieuQuaiKinhParam = request.getParameter("kieuQuaiKinh");
+        String trangThaiParam = request.getParameter("trangThai");
+
+        if (hinhDangGongParam == null || hinhDangGongParam.trim().isEmpty()) {
+            throw new RuntimeException("Vui lòng chọn hình dáng gọng");
+        }
+        if (kieuQuaiKinhParam == null || kieuQuaiKinhParam.trim().isEmpty()) {
+            throw new RuntimeException("Vui lòng chọn kiểu quai kính");
+        }
+        if (trangThaiParam == null || trangThaiParam.trim().isEmpty()) {
+            throw new RuntimeException("Vui lòng chọn trạng thái");
+        }
+
+        int hinhdanggong = Integer.parseInt(hinhDangGongParam);
+        HinhDangGong hinhDangGong = lookupService.layHinhDangGongTheoId(hinhdanggong);
+        if (hinhDangGong == null) {
+            throw new RuntimeException("Hình dáng gọng không tồn tại");
+        }
+
+        int kieuquaikinh = Integer.parseInt(kieuQuaiKinhParam);
+        KieuQuaiKinh kieuQuaiKinh = lookupService.layKieuQuaiKinhTheoId(kieuquaikinh);
+        if (kieuQuaiKinh == null) {
+            throw new RuntimeException("Kiểu quai kính không tồn tại");
+        }
+
+        int trangThai = Integer.parseInt(trangThaiParam);
+
         GongKinh gongKinh = new GongKinh();
-        gongKinh.setId((Integer ) tenGongKinh);
+        gongKinh.setHinhDangGong(hinhDangGong);
+        gongKinh.setKieuQuaiKinh(kieuQuaiKinh);
+        gongKinh.setTrangThai(trangThai);
         return gongKinh;
     }
 }

@@ -87,6 +87,14 @@ public class LookupServiceImpl implements LookupService {
         return danhMucDao.count();
     }
     
+    @Override
+    public List<DanhMuc> timKiemDanhMuc(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return layTatCaDanhMuc();
+        }
+        return danhMucDao.searchByKeyword(keyword.trim());
+    }
+    
     // ===== THUONG HIEU =====
     
     @Override
@@ -150,6 +158,13 @@ public class LookupServiceImpl implements LookupService {
     @Override
     public long demThuongHieu() {
         return thuongHieuDao.count();
+    }
+    @Override
+    public List<ThuongHieu> timKiemThuongHieu(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return layTatCaThuongHieu();
+        }
+        return thuongHieuDao.searchByKeyword(keyword.trim());
     }
     
     // ===== CHAT LIEU =====
@@ -216,7 +231,13 @@ public class LookupServiceImpl implements LookupService {
     public long demChatLieu() {
         return chatLieuDao.count();
     }
-    
+    @Override
+    public List<ChatLieu> timKiemChatLieu(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return layTatCaChatLieu();
+        }
+        return chatLieuDao.searchByKeyword(keyword.trim());
+    }
     // ===== KIEU DANG =====
     
     @Override
@@ -281,7 +302,13 @@ public class LookupServiceImpl implements LookupService {
     public long demKieuDang() {
         return kieuDangDao.count();
     }
-    
+    @Override
+    public List<KieuDang> timKiemKieuDang(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return layTatCaKieuDang();
+        }
+        return kieuDangDao.searchByKeyword(keyword.trim());
+    }
     // ===== MAU SAC =====
     
     @Override
@@ -347,6 +374,14 @@ public class LookupServiceImpl implements LookupService {
         return mauSacDao.count();
     }
     
+    @Override
+    public List<MauSac> timKiemMauSac(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return layTatCaMauSac();
+        }
+        return mauSacDao.searchByKeyword(keyword.trim());
+    }
+
     // ===== KICH CO =====
     
     @Override
@@ -410,6 +445,13 @@ public class LookupServiceImpl implements LookupService {
     @Override
     public long demKichCo() {
         return kichCoDao.count();
+    }
+    @Override
+    public List<KichCo> timKiemKichCo(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return layTatCaKichCo();
+        }
+        return kichCoDao.searchByKeyword(keyword.trim());
     }
     
     // ===== TRONG KINH =====
@@ -476,7 +518,14 @@ public class LookupServiceImpl implements LookupService {
     public long demTrongKinh() {
         return trongKinhDao.count();
     }
-    
+
+    @Override
+    public List<TrongKinh> timKiemTrongKinh(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return layTatCaTrongKinh();
+        }
+        return trongKinhDao.searchByKeyword(keyword.trim());
+    }
     // ===== GONG KINH =====
     
     @Override
@@ -527,7 +576,15 @@ public class LookupServiceImpl implements LookupService {
     public long demGongKinh() {
         return gongKinhDao.count();
     }
-    
+
+    @Override
+    public List<GongKinh> timKiemGongKinh(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return layTatCaGongKinh();
+        }
+        return gongKinhDao.searchByKeyword(keyword.trim());
+    }
+
     // ===== HINH DANG GONG =====
     
     @Override
@@ -592,6 +649,7 @@ public class LookupServiceImpl implements LookupService {
     public long demHinhDangGong() {
         return hinhDangGongDao.count();
     }
+
     
     // ===== KIEU QUAI KINH =====
     

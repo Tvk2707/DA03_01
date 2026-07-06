@@ -7,7 +7,7 @@ import java.util.List;
  * Interface SanPhamChiTietService - quản lý biến thể sản phẩm
  */
 public interface SanPhamChiTietService {
-    
+    List<SanPhamChiTiet> timKiem(Integer sanPhamId, String ma, Integer mauSacId, Integer kichCoId, Integer trangThai);
     /**
      * Thêm biến thể sản phẩm mới
      */

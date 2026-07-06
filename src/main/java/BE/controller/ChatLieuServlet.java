@@ -1,6 +1,8 @@
 package BE.controller;
 
 import BE.Entity.ChatLieu;
+import BE.Entity.DanhMuc;
+import BE.Entity.GongKinh;
 import BE.service.LookupService;
 import BE.service.impl.LookupServiceImpl;
 import jakarta.servlet.*;
@@ -34,9 +36,7 @@ public class ChatLieuServlet extends HttpServlet {
             case "/ChatLieu/edit":
                 showEditChatLieu(request, response);
                 break;
-            case "/ChatLieu/delete":
-                deleteChatLieu(request, response);
-                break;
+
         }
     }
 
@@ -50,24 +50,38 @@ public class ChatLieuServlet extends HttpServlet {
             case "/ChatLieu/update":
                 updateChatLieu(request, response);
                 break;
+            case "/ChatLieu/delete":
+                deleteChatLieu(request, response);
+                break;
         }
     }
 
     private void ShowChatLieu(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<ChatLieu> items = lookupService.layTatCaChatLieu();
+        String keyword = request.getParameter("keyword");
+        List<ChatLieu> items;
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            items = lookupService.timKiemChatLieu(keyword);
+            request.setAttribute("keyword", keyword);
+        } else {
+            items = lookupService.layTatCaChatLieu();
+        }
+        //List<ChatLieu> chatLieuItems = lookupService.layTatCaChatLieu();
         request.setAttribute("items", items);
-        request.getRequestDispatcher("/view/chatlieu/List.jsp").forward(request, response);
+        request.setAttribute("activeMenu", "product");    // Giữ menu cha mở và sáng lên
+        request.setAttribute("activeSubMenu", "category");
+        request.getRequestDispatcher("/Admin/QuanLyBienThe/ChatLieu.jsp").forward(request, response);
     }
 
     private void showAddChatLieu(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.getRequestDispatcher("/view/chatlieu/Add.jsp").forward(request, response);
+        request.getRequestDispatcher("/Admin/QuanLyBienThe/ChatLieu.jsp").forward(request, response);
     }
 
     private void showEditChatLieu(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Integer id = Integer.parseInt(request.getParameter("id"));
         ChatLieu chatLieu = lookupService.layChatLieuTheoId(id);
         request.setAttribute("chatLieu", chatLieu);
-        request.getRequestDispatcher("/view/chatlieu/Edit.jsp").forward(request, response);
+        request.getRequestDispatcher("/Admin/QuanLyBienThe/ChatLieu.jsp").forward(request, response);
     }
 
     private void insertChatLieu(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -78,7 +92,7 @@ public class ChatLieuServlet extends HttpServlet {
         } catch (RuntimeException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("chatLieu", chatLieu);
-            request.getRequestDispatcher("/view/chatlieu/Add.jsp").forward(request, response);
+            request.getRequestDispatcher("/Admin/QuanLyBienThe/ChatLieu.jsp").forward(request, response);
         }
     }
 
@@ -91,7 +105,7 @@ public class ChatLieuServlet extends HttpServlet {
         } catch (RuntimeException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("chatLieu", chatLieu);
-            request.getRequestDispatcher("/view/chatlieu/Edit.jsp").forward(request, response);
+            request.getRequestDispatcher("/Admin/QuanLyBienThe/ChatLieu.jsp").forward(request, response);
         }
     }
 
@@ -103,6 +117,7 @@ public class ChatLieuServlet extends HttpServlet {
 
     private ChatLieu getChatLieuFron(HttpServletRequest request) {
         String tenChatLieu = request.getParameter("tenChatLieu");
+        Integer trangthai = Integer.parseInt(request.getParameter("trangthai"));
         ChatLieu chatLieu = new ChatLieu();
         chatLieu.setTenChatLieu(tenChatLieu);
         return chatLieu;

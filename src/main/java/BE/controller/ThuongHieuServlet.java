@@ -1,5 +1,6 @@
 package BE.controller;
 
+import BE.Entity.KieuDang;
 import BE.Entity.ThuongHieu;
 import BE.service.LookupService;
 import BE.service.impl.LookupServiceImpl;
@@ -34,9 +35,7 @@ public class ThuongHieuServlet extends HttpServlet {
             case "/ThuongHieu/edit":
                 showEditThuongHieu(request, response);
                 break;
-            case "/ThuongHieu/delete":
-                deleteThuongHieu(request, response);
-                break;
+
         }
     }
 
@@ -50,24 +49,38 @@ public class ThuongHieuServlet extends HttpServlet {
             case "/ThuongHieu/update":
                 updateThuongHieu(request, response);
                 break;
+            case "/ThuongHieu/delete":
+                deleteThuongHieu(request, response);
+                break;
         }
     }
 
     private void ShowThuongHieu(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<ThuongHieu> items = lookupService.layTatCaThuongHieu();
+        String keyword = request.getParameter("keyword");
+        List<ThuongHieu> items;
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            items = lookupService.timKiemThuongHieu(keyword);
+            request.setAttribute("keyword", keyword);
+        } else {
+            items = lookupService.layTatCaThuongHieu();
+        }
+        // List<ThuongHieu> items = lookupService.layTatCaThuongHieu();
         request.setAttribute("items", items);
-        request.getRequestDispatcher("/view/thuonghieu/List.jsp").forward(request, response);
+        request.setAttribute("activeMenu", "product");    // Giữ menu cha mở và sáng lên
+        request.setAttribute("activeSubMenu", "category");
+        request.getRequestDispatcher("/Admin/QuanLyBienThe/ThuongHieu.jsp").forward(request, response);
     }
 
     private void showAddThuongHieu(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.getRequestDispatcher("/view/thuonghieu/Add.jsp").forward(request, response);
+        request.getRequestDispatcher("/Admin/QuanLyBienThe/ThuongHieu.jsp").forward(request, response);
     }
 
     private void showEditThuongHieu(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Integer id = Integer.parseInt(request.getParameter("id"));
         ThuongHieu thuongHieu = lookupService.layThuongHieuTheoId(id);
         request.setAttribute("thuongHieu", thuongHieu);
-        request.getRequestDispatcher("/view/thuonghieu/Edit.jsp").forward(request, response);
+        request.getRequestDispatcher("/Admin/QuanLyBienThe/ThuongHieu.jsp").forward(request, response);
     }
 
     private void insertThuongHieu(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -78,7 +91,7 @@ public class ThuongHieuServlet extends HttpServlet {
         } catch (RuntimeException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("thuongHieu", thuongHieu);
-            request.getRequestDispatcher("/view/thuonghieu/Add.jsp").forward(request, response);
+            request.getRequestDispatcher("/Admin/QuanLyBienThe/ThuongHieu.jsp").forward(request, response);
         }
     }
 
@@ -91,7 +104,7 @@ public class ThuongHieuServlet extends HttpServlet {
         } catch (RuntimeException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("thuongHieu", thuongHieu);
-            request.getRequestDispatcher("/view/thuonghieu/Edit.jsp").forward(request, response);
+            request.getRequestDispatcher("/Admin/QuanLyBienThe/ThuongHieu.jsp").forward(request, response);
         }
     }
 
@@ -102,9 +115,13 @@ public class ThuongHieuServlet extends HttpServlet {
     }
 
     private ThuongHieu getThuongHieuFron(HttpServletRequest request) {
+        String maThuonHieu = request.getParameter("maThuongHieu");
         String tenThuongHieu = request.getParameter("tenThuongHieu");
+        Integer trangthai = Integer.parseInt(request.getParameter("trangthai"));
         ThuongHieu thuongHieu = new ThuongHieu();
+        thuongHieu.setMaThuongHieu(maThuonHieu);
         thuongHieu.setTenThuongHieu(tenThuongHieu);
+        thuongHieu.setTrangThai(trangthai);
         return thuongHieu;
     }
 }

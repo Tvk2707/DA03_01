@@ -1,5 +1,6 @@
 package BE.dao;
 
+import BE.Entity.DanhMuc;
 import BE.Entity.SanPhamChiTiet;
 import java.util.List;
 
@@ -7,7 +8,7 @@ import java.util.List;
  * Interface DAO cho entity SanPhamChiTiet
  */
 public interface SanPhamChiTietDao extends GenericDao<SanPhamChiTiet, Integer> {
-    
+    List<SanPhamChiTiet> timKiem(Integer sanPhamId, String ma, Integer mauSacId, Integer kichCoId, Integer trangThai);
     /**
      * Lấy danh sách chi tiết sản phẩm theo ID sản phẩm
      */
@@ -22,4 +23,5 @@ public interface SanPhamChiTietDao extends GenericDao<SanPhamChiTiet, Integer> {
      * Cập nhật tồn kho cho chi tiết sản phẩm
      */
     void updateTonKho(Integer sanPhamChiTietId, Integer tonKhoMoi);
+
 }

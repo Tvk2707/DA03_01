@@ -1,5 +1,6 @@
 package BE.dao.impl;
 
+import BE.Entity.DanhMuc;
 import BE.Entity.KichCo;
 import BE.dao.KichCoDao;
 import BE.Utils.EntityManagerUtlis;
@@ -31,6 +32,23 @@ public class KichCoDaoImpl extends GenericDaoImpl<KichCo, Integer> implements Ki
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Lỗi khi tìm kích cỡ theo tên", e);
+        } finally {
+            em.close();
+        }
+    }
+    @Override
+    public List<KichCo> searchByKeyword(String keyword) {
+        EntityManager em = EntityManagerUtlis.getEntityManager();
+        try {
+            String jpql = "SELECT k FROM KichCo k WHERE " +
+                    "LOWER(k.tenKichCo) LIKE LOWER(:keyword) " +
+                    "ORDER BY k.id DESC";
+            TypedQuery<KichCo> query = em.createQuery(jpql, KichCo.class);
+            query.setParameter("keyword", "%" + keyword + "%");
+            return query.getResultList();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi tìm kiếm danh mục", e);
         } finally {
             em.close();
         }

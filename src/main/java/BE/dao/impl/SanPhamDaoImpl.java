@@ -12,11 +12,11 @@ import java.util.List;
  * Lớp DAO cài đặt cho SanPham
  */
 public class SanPhamDaoImpl extends GenericDaoImpl<SanPham, Integer> implements SanPhamDao {
-    
+
     public SanPhamDaoImpl() {
         super(SanPham.class);
     }
-    
+
     /**
      * Tìm sản phẩm theo tên
      */
@@ -36,7 +36,36 @@ public class SanPhamDaoImpl extends GenericDaoImpl<SanPham, Integer> implements 
             em.close();
         }
     }
-    
+
+    /**
+     * Override để nạp sẵn các quan hệ LAZY, tránh LazyInitializationException khi JSP render
+     */
+    @Override
+    public List<SanPham> findWithPaging(int pageNumber, int pageSize) {
+        EntityManager em = EntityManagerUtlis.getEntityManager();
+        try {
+            String jpql = "SELECT DISTINCT s FROM SanPham s " +
+                    "LEFT JOIN FETCH s.danhMuc " +
+                    "LEFT JOIN FETCH s.thuongHieu " +
+                    "LEFT JOIN FETCH s.chatLieu " +
+                    "LEFT JOIN FETCH s.kieuDang " +
+                    "LEFT JOIN FETCH s.gongKinh gk " +
+                    "LEFT JOIN FETCH gk.hinhDangGong " +
+                    "LEFT JOIN FETCH gk.kieuQuaiKinh " +
+                    "LEFT JOIN FETCH s.trongKinh " +
+                    "ORDER BY s.id ";
+            TypedQuery<SanPham> query = em.createQuery(jpql, SanPham.class);
+            query.setFirstResult((pageNumber - 1) * pageSize);
+            query.setMaxResults(pageSize);
+            return query.getResultList();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi lấy dữ liệu với phân trang", e);
+        } finally {
+            em.close();
+        }
+    }
+
     /**
      * Lấy danh sách sản phẩm theo danh mục
      */
@@ -55,7 +84,7 @@ public class SanPhamDaoImpl extends GenericDaoImpl<SanPham, Integer> implements 
             em.close();
         }
     }
-    
+
     /**
      * Lấy danh sách sản phẩm theo thương hiệu
      */
@@ -74,7 +103,7 @@ public class SanPhamDaoImpl extends GenericDaoImpl<SanPham, Integer> implements 
             em.close();
         }
     }
-    
+
     /**
      * Tìm kiếm sản phẩm theo tên, danh mục, thương hiệu, và khoảng giá
      * Các tham số có thể null - nếu null thì bỏ qua điều kiện đó
@@ -84,9 +113,19 @@ public class SanPhamDaoImpl extends GenericDaoImpl<SanPham, Integer> implements 
                                 Double giaMin, Double giaMax) {
         EntityManager em = EntityManagerUtlis.getEntityManager();
         try {
-            StringBuilder jpql = new StringBuilder("SELECT s FROM SanPham s WHERE 1=1");
+            StringBuilder jpql = new StringBuilder(
+                    "SELECT DISTINCT s FROM SanPham s " +
+                            "LEFT JOIN FETCH s.danhMuc " +
+                            "LEFT JOIN FETCH s.thuongHieu " +
+                            "LEFT JOIN FETCH s.chatLieu " +
+                            "LEFT JOIN FETCH s.kieuDang " +
+                            "LEFT JOIN FETCH s.gongKinh gk " +
+                            "LEFT JOIN FETCH gk.hinhDangGong " +
+                            "LEFT JOIN FETCH gk.kieuQuaiKinh " +
+                            "LEFT JOIN FETCH s.trongKinh " +
+                            "WHERE 1=1");
             List<String> conditions = new ArrayList<>();
-            
+
             if (tenSanPham != null && !tenSanPham.trim().isEmpty()) {
                 conditions.add("LOWER(s.tenSanPham) LIKE LOWER(:tenSanPham)");
             }
@@ -96,13 +135,13 @@ public class SanPhamDaoImpl extends GenericDaoImpl<SanPham, Integer> implements 
             if (thuongHieuId != null) {
                 conditions.add("s.thuongHieu.id = :thuongHieuId");
             }
-            
+
             for (String condition : conditions) {
                 jpql.append(" AND ").append(condition);
             }
-            
+
             TypedQuery<SanPham> query = em.createQuery(jpql.toString(), SanPham.class);
-            
+
             if (tenSanPham != null && !tenSanPham.trim().isEmpty()) {
                 query.setParameter("tenSanPham", "%" + tenSanPham + "%");
             }
@@ -112,7 +151,7 @@ public class SanPhamDaoImpl extends GenericDaoImpl<SanPham, Integer> implements 
             if (thuongHieuId != null) {
                 query.setParameter("thuongHieuId", thuongHieuId);
             }
-            
+
             return query.getResultList();
         } catch (Exception e) {
             e.printStackTrace();

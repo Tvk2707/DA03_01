@@ -18,6 +18,7 @@ public interface LookupService {
     List<DanhMuc> layTatCaDanhMuc();
     List<DanhMuc> layDanhMucCoPhanTrang(int pageNumber, int pageSize);
     long demDanhMuc();
+    List<DanhMuc> timKiemDanhMuc(String keyword);
     
     // ===== THUONG HIEU =====
     ThuongHieu themThuongHieu(ThuongHieu thuongHieu);
@@ -27,7 +28,9 @@ public interface LookupService {
     List<ThuongHieu> layTatCaThuongHieu();
     List<ThuongHieu> layThuongHieuCoPhanTrang(int pageNumber, int pageSize);
     long demThuongHieu();
-    
+    List<ThuongHieu> timKiemThuongHieu(String keyword);
+
+
     // ===== CHAT LIEU =====
     ChatLieu themChatLieu(ChatLieu chatLieu);
     ChatLieu capNhatChatLieu(ChatLieu chatLieu);
@@ -36,7 +39,7 @@ public interface LookupService {
     List<ChatLieu> layTatCaChatLieu();
     List<ChatLieu> layChatLieuCoPhanTrang(int pageNumber, int pageSize);
     long demChatLieu();
-    
+    List<ChatLieu> timKiemChatLieu(String keyword);
     // ===== KIEU DANG =====
     KieuDang themKieuDang(KieuDang kieuDang);
     KieuDang capNhatKieuDang(KieuDang kieuDang);
@@ -45,6 +48,7 @@ public interface LookupService {
     List<KieuDang> layTatCaKieuDang();
     List<KieuDang> layKieuDangCoPhanTrang(int pageNumber, int pageSize);
     long demKieuDang();
+    List<KieuDang> timKiemKieuDang(String keyword);
     
     // ===== MAU SAC =====
     MauSac themMauSac(MauSac mauSac);
@@ -54,6 +58,7 @@ public interface LookupService {
     List<MauSac> layTatCaMauSac();
     List<MauSac> layMauSacCoPhanTrang(int pageNumber, int pageSize);
     long demMauSac();
+    List<MauSac> timKiemMauSac(String keyword);
     
     // ===== KICH CO =====
     KichCo themKichCo(KichCo kichCo);
@@ -63,7 +68,9 @@ public interface LookupService {
     List<KichCo> layTatCaKichCo();
     List<KichCo> layKichCoCoPhanTrang(int pageNumber, int pageSize);
     long demKichCo();
-    
+
+    List<KichCo> timKiemKichCo(String keyword);
+
     // ===== TRONG KINH =====
     TrongKinh themTrongKinh(TrongKinh trongKinh);
     TrongKinh capNhatTrongKinh(TrongKinh trongKinh);
@@ -72,6 +79,7 @@ public interface LookupService {
     List<TrongKinh> layTatCaTrongKinh();
     List<TrongKinh> layTrongKinhCoPhanTrang(int pageNumber, int pageSize);
     long demTrongKinh();
+    List<TrongKinh> timKiemTrongKinh(String keyword);
     
     // ===== GONG KINH =====
     GongKinh themGongKinh(GongKinh gongKinh);
@@ -81,6 +89,7 @@ public interface LookupService {
     List<GongKinh> layTatCaGongKinh();
     List<GongKinh> layGongKinhCoPhanTrang(int pageNumber, int pageSize);
     long demGongKinh();
+    List<GongKinh> timKiemGongKinh(String keyword);
     
     // ===== HINH DANG GONG =====
     HinhDangGong themHinhDangGong(HinhDangGong hinhDangGong);

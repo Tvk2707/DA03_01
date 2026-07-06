@@ -1,5 +1,6 @@
 package BE.controller;
 
+import BE.Entity.GongKinh;
 import BE.Entity.KieuDang;
 import BE.service.LookupService;
 import BE.service.impl.LookupServiceImpl;
@@ -34,9 +35,7 @@ public class KieuDangServlet extends HttpServlet {
             case "/KieuDang/edit":
                 showEditKieuDang(request, response);
                 break;
-            case "/KieuDang/delete":
-                deleteKieuDang(request, response);
-                break;
+
         }
     }
 
@@ -50,24 +49,38 @@ public class KieuDangServlet extends HttpServlet {
             case "/KieuDang/update":
                 updateKieuDang(request, response);
                 break;
+            case "/KieuDang/delete":
+                deleteKieuDang(request, response);
+                break;
         }
     }
 
     private void ShowKieuDang(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<KieuDang> items = lookupService.layTatCaKieuDang();
+        String keyword = request.getParameter("keyword");
+        List<KieuDang> items;
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            items = lookupService.timKiemKieuDang(keyword);
+            request.setAttribute("keyword", keyword);
+        } else {
+            items = lookupService.layTatCaKieuDang();
+        }
+        //  List<KieuDang> items = lookupService.layTatCaKieuDang();
         request.setAttribute("items", items);
-        request.getRequestDispatcher("/view/kieudang/List.jsp").forward(request, response);
+        request.setAttribute("activeMenu", "product");    // Giữ menu cha mở và sáng lên
+        request.setAttribute("activeSubMenu", "category");
+        request.getRequestDispatcher("/Admin/QuanLyBienThe/KieuDang.jsp").forward(request, response);
     }
 
     private void showAddKieuDang(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.getRequestDispatcher("/view/kieudang/Add.jsp").forward(request, response);
+        request.getRequestDispatcher("/Admin/QuanLyBienThe/KieuDang.jsp").forward(request, response);
     }
 
     private void showEditKieuDang(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Integer id = Integer.parseInt(request.getParameter("id"));
         KieuDang kieuDang = lookupService.layKieuDangTheoId(id);
         request.setAttribute("kieuDang", kieuDang);
-        request.getRequestDispatcher("/view/kieudang/Edit.jsp").forward(request, response);
+        request.getRequestDispatcher("/Admin/QuanLyBienThe/KieuDang.jsp").forward(request, response);
     }
 
     private void insertKieuDang(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -78,7 +91,7 @@ public class KieuDangServlet extends HttpServlet {
         } catch (RuntimeException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("kieuDang", kieuDang);
-            request.getRequestDispatcher("/view/kieudang/Add.jsp").forward(request, response);
+            request.getRequestDispatcher("/Admin/QuanLyBienThe/KieuDang.jsp").forward(request, response);
         }
     }
 
@@ -91,7 +104,7 @@ public class KieuDangServlet extends HttpServlet {
         } catch (RuntimeException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("kieuDang", kieuDang);
-            request.getRequestDispatcher("/view/kieudang/Edit.jsp").forward(request, response);
+            request.getRequestDispatcher("/Admin/QuanLyBienThe/KieuDang.jsp").forward(request, response);
         }
     }
 
@@ -103,8 +116,10 @@ public class KieuDangServlet extends HttpServlet {
 
     private KieuDang getKieuDangFron(HttpServletRequest request) {
         String tenKieuDang = request.getParameter("tenKieuDang");
+        Integer trangThai = Integer.parseInt(request.getParameter("trangThai"));
         KieuDang kieuDang = new KieuDang();
         kieuDang.setTenKieuDang(tenKieuDang);
+        kieuDang.setTrangThai(trangThai);
         return kieuDang;
     }
 }

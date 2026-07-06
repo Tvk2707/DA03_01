@@ -1,5 +1,6 @@
 package BE.controller;
 
+import BE.Entity.KieuDang;
 import BE.Entity.MauSac;
 import BE.service.LookupService;
 import BE.service.impl.LookupServiceImpl;
@@ -34,9 +35,7 @@ public class MauSacServlet extends HttpServlet {
             case "/MauSac/edit":
                 showEditMauSac(request, response);
                 break;
-            case "/MauSac/delete":
-                deleteMauSac(request, response);
-                break;
+
         }
     }
 
@@ -50,24 +49,36 @@ public class MauSacServlet extends HttpServlet {
             case "/MauSac/update":
                 updateMauSac(request, response);
                 break;
+            case "/MauSac/delete":
+                deleteMauSac(request, response);
+                break;
         }
     }
 
     private void ShowMauSac(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<MauSac> items = lookupService.layTatCaMauSac();
+        String keyword = request.getParameter("keyword");
+        List<MauSac> items;
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            items = lookupService.timKiemMauSac(keyword);
+            request.setAttribute("keyword", keyword);
+        } else {
+            items = lookupService.layTatCaMauSac();
+        }
+        //List<MauSac> items = lookupService.layTatCaMauSac();
         request.setAttribute("items", items);
-        request.getRequestDispatcher("/view/mausac/List.jsp").forward(request, response);
+        request.getRequestDispatcher("/Admin/QuanLyBienThe/MauSac.jsp").forward(request, response);
     }
 
     private void showAddMauSac(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.getRequestDispatcher("/view/mausac/Add.jsp").forward(request, response);
+        request.getRequestDispatcher("/Admin/QuanLyBienThe/MauSac.jsp").forward(request, response);
     }
 
     private void showEditMauSac(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Integer id = Integer.parseInt(request.getParameter("id"));
         MauSac mauSac = lookupService.layMauSacTheoId(id);
         request.setAttribute("mauSac", mauSac);
-        request.getRequestDispatcher("/view/mausac/Edit.jsp").forward(request, response);
+        request.getRequestDispatcher("/Admin/QuanLyBienThe/MauSac.jsp").forward(request, response);
     }
 
     private void insertMauSac(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -78,7 +89,7 @@ public class MauSacServlet extends HttpServlet {
         } catch (RuntimeException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("mauSac", mauSac);
-            request.getRequestDispatcher("/view/mausac/Add.jsp").forward(request, response);
+            request.getRequestDispatcher("/Admin/QuanLyBienThe/MauSac.jsp").forward(request, response);
         }
     }
 
@@ -91,7 +102,7 @@ public class MauSacServlet extends HttpServlet {
         } catch (RuntimeException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("mauSac", mauSac);
-            request.getRequestDispatcher("/view/mausac/Edit.jsp").forward(request, response);
+            request.getRequestDispatcher("/Admin/QuanLyBienThe/MauSac.jsp").forward(request, response);
         }
     }
 
@@ -102,9 +113,13 @@ public class MauSacServlet extends HttpServlet {
     }
 
     private MauSac getMauSacFron(HttpServletRequest request) {
+        String MaMau = request.getParameter("maMau");
         String tenMau = request.getParameter("tenMau");
+        Integer trangThai = Integer.parseInt(request.getParameter("trangThai"));
         MauSac mauSac = new MauSac();
+        mauSac.setMaMau(MaMau);
         mauSac.setTenMau(tenMau);
+        mauSac.setTrangThai(trangThai);
         return mauSac;
     }
 }

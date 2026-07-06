@@ -29,4 +29,5 @@ public interface SanPhamDao extends GenericDao<SanPham, Integer> {
      */
     List<SanPham> search(String tenSanPham, Integer danhMucId, Integer thuongHieuId,
                          Double giaMin, Double giaMax);
+
 }

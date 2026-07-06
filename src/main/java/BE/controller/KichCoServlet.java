@@ -1,5 +1,6 @@
 package BE.controller;
 
+import BE.Entity.GongKinh;
 import BE.Entity.KichCo;
 import BE.service.LookupService;
 import BE.service.impl.LookupServiceImpl;
@@ -34,9 +35,7 @@ public class KichCoServlet extends HttpServlet {
             case "/KichCo/edit":
                 showEditKichCo(request, response);
                 break;
-            case "/KichCo/delete":
-                deleteKichCo(request, response);
-                break;
+
         }
     }
 
@@ -50,24 +49,36 @@ public class KichCoServlet extends HttpServlet {
             case "/KichCo/update":
                 updateKichCo(request, response);
                 break;
+            case "/KichCo/delete":
+                deleteKichCo(request, response);
+                break;
         }
     }
 
     private void ShowKichCo(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<KichCo> items = lookupService.layTatCaKichCo();
+        String keyword = request.getParameter("keyword");
+        List<KichCo> items;
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            items = lookupService.timKiemKichCo(keyword);
+            request.setAttribute("keyword", keyword);
+        } else {
+            items = lookupService.layTatCaKichCo();
+        }
+        //List<KichCo> items = lookupService.layTatCaKichCo();
         request.setAttribute("items", items);
-        request.getRequestDispatcher("/view/kichco/List.jsp").forward(request, response);
+        request.getRequestDispatcher("/Admin/QuanLyBienThe/KichCo.jsp").forward(request, response);
     }
 
     private void showAddKichCo(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.getRequestDispatcher("/view/kichco/Add.jsp").forward(request, response);
+        request.getRequestDispatcher("/Admin/QuanLyBienThe/KichCo.jsp").forward(request, response);
     }
 
     private void showEditKichCo(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Integer id = Integer.parseInt(request.getParameter("id"));
         KichCo kichCo = lookupService.layKichCoTheoId(id);
         request.setAttribute("kichCo", kichCo);
-        request.getRequestDispatcher("/view/kichco/Edit.jsp").forward(request, response);
+        request.getRequestDispatcher("/Admin/QuanLyBienThe/KichCo.jsp").forward(request, response);
     }
 
     private void insertKichCo(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -78,7 +89,7 @@ public class KichCoServlet extends HttpServlet {
         } catch (RuntimeException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("kichCo", kichCo);
-            request.getRequestDispatcher("/view/kichco/Add.jsp").forward(request, response);
+            request.getRequestDispatcher("/Admin/QuanLyBienThe/KichCo.jsp").forward(request, response);
         }
     }
 
@@ -91,7 +102,7 @@ public class KichCoServlet extends HttpServlet {
         } catch (RuntimeException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("kichCo", kichCo);
-            request.getRequestDispatcher("/view/kichco/Edit.jsp").forward(request, response);
+            request.getRequestDispatcher("/Admin/QuanLyBienThe/KichCo.jsp").forward(request, response);
         }
     }
 
