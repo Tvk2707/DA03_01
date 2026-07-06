@@ -20,5 +20,6 @@ public class ChatLieu {
     private String tenChatLieu;
 
     @Column(name = "trang_thai")
+    @Builder.Default
     private Integer trangThai = 1;
 }

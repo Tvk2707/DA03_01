@@ -18,7 +18,7 @@ public class DiaChiKhachHang {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_khach_hang", nullable = false)
-    private KhachHang khachHang;
+    private com.eyewear.entity.KhachHang khachHang;
 
     @Column(name = "ten_nguoi_nhan", nullable = false, length = 250)
     private String tenNguoiNhan;
@@ -42,5 +42,6 @@ public class DiaChiKhachHang {
     private Integer loaiDiaChi;
 
     @Column(name = "is_mac_dinh")
+    @Builder.Default
     private Integer isMacDinh = 0;
 }

@@ -23,5 +23,6 @@ public class DanhMuc {
     private String tenDanhMuc;
 
     @Column(name = "trang_thai")
+    @Builder.Default
     private Integer trangThai = 1;
 }

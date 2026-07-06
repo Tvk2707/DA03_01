@@ -39,13 +39,13 @@
             <div class="menu-title">Quản trị</div>
             <ul class="menu-list">
                 <li class="menu-item">
-                    <a href="../Thongke.jsp" class="menu-link <%= "dashboard".equals(request.getAttribute("activeMenu"))?"active":""%>">
+                    <a href="<%= request.getContextPath() %>/Admin/Thongke.jsp" class="menu-link <%= "dashboard".equals(request.getAttribute("activeMenu"))?"active":""%>">
                         <i class="fas fa-chart-bar"></i>
                         <span>Thống kê</span>
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="#" class="menu-link">
+                    <a href="<%= request.getContextPath() %>/Admin/QuanLyHoaDon/quan_ly_hoa_don.jsp" class="menu-link <%= "hoadon".equals(request.getAttribute("activeMenu"))?"active":""%>">
                         <i class="fas fa-file-invoice"></i>
                         <span>Quản lý hoá đơn</span>
                     </a>
@@ -57,7 +57,7 @@
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="../QuanLyMaGiamGia/quan_ly_giam_gia.jsp" class="menu-link" <%= "giamgia".equals(request.getAttribute("activeMenu"))?"active":""%>>
+                    <a href="<%= request.getContextPath() %>/Admin/QuanLyMaGiamGia/quan_ly_giam_gia.jsp" class="menu-link <%= "giamgia".equals(request.getAttribute("activeMenu"))?"active":""%>">
                         <i class="fas fa-tags"></i>
                         <span>Quản lý giảm giá</span>
                     </a>

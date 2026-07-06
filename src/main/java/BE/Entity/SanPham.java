@@ -20,27 +20,27 @@ public class SanPham {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_danh_muc")
-    private DanhMuc danhMuc;
+    private com.eyewear.entity.DanhMuc danhMuc;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_thuong_hieu")
-    private ThuongHieu thuongHieu;
+    private com.eyewear.entity.ThuongHieu thuongHieu;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_chat_lieu")
-    private ChatLieu chatLieu;
+    private com.eyewear.entity.ChatLieu chatLieu;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_kieu_dang")
-    private KieuDang kieuDang;
+    private com.eyewear.entity.KieuDang kieuDang;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_gong_kinh")
-    private GongKinh gongKinh;
+    private com.eyewear.entity.GongKinh gongKinh;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_trong_kinh")
-    private TrongKinh trongKinh;
+    private com.eyewear.entity.TrongKinh trongKinh;
 
     @Column(name = "ma_san_pham", unique = true, nullable = false, length = 50)
     private String maSanPham;
@@ -58,5 +58,6 @@ public class SanPham {
     private LocalDateTime ngaySua;
 
     @Column(name = "trang_thai")
+    @Builder.Default
     private Integer trangThai = 1;
 }

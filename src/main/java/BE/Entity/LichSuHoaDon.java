@@ -20,7 +20,7 @@ public class LichSuHoaDon {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_hoa_don", nullable = false)
-    private HoaDon hoaDon;
+    private com.eyewear.entity.HoaDon hoaDon;
 
     @Column(name = "hanh_dong", length = 250)
     private String hanhDong;

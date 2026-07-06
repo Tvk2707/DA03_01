@@ -38,9 +38,11 @@ public class PhieuGiamGia {
     private BigDecimal donToiThieu;
 
     @Column(name = "so_luong", nullable = false)
+    @Builder.Default
     private Integer soLuong = 0;
 
     @Column(name = "so_luong_da_dung")
+    @Builder.Default
     private Integer soLuongDaDung = 0;
 
     @Column(name = "loai_phieu")
@@ -56,5 +58,6 @@ public class PhieuGiamGia {
     private LocalDateTime ngayTao;
 
     @Column(name = "trang_thai")
+    @Builder.Default
     private Integer trangThai = 1;
 }

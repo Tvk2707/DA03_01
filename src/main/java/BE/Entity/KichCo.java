@@ -20,5 +20,6 @@ public class KichCo {
     private String tenKichCo;
 
     @Column(name = "trang_thai")
+    @Builder.Default
     private Integer trangThai = 1;
 }

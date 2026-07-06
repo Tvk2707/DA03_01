@@ -21,15 +21,15 @@ public class HoaDon {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_khach_hang")
-    private KhachHang khachHang;
+    private com.eyewear.entity.KhachHang khachHang;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_nhan_vien")
-    private NhanVien nhanVien;
+    private com.eyewear.entity.NhanVien nhanVien;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_phieu_giam_gia")
-    private PhieuGiamGia phieuGiamGia;
+    private com.eyewear.entity.PhieuGiamGia phieuGiamGia;
 
     @Column(name = "ma_hoa_don", unique = true, nullable = false, length = 50)
     private String maHoaDon;
@@ -47,9 +47,11 @@ public class HoaDon {
     private LocalDateTime ngayThanhToan;
 
     @Column(name = "tong_tien_thanh_toan", precision = 15, scale = 2)
+    @Builder.Default
     private BigDecimal tongTienThanhToan = BigDecimal.ZERO;
 
     @Column(name = "trang_thai")
+    @Builder.Default
     private Integer trangThai = 1;
 
     @Column(name = "ngay_nhan_ban_dau")

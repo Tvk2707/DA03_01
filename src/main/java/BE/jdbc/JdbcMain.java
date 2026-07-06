@@ -1,29 +1,32 @@
-package jdbc;
+package BE.jdbc;
 
-import utlis.EntityManagerUtlis;
+import BE.Utils.EntityManagerUtils;
+
+import jakarta.persistence.EntityManager;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 public class JdbcMain {
 
     public static void main(String[] args) {
 
-        DatabaseConnectionManager dcm = new DatabaseConnectionManager("mvc_crud_v1", "sa", "123");
+        DatabaseConnectionManager dcm = DatabaseConnectionManager.fromEnvironment();
 
-        //test connection
-        //try (Connection connection = dcm.getConnection()) {
-        //
-        //    System.out.println("Connected...");
-        //
-        //} catch (SQLException e) {
-        //    System.out.println("Failed to connect to database");
-        //    e.printStackTrace();
-        //}
+        try (Connection connection = dcm.getConnection()) {
+            System.out.println("Connected to database: " + connection.getCatalog());
+        } catch (SQLException e) {
+            System.out.println("Failed to connect to database");
+            System.out.println("URL: " + dcm.getUrl());
+            System.out.println("User: " + dcm.getUsername());
+            System.out.println("Override with -Ddb.user=... -Ddb.password=... if these credentials are not correct.");
+            e.printStackTrace();
+            return;
+        }
 
-        //creating EM => auto create tables in DB
-        EntityManagerUtlis EntityManagerUtils = new EntityManagerUtlis();
-        try (var em = EntityManagerUtils.getEntityManager()) {
-
-            System.out.println("Created tables...");
-
+        EntityManagerUtils entityManagerUtils = new EntityManagerUtils();
+        try (EntityManager em = entityManagerUtils.getEntityManager()) {
+            em.createNativeQuery("SELECT 1").getSingleResult();
+            System.out.println("EntityManager connected...");
         } catch (Exception e) {
             System.out.println("Failed to create Entity Manager");
             e.printStackTrace();

@@ -49,5 +49,6 @@ public class NhanVien {
     private String anhDaiDien;
 
     @Column(name = "trang_thai")
+    @Builder.Default
     private Integer trangThai = 1;
 }

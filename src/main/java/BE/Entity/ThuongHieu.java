@@ -23,5 +23,6 @@ public class ThuongHieu {
     private String tenThuongHieu;
 
     @Column(name = "trang_thai")
+    @Builder.Default
     private Integer trangThai = 1;
 }

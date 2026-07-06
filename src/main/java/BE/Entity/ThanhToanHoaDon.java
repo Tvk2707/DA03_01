@@ -21,11 +21,11 @@ public class ThanhToanHoaDon {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_hoa_don", nullable = false)
-    private HoaDon hoaDon;
+    private com.eyewear.entity.HoaDon hoaDon;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_pttt", nullable = false)
-    private HinhThucThanhToan hinhThucThanhToan;
+    private com.eyewear.entity.HinhThucThanhToan hinhThucThanhToan;
 
     @Column(name = "ma_giao_dich", length = 100)
     private String maGiaoDich;
@@ -37,6 +37,7 @@ public class ThanhToanHoaDon {
     private LocalDateTime thoiGian;
 
     @Column(name = "trang_thai")
+    @Builder.Default
     private Integer trangThai = 1;
 
     @Column(name = "ghi_chu", columnDefinition = "NVARCHAR(MAX)")

@@ -40,6 +40,7 @@ public class SanPhamChiTiet {
     private BigDecimal giaBan;
 
     @Column(name = "so_luong_ton", nullable = false)
+    @Builder.Default
     private Integer soLuongTon = 0;
 
     @Column(name = "trong_luong")
@@ -49,5 +50,6 @@ public class SanPhamChiTiet {
     private String hinhAnh;
 
     @Column(name = "trang_thai")
+    @Builder.Default
     private Integer trangThai = 1;
 }

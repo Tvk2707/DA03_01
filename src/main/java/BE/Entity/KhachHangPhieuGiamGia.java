@@ -20,13 +20,14 @@ public class KhachHangPhieuGiamGia {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_khach_hang", nullable = false)
-    private KhachHang khachHang;
+    private com.eyewear.entity.KhachHang khachHang;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_phieu_giam_gia", nullable = false)
-    private PhieuGiamGia phieuGiamGia;
+    private com.eyewear.entity.PhieuGiamGia phieuGiamGia;
 
     @Column(name = "trang_thai")
+    @Builder.Default
     private Integer trangThai = 1;
 
     @Column(name = "ngay_su_dung")

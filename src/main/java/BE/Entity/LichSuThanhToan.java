@@ -21,7 +21,7 @@ public class LichSuThanhToan {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_hoa_don", nullable = false)
-    private HoaDon hoaDon;
+    private com.eyewear.entity.HoaDon hoaDon;
 
     @Column(name = "so_tien", nullable = false, precision = 15, scale = 2)
     private BigDecimal soTien;

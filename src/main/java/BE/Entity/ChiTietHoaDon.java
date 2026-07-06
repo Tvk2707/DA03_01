@@ -20,13 +20,14 @@ public class ChiTietHoaDon {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_hoa_don", nullable = false)
-    private HoaDon hoaDon;
+    private com.eyewear.entity.HoaDon hoaDon;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_san_pham_chi_tiet", nullable = false)
-    private SanPhamChiTiet sanPhamChiTiet;
+    private com.eyewear.entity.SanPhamChiTiet sanPhamChiTiet;
 
     @Column(name = "so_luong", nullable = false)
+    @Builder.Default
     private Integer soLuong = 1;
 
     @Column(name = "don_gia", nullable = false, precision = 15, scale = 2)
@@ -39,5 +40,6 @@ public class ChiTietHoaDon {
     private BigDecimal tongTien;
 
     @Column(name = "trang_thai")
+    @Builder.Default
     private Integer trangThai = 1;
 }

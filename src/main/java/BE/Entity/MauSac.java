@@ -23,5 +23,6 @@ public class MauSac {
     private String tenMau;
 
     @Column(name = "trang_thai")
+    @Builder.Default
     private Integer trangThai = 1;
 }

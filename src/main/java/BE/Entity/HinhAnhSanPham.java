@@ -18,11 +18,12 @@ public class HinhAnhSanPham {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_san_pham", nullable = false)
-    private SanPham sanPham;
+    private com.eyewear.entity.SanPham sanPham;
 
     @Column(name = "url_anh", nullable = false, length = 500)
     private String urlAnh;
 
     @Column(name = "is_anh_chinh")
+    @Builder.Default
     private Integer isAnhChinh = 0;
 }
