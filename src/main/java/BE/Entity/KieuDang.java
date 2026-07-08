@@ -1,24 +1,43 @@
-package com.eyewear.entity;
+package BE.Entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import java.util.List;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "kieu_dang")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class KieuDang {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Integer id;
 
-    @Column(name = "ten_kieu_dang", nullable = false, length = 250)
+    @Column(name = "ten_kieu_dang")
     private String tenKieuDang;
 
     @Column(name = "trang_thai")
-    private Integer trangThai = 1;
+    private Integer trangThai;
+
+    @OneToMany(mappedBy = "kieuDang")
+    private List<SanPham> sanPhams;
+
+    public KieuDang() {}
+
+    public KieuDang(Integer id, String tenKieuDang, Integer trangThai, List<SanPham> sanPhams) {
+        this.id = id;
+        this.tenKieuDang = tenKieuDang;
+        this.trangThai = trangThai;
+        this.sanPhams = sanPhams;
+    }
+
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
+    public String getTenKieuDang() { return tenKieuDang; }
+    public void setTenKieuDang(String tenKieuDang) { this.tenKieuDang = tenKieuDang; }
+    public Integer getTrangThai() { return trangThai; }
+    public void setTrangThai(Integer trangThai) { this.trangThai = trangThai; }
+    public List<SanPham> getSanPhams() { return sanPhams; }
+    public void setSanPhams(List<SanPham> sanPhams) { this.sanPhams = sanPhams; }
 }

@@ -1,12 +1,12 @@
-package jdbc;
+package BE.jdbc;
 
-import utlis.EntityManagerUtlis;
+import BE.Utils.EntityManagerUtlis;
 
 public class JdbcMain {
 
     public static void main(String[] args) {
 
-        DatabaseConnectionManager dcm = new DatabaseConnectionManager("mvc_crud_v1", "sa", "123");
+        DatabaseConnectionManager dcm = new DatabaseConnectionManager("quan_ly_ban_kinh", "sa", "123");
 
         //test connection
         //try (Connection connection = dcm.getConnection()) {
