@@ -40,9 +40,7 @@ public class SanPhamChiTietServlet extends HttpServlet {
             case "/SanPhamChiTiet/edit":
                 showEditSanPhamChiTiet(request, response);
                 break;
-            case "/SanPhamChiTiet/delete":
-                deleteSanPhamChiTiet(request, response);
-                break;
+
             case "/SanPhamChiTiet/tonkho":
                 showTonKho(request, response);
                 break;
@@ -61,6 +59,9 @@ public class SanPhamChiTietServlet extends HttpServlet {
                 break;
             case "/SanPhamChiTiet/tonkho/update":
                 updateTonKho(request, response);
+                break;
+            case "/SanPhamChiTiet/delete":
+                deleteSanPhamChiTiet(request, response);
                 break;
         }
     }
@@ -159,14 +160,31 @@ public class SanPhamChiTietServlet extends HttpServlet {
         sanPhamChiTietService.capNhatBienThe(sanPhamChiTiet);
         response.sendRedirect(request.getContextPath() + "/SanPhamChiTiet?sanPhamId=" + sanPhamId);
     }
+    private void deleteSanPhamChiTiet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        String idStr = request.getParameter("id");
 
-    private void deleteSanPhamChiTiet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        Integer sanPhamId = Integer.parseInt(request.getParameter("sanPhamId"));
-        Integer id = Integer.parseInt(request.getParameter("id"));
-        sanPhamChiTietService.xoaBienThe(id);
-        response.sendRedirect(request.getContextPath() + "/SanPhamChiTiet?sanPhamId=" + sanPhamId);
+
+        try {
+            // 2. Chỉ thực hiện xóa nếu nhận được ID biến thể hợp lệ
+            if (idStr != null && !idStr.trim().isEmpty()) {
+                Integer id = Integer.parseInt(idStr);
+                sanPhamChiTietService.xoaBienThe(id); // Gọi xóa mềm
+
+                // 3. Chỉ redirect khi thành công hoàn toàn
+             response.sendRedirect(request.getContextPath() + "/SanPhamChiTiet");
+            } else {
+                throw new IllegalArgumentException("Không nhận được ID biến thể để xóa.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace(); // 1. In lỗi ra Console của IDE để xem nguyên nhân gốc
+
+            // 2. Forward thay vì redirect để giữ lại thông báo lỗi hiển thị lên JSP
+            request.setAttribute("error", "Lỗi chi tiết: " + e.getMessage());
+
+            // Bạn nhớ kiểm tra lại đường dẫn file JSP biến thể này đã chuẩn với project của bạn chưa nhé
+            request.getRequestDispatcher("/Admin/QuanLySanPham/QuanLySanPhamChiTiet.jsp").forward(request, response);
+        }
     }
-
     private void showTonKho(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Integer sanPhamId = Integer.parseInt(request.getParameter("sanPhamId"));
         Integer id = Integer.parseInt(request.getParameter("id"));

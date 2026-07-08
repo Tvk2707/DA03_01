@@ -56,6 +56,11 @@ public class SanPham {
     @Column(name = "trang_thai")
     private Integer trangThai;
 
+    // --- THÊM THUỘC TÍNH XÓA MỀM ---
+    @Column(name = "isDeleted", nullable = false)
+    private Boolean isDeleted = false;
+    // --------------------------------
+
     @OneToMany(mappedBy = "sanPham")
     private List<SanPhamChiTiet> sanPhamChiTiets;
 
@@ -80,6 +85,7 @@ public class SanPham {
         this.trangThai = trangThai;
         this.sanPhamChiTiets = sanPhamChiTiets;
         this.hinhAnhSanPhams = hinhAnhSanPhams;
+        // isDeleted mặc định là false, không cần truyền vào constructor này để tránh vỡ code cũ
     }
 
     public Integer getId() { return id; }
@@ -112,4 +118,14 @@ public class SanPham {
     public void setSanPhamChiTiets(List<SanPhamChiTiet> sanPhamChiTiets) { this.sanPhamChiTiets = sanPhamChiTiets; }
     public List<HinhAnhSanPham> getHinhAnhSanPhams() { return hinhAnhSanPhams; }
     public void setHinhAnhSanPhams(List<HinhAnhSanPham> hinhAnhSanPhams) { this.hinhAnhSanPhams = hinhAnhSanPhams; }
+
+    // --- GETTER / SETTER CHO XÓA MỀM ---
+    public Boolean getIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(Boolean isDeleted) {
+        this.isDeleted = isDeleted;
+    }
+    // -----------------------------------
 }

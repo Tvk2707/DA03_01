@@ -1,8 +1,7 @@
 package BE.service.impl;
 
 import BE.Entity.SanPham;
-import BE.Entity.SanPhamChiTiet;
-import BE.Entity.HinhAnhSanPham;
+import BE.Utils.EntityManagerUtlis;
 import BE.dao.SanPhamDao;
 import BE.dao.SanPhamChiTietDao;
 import BE.dao.HinhAnhSanPhamDao;
@@ -10,6 +9,9 @@ import BE.dao.impl.SanPhamDaoImpl;
 import BE.dao.impl.SanPhamChiTietDaoImpl;
 import BE.dao.impl.HinhAnhSanPhamDaoImpl;
 import BE.service.SanPhamService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
+
 import java.util.List;
 
 /**
@@ -17,7 +19,7 @@ import java.util.List;
  */
 public class SanPhamServiceImpl implements SanPhamService {
     
-    private final SanPhamDao sanPhamDao = new SanPhamDaoImpl();
+    private final SanPhamDaoImpl sanPhamDao = new SanPhamDaoImpl();
     private final SanPhamChiTietDao sanPhamChiTietDao = new SanPhamChiTietDaoImpl();
     private final HinhAnhSanPhamDao hinhAnhSanPhamDao = new HinhAnhSanPhamDaoImpl();
     
@@ -66,24 +68,14 @@ public class SanPhamServiceImpl implements SanPhamService {
      * Chặn xóa nếu có biến thể hoặc hình ảnh
      */
     @Override
+
     public void xoaSanPham(Integer id) {
-        if (id == null) {
-            throw new RuntimeException("ID sản phẩm không được để trống");
-        }
-        
-        // Kiểm tra xem sản phẩm có biến thể hay không
-        List<SanPhamChiTiet> chiTiets = sanPhamChiTietDao.findBySanPhamId(id);
-        if (chiTiets != null && !chiTiets.isEmpty()) {
-            throw new RuntimeException("Sản phẩm đang có biến thể, không thể xóa");
-        }
-        
-        // Kiểm tra xem sản phẩm có hình ảnh hay không
-        List<HinhAnhSanPham> hinhAnhs = hinhAnhSanPhamDao.findBySanPhamId(id);
-        if (hinhAnhs != null && !hinhAnhs.isEmpty()) {
-            throw new RuntimeException("Sản phẩm đang có hình ảnh, không thể xóa");
-        }
-        
-        sanPhamDao.deleteById(id);
+     if (id == null) {
+     throw new RuntimeException("ID sản phẩm không được để trống");
+     }
+
+          // Gọi xuống DAO để thực hiện xóa mềm (cập nhật isDeleted = true)
+     sanPhamDao.softDelete(id);
     }
     
     /**
@@ -123,5 +115,30 @@ public class SanPhamServiceImpl implements SanPhamService {
     @Override
     public List<SanPham> timKiem(String tenSanPham, Integer danhMucId, Integer thuongHieuId) {
         return sanPhamDao.search(tenSanPham, danhMucId, thuongHieuId, null, null);
+    }
+    /**
+     * Override lại hàm deleteById của GenericDao để thực hiện XÓA MỀM
+     */
+
+    public void softdelete(Integer id) {
+        EntityManager em = EntityManagerUtlis.getEntityManager();
+        EntityTransaction transaction = em.getTransaction();
+        try {
+            transaction.begin();
+            SanPham sanPham = em.find(SanPham.class, id);
+            if (sanPham != null) {
+                sanPham.setIsDeleted(true); // Đánh dấu đã xóa thay vì gọi em.remove()
+                em.merge(sanPham);
+            }
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null && transaction.isActive()) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi xóa mềm sản phẩm: " + e.getMessage(), e);
+        } finally {
+            em.close();
+        }
     }
 }

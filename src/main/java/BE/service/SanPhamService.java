@@ -44,4 +44,6 @@ public interface SanPhamService {
      * Các tham số có thể null - nếu null thì bỏ qua điều kiện đó
      */
     List<SanPham> timKiem(String tenSanPham, Integer danhMucId, Integer thuongHieuId);
+
+    void softdelete(Integer id);
 }

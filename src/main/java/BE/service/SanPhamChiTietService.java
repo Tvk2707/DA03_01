@@ -27,7 +27,9 @@ public interface SanPhamChiTietService {
      * Lấy danh sách biến thể theo ID sản phẩm
      */
     List<SanPhamChiTiet> layTheoSanPham(Integer sanPhamId);
-    
+    SanPhamChiTiet timBienTheTheoSanPhamId(Integer sanPhamId);
+
+
     /**
      * Cập nhật tồn kho
      * Tính tồn kho mới = tồn kho hiện tại + soLuongThayDoi (có thể âm để trừ)

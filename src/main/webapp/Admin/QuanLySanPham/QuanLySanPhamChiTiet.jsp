@@ -116,20 +116,24 @@
             <c:forEach var="temp" items="${items}" varStatus="status">
                 <tr>
                     <td><span class="category-id">${status.count}</span></td>
+
+                    <!-- THẺ HIỂN THỊ ẢNH ĐƯỢC CẬP NHẬT CHỐNG GIẬT MÀN HÌNH -->
                     <td>
                         <c:choose>
                             <c:when test="${not empty temp.hinhAnh}">
                                 <img src="${pageContext.request.contextPath}/File_Anh/images/${temp.hinhAnh}"
                                      alt="Ảnh biến thể"
-                                     style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;"/>
+                                     style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;"
+                                     onerror="loadCachedImage('${temp.hinhAnh}', this)"/>
                             </c:when>
                             <c:otherwise>
-                                <img src="${pageContext.request.contextPath}/Admin/images/default-placeholder.png"
+                                <img src="https://images.placeholders.dev/?width=50&height=50&text=No+Image&bgColor=%23e9ecef&textColor=%236c757d"
                                      alt="No image"
                                      style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; opacity: 0.6;"/>
                             </c:otherwise>
                         </c:choose>
                     </td>
+
                     <td><span class="category-code">${temp.ma}</span></td>
                     <td><span class="category-name">${temp.mauSac.tenMau}</span></td>
                     <td><span class="category-name">${temp.kichCo.tenKichCo}</span></td>
@@ -143,10 +147,10 @@
                     </td>
                     <td>
                         <div class="action-buttons">
-                            <form action="${pageContext.request.contextPath}/SanPhamChiTiet/delete" method="get"
+                            <form action="${pageContext.request.contextPath}/SanPhamChiTiet/delete" method="post"
                                   style="display:inline;">
                                 <input type="hidden" name="id" value="${temp.id}">
-                                <input type="hidden" name="sanPhamId" value="${sanPhamId}">
+                                <input type="hidden" name="sanPhamId" value="${temp.sanPham.id}">
                                 <button type="submit" class="action-btn delete-btn" title="Xóa"
                                         onclick="return confirm('Bạn có chắc chắn muốn xóa biến thể này?');">
                                     <i class="fas fa-trash-alt"></i>
@@ -182,5 +186,22 @@
         </c:if>
     </div>
 </div>
+
+<script>
+    // --- FIX LỖI VÒNG LẶP VÔ HẠN (CHỐNG GIẬT HÌNH) ---
+    function loadCachedImage(fileName, imgElement) {
+        imgElement.onerror = null; // Huỷ bỏ bắt lỗi ngay lập tức để chặn đứng vòng lặp vô hạn gây nhấp nháy
+
+        if (fileName) {
+            const cachedData = localStorage.getItem('img_' + fileName);
+            if (cachedData) {
+                imgElement.src = cachedData;
+                return;
+            }
+        }
+        // Link ảnh CDN dự phòng an toàn tuyệt đối
+        imgElement.src = "https://images.placeholders.dev/?width=50&height=50&text=No+Image&bgColor=%23e9ecef&textColor=%236c757d";
+    }
+</script>
 </body>
 </html>

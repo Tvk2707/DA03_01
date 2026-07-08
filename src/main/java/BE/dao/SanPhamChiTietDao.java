@@ -1,27 +1,28 @@
 package BE.dao;
 
-import BE.Entity.DanhMuc;
 import BE.Entity.SanPhamChiTiet;
 import java.util.List;
 
-/**
- * Interface DAO cho entity SanPhamChiTiet
- */
 public interface SanPhamChiTietDao extends GenericDao<SanPhamChiTiet, Integer> {
+
     List<SanPhamChiTiet> timKiem(Integer sanPhamId, String ma, Integer mauSacId, Integer kichCoId, Integer trangThai);
-    /**
-     * Lấy danh sách chi tiết sản phẩm theo ID sản phẩm
-     */
+
     List<SanPhamChiTiet> findBySanPhamId(Integer sanPhamId);
-    
-    /**
-     * Tìm chi tiết sản phẩm theo sản phẩm, màu sắc và kích cỡ
-     */
+
     SanPhamChiTiet findByMauSacVaKichCo(Integer sanPhamId, Integer mauSacId, Integer kichCoId);
-    
-    /**
-     * Cập nhật tồn kho cho chi tiết sản phẩm
-     */
+
     void updateTonKho(Integer sanPhamChiTietId, Integer tonKhoMoi);
 
+    // --- THÊM 2 HÀM XÓA MỀM ---
+
+    /**
+     * Xóa mềm 1 chi tiết sản phẩm cụ thể
+     */
+    void softDelete(Integer id);
+
+    /**
+     * Xóa mềm TẤT CẢ chi tiết của một sản phẩm cha
+     * Dùng khi xóa mềm sản phẩm cha để đồng bộ dữ liệu con
+     */
+    void softDeleteBySanPhamId(Integer sanPhamId);
 }
