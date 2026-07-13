@@ -88,10 +88,10 @@
     <title>Chi tiết hóa đơn</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/Admin/css/layout.css">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/Admin/css/sidebar.css">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/Admin/css/header.css">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/Admin/css/hoa_don.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/layout.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/sidebar.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/header.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/hoa_don.css">
 </head>
 <body>
 <%@ include file="../layout/sidebar.jsp" %>
@@ -531,6 +531,6 @@
     </div>
 </div>
 
-<script src="<%= request.getContextPath() %>/Admin/QuanLyHoaDon/hoa_don.js"></script>
+<script src="<%= request.getContextPath() %>/FE/Admin/QuanLyHoaDon/hoa_don.js"></script>
 </body>
 </html>

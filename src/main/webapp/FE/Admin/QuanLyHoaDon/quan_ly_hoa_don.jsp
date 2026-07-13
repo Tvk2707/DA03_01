@@ -70,10 +70,10 @@
     <title>Quản lý hóa đơn</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/Admin/css/layout.css">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/Admin/css/sidebar.css">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/Admin/css/header.css">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/Admin/css/hoa_don.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/layout.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/sidebar.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/header.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/hoa_don.css">
 </head>
 <body>
 <%@ include file="../layout/sidebar.jsp" %>
@@ -266,7 +266,11 @@
                         String statusLabel = statusText(hoaDon.getTrangThai());
                         String invoiceType = hoaDon.getTenNhanVien() == null || hoaDon.getTenNhanVien().trim().isEmpty() ? "Online" : "Tại quầy";
                         String dateValue = hoaDon.getNgayTao() == null ? "" : hoaDon.getNgayTao().toLocalDate().toString();
+                        String customerName = hoaDon.getTenKhachHang() == null || hoaDon.getTenKhachHang().trim().isEmpty()
+                                ? hoaDon.getTenNguoiNhan()
+                                : hoaDon.getTenKhachHang();
                         String searchText = (hoaDon.getMaHoaDon() + " "
+                                + text(customerName) + " "
                                 + text(hoaDon.getTenNguoiNhan()) + " "
                                 + text(hoaDon.getSoDienThoai())).toLowerCase();
                     %>
@@ -274,7 +278,7 @@
                         <td><%= i + 1 %></td>
                         <td><strong><%= hoaDon.getMaHoaDon() %></strong></td>
                         <td><%= text(hoaDon.getTenNhanVien()) %></td>
-                        <td><%= text(hoaDon.getTenNguoiNhan()) %></td>
+                        <td><%= text(customerName) %></td>
                         <td><%= text(hoaDon.getSoDienThoai()) %></td>
                         <td><span class="invoice-pill"><%= invoiceType %></span></td>
                         <td class="invoice-money"><%= moneyFormat.format(hoaDon.getTongTienThanhToan()) %> đ</td>
@@ -344,6 +348,6 @@
     </div>
 </div>
 
-<script src="<%= request.getContextPath() %>/Admin/QuanLyHoaDon/hoa_don.js"></script>
+<script src="<%= request.getContextPath() %>/FE/Admin/QuanLyHoaDon/hoa_don.js"></script>
 </body>
 </html>
