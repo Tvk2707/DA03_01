@@ -6,6 +6,7 @@
 <%@ page import="java.util.List" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
+    // Neu nguoi dung mo truc tiep JSP thi chuyen ve controller de nap du lieu truoc.
     if (request.getAttribute("hoaDonList") == null) {
         response.sendRedirect(request.getContextPath() + "/admin/hoa-don");
         return;
@@ -20,6 +21,7 @@
     BigDecimal doanhThu = BigDecimal.ZERO;
     int dangXuLy = 0;
 
+    // Tinh so lieu tong quan hien thi o cac the thong ke.
     for (HoaDonView item : hoaDonList) {
         if (item.getTrangThai() != null && item.getTrangThai() == 3) {
             doanhThu = doanhThu.add(item.getTongTienThanhToan());
@@ -82,6 +84,7 @@
     <%@ include file="../layout/header.jsp" %>
 
     <main id="page-content" class="invoice-page">
+        <%-- Tieu de trang va cac nut thao tac nhanh. --%>
         <section class="invoice-page-header">
             <div>
                 <h1 class="invoice-title">Quản lý hóa đơn</h1>
@@ -103,6 +106,7 @@
             </div>
         </section>
 
+        <%-- Bo loc tim kiem hoa don tren giao dien, xu ly bang JavaScript. --%>
         <section class="invoice-filter-card">
             <button class="invoice-section-toggle" type="button" id="filterToggle">
                 <span>
@@ -144,6 +148,7 @@
             </div>
         </section>
 
+        <%-- Cac the thong ke nhanh: tong hoa don, doanh thu, dang xu ly, da huy. --%>
         <section class="invoice-stats">
             <div class="invoice-stat">
                 <span class="invoice-stat__label">Tổng hóa đơn</span>
@@ -167,6 +172,7 @@
             </div>
         </section>
 
+        <%-- Form them/sua hoa don. action=save se duoc HoaDonController.doPost xu ly. --%>
         <section class="invoice-form-card" id="invoiceFormCard">
             <div class="invoice-card-heading">
                 <div class="invoice-heading-icon">
@@ -226,6 +232,7 @@
             </form>
         </section>
 
+        <%-- Bang danh sach hoa don lay tu request attribute hoaDonList. --%>
         <section class="invoice-list-card">
             <div class="invoice-card-heading">
                 <div class="invoice-heading-icon">
@@ -274,6 +281,7 @@
                                 + text(hoaDon.getTenNguoiNhan()) + " "
                                 + text(hoaDon.getSoDienThoai())).toLowerCase();
                     %>
+                    <%-- Moi dong table tuong ung voi 1 hoa don trong database. --%>
                     <tr data-search="<%= searchText %>" data-status="<%= statusLabel %>" data-type="<%= invoiceType %>" data-date="<%= dateValue %>">
                         <td><%= i + 1 %></td>
                         <td><strong><%= hoaDon.getMaHoaDon() %></strong></td>
@@ -340,6 +348,7 @@
     </main>
 </div>
 
+<%-- Toast hien thong bao nhanh, noi dung duoc thay doi trong hoa_don.js. --%>
 <div class="invoice-toast" id="invoiceToast" role="status" aria-live="polite">
     <i class="fas fa-circle-check"></i>
     <div>

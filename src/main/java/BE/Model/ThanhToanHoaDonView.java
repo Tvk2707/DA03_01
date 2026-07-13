@@ -3,6 +3,7 @@ package BE.Model;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+// Chua thong tin 1 lan thanh toan cua hoa don.
 public class ThanhToanHoaDonView {
     private BigDecimal soTien;
     private LocalDateTime thoiGian;

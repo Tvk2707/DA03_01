@@ -1,4 +1,5 @@
 (function () {
+    // Hien thong bao nho tren giao dien sau moi thao tac.
     function showToast(message) {
         const toast = document.getElementById('invoiceToast');
         const toastMessage = document.getElementById('toastMessage');
@@ -15,10 +16,12 @@
         }, 2600);
     }
 
+    // Khoi tao trang danh sach hoa don: loc, them/sua, xoa mem, xuat file.
     function initInvoiceList() {
         const table = document.getElementById('ordersTable');
 
         if (!table) {
+            // Khong tim thay bang danh sach nghia la dang o trang chi tiet.
             initDetailPage();
             return;
         }
@@ -42,6 +45,7 @@
         const formTitle = document.getElementById('formTitle');
         let selectedTabStatus = 'all';
 
+        // Loc cac dong trong bang theo tu khoa, loai, trang thai va khoang ngay.
         function filterRows() {
             const keyword = (searchInput.value || '').trim().toLowerCase();
             const selectedType = typeFilter.value;
@@ -74,6 +78,7 @@
             orderCount.textContent = 'Hiển thị ' + visibleCount + ' / tổng ' + rows.length + ' hóa đơn';
         }
 
+        // Dua form ve trang thai ban dau de them hoa don moi.
         function resetForm() {
             formTitle.textContent = 'Thêm hóa đơn';
             document.getElementById('invoiceId').value = '';
@@ -86,6 +91,7 @@
             formCard.classList.remove('is-visible');
         }
 
+        // Xuat cac dong dang hien thi ra file CSV.
         function exportVisibleRows() {
             const visibleRows = rows.filter((row) => row.style.display !== 'none');
             const header = ['STT', 'Mã hóa đơn', 'Nhân viên', 'Khách hàng', 'Số điện thoại', 'Loại hóa đơn', 'Tổng tiền', 'Ngày tạo', 'Trạng thái'];
@@ -107,6 +113,7 @@
             showToast('Đã xuất danh sách hóa đơn hiện tại');
         }
 
+        // Mo form them moi hoa don.
         showFormButton.addEventListener('click', () => {
             resetForm();
             formCard.classList.add('is-visible');
@@ -125,6 +132,7 @@
             filterCard.classList.toggle('is-collapsed');
         });
 
+        // Xoa tat ca dieu kien loc va hien lai toan bo hoa don.
         resetButton.addEventListener('click', () => {
             searchInput.value = '';
             typeFilter.value = 'all';
@@ -137,6 +145,7 @@
             showToast('Đã đặt lại bộ lọc hóa đơn');
         });
 
+        // Loc nhanh theo cac tab trang thai.
         tabs.forEach((tab) => {
             tab.addEventListener('click', () => {
                 tabs.forEach((item) => item.classList.remove('is-active'));
@@ -146,12 +155,14 @@
             });
         });
 
+        // Nut in hien dang hien thong bao demo.
         document.querySelectorAll('[data-print]').forEach((button) => {
             button.addEventListener('click', () => {
                 showToast('Đã gửi hóa đơn ' + button.dataset.print + ' đến hàng đợi in');
             });
         });
 
+        // Lay du lieu tu dong dang chon va dua len form sua.
         document.querySelectorAll('[data-edit]').forEach((button) => {
             button.addEventListener('click', () => {
                 formTitle.textContent = 'Sửa hóa đơn';
@@ -167,6 +178,7 @@
             });
         });
 
+        // Hoi xac nhan truoc khi gui form xoa mem.
         document.querySelectorAll('.invoice-delete-form').forEach((form) => {
             form.addEventListener('submit', (event) => {
                 if (!confirm('Bạn có chắc muốn hủy hóa đơn này không?')) {
@@ -178,6 +190,7 @@
         filterRows();
     }
 
+    // Khoi tao trang chi tiet hoa don: in va modal cap nhat trang thai.
     function initDetailPage() {
         const printButton = document.getElementById('btnPrintDetail');
 
@@ -185,11 +198,13 @@
             return;
         }
 
+        // Goi chuc nang in cua trinh duyet.
         printButton.addEventListener('click', () => {
             window.print();
             showToast('Đã mở cửa sổ in hóa đơn');
         });
 
+        // Mo modal khi bam nut co data-open-modal.
         document.querySelectorAll('[data-open-modal]').forEach((button) => {
             button.addEventListener('click', () => {
                 const modal = document.getElementById(button.dataset.openModal);
@@ -200,6 +215,7 @@
             });
         });
 
+        // Dong modal khi bam nut co data-close-modal.
         document.querySelectorAll('[data-close-modal]').forEach((button) => {
             button.addEventListener('click', () => {
                 const modal = button.closest('.invoice-modal');
@@ -211,6 +227,7 @@
         });
     }
 
+    // Doi HTML tai xong roi moi gan su kien.
     document.addEventListener('DOMContentLoaded', () => {
         initInvoiceList();
     });

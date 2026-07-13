@@ -2,6 +2,7 @@ package BE.Model;
 
 import java.time.LocalDateTime;
 
+// Chua thong tin 1 dong lich su xu ly hoa don.
 public class LichSuHoaDonView {
     private String hanhDong;
     private LocalDateTime ngayTao;

@@ -1,6 +1,7 @@
 <%@ page import="BE.Model.ChiTietHoaDonView" %>
 <%@ page import="BE.Model.HoaDonView" %>
 <%@ page import="BE.Model.LichSuHoaDonView" %>
+<%@ page import="BE.Model.LichSuThanhToanView" %>
 <%@ page import="BE.Model.ThanhToanHoaDonView" %>
 <%@ page import="java.math.BigDecimal" %>
 <%@ page import="java.text.DecimalFormat" %>
@@ -8,6 +9,7 @@
 <%@ page import="java.util.List" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
+    // Neu mo truc tiep JSP khong qua controller thi quay ve danh sach hoa don.
     if (request.getAttribute("hoaDon") == null) {
         response.sendRedirect(request.getContextPath() + "/admin/hoa-don");
         return;
@@ -19,16 +21,19 @@
     HoaDonView hoaDon = (HoaDonView) request.getAttribute("hoaDon");
     List<ChiTietHoaDonView> chiTietList = (List<ChiTietHoaDonView>) request.getAttribute("chiTietList");
     List<ThanhToanHoaDonView> paymentList = (List<ThanhToanHoaDonView>) request.getAttribute("paymentList");
+    List<LichSuThanhToanView> paymentHistoryList = (List<LichSuThanhToanView>) request.getAttribute("paymentHistoryList");
     List<LichSuHoaDonView> historyList = (List<LichSuHoaDonView>) request.getAttribute("historyList");
     DecimalFormat moneyFormat = new DecimalFormat("#,###");
     DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     int productCount = 0;
     BigDecimal paidTotal = BigDecimal.ZERO;
 
+    // Tinh tong so san pham trong hoa don.
     for (ChiTietHoaDonView detail : chiTietList) {
         productCount += detail.getSoLuong() == null ? 0 : detail.getSoLuong();
     }
 
+    // Tinh tong tien da thanh toan.
     for (ThanhToanHoaDonView payment : paymentList) {
         paidTotal = paidTotal.add(payment.getSoTien() == null ? BigDecimal.ZERO : payment.getSoTien());
     }
@@ -36,6 +41,32 @@
 <%!
     private String text(String value) {
         return value == null || value.trim().isEmpty() ? "-" : value;
+    }
+
+    private String productMeta(ChiTietHoaDonView detail) {
+        StringBuilder builder = new StringBuilder();
+        appendMeta(builder, "Ma", detail.getMaSanPhamChiTiet());
+        appendMeta(builder, "DM", detail.getDanhMuc());
+        appendMeta(builder, "TH", detail.getThuongHieu());
+        appendMeta(builder, "Mau", detail.getMauSac());
+        appendMeta(builder, "KC", detail.getKichCo());
+        appendMeta(builder, "CL", detail.getChatLieu());
+        appendMeta(builder, "Dang", detail.getKieuDang());
+        appendMeta(builder, "Gong", detail.getHinhDangGong());
+        appendMeta(builder, "Trong", detail.getLoaiTrong());
+        return builder.length() == 0 ? "-" : builder.toString();
+    }
+
+    private void appendMeta(StringBuilder builder, String label, String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return;
+        }
+
+        if (builder.length() > 0) {
+            builder.append(" | ");
+        }
+
+        builder.append(label).append(": ").append(value);
     }
 
     private String statusText(Integer status) {
@@ -100,6 +131,7 @@
     <%@ include file="../layout/header.jsp" %>
 
     <main id="page-content" class="invoice-page invoice-detail-page">
+        <%-- Tieu de trang chi tiet va nut quay lai danh sach. --%>
         <section class="invoice-page-header">
             <div>
                 <h1 class="invoice-title">Chi tiết hóa đơn</h1>
@@ -111,6 +143,7 @@
             </a>
         </section>
 
+        <%-- Khu vuc lam viec chinh: san pham, thong tin giao hang va thanh toan. --%>
         <section class="invoice-workspace">
             <div class="invoice-workspace__left">
                 <div class="invoice-list-card invoice-detail-section">
@@ -237,6 +270,7 @@
             </aside>
         </section>
 
+        <%-- Timeline hien trang thai hien tai cua hoa don. --%>
         <section class="invoice-timeline-card">
             <div class="invoice-timeline">
                 <div class="timeline-step<%= stepClass(hoaDon.getTrangThai(), 1) %>">
@@ -257,6 +291,7 @@
             </div>
         </section>
 
+        <%-- Cac nut xu ly: cap nhat trang thai, huy hoa don, in, xem lich su. --%>
         <section class="invoice-detail-actions">
             <div class="invoice-action-left">
                 <button class="invoice-btn invoice-btn--primary" type="button" data-open-modal="statusModal" <%= hoaDon.getTrangThai() != null && hoaDon.getTrangThai() == 5 ? "disabled" : "" %>>
@@ -286,6 +321,7 @@
             </div>
         </section>
 
+        <%-- Tom tat nhanh ma hoa don, trang thai, nhan vien va tong tien. --%>
         <section class="invoice-detail-summary">
             <div>
                 <div class="invoice-summary-title">
@@ -308,6 +344,7 @@
             </div>
         </section>
 
+        <%-- Thong tin nguoi nhan, giao hang va tong tien. --%>
         <section class="invoice-info-grid">
             <article class="invoice-info-panel">
                 <h3><i class="far fa-user"></i> Khách hàng</h3>
@@ -369,6 +406,7 @@
             </div>
         </section>
 
+        <%-- Bang lich su thanh toan cua hoa don. --%>
         <section class="invoice-list-card invoice-detail-section">
             <div class="invoice-card-heading invoice-card-heading--compact">
                 <div>
@@ -405,6 +443,7 @@
             </div>
         </section>
 
+        <%-- Bang san pham trong hoa don, doc tu chi_tiet_hoa_don. --%>
         <section class="invoice-list-card invoice-detail-section">
             <div class="invoice-card-heading invoice-card-heading--compact">
                 <div>
@@ -431,7 +470,10 @@
                     <tr>
                         <td><%= i + 1 %></td>
                         <td><span class="invoice-thumb"><i class="fas fa-glasses"></i></span></td>
-                        <td><strong><%= text(detail.getTenSanPham()) %></strong></td>
+                        <td>
+                            <strong><%= text(detail.getTenSanPham()) %></strong>
+                            <small class="invoice-product-meta"><%= productMeta(detail) %></small>
+                        </td>
                         <td><%= detail.getSoLuong() %></td>
                         <td class="invoice-money"><%= moneyFormat.format(detail.getDonGia()) %> đ</td>
                         <td class="invoice-money"><%= moneyFormat.format(detail.getTongTien()) %> đ</td>
@@ -444,9 +486,47 @@
                 </table>
             </div>
         </section>
+
+        <%-- Bang lich su thanh toan doc truc tiep tu bang lich_su_thanh_toan. --%>
+        <section class="invoice-list-card invoice-detail-section">
+            <div class="invoice-card-heading invoice-card-heading--compact">
+                <div>
+                    <h2>Lich su thanh toan he thong</h2>
+                    <p>Du lieu lay tu bang lich_su_thanh_toan</p>
+                </div>
+            </div>
+            <div class="invoice-table-wrap">
+                <table class="invoice-table">
+                    <thead>
+                    <tr>
+                        <th>So tien</th>
+                        <th>Phuong thuc</th>
+                        <th>Trang thai</th>
+                        <th>Ngay thanh toan</th>
+                        <th>Ghi chu</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <% for (LichSuThanhToanView paymentHistory : paymentHistoryList) { %>
+                    <tr>
+                        <td class="invoice-money"><%= moneyFormat.format(paymentHistory.getSoTien()) %> đ</td>
+                        <td><%= text(paymentHistory.getPhuongThucThanhToan()) %></td>
+                        <td><%= paymentHistory.getTrangThaiThanhToan() == null ? "-" : paymentHistory.getTrangThaiThanhToan() %></td>
+                        <td><%= paymentHistory.getNgayThanhToan() == null ? "-" : paymentHistory.getNgayThanhToan().format(dateFormat) %></td>
+                        <td><%= text(paymentHistory.getGhiChu()) %></td>
+                    </tr>
+                    <% } %>
+                    <% if (paymentHistoryList == null || paymentHistoryList.isEmpty()) { %>
+                    <tr><td colspan="5">Chua co lich su thanh toan.</td></tr>
+                    <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </section>
     </main>
 </div>
 
+<%-- Modal cap nhat trang thai hoa don. Form nay gui action=changeStatus ve controller. --%>
 <div class="invoice-modal" id="statusModal" aria-hidden="true">
     <div class="invoice-modal__backdrop" data-close-modal></div>
     <section class="invoice-modal__dialog" role="dialog" aria-modal="true">
@@ -483,6 +563,7 @@
     </section>
 </div>
 
+<%-- Modal xem lich su thao tac hoa don. --%>
 <div class="invoice-modal" id="historyModal" aria-hidden="true">
     <div class="invoice-modal__backdrop" data-close-modal></div>
     <section class="invoice-modal__dialog invoice-modal__dialog--wide" role="dialog" aria-modal="true">
@@ -523,6 +604,7 @@
     </section>
 </div>
 
+<%-- Toast hien thong bao nhanh, dieu khien boi hoa_don.js. --%>
 <div class="invoice-toast" id="invoiceToast" role="status" aria-live="polite">
     <i class="fas fa-circle-check"></i>
     <div>

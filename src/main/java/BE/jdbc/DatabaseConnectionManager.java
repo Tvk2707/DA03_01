@@ -6,8 +6,10 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+// Quan ly ket noi SQL Server cho toan bo tang DAO.
 public class DatabaseConnectionManager {
 
+    // Cau hinh mac dinh, co the ghi de bang system property hoac environment variable.
     private static final String DEFAULT_HOST = "localhost";
     private static final int DEFAULT_PORT = 1433;
     private static final String DEFAULT_DATABASE_NAME = "quan_ly_ban_kinh";
@@ -42,6 +44,7 @@ public class DatabaseConnectionManager {
     }
 
     public static DatabaseConnectionManager fromEnvironment() {
+        // Uu tien doc cau hinh tu bien moi truong, neu khong co thi dung gia tri mac dinh.
         String host = getSetting("db.host", "DB_HOST", DEFAULT_HOST);
         int port = getIntSetting("db.port", "DB_PORT", DEFAULT_PORT);
         String databaseName = getSetting("db.name", "DB_NAME", DEFAULT_DATABASE_NAME);
@@ -57,6 +60,7 @@ public class DatabaseConnectionManager {
     }
 
     public Connection getConnection() throws SQLException {
+        // DAO goi ham nay de lay Connection moi moi khi can truy van database.
         loadSqlServerDriver();
 
         if (this.integratedSecurity) {
@@ -66,6 +70,7 @@ public class DatabaseConnectionManager {
     }
 
     public Map<String, String> toJpaProperties() {
+        // Ham nay phuc vu JPA neu can dung EntityManager trong cac phan khac.
         Map<String, String> properties = new HashMap<>();
         properties.put("jakarta.persistence.jdbc.driver", "com.microsoft.sqlserver.jdbc.SQLServerDriver");
         properties.put("jakarta.persistence.jdbc.url", this.url);
@@ -88,6 +93,7 @@ public class DatabaseConnectionManager {
     }
 
     private void loadSqlServerDriver() throws SQLException {
+        // Nap driver JDBC de DriverManager biet cach ket noi SQL Server.
         try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
         } catch (ClassNotFoundException e) {
@@ -96,6 +102,7 @@ public class DatabaseConnectionManager {
     }
 
     private static String getSetting(String propertyName, String environmentName, String defaultValue) {
+        // Doc gia tri theo thu tu: JVM property -> bien moi truong -> mac dinh.
         String propertyValue = System.getProperty(propertyName);
         if (propertyValue != null && !propertyValue.trim().isEmpty()) {
             return propertyValue;

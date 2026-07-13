@@ -14,11 +14,13 @@ import java.sql.SQLException;
 
 @WebServlet("/admin/hoa-don")
 public class HoaDonController extends HttpServlet {
+    // Controller chi nhan request tu FE, sau do goi service de xu ly nghiep vu.
     private final HoaDonService hoaDonService = new HoaDonService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
+            // GET /admin/hoa-don: lay danh sach hoa don va chuyen sang trang JSP.
             request.setAttribute("hoaDonList", hoaDonService.getAllHoaDon());
             request.getRequestDispatcher("/FE/Admin/QuanLyHoaDon/quan_ly_hoa_don.jsp").forward(request, response);
         } catch (SQLException exception) {
@@ -32,6 +34,7 @@ public class HoaDonController extends HttpServlet {
         String action = request.getParameter("action");
 
         try {
+            // action duoc gui tu cac form ben JSP: save, delete, changeStatus.
             if ("delete".equals(action)) {
                 hoaDonService.huyHoaDon(parseInt(request.getParameter("id"), 0));
             } else if ("changeStatus".equals(action)) {
@@ -53,6 +56,7 @@ public class HoaDonController extends HttpServlet {
     }
 
     private HoaDonView readForm(HttpServletRequest request) {
+        // Chuyen du lieu tu form HTML thanh object HoaDonView de gui xuong service/dao.
         HoaDonView hoaDon = new HoaDonView();
         int id = parseInt(request.getParameter("id"), 0);
 
@@ -71,6 +75,7 @@ public class HoaDonController extends HttpServlet {
     }
 
     private int parseInt(String value, int defaultValue) {
+        // Neu nguoi dung nhap sai so thi tra ve gia tri mac dinh de tranh loi 500.
         try {
             return Integer.parseInt(value);
         } catch (NumberFormatException exception) {
@@ -79,6 +84,7 @@ public class HoaDonController extends HttpServlet {
     }
 
     private BigDecimal parseMoney(String value) {
+        // Chuyen chuoi tien tu form thanh BigDecimal de luu vao cot DECIMAL trong SQL Server.
         try {
             return new BigDecimal(value);
         } catch (Exception exception) {

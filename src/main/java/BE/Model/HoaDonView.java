@@ -3,6 +3,7 @@ package BE.Model;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+// Model/View object dung de chua du lieu hoa don lay tu DAO va dua len JSP.
 public class HoaDonView {
     private Integer id;
     private String maHoaDon;

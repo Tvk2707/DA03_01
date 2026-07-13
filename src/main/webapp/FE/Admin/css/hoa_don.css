@@ -1,5 +1,6 @@
 /* ==================== INVOICE MANAGEMENT ==================== */
 
+/* Layout tong cua trang hoa don va cac hang flex dung chung. */
 .invoice-page {
     color: var(--text-dark);
 }
@@ -31,6 +32,14 @@
     margin-bottom: 4px;
 }
 
+.invoice-product-meta {
+    display: block;
+    margin-top: 4px;
+    color: var(--text-light);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
 .invoice-subtitle {
     color: var(--text-light);
     font-size: 14px;
@@ -45,6 +54,7 @@
     flex-wrap: wrap;
 }
 
+/* Style nut dung chung trong man hinh hoa don. */
 .invoice-btn {
     display: inline-flex;
     align-items: center;
@@ -112,6 +122,7 @@
     transform: none;
 }
 
+/* Cac khoi card: bo loc, form, danh sach, timeline va thong tin chi tiet. */
 .invoice-filter-card,
 .invoice-list-card,
 .invoice-form-card,
@@ -131,6 +142,7 @@
     overflow: hidden;
 }
 
+/* Form them/sua hoa don va nut xoa mem trong bang. */
 .invoice-form-card {
     display: none;
     padding: 22px 24px;
@@ -158,6 +170,7 @@
     margin: 0;
 }
 
+/* Nut thu gon/mo rong bo loc. */
 .invoice-section-toggle {
     width: 100%;
     border: none;
@@ -187,6 +200,7 @@
     display: none;
 }
 
+/* Khu vuc bo loc tim kiem tren trang danh sach. */
 .invoice-filter-body {
     align-items: flex-end;
     gap: 14px;
@@ -330,6 +344,7 @@
     color: var(--white);
 }
 
+/* Bang danh sach hoa don va bang san pham trong chi tiet hoa don. */
 .invoice-table-wrap {
     width: 100%;
     overflow-x: auto;
@@ -470,6 +485,7 @@
     display: flex;
 }
 
+/* Phan chan bang: tong so dong va phan trang hien thi. */
 .invoice-table-footer {
     justify-content: space-between;
     gap: 12px;
@@ -827,6 +843,7 @@
     background: #116b3d;
 }
 
+/* Modal dung de cap nhat trang thai hoa don. */
 .invoice-modal {
     position: fixed;
     inset: 0;
@@ -923,6 +940,7 @@
     font-size: 13px;
 }
 
+/* Toast thong bao nhanh sau khi nguoi dung thao tac. */
 .invoice-toast {
     position: fixed;
     top: 88px;
@@ -965,6 +983,7 @@
     font-size: 13px;
 }
 
+/* Responsive cho man hinh laptop nho. */
 @media (max-width: 1200px) {
     .invoice-stats,
     .invoice-mini-grid {
@@ -984,6 +1003,7 @@
     }
 }
 
+/* Responsive cho dien thoai va tablet nho. */
 @media (max-width: 768px) {
     .invoice-page-header,
     .invoice-detail-actions,
@@ -1052,6 +1072,7 @@
     }
 }
 
+/* An cac nut/khung khong can thiet khi in hoa don. */
 @media print {
     .sidebar,
     .admin-header,
