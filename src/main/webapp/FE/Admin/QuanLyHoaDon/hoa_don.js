@@ -1,5 +1,5 @@
 (function () {
-    // Hien thong bao nho tren giao dien sau moi thao tac.
+    // Hiện thông báo nhỏ trên giao diện sau mỗi thao tác.
     function showToast(message) {
         const toast = document.getElementById('invoiceToast');
         const toastMessage = document.getElementById('toastMessage');
@@ -16,12 +16,12 @@
         }, 2600);
     }
 
-    // Khoi tao trang danh sach hoa don: loc, them/sua, xoa mem, xuat file.
+    // Khởi tạo trang danh sách hóa đơn: lọc, thêm/sửa, xóa mềm, xuất file.
     function initInvoiceList() {
         const table = document.getElementById('ordersTable');
 
         if (!table) {
-            // Khong tim thay bang danh sach nghia la dang o trang chi tiet.
+            // Không tìm thấy bảng danh sách nghĩa là đang ở trang chi tiết.
             initDetailPage();
             return;
         }
@@ -43,9 +43,15 @@
         const showFormButton = document.getElementById('btnShowForm');
         const cancelFormButton = document.getElementById('btnCancelForm');
         const formTitle = document.getElementById('formTitle');
+        const invoiceCodeInput = document.getElementById('maHoaDon');
         let selectedTabStatus = 'all';
 
-        // Loc cac dong trong bang theo tu khoa, loai, trang thai va khoang ngay.
+        if (invoiceCodeInput) {
+            invoiceCodeInput.required = false;
+            invoiceCodeInput.placeholder = 'Tự tạo nếu để trống';
+        }
+
+        // Lọc các dòng trong bảng theo từ khóa, loại, trạng thái và khoảng ngày.
         function filterRows() {
             const keyword = (searchInput.value || '').trim().toLowerCase();
             const selectedType = typeFilter.value;
@@ -78,20 +84,21 @@
             orderCount.textContent = 'Hiển thị ' + visibleCount + ' / tổng ' + rows.length + ' hóa đơn';
         }
 
-        // Dua form ve trang thai ban dau de them hoa don moi.
+        // Đưa form về trạng thái ban đầu để thêm hóa đơn mới.
         function resetForm() {
             formTitle.textContent = 'Thêm hóa đơn';
             document.getElementById('invoiceId').value = '';
             document.getElementById('maHoaDon').value = '';
             document.getElementById('tenNguoiNhan').value = '';
             document.getElementById('soDienThoai').value = '';
+            document.getElementById('idNhanVien').value = '';
             document.getElementById('tongTienThanhToan').value = '';
             document.getElementById('trangThai').value = '1';
             document.getElementById('ghiChu').value = '';
             formCard.classList.remove('is-visible');
         }
 
-        // Xuat cac dong dang hien thi ra file CSV.
+        // Xuất các dòng đang hiển thị ra file CSV.
         function exportVisibleRows() {
             const visibleRows = rows.filter((row) => row.style.display !== 'none');
             const header = ['STT', 'Mã hóa đơn', 'Nhân viên', 'Khách hàng', 'Số điện thoại', 'Loại hóa đơn', 'Tổng tiền', 'Ngày tạo', 'Trạng thái'];
@@ -113,7 +120,7 @@
             showToast('Đã xuất danh sách hóa đơn hiện tại');
         }
 
-        // Mo form them moi hoa don.
+        // Mở form thêm mới hóa đơn.
         showFormButton.addEventListener('click', () => {
             resetForm();
             formCard.classList.add('is-visible');
@@ -132,7 +139,7 @@
             filterCard.classList.toggle('is-collapsed');
         });
 
-        // Xoa tat ca dieu kien loc va hien lai toan bo hoa don.
+        // Xóa tất cả điều kiện lọc và hiện lại toàn bộ hóa đơn.
         resetButton.addEventListener('click', () => {
             searchInput.value = '';
             typeFilter.value = 'all';
@@ -145,7 +152,7 @@
             showToast('Đã đặt lại bộ lọc hóa đơn');
         });
 
-        // Loc nhanh theo cac tab trang thai.
+        // Lọc nhanh theo các tab trạng thái.
         tabs.forEach((tab) => {
             tab.addEventListener('click', () => {
                 tabs.forEach((item) => item.classList.remove('is-active'));
@@ -155,14 +162,14 @@
             });
         });
 
-        // Nut in hien dang hien thong bao demo.
+        // Nút in hiện đang hiển thị thông báo demo.
         document.querySelectorAll('[data-print]').forEach((button) => {
             button.addEventListener('click', () => {
                 showToast('Đã gửi hóa đơn ' + button.dataset.print + ' đến hàng đợi in');
             });
         });
 
-        // Lay du lieu tu dong dang chon va dua len form sua.
+        // Lấy dữ liệu từ dòng đang chọn và đưa lên form sửa.
         document.querySelectorAll('[data-edit]').forEach((button) => {
             button.addEventListener('click', () => {
                 formTitle.textContent = 'Sửa hóa đơn';
@@ -170,6 +177,7 @@
                 document.getElementById('maHoaDon').value = button.dataset.code || '';
                 document.getElementById('tenNguoiNhan').value = button.dataset.name === '-' ? '' : (button.dataset.name || '');
                 document.getElementById('soDienThoai').value = button.dataset.phone === '-' ? '' : (button.dataset.phone || '');
+                document.getElementById('idNhanVien').value = button.dataset.employeeId || '';
                 document.getElementById('tongTienThanhToan').value = button.dataset.total || '0';
                 document.getElementById('trangThai').value = button.dataset.statusValue || '1';
                 document.getElementById('ghiChu').value = button.dataset.note === '-' ? '' : (button.dataset.note || '');
@@ -178,10 +186,10 @@
             });
         });
 
-        // Hoi xac nhan truoc khi gui form xoa mem.
+        // Hỏi xác nhận trước khi gửi form xóa mềm.
         document.querySelectorAll('.invoice-delete-form').forEach((form) => {
             form.addEventListener('submit', (event) => {
-                if (!confirm('Bạn có chắc muốn hủy hóa đơn này không?')) {
+                if (!confirm('Bạn có chắc muốn xóa mềm hóa đơn này không?')) {
                     event.preventDefault();
                 }
             });
@@ -190,7 +198,7 @@
         filterRows();
     }
 
-    // Khoi tao trang chi tiet hoa don: in va modal cap nhat trang thai.
+    // Khởi tạo trang chi tiết hóa đơn: in và modal cập nhật trạng thái.
     function initDetailPage() {
         const printButton = document.getElementById('btnPrintDetail');
 
@@ -198,13 +206,13 @@
             return;
         }
 
-        // Goi chuc nang in cua trinh duyet.
+        // Gọi chức năng in của trình duyệt.
         printButton.addEventListener('click', () => {
             window.print();
             showToast('Đã mở cửa sổ in hóa đơn');
         });
 
-        // Mo modal khi bam nut co data-open-modal.
+        // Mở modal khi bấm nút có data-open-modal.
         document.querySelectorAll('[data-open-modal]').forEach((button) => {
             button.addEventListener('click', () => {
                 const modal = document.getElementById(button.dataset.openModal);
@@ -215,7 +223,7 @@
             });
         });
 
-        // Dong modal khi bam nut co data-close-modal.
+        // Đóng modal khi bấm nút có data-close-modal.
         document.querySelectorAll('[data-close-modal]').forEach((button) => {
             button.addEventListener('click', () => {
                 const modal = button.closest('.invoice-modal');
@@ -227,7 +235,7 @@
         });
     }
 
-    // Doi HTML tai xong roi moi gan su kien.
+    // Đợi HTML tải xong rồi mới gắn sự kiện.
     document.addEventListener('DOMContentLoaded', () => {
         initInvoiceList();
     });

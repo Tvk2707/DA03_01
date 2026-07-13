@@ -538,7 +538,7 @@
             <div class="invoice-card-heading invoice-card-heading--compact">
                 <div>
                     <h2>Lich su thanh toan he thong</h2>
-                    <p>Du lieu lay tu bang lich_su_thanh_toan</p>
+                    <p>Dữ liệu lấy từ bảng lich_su_thanh_toan</p>
                 </div>
             </div>
             <div class="invoice-table-wrap">
@@ -563,7 +563,7 @@
                     </tr>
                     <% } %>
                     <% if (paymentHistoryList.isEmpty()) { %>
-                    <tr><td colspan="5">Chua co lich su thanh toan.</td></tr>
+                    <tr><td colspan="5">Chưa có lịch sử thanh toán.</td></tr>
                     <% } %>
                     </tbody>
                 </table>

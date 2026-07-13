@@ -2,7 +2,7 @@ package BE.Model;
 
 import java.math.BigDecimal;
 
-// Chua du lieu 1 dong san pham trong chi tiet hoa don de hien thi len JSP.
+// Chứa dữ liệu 1 dòng sản phẩm trong chi tiết hóa đơn để hiển thị lên JSP.
 public class ChiTietHoaDonView {
     private String tenSanPham;
     private String maSanPhamChiTiet;

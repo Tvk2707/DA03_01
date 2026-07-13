@@ -3,7 +3,7 @@ package BE.Model;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-// Chua thong tin 1 lan thanh toan cua hoa don.
+// Chứa thông tin 1 lần thanh toán của hóa đơn.
 public class ThanhToanHoaDonView {
     private BigDecimal soTien;
     private LocalDateTime thoiGian;

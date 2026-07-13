@@ -3,7 +3,7 @@ package BE.Model;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-// Chua du lieu tu bang lich_su_thanh_toan de hien thi o trang chi tiet hoa don.
+// Chứa dữ liệu từ bảng lich_su_thanh_toan để hiển thị ở trang chi tiết hóa đơn.
 public class LichSuThanhToanView {
     private BigDecimal soTien;
     private String phuongThucThanhToan;

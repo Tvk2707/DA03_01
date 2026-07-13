@@ -6,16 +6,18 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-// Quan ly ket noi SQL Server cho toan bo tang DAO.
+// Quản lý kết nối SQL Server cho toàn bộ tầng DAO.
 public class DatabaseConnectionManager {
 
-    // Cau hinh mac dinh, co the ghi de bang system property hoac environment variable.
+    // Cấu hình mặc định, có thể ghi đè bằng system property hoặc environment variable.
     private static final String DEFAULT_HOST = "localhost";
     private static final int DEFAULT_PORT = 1433;
     private static final String DEFAULT_DATABASE_NAME = "quan_ly_ban_kinh";
     private static final String DEFAULT_USERNAME = "minh";
     private static final String DEFAULT_PASSWORD = "123456";
     private static final boolean DEFAULT_INTEGRATED_SECURITY = false;
+    private static final boolean DEFAULT_ENCRYPT = false;
+    private static final boolean DEFAULT_TRUST_SERVER_CERTIFICATE = true;
 
     private final String url;
     private final String username;
@@ -32,10 +34,16 @@ public class DatabaseConnectionManager {
 
     public DatabaseConnectionManager(String host, int port, String databaseName, String username, String password,
             boolean integratedSecurity) {
+        this(host, port, databaseName, username, password, integratedSecurity,
+                DEFAULT_ENCRYPT, DEFAULT_TRUST_SERVER_CERTIFICATE);
+    }
+
+    public DatabaseConnectionManager(String host, int port, String databaseName, String username, String password,
+            boolean integratedSecurity, boolean encrypt, boolean trustServerCertificate) {
         this.url = "jdbc:sqlserver://" + host + ":" + port
                 + ";databaseName=" + databaseName
-                + ";encrypt=true;"
-                + "trustServerCertificate=true;"
+                + ";encrypt=" + encrypt + ";"
+                + "trustServerCertificate=" + trustServerCertificate + ";"
                 + "loginTimeout=30;"
                 + (integratedSecurity ? "integratedSecurity=true;" : "");
         this.username = username;
@@ -44,7 +52,7 @@ public class DatabaseConnectionManager {
     }
 
     public static DatabaseConnectionManager fromEnvironment() {
-        // Uu tien doc cau hinh tu bien moi truong, neu khong co thi dung gia tri mac dinh.
+        // Ưu tiên đọc cấu hình từ biến môi trường, nếu không có thì dùng giá trị mặc định.
         String host = getSetting("db.host", "DB_HOST", DEFAULT_HOST);
         int port = getIntSetting("db.port", "DB_PORT", DEFAULT_PORT);
         String databaseName = getSetting("db.name", "DB_NAME", DEFAULT_DATABASE_NAME);
@@ -55,12 +63,19 @@ public class DatabaseConnectionManager {
                 "DB_INTEGRATED_SECURITY",
                 DEFAULT_INTEGRATED_SECURITY
         );
+        boolean encrypt = getBooleanSetting("db.encrypt", "DB_ENCRYPT", DEFAULT_ENCRYPT);
+        boolean trustServerCertificate = getBooleanSetting(
+                "db.trustServerCertificate",
+                "DB_TRUST_SERVER_CERTIFICATE",
+                DEFAULT_TRUST_SERVER_CERTIFICATE
+        );
 
-        return new DatabaseConnectionManager(host, port, databaseName, username, password, integratedSecurity);
+        return new DatabaseConnectionManager(host, port, databaseName, username, password,
+                integratedSecurity, encrypt, trustServerCertificate);
     }
 
     public Connection getConnection() throws SQLException {
-        // DAO goi ham nay de lay Connection moi moi khi can truy van database.
+        // DAO gọi hàm này để lấy Connection mới mỗi khi cần truy vấn database.
         loadSqlServerDriver();
 
         if (this.integratedSecurity) {
@@ -70,7 +85,7 @@ public class DatabaseConnectionManager {
     }
 
     public Map<String, String> toJpaProperties() {
-        // Ham nay phuc vu JPA neu can dung EntityManager trong cac phan khac.
+        // Hàm này phục vụ JPA nếu cần dùng EntityManager trong các phần khác.
         Map<String, String> properties = new HashMap<>();
         properties.put("jakarta.persistence.jdbc.driver", "com.microsoft.sqlserver.jdbc.SQLServerDriver");
         properties.put("jakarta.persistence.jdbc.url", this.url);
@@ -93,7 +108,7 @@ public class DatabaseConnectionManager {
     }
 
     private void loadSqlServerDriver() throws SQLException {
-        // Nap driver JDBC de DriverManager biet cach ket noi SQL Server.
+        // Nạp driver JDBC để DriverManager biết cách kết nối SQL Server.
         try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
         } catch (ClassNotFoundException e) {
@@ -102,7 +117,7 @@ public class DatabaseConnectionManager {
     }
 
     private static String getSetting(String propertyName, String environmentName, String defaultValue) {
-        // Doc gia tri theo thu tu: JVM property -> bien moi truong -> mac dinh.
+        // Đọc giá trị theo thứ tự: JVM property -> biến môi trường -> mặc định.
         String propertyValue = System.getProperty(propertyName);
         if (propertyValue != null && !propertyValue.trim().isEmpty()) {
             return propertyValue;

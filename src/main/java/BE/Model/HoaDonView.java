@@ -3,7 +3,7 @@ package BE.Model;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-// Model/View object dung de chua du lieu hoa don lay tu DAO va dua len JSP.
+// Model/View object dùng để chứa dữ liệu hóa đơn lấy từ DAO và đưa lên JSP.
 public class HoaDonView {
     private Integer id;
     private String maHoaDon;
@@ -13,6 +13,7 @@ public class HoaDonView {
     private Integer trangThai;
     private LocalDateTime ngayTao;
     private String ghiChu;
+    private Integer idNhanVien;
     private String tenNhanVien;
     private String tenKhachHang;
     private String maVoucher;
@@ -80,6 +81,14 @@ public class HoaDonView {
 
     public void setGhiChu(String ghiChu) {
         this.ghiChu = ghiChu;
+    }
+
+    public Integer getIdNhanVien() {
+        return idNhanVien;
+    }
+
+    public void setIdNhanVien(Integer idNhanVien) {
+        this.idNhanVien = idNhanVien;
     }
 
     public String getTenNhanVien() {

@@ -4,6 +4,7 @@ import BE.Model.ChiTietHoaDonView;
 import BE.Model.HoaDonView;
 import BE.Model.LichSuHoaDonView;
 import BE.Model.LichSuThanhToanView;
+import BE.Model.NhanVienView;
 import BE.Model.ThanhToanHoaDonView;
 import BE.dao.HoaDonDAO;
 
@@ -11,7 +12,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 public class HoaDonService {
-    // Service la tang trung gian: controller khong goi SQL truc tiep ma goi qua service.
+    // Service là tầng trung gian: controller không gọi SQL trực tiếp mà gọi qua service.
     private final HoaDonDAO hoaDonDAO = new HoaDonDAO();
 
     public List<HoaDonView> getAllHoaDon() throws SQLException {
@@ -20,6 +21,10 @@ public class HoaDonService {
 
     public HoaDonView getHoaDonById(int id) throws SQLException {
         return hoaDonDAO.findById(id);
+    }
+
+    public List<NhanVienView> getAllNhanVien() throws SQLException {
+        return hoaDonDAO.findAllNhanVien();
     }
 
     public List<ChiTietHoaDonView> getChiTietHoaDon(int hoaDonId) throws SQLException {
@@ -39,10 +44,16 @@ public class HoaDonService {
     }
 
     public void saveHoaDon(HoaDonView hoaDon) throws SQLException {
-        // Neu chua co id thi them moi, neu da co id thi cap nhat hoa don cu.
+        // Nếu chưa có id thì thêm mới, nếu đã có id thì cập nhật hóa đơn cũ.
         if (hoaDon.getId() == null) {
+            if (isBlank(hoaDon.getMaHoaDon()) || hoaDonDAO.existsByMaHoaDon(hoaDon.getMaHoaDon(), null)) {
+                hoaDon.setMaHoaDon(hoaDonDAO.generateNextMaHoaDon());
+            }
             hoaDonDAO.insert(hoaDon);
         } else {
+            if (isBlank(hoaDon.getMaHoaDon()) || hoaDonDAO.existsByMaHoaDon(hoaDon.getMaHoaDon(), hoaDon.getId())) {
+                hoaDon.setMaHoaDon(hoaDonDAO.generateNextMaHoaDon());
+            }
             hoaDonDAO.update(hoaDon);
         }
     }
@@ -53,5 +64,9 @@ public class HoaDonService {
 
     public void updateTrangThai(int id, int trangThai, String ghiChu) throws SQLException {
         hoaDonDAO.updateStatus(id, trangThai, ghiChu);
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
     }
 }

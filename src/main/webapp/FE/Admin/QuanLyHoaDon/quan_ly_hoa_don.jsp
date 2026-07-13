@@ -1,12 +1,14 @@
 <%@ page import="BE.Model.HoaDonView" %>
+<%@ page import="BE.Model.NhanVienView" %>
 <%@ page import="java.math.BigDecimal" %>
 <%@ page import="java.text.DecimalFormat" %>
 <%@ page import="java.time.LocalDate" %>
 <%@ page import="java.time.format.DateTimeFormatter" %>
 <%@ page import="java.util.List" %>
+<%@ page import="java.util.Collections" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
-    // Neu nguoi dung mo truc tiep JSP thi chuyen ve controller de nap du lieu truoc.
+    // Nếu người dùng mở trực tiếp JSP thì chuyển về controller để nạp dữ liệu trước.
     if (request.getAttribute("hoaDonList") == null) {
         response.sendRedirect(request.getContextPath() + "/admin/hoa-don");
         return;
@@ -16,6 +18,10 @@
     request.setAttribute("activeMenu", "hoadon");
 
     List<HoaDonView> hoaDonList = (List<HoaDonView>) request.getAttribute("hoaDonList");
+    List<NhanVienView> nhanVienList = (List<NhanVienView>) request.getAttribute("nhanVienList");
+    if (nhanVienList == null) {
+        nhanVienList = Collections.emptyList();
+    }
     DecimalFormat moneyFormat = new DecimalFormat("#,###");
     DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     BigDecimal doanhThu = BigDecimal.ZERO;
@@ -35,6 +41,14 @@
 <%!
     private String text(String value) {
         return value == null || value.trim().isEmpty() ? "-" : value;
+    }
+
+    private String attr(String value) {
+        return text(value)
+                .replace("&", "&amp;")
+                .replace("\"", "&quot;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;");
     }
 
     private String statusText(Integer status) {
@@ -189,6 +203,16 @@
                 <input type="hidden" name="id" id="invoiceId">
 
                 <label class="invoice-field">
+                    <span>Nhân viên</span>
+                    <select id="idNhanVien" name="idNhanVien">
+                        <option value="">Chọn nhân viên</option>
+                        <% for (NhanVienView nhanVien : nhanVienList) { %>
+                        <option value="<%= nhanVien.getId() %>"><%= text(nhanVien.getHoTen()) %> - <%= text(nhanVien.getMaNhanVien()) %></option>
+                        <% } %>
+                    </select>
+                </label>
+
+                <label class="invoice-field">
                     <span>Mã hóa đơn</span>
                     <input id="maHoaDon" name="maHoaDon" type="text" placeholder="Ví dụ: HD006" required>
                 </label>
@@ -273,12 +297,13 @@
                         String statusLabel = statusText(hoaDon.getTrangThai());
                         String invoiceType = hoaDon.getTenNhanVien() == null || hoaDon.getTenNhanVien().trim().isEmpty() ? "Online" : "Tại quầy";
                         String dateValue = hoaDon.getNgayTao() == null ? "" : hoaDon.getNgayTao().toLocalDate().toString();
-                        String customerName = hoaDon.getTenKhachHang() == null || hoaDon.getTenKhachHang().trim().isEmpty()
-                                ? hoaDon.getTenNguoiNhan()
-                                : hoaDon.getTenKhachHang();
+                        String customerName = hoaDon.getTenNguoiNhan() == null || hoaDon.getTenNguoiNhan().trim().isEmpty()
+                                ? hoaDon.getTenKhachHang()
+                                : hoaDon.getTenNguoiNhan();
                         String searchText = (hoaDon.getMaHoaDon() + " "
                                 + text(customerName) + " "
                                 + text(hoaDon.getTenNguoiNhan()) + " "
+                                + text(hoaDon.getTenKhachHang()) + " "
                                 + text(hoaDon.getSoDienThoai())).toLowerCase();
                     %>
                     <%-- Moi dong table tuong ung voi 1 hoa don trong database. --%>
@@ -303,19 +328,20 @@
                                 <button class="invoice-icon-btn" type="button"
                                         data-edit
                                         data-id="<%= hoaDon.getId() %>"
-                                        data-code="<%= hoaDon.getMaHoaDon() %>"
-                                        data-name="<%= text(hoaDon.getTenNguoiNhan()) %>"
-                                        data-phone="<%= text(hoaDon.getSoDienThoai()) %>"
+                                        data-code="<%= attr(hoaDon.getMaHoaDon()) %>"
+                                        data-name="<%= attr(hoaDon.getTenNguoiNhan()) %>"
+                                        data-phone="<%= attr(hoaDon.getSoDienThoai()) %>"
                                         data-total="<%= hoaDon.getTongTienThanhToan() %>"
                                         data-status-value="<%= hoaDon.getTrangThai() %>"
-                                        data-note="<%= text(hoaDon.getGhiChu()) %>"
+                                        data-employee-id="<%= hoaDon.getIdNhanVien() == null ? "" : hoaDon.getIdNhanVien() %>"
+                                        data-note="<%= attr(hoaDon.getGhiChu()) %>"
                                         title="Sửa">
                                     <i class="fas fa-pen"></i>
                                 </button>
                                 <form method="post" action="<%= request.getContextPath() %>/admin/hoa-don" class="invoice-delete-form">
                                     <input type="hidden" name="action" value="delete">
                                     <input type="hidden" name="id" value="<%= hoaDon.getId() %>">
-                                    <button class="invoice-icon-btn" type="submit" title="Hủy hóa đơn">
+                                    <button class="invoice-icon-btn" type="submit" title="Xóa mềm hóa đơn">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>

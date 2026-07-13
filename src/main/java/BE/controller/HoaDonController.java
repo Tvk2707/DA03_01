@@ -14,17 +14,18 @@ import java.sql.SQLException;
 
 @WebServlet("/admin/hoa-don")
 public class HoaDonController extends HttpServlet {
-    // Controller chi nhan request tu FE, sau do goi service de xu ly nghiep vu.
+    // Controller chỉ nhận request từ FE, sau đó gọi service để xử lý nghiệp vụ.
     private final HoaDonService hoaDonService = new HoaDonService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
-            // GET /admin/hoa-don: lay danh sach hoa don va chuyen sang trang JSP.
+            // GET /admin/hoa-don: lấy danh sách hóa đơn và chuyển sang trang JSP.
             request.setAttribute("hoaDonList", hoaDonService.getAllHoaDon());
+            request.setAttribute("nhanVienList", hoaDonService.getAllNhanVien());
             request.getRequestDispatcher("/FE/Admin/QuanLyHoaDon/quan_ly_hoa_don.jsp").forward(request, response);
         } catch (SQLException exception) {
-            throw new ServletException("Khong the lay danh sach hoa don tu database.", exception);
+            throw new ServletException("Không thể lấy danh sách hóa đơn từ database.", exception);
         }
     }
 
@@ -34,7 +35,7 @@ public class HoaDonController extends HttpServlet {
         String action = request.getParameter("action");
 
         try {
-            // action duoc gui tu cac form ben JSP: save, delete, changeStatus.
+            // action được gửi từ các form bên JSP: save, delete, changeStatus.
             if ("delete".equals(action)) {
                 hoaDonService.huyHoaDon(parseInt(request.getParameter("id"), 0));
             } else if ("changeStatus".equals(action)) {
@@ -51,12 +52,12 @@ public class HoaDonController extends HttpServlet {
 
             response.sendRedirect(request.getContextPath() + "/admin/hoa-don");
         } catch (SQLException exception) {
-            throw new ServletException("Khong the luu hoa don vao database.", exception);
+            throw new ServletException("Không thể lưu hóa đơn vào database.", exception);
         }
     }
 
     private HoaDonView readForm(HttpServletRequest request) {
-        // Chuyen du lieu tu form HTML thanh object HoaDonView de gui xuong service/dao.
+        // Chuyển dữ liệu từ form HTML thành object HoaDonView để gửi xuống service/dao.
         HoaDonView hoaDon = new HoaDonView();
         int id = parseInt(request.getParameter("id"), 0);
 
@@ -67,6 +68,7 @@ public class HoaDonController extends HttpServlet {
         hoaDon.setMaHoaDon(request.getParameter("maHoaDon"));
         hoaDon.setTenNguoiNhan(request.getParameter("tenNguoiNhan"));
         hoaDon.setSoDienThoai(request.getParameter("soDienThoai"));
+        hoaDon.setIdNhanVien(parseInt(request.getParameter("idNhanVien"), 0));
         hoaDon.setTongTienThanhToan(parseMoney(request.getParameter("tongTienThanhToan")));
         hoaDon.setTrangThai(parseInt(request.getParameter("trangThai"), 1));
         hoaDon.setGhiChu(request.getParameter("ghiChu"));
@@ -75,7 +77,7 @@ public class HoaDonController extends HttpServlet {
     }
 
     private int parseInt(String value, int defaultValue) {
-        // Neu nguoi dung nhap sai so thi tra ve gia tri mac dinh de tranh loi 500.
+        // Nếu người dùng nhập sai số thì trả về giá trị mặc định để tránh lỗi 500.
         try {
             return Integer.parseInt(value);
         } catch (NumberFormatException exception) {
@@ -84,7 +86,7 @@ public class HoaDonController extends HttpServlet {
     }
 
     private BigDecimal parseMoney(String value) {
-        // Chuyen chuoi tien tu form thanh BigDecimal de luu vao cot DECIMAL trong SQL Server.
+        // Chuyển chuỗi tiền từ form thành BigDecimal để lưu vào cột DECIMAL trong SQL Server.
         try {
             return new BigDecimal(value);
         } catch (Exception exception) {

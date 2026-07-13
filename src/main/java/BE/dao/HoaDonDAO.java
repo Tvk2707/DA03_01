@@ -4,6 +4,7 @@ import BE.Model.ChiTietHoaDonView;
 import BE.Model.HoaDonView;
 import BE.Model.LichSuHoaDonView;
 import BE.Model.LichSuThanhToanView;
+import BE.Model.NhanVienView;
 import BE.Model.ThanhToanHoaDonView;
 import BE.jdbc.DatabaseConnectionManager;
 
@@ -24,16 +25,17 @@ public class HoaDonDAO {
         this.connectionManager = DatabaseConnectionManager.fromEnvironment();
     }
 
-    // READ: lay danh sach hoa don.
+    // READ: lấy danh sách hóa đơn.
     public List<HoaDonView> findAll() throws SQLException {
         String sql = "SELECT hd.id, hd.ma_hoa_don, hd.ten_nguoi_nhan, hd.sdt_nguoi_nhan, "
-                + "hd.tong_tien_thanh_toan, hd.trang_thai, hd.ngay_tao, hd.ghi_chu, "
+                + "hd.id_nhan_vien, hd.tong_tien_thanh_toan, hd.trang_thai, hd.ngay_tao, hd.ghi_chu, "
                 + "nv.ho_ten AS ten_nhan_vien, kh.ho_ten AS ten_khach_hang, "
                 + "pgg.ma_voucher, pgg.ten_voucher "
                 + "FROM hoa_don hd "
                 + "LEFT JOIN nhan_vien nv ON hd.id_nhan_vien = nv.id "
                 + "LEFT JOIN khach_hang kh ON hd.id_khach_hang = kh.id "
                 + "LEFT JOIN phieu_giam_gia pgg ON hd.id_phieu_giam_gia = pgg.id "
+                + "WHERE NOT (hd.trang_thai = 5 AND hd.ly_do_huy LIKE N'Xóa mềm%') "
                 + "ORDER BY hd.id DESC";
 
         try (Connection connection = connectionManager.getConnection();
@@ -49,10 +51,10 @@ public class HoaDonDAO {
         }
     }
 
-    // READ: lay thong tin 1 hoa don theo id.
+    // READ: lấy thông tin 1 hóa đơn theo id.
     public HoaDonView findById(int id) throws SQLException {
         String sql = "SELECT hd.id, hd.ma_hoa_don, hd.ten_nguoi_nhan, hd.sdt_nguoi_nhan, "
-                + "hd.tong_tien_thanh_toan, hd.trang_thai, hd.ngay_tao, hd.ghi_chu, "
+                + "hd.id_nhan_vien, hd.tong_tien_thanh_toan, hd.trang_thai, hd.ngay_tao, hd.ghi_chu, "
                 + "nv.ho_ten AS ten_nhan_vien, kh.ho_ten AS ten_khach_hang, "
                 + "pgg.ma_voucher, pgg.ten_voucher "
                 + "FROM hoa_don hd "
@@ -75,7 +77,29 @@ public class HoaDonDAO {
         return null;
     }
 
-    // READ: lay danh sach san pham trong hoa don.
+    // READ: lấy danh sách sản phẩm trong hóa đơn.
+    public List<NhanVienView> findAllNhanVien() throws SQLException {
+        String sql = "SELECT id, ma_nhan_vien, ho_ten "
+                + "FROM nhan_vien "
+                + "ORDER BY ho_ten";
+
+        try (Connection connection = connectionManager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet resultSet = statement.executeQuery()) {
+            List<NhanVienView> employees = new ArrayList<>();
+
+            while (resultSet.next()) {
+                NhanVienView employee = new NhanVienView();
+                employee.setId(resultSet.getInt("id"));
+                employee.setMaNhanVien(resultSet.getString("ma_nhan_vien"));
+                employee.setHoTen(resultSet.getString("ho_ten"));
+                employees.add(employee);
+            }
+
+            return employees;
+        }
+    }
+
     public List<ChiTietHoaDonView> findDetailsByHoaDonId(int hoaDonId) throws SQLException {
         String sql = "SELECT sp.ten_san_pham, spct.ma AS ma_san_pham_chi_tiet, "
                 + "dm.ten_danh_muc, th.ten_thuong_hieu, cl.ten_chat_lieu, kd.ten_kieu_dang, "
@@ -138,7 +162,7 @@ public class HoaDonDAO {
         }
     }
 
-    // READ: lay danh sach thanh toan cua hoa don.
+    // READ: lấy danh sách thanh toán của hóa đơn.
     public List<ThanhToanHoaDonView> findPaymentsByHoaDonId(int hoaDonId) throws SQLException {
         String sql = "SELECT tt.so_tien, tt.thoi_gian, tt.ma_giao_dich, ht.ten_pttt, tt.ghi_chu "
                 + "FROM thanh_toan_hoa_don tt "
@@ -169,7 +193,7 @@ public class HoaDonDAO {
         }
     }
 
-    // READ: lay lich su thanh toan tu bang lich_su_thanh_toan.
+    // READ: lấy lịch sử thanh toán từ bảng lich_su_thanh_toan.
     public List<LichSuThanhToanView> findPaymentHistoryByHoaDonId(int hoaDonId) throws SQLException {
         String sql = "SELECT so_tien, phuong_thuc_thanh_toan, trang_thai_thanh_toan, ngay_thanh_toan, ghi_chu "
                 + "FROM lich_su_thanh_toan "
@@ -199,7 +223,7 @@ public class HoaDonDAO {
         }
     }
 
-    // READ: lay lich su xu ly hoa don.
+    // READ: lấy lịch sử xử lý hóa đơn.
     public List<LichSuHoaDonView> findHistoryByHoaDonId(int hoaDonId) throws SQLException {
         String sql = "SELECT hanh_dong, ngay_tao, ghi_chu "
                 + "FROM lich_su_hoa_don "
@@ -227,10 +251,10 @@ public class HoaDonDAO {
         }
     }
 
-    // CREATE: them hoa don moi.
+    // CREATE: thêm hóa đơn mới.
     public void insert(HoaDonView hoaDon) throws SQLException {
         String sql = "INSERT INTO hoa_don (ma_hoa_don, ten_nguoi_nhan, sdt_nguoi_nhan, "
-                + "tong_tien_thanh_toan, trang_thai, ghi_chu) VALUES (?, ?, ?, ?, ?, ?)";
+                + "tong_tien_thanh_toan, trang_thai, ghi_chu, id_nhan_vien) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection connection = connectionManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -239,31 +263,85 @@ public class HoaDonDAO {
         }
     }
 
-    // UPDATE: sua thong tin co ban cua hoa don.
+    public boolean existsByMaHoaDon(String maHoaDon, Integer exceptId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM hoa_don WHERE ma_hoa_don = ?"
+                + (exceptId == null ? "" : " AND id <> ?");
+
+        try (Connection connection = connectionManager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, maHoaDon);
+
+            if (exceptId != null) {
+                statement.setInt(2, exceptId);
+            }
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next() && resultSet.getInt(1) > 0;
+            }
+        }
+    }
+
+    public String generateNextMaHoaDon() throws SQLException {
+        String sql = "SELECT MAX(TRY_CONVERT(INT, SUBSTRING(ma_hoa_don, 3, 20))) "
+                + "FROM hoa_don WHERE ma_hoa_don LIKE 'HD[0-9]%'";
+
+        try (Connection connection = connectionManager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet resultSet = statement.executeQuery()) {
+            int nextNumber = 1;
+
+            if (resultSet.next()) {
+                int currentMax = resultSet.getInt(1);
+
+                if (!resultSet.wasNull()) {
+                    nextNumber = currentMax + 1;
+                }
+            }
+
+            return String.format("HD%03d", nextNumber);
+        }
+    }
+
+    // UPDATE: sửa thông tin cơ bản của hóa đơn.
     public void update(HoaDonView hoaDon) throws SQLException {
         String sql = "UPDATE hoa_don SET ma_hoa_don = ?, ten_nguoi_nhan = ?, sdt_nguoi_nhan = ?, "
-                + "tong_tien_thanh_toan = ?, trang_thai = ?, ghi_chu = ? WHERE id = ?";
+                + "tong_tien_thanh_toan = ?, trang_thai = ?, ghi_chu = ?, id_nhan_vien = ? WHERE id = ?";
 
         try (Connection connection = connectionManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             setFormParameters(statement, hoaDon);
-            statement.setInt(7, hoaDon.getId());
+            statement.setInt(8, hoaDon.getId());
             statement.executeUpdate();
         }
     }
 
-    // DELETE: xoa mem hoa don bang cach doi trang_thai = 5.
+    // DELETE: xóa mềm hóa đơn bằng cách đổi trang_thai = 5.
     public void delete(int id) throws SQLException {
-        String sql = "UPDATE hoa_don SET trang_thai = 5, ly_do_huy = N'H\u1ee7y t\u1eeb m\u00e0n h\u00ecnh qu\u1ea3n l\u00fd h\u00f3a \u0111\u01a1n' WHERE id = ?";
+        String sql = "UPDATE hoa_don SET trang_thai = 5, ly_do_huy = N'Xóa mềm từ màn hình quản lý hóa đơn' WHERE id = ?";
+        String historySql = "INSERT INTO lich_su_hoa_don (id_hoa_don, hanh_dong, ghi_chu) VALUES (?, ?, ?)";
 
-        try (Connection connection = connectionManager.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, id);
-            statement.executeUpdate();
+        try (Connection connection = connectionManager.getConnection()) {
+            connection.setAutoCommit(false);
+
+            try (PreparedStatement statement = connection.prepareStatement(sql);
+                 PreparedStatement historyStatement = connection.prepareStatement(historySql)) {
+                statement.setInt(1, id);
+                statement.executeUpdate();
+
+                historyStatement.setInt(1, id);
+                historyStatement.setString(2, "Xóa mềm hóa đơn");
+                historyStatement.setString(3, "Hóa đơn được xóa mềm từ màn hình quản lý hóa đơn");
+                historyStatement.executeUpdate();
+
+                connection.commit();
+            } catch (SQLException exception) {
+                connection.rollback();
+                throw exception;
+            }
         }
     }
 
-    // UPDATE: cap nhat trang thai va ghi them lich su hoa don.
+    // UPDATE: cập nhật trạng thái và ghi thêm lịch sử hóa đơn.
     public void updateStatus(int id, int status, String note) throws SQLException {
         String action = status == 5 ? "H\u1ee7y h\u00f3a \u0111\u01a1n" : "C\u1eadp nh\u1eadt tr\u1ea1ng th\u00e1i";
         String sql = "UPDATE hoa_don SET trang_thai = ?, ghi_chu = ? WHERE id = ?";
@@ -304,6 +382,12 @@ public class HoaDonDAO {
         } else {
             statement.setString(6, hoaDon.getGhiChu());
         }
+
+        if (hoaDon.getIdNhanVien() == null || hoaDon.getIdNhanVien() <= 0) {
+            statement.setNull(7, Types.INTEGER);
+        } else {
+            statement.setInt(7, hoaDon.getIdNhanVien());
+        }
     }
 
     private HoaDonView mapHoaDon(ResultSet resultSet) throws SQLException {
@@ -318,6 +402,8 @@ public class HoaDonDAO {
         hoaDon.setTrangThai(resultSet.getInt("trang_thai"));
         hoaDon.setNgayTao(ngayTao == null ? null : ngayTao.toLocalDateTime());
         hoaDon.setGhiChu(resultSet.getString("ghi_chu"));
+        int idNhanVien = resultSet.getInt("id_nhan_vien");
+        hoaDon.setIdNhanVien(resultSet.wasNull() ? null : idNhanVien);
         hoaDon.setTenNhanVien(resultSet.getString("ten_nhan_vien"));
         hoaDon.setTenKhachHang(resultSet.getString("ten_khach_hang"));
         hoaDon.setMaVoucher(resultSet.getString("ma_voucher"));

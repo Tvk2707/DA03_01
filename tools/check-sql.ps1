@@ -13,19 +13,19 @@ try {
 
     $queries = @(
         @{
-            Name = "Kiem tra database va so hoa don"
+            Name = "Kiểm tra database và số hóa đơn"
             Sql = "SELECT DB_NAME() AS database_name, COUNT(*) AS so_hoa_don FROM hoa_don"
         },
         @{
-            Name = "Kiem tra join hoa_don voi khach_hang, nhan_vien, phieu_giam_gia"
+            Name = "Kiểm tra join hoa_don với khach_hang, nhan_vien, phieu_giam_gia"
             Sql = "SELECT TOP 5 hd.id, hd.ma_hoa_don, kh.ho_ten AS khach_hang, nv.ho_ten AS nhan_vien, pgg.ma_voucher FROM hoa_don hd LEFT JOIN khach_hang kh ON hd.id_khach_hang = kh.id LEFT JOIN nhan_vien nv ON hd.id_nhan_vien = nv.id LEFT JOIN phieu_giam_gia pgg ON hd.id_phieu_giam_gia = pgg.id ORDER BY hd.id DESC"
         },
         @{
-            Name = "Kiem tra chi tiet hoa don va san pham"
-            Sql = "SELECT TOP 5 cthd.id_hoa_don, sp.ten_san_pham, spct.ma AS ma_chi_tiet, CASE WHEN kqk.quai_thang = 1 THEN N'Quai thang' WHEN kqk.quai_gap = 1 THEN N'Quai gap' WHEN kqk.quai_loxo = 1 THEN N'Quai lo xo' ELSE NULL END AS kieu_quai_kinh, COALESCE(NULLIF(spct.hinh_anh, ''), ha.url_anh) AS hinh_anh, cthd.so_luong, cthd.tong_tien FROM chi_tiet_hoa_don cthd LEFT JOIN san_pham_chi_tiet spct ON cthd.id_san_pham_chi_tiet = spct.id LEFT JOIN san_pham sp ON spct.id_san_pham = sp.id LEFT JOIN gong_kinh gk ON sp.id_gong_kinh = gk.id LEFT JOIN kieu_quai_kinh kqk ON gk.id_kieu_quai_kinh = kqk.id OUTER APPLY (SELECT TOP 1 url_anh FROM hinh_anh_san_pham WHERE id_san_pham = sp.id ORDER BY is_anh_chinh DESC, id ASC) ha ORDER BY cthd.id"
+            Name = "Kiểm tra chi tiết hóa đơn và sản phẩm"
+            Sql = "SELECT TOP 5 cthd.id_hoa_don, sp.ten_san_pham, spct.ma AS ma_chi_tiet, CASE WHEN kqk.quai_thang = 1 THEN N'Quai thẳng' WHEN kqk.quai_gap = 1 THEN N'Quai gập' WHEN kqk.quai_loxo = 1 THEN N'Quai lò xo' ELSE NULL END AS kieu_quai_kinh, COALESCE(NULLIF(spct.hinh_anh, ''), ha.url_anh) AS hinh_anh, cthd.so_luong, cthd.tong_tien FROM chi_tiet_hoa_don cthd LEFT JOIN san_pham_chi_tiet spct ON cthd.id_san_pham_chi_tiet = spct.id LEFT JOIN san_pham sp ON spct.id_san_pham = sp.id LEFT JOIN gong_kinh gk ON sp.id_gong_kinh = gk.id LEFT JOIN kieu_quai_kinh kqk ON gk.id_kieu_quai_kinh = kqk.id OUTER APPLY (SELECT TOP 1 url_anh FROM hinh_anh_san_pham WHERE id_san_pham = sp.id ORDER BY is_anh_chinh DESC, id ASC) ha ORDER BY cthd.id"
         },
         @{
-            Name = "Kiem tra lich su thanh toan"
+            Name = "Kiểm tra lịch sử thanh toán"
             Sql = "SELECT TOP 5 id_hoa_don, so_tien, phuong_thuc_thanh_toan, trang_thai_thanh_toan, ngay_thanh_toan FROM lich_su_thanh_toan ORDER BY id DESC"
         }
     )
