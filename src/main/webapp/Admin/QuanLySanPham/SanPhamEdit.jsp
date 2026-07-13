@@ -31,14 +31,12 @@
             </a>
         </div>
 
-        <!-- Thông báo lỗi -->
         <c:if test="${not empty error}">
             <div style="background:#fdecea;color:#b3261e;padding:12px 16px;border-radius:8px;margin-bottom:16px;">
                 <i class="fas fa-circle-exclamation"></i> ${error}
             </div>
         </c:if>
 
-        <!-- Thông báo thành công -->
         <c:if test="${not empty success}">
             <div style="background:#e8f5e9;color:#2e7d32;padding:12px 16px;border-radius:8px;margin-bottom:16px;">
                 <i class="fas fa-check-circle"></i> ${success}
@@ -47,7 +45,6 @@
 
         <c:choose>
             <c:when test="${empty sanPham}">
-                <!-- Trường hợp không tìm thấy sản phẩm -->
                 <div style="background:#fdecea;color:#b3261e;padding:24px;border-radius:8px;text-align:center;">
                     <i class="fas fa-exclamation-triangle" style="font-size:32px;margin-bottom:12px;"></i>
                     <h3>Không tìm thấy sản phẩm</h3>
@@ -58,21 +55,17 @@
                 </div>
             </c:when>
             <c:otherwise>
-                <!-- Form cập nhật sản phẩm -->
-                <form action="${pageContext.request.contextPath}/SanPham/update"
+                <form action="${pageContext.request.contextPath}/SanPham/update?id=${sanPham.id}"
                       method="post" enctype="multipart/form-data" id="sanPhamForm" novalidate>
 
-                    <!-- Hidden field cho ID sản phẩm -->
                     <input type="hidden" name="id" value="${sanPham.id}">
 
-                    <!-- Hidden field cho ID biến thể (quan trọng để update) -->
                     <c:if test="${not empty sanPhamChiTiet}">
                         <input type="hidden" name="sanPhamChiTietId" value="${sanPhamChiTiet.id}">
                     </c:if>
 
                     <div class="sp-form-columns">
 
-                        <!-- CARD: THÔNG TIN SẢN PHẨM -->
                         <div class="filter-section">
                             <div class="filter-header">
                                 <div class="filter-title">
@@ -202,16 +195,15 @@
                                 <label class="filter-label">Trạng thái sản phẩm</label>
                                 <select class="filter-select" name="trangThai">
                                     <option value="1" ${sanPham.trangThai == 1 ? 'selected' : ''}>
-                                        <i class="fas fa-check-circle"></i> Hoạt động
+                                        Hoạt động
                                     </option>
                                     <option value="0" ${sanPham.trangThai == 0 ? 'selected' : ''}>
-                                        <i class="fas fa-ban"></i> Ngừng bán
+                                        Ngừng bán
                                     </option>
                                 </select>
                             </div>
                         </div>
 
-                        <!-- CARD: BIẾN THỂ & HÌNH ẢNH -->
                         <div class="filter-section">
                             <div class="filter-header">
                                 <div class="filter-title">
@@ -219,7 +211,6 @@
                                 </div>
                             </div>
 
-                            <!-- Cảnh báo nếu không có biến thể -->
                             <c:if test="${empty sanPhamChiTiet}">
                                 <div style="background:#fff3cd;color:#856404;padding:12px 16px;border-radius:8px;margin-bottom:16px;border-left:4px solid #ffc107;">
                                     <i class="fas fa-exclamation-triangle"></i>
@@ -308,7 +299,6 @@
                                 </div>
                             </div>
 
-                            <!-- Phần upload ảnh -->
                             <div class="filter-group" style="margin-top:16px;">
                                 <label class="filter-label">Hình ảnh sản phẩm</label>
                                 <input type="file" class="filter-input" id="fileAnh" name="fileAnh"
@@ -332,7 +322,6 @@
                                     </span>
                                 </div>
 
-                                <!-- Nút xóa ảnh (chỉ hiện khi có ảnh) -->
                                 <c:if test="${not empty sanPhamChiTiet.hinhAnh}">
                                     <button type="button" id="btnXoaAnh" class="btn-xoa-anh"
                                             onclick="xoaAnh()" style="margin-top:8px;">
@@ -356,7 +345,6 @@
 
                     </div>
 
-                    <!-- Các nút hành động -->
                     <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:24px;">
                         <a href="${pageContext.request.contextPath}/SanPham" class="btn-reset"
                            style="text-decoration:none;" onclick="return confirmHuy()">
@@ -403,7 +391,7 @@
         color: var(--text-light); text-align: center; font-size: 13px;
     }
 
-    /* [MỚI] Style cho field hint */
+    /* Style cho field hint */
     .field-hint {
         display: block;
         margin-top: 4px;
@@ -412,13 +400,13 @@
         font-style: italic;
     }
 
-    /* [MỚI] Style cho dấu * bắt buộc */
+    /* Style cho dấu * bắt buộc */
     .required {
         color: #dc2626;
         font-weight: bold;
     }
 
-    /* [MỚI] Style cho nút xóa ảnh */
+    /* Style cho nút xóa ảnh */
     .btn-xoa-anh {
         background: #fee2e2;
         color: #dc2626;
@@ -434,14 +422,14 @@
         border-color: #dc2626;
     }
 
-    /* [MỚI] Style cho input khi có lỗi */
+    /* Style cho input khi có lỗi */
     .filter-input.error,
     .filter-select.error {
         border-color: #dc2626 !important;
         background-color: #fef2f2;
     }
 
-    /* [MỚI] Style cho thông báo lỗi inline */
+    /* Style cho thông báo lỗi inline */
     .error-message {
         color: #dc2626;
         font-size: 12px;
@@ -490,7 +478,7 @@
         reader.readAsDataURL(file);
     }
 
-    // [MỚI] Hàm xóa ảnh hiện tại
+    // Hàm xóa ảnh hiện tại
     function xoaAnh() {
         if (confirm('Bạn có chắc muốn xóa ảnh hiện tại?')) {
             const preview = document.getElementById('spImagePreview');
@@ -508,16 +496,85 @@
             fileInput.value = '';
 
             // Ẩn nút xóa
-            document.getElementById('btnXoaAnh').style.display = 'none';
+            const btnXoa = document.getElementById('btnXoaAnh');
+            if (btnXoa) btnXoa.style.display = 'none';
         }
     }
 
-    // [MỚI] Xác nhận khi hủy
+    // Xác nhận khi hủy
     function confirmHuy() {
         return confirm('Bạn có chắc muốn hủy? Các thay đổi sẽ không được lưu.');
     }
 
-    // [MỚI] Validation form khi submit
+    // --- [MỚI] TỰ ĐỘNG SINH MÃ BIẾN THỂ KHI CHỌN THUỘC TÍNH ---
+    document.addEventListener("DOMContentLoaded", function () {
+        const inputMaSanPham = document.querySelector("input[name='maSanPham']");
+        const selectMauSac = document.querySelector("select[name='mauSacId']");
+        const selectKichCo = document.querySelector("select[name='kichCoId']");
+        const inputMaBienThe = document.querySelector("input[name='ma']");
+
+        function sinhMaBienThe() {
+            if (!inputMaSanPham || !selectMauSac || !selectKichCo || !inputMaBienThe) return;
+
+            let maSP = inputMaSanPham.value.trim();
+
+            // Nếu chưa chọn màu hoặc kích cỡ (vẫn đang ở option mặc định "-- Chọn --") thì không sinh mã
+            if (!maSP || selectMauSac.selectedIndex === 0 || selectKichCo.selectedIndex === 0) {
+                return;
+            }
+
+            // Lấy chuỗi Text hiển thị trong thẻ <option>
+            let textMau = selectMauSac.options[selectMauSac.selectedIndex].text;
+            let textKichCo = selectKichCo.options[selectKichCo.selectedIndex].text;
+
+            // Xử lý chuỗi rút gọn không dấu
+            let mauCode = xulyChuoiThuong(textMau);
+            let sizeCode = xulyChuoiKichCo(textKichCo);
+
+            if (mauCode && sizeCode) {
+                inputMaBienThe.value = (maSP + "-" + mauCode + "-" + sizeCode).toUpperCase();
+
+                // Đồng thời xóa trạng thái báo lỗi đỏ của ô mã biến thể nếu có
+                inputMaBienThe.classList.remove('error');
+                const errorMsg = inputMaBienThe.parentElement.querySelector('.error-message');
+                if (errorMsg) {
+                    errorMsg.classList.remove('show');
+                }
+            }
+        }
+
+        // Loại bỏ dấu tiếng Việt và ký tự đặc biệt
+        function xulyChuoiThuong(str) {
+            if (!str || str.startsWith("--")) return "";
+            str = str.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                .replace(/đ/g, "d").replace(/Đ/g, "D")
+                .replace(/[^a-zA-Z0-9\s]/g, ""); // Chỉ giữ chữ và số
+
+            let arr = str.trim().split(/\s+/);
+            // Nếu có nhiều từ (VD: "Đen bóng" -> "DEN BONG" -> lấy chữ cái đầu là "DB")
+            if (arr.length > 1) {
+                return arr.map(word => word.charAt(0)).join("");
+            }
+            return arr[0]; // VD: "Đen" -> "DEN"
+        }
+
+        // Xử lý riêng cho Kích cỡ (VD: "Size S (48-50mm)" -> lấy chữ "S", hoặc "Size 54" -> lấy "54")
+        function xulyChuoiKichCo(str) {
+            if (!str || str.startsWith("--")) return "";
+            let match = str.match(/Size\s+([a-zA-Z0-9]+)/i);
+            if (match) {
+                return match[1];
+            }
+            return xulyChuoiThuong(str).split(/\s+/)[0];
+        }
+
+        // Lắng nghe sự kiện thay đổi
+        if (selectMauSac) selectMauSac.addEventListener("change", sinhMaBienThe);
+        if (selectKichCo) selectKichCo.addEventListener("change", sinhMaBienThe);
+        if (inputMaSanPham) inputMaSanPham.addEventListener("input", sinhMaBienThe);
+    });
+
+    // Validation form khi submit
     document.getElementById('sanPhamForm').addEventListener('submit', function(e) {
         let isValid = true;
         const requiredFields = this.querySelectorAll('[required]');
@@ -545,22 +602,26 @@
         });
 
         // Kiểm tra giá bán >= giá nhập
-        const giaNhap = parseFloat(this.querySelector('[name="giaNhap"]').value);
-        const giaBan = parseFloat(this.querySelector('[name="giaBan"]').value);
+        const giaNhapField = this.querySelector('[name="giaNhap"]');
+        const giaBanField = this.querySelector('[name="giaBan"]');
 
-        if (!isNaN(giaNhap) && !isNaN(giaBan) && giaBan < giaNhap) {
-            isValid = false;
-            const giaBanField = this.querySelector('[name="giaBan"]');
-            giaBanField.classList.add('error');
+        if (giaNhapField && giaBanField) {
+            const giaNhap = parseFloat(giaNhapField.value);
+            const giaBan = parseFloat(giaBanField.value);
 
-            let errorMsg = giaBanField.parentElement.querySelector('.error-message');
-            if (!errorMsg) {
-                errorMsg = document.createElement('div');
-                errorMsg.className = 'error-message';
-                errorMsg.textContent = 'Giá bán phải lớn hơn hoặc bằng giá nhập';
-                giaBanField.parentElement.appendChild(errorMsg);
+            if (!isNaN(giaNhap) && !isNaN(giaBan) && giaBan < giaNhap) {
+                isValid = false;
+                giaBanField.classList.add('error');
+
+                let errorMsg = giaBanField.parentElement.querySelector('.error-message');
+                if (!errorMsg) {
+                    errorMsg = document.createElement('div');
+                    errorMsg.className = 'error-message';
+                    errorMsg.textContent = 'Giá bán phải lớn hơn hoặc bằng giá nhập';
+                    giaBanField.parentElement.appendChild(errorMsg);
+                }
+                errorMsg.classList.add('show');
             }
-            errorMsg.classList.add('show');
         }
 
         if (!isValid) {
@@ -574,7 +635,7 @@
         }
     });
 
-    // [MỚI] Xóa lỗi khi người dùng bắt đầu nhập
+    // Xóa lỗi khi người dùng bắt đầu nhập
     document.querySelectorAll('.filter-input, .filter-select').forEach(field => {
         field.addEventListener('input', function() {
             this.classList.remove('error');

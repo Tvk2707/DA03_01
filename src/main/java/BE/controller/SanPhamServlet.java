@@ -15,7 +15,7 @@ import jakarta.servlet.annotation.*;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-// [SỬA] Thêm thư viện để xử lý upload file ảnh
+// Thư viện để xử lý upload file ảnh
 import jakarta.servlet.annotation.MultipartConfig;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -38,7 +38,6 @@ import java.util.List;
         "/SanPham/search",
         "/SanPham/export"
 })
-// [SỬA] Thêm annotation để hỗ trợ upload file
 @MultipartConfig(
         fileSizeThreshold = 1024 * 1024, // 1 MB
         maxFileSize = 1024 * 1024 * 10,  // 10 MB
@@ -49,7 +48,6 @@ public class SanPhamServlet extends HttpServlet {
     private LookupService lookupService = new LookupServiceImpl();
     private SanPhamChiTietService sanPhamChiTietService = new SanPhamChiTietServiceImpl();
 
-    // [SỬA] Đường dẫn lưu ảnh - điều chỉnh theo project của bạn
     private static final String UPLOAD_DIR = "File_Anh/images";
 
     @Override
@@ -65,7 +63,6 @@ public class SanPhamServlet extends HttpServlet {
             case "/SanPham/edit":
                 showEditSanPham(request, response);
                 break;
-
             case "/SanPham/export":
                 exportExcel(request, response);
                 break;
@@ -74,7 +71,6 @@ public class SanPhamServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // [SỬA] Set encoding UTF-8 để xử lý tiếng Việt đúng khi upload multipart
         request.setCharacterEncoding("UTF-8");
 
         String path = request.getServletPath();
@@ -201,18 +197,16 @@ public class SanPhamServlet extends HttpServlet {
         sanPham.setNgaySua(LocalDateTime.now());
 
         if (sanPham.getTenSanPham() == null || sanPham.getTenSanPham().isEmpty()) {
-            request.setAttribute("error", "Tên sản phẩm không được để trống!"); // [SỬA] đổi thành "error" để khớp JSP
+            request.setAttribute("error", "Tên sản phẩm không được để trống!");
             request.setAttribute("sanPham", sanPham);
             setLookupAttributes(request);
             request.setAttribute("action", "add");
-            // [SỬA] Forward về đúng trang Add thay vì trang list
             request.getRequestDispatcher("/Admin/QuanLySanPham/SanPhamAdd.jsp").forward(request, response);
             return;
         }
 
         sanPhamService.themSanPham(sanPham);
 
-        // [SỬA] Truyền thêm request để xử lý upload ảnh
         SanPhamChiTiet sanPhamChiTiet = getSanPhamChiTietFrom(request, sanPham.getId());
         sanPhamChiTietService.themBienThe(sanPhamChiTiet);
         response.sendRedirect(request.getContextPath() + "/SanPham");
@@ -220,39 +214,52 @@ public class SanPhamServlet extends HttpServlet {
 
     private void updateSanPham(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         SanPham sanPham = getSanPhamFrom(request);
-        sanPham.setId(Integer.parseInt(request.getParameter("id")));
+
+        String idStr = request.getParameter("id");
+        if (idStr == null || idStr.trim().isEmpty()) {
+            request.setAttribute("error", "Không tìm thấy ID sản phẩm để cập nhật!");
+            showEditSanPham(request, response);
+            return;
+        }
+
+        sanPham.setId(Integer.parseInt(idStr));
         sanPham.setNgaySua(LocalDateTime.now());
 
         if (sanPham.getTenSanPham() == null || sanPham.getTenSanPham().isEmpty()) {
-            request.setAttribute("error", "Tên sản phẩm không được để trống!"); // [SỬA] đổi thành "error"
+            request.setAttribute("error", "Tên sản phẩm không được để trống!");
             request.setAttribute("sanPham", sanPham);
             setLookupAttributes(request);
             request.setAttribute("action", "edit");
-            // [SỬA] Forward về đúng trang Edit thay vì trang list
             request.getRequestDispatcher("/Admin/QuanLySanPham/SanPhamEdit.jsp").forward(request, response);
             return;
         }
 
+        // 1. Cập nhật bảng sản phẩm cha trước
         sanPhamService.capNhatSanPham(sanPham);
 
-        // [SỬA] Truyền thêm request để xử lý upload ảnh
+        // 2. Lấy dữ liệu biến thể chi tiết điền từ Form
         SanPhamChiTiet sanPhamChiTiet = getSanPhamChiTietFrom(request, sanPham.getId());
-        sanPhamChiTietService.capNhatBienThe(sanPhamChiTiet);
+
+        // 3. Kiểm tra thông minh: Nếu chưa từng có biến thể cũ (hoặc đã bị xóa hết) -> Tự động chuyển hướng thêm mới
+        String spctIdStr = request.getParameter("sanPhamChiTietId");
+        if (spctIdStr != null && !spctIdStr.trim().isEmpty()) {
+            sanPhamChiTietService.capNhatBienThe(sanPhamChiTiet);
+        } else {
+            sanPhamChiTietService.themBienThe(sanPhamChiTiet);
+        }
+
         response.sendRedirect(request.getContextPath() + "/SanPham");
     }
+
     private void deleteSanPham(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Integer id = Integer.parseInt(request.getParameter("id"));
         try {
             sanPhamService.xoaSanPham(id);
-            // Chỉ redirect khi thành công
             response.sendRedirect(request.getContextPath() + "/SanPham");
         } catch (Exception e) {
-            e.printStackTrace(); // 1. In lỗi ra Console của IDE để xem nguyên nhân gốc
-
-            // 2. Forward thay vì redirect để giữ lại thông báo lỗi hiển thị lên JSP
+            e.printStackTrace();
             request.setAttribute("error", "Lỗi chi tiết: " + e.getMessage());
             request.getRequestDispatcher("/Admin/QuanLySanPham/QuanLySanPham.jsp").forward(request, response);
-            // (Lưu ý: Thay đường dẫn JSP cho đúng với project của bạn)
         }
     }
 
@@ -276,7 +283,6 @@ public class SanPhamServlet extends HttpServlet {
         request.getRequestDispatcher("/Admin/QuanLySanPham/QuanLySanPham.jsp").forward(request, response);
     }
 
-    // [SỬA] Đổi tên method cho đúng chính tả (Fron -> From)
     private SanPham getSanPhamFrom(HttpServletRequest request) {
         String tenSanPham = request.getParameter("tenSanPham");
         String maSanPham = request.getParameter("maSanPham");
@@ -347,33 +353,21 @@ public class SanPhamServlet extends HttpServlet {
         return sanPham;
     }
 
-    /**
-     * [SỬA LỚN] Viết lại hoàn toàn hàm này để sửa các lỗi sau:
-     *  1. Lỗi NullPointerException: sanPhamChiTiet.setId() được gọi TRƯỚC khi new object
-     *  2. Lỗi đọc sai field: form gửi "trangThaiChiTiet" nhưng code đọc "trangThai"
-     *  3. Thiếu xử lý upload file ảnh
-     *  4. Thiếu xử lý ảnh cũ (hinhAnhCu) khi không upload ảnh mới
-     */
     private SanPhamChiTiet getSanPhamChiTietFrom(HttpServletRequest request, Integer sanPhamId) {
-        // [SỬA] 1. Khởi tạo object TRƯỚC khi sử dụng (trước đây gọi setId() khi chưa new)
         SanPhamChiTiet sanPhamChiTiet = new SanPhamChiTiet();
 
-        // [SỬA] 2. Đọc ID biến thể (phải đặt SAU khi new object)
         String spctIdStr = request.getParameter("sanPhamChiTietId");
         if (spctIdStr != null && !spctIdStr.isEmpty()) {
             sanPhamChiTiet.setId(Integer.parseInt(spctIdStr));
         }
 
-        // Set sản phẩm cha
         SanPham sanPham = new SanPham();
         sanPham.setId(sanPhamId);
         sanPhamChiTiet.setSanPham(sanPham);
 
-        // Các field cơ bản
         String ma = request.getParameter("ma");
         sanPhamChiTiet.setMa(ma);
 
-        // Màu sắc
         String mauSacIdStr = request.getParameter("mauSacId");
         if (mauSacIdStr != null && !mauSacIdStr.isEmpty()) {
             MauSac mauSac = new MauSac();
@@ -381,7 +375,6 @@ public class SanPhamServlet extends HttpServlet {
             sanPhamChiTiet.setMauSac(mauSac);
         }
 
-        // Kích cỡ
         String kichCoIdStr = request.getParameter("kichCoId");
         if (kichCoIdStr != null && !kichCoIdStr.isEmpty()) {
             KichCo kichCo = new KichCo();
@@ -389,47 +382,37 @@ public class SanPhamServlet extends HttpServlet {
             sanPhamChiTiet.setKichCo(kichCo);
         }
 
-        // Giá nhập
         String giaNhapStr = request.getParameter("giaNhap");
         if (giaNhapStr != null && !giaNhapStr.isEmpty()) {
             sanPhamChiTiet.setGiaNhap(new BigDecimal(giaNhapStr));
         }
 
-        // Giá bán
         String giaBanStr = request.getParameter("giaBan");
         if (giaBanStr != null && !giaBanStr.isEmpty()) {
             sanPhamChiTiet.setGiaBan(new BigDecimal(giaBanStr));
         }
 
-        // Số lượng tồn
         String soLuongTonStr = request.getParameter("soLuongTon");
         if (soLuongTonStr != null && !soLuongTonStr.isEmpty()) {
             sanPhamChiTiet.setSoLuongTon(Integer.parseInt(soLuongTonStr));
         }
 
-        // Trọng lượng
         String trongLuongStr = request.getParameter("trongLuong");
         if (trongLuongStr != null && !trongLuongStr.isEmpty()) {
             sanPhamChiTiet.setTrongLuong(Integer.parseInt(trongLuongStr));
         }
 
-        // [SỬA] 3. Đọc đúng field "trangThaiChiTiet" cho trạng thái biến thể
-        // (Trước đây code đọc "trangThai" → bị nhầm với trạng thái của sản phẩm cha)
         String trangThaiChiTietStr = request.getParameter("trangThaiChiTiet");
         if (trangThaiChiTietStr != null && !trangThaiChiTietStr.isEmpty()) {
             sanPhamChiTiet.setTrangThai(Integer.parseInt(trangThaiChiTietStr));
         } else {
-            sanPhamChiTiet.setTrangThai(1); // Mặc định: Hoạt động
+            sanPhamChiTiet.setTrangThai(1);
         }
 
-        // [SỬA] 4. Xử lý upload file ảnh
         String tenFileAnh = xuLyUploadAnh(request);
-
         if (tenFileAnh != null && !tenFileAnh.isEmpty()) {
-            // Có upload ảnh mới → dùng ảnh mới
             sanPhamChiTiet.setHinhAnh(tenFileAnh);
         } else {
-            // Không upload ảnh mới → giữ lại ảnh cũ (nếu có)
             String hinhAnhCu = request.getParameter("hinhAnhCu");
             if (hinhAnhCu != null && !hinhAnhCu.isEmpty()) {
                 sanPhamChiTiet.setHinhAnh(hinhAnhCu);
@@ -439,36 +422,25 @@ public class SanPhamServlet extends HttpServlet {
         return sanPhamChiTiet;
     }
 
-    /**
-     * [SỬA] Hàm mới: Xử lý upload file ảnh từ form multipart/form-data
-     * Trả về tên file đã lưu, hoặc null nếu không có file upload
-     */
     private String xuLyUploadAnh(HttpServletRequest request) {
         try {
             Part filePart = request.getPart("fileAnh");
-
-            // Kiểm tra có file được chọn không
             if (filePart == null || filePart.getSize() == 0) {
                 return null;
             }
 
-            // Lấy tên file gốc
             String tenFileGoc = getFileName(filePart);
             if (tenFileGoc == null || tenFileGoc.isEmpty()) {
                 return null;
             }
 
-            // Tạo tên file duy nhất để tránh trùng lặp
             String tenFileMoi = System.currentTimeMillis() + "_" + tenFileGoc;
-
-            // Đường dẫn tuyệt đối đến thư mục upload
             String uploadPath = getServletContext().getRealPath("") + File.separator + UPLOAD_DIR;
             File uploadDir = new File(uploadPath);
             if (!uploadDir.exists()) {
                 uploadDir.mkdirs();
             }
 
-            // Lưu file vào server
             String duongDanDayDu = uploadPath + File.separator + tenFileMoi;
             try (InputStream input = filePart.getInputStream();
                  FileOutputStream fos = new FileOutputStream(duongDanDayDu)) {
@@ -479,26 +451,17 @@ public class SanPhamServlet extends HttpServlet {
                     fos.write(buffer, 0, length);
                 }
             }
-
             return tenFileMoi;
-
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    /**
-     * [SỬA] Hàm helper: Lấy tên file từ Part (do getPart().getSubmittedFileName()
-     * có thể không hoạt động trên một số server cũ)
-     */
     private String getFileName(Part part) {
-        // Cách 1: Dùng method có sẵn (Servlet 3.1+)
         if (part.getSubmittedFileName() != null) {
             return part.getSubmittedFileName();
         }
-
-        // Cách 2: Parse từ header Content-Disposition (fallback)
         String contentDisp = part.getHeader("content-disposition");
         if (contentDisp != null) {
             for (String content : contentDisp.split(";")) {

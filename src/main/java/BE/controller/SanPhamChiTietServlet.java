@@ -9,10 +9,17 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Paths;
 import java.util.List;
 
+@MultipartConfig(
+        fileSizeThreshold = 1024 * 1024 * 2, // 2 MB
+        maxFileSize = 1024 * 1024 * 10,       // 10 MB
+        maxRequestSize = 1024 * 1024 * 50     // 50 MB
+)
 @WebServlet(name = "SanPhamChiTietServlet", value = {
         "/SanPhamChiTiet",
         "/SanPhamChiTiet/new",
@@ -40,7 +47,6 @@ public class SanPhamChiTietServlet extends HttpServlet {
             case "/SanPhamChiTiet/edit":
                 showEditSanPhamChiTiet(request, response);
                 break;
-
             case "/SanPhamChiTiet/tonkho":
                 showTonKho(request, response);
                 break;
@@ -84,7 +90,6 @@ public class SanPhamChiTietServlet extends HttpServlet {
         request.setAttribute("items", items);
         request.setAttribute("sanPhamId", sanPhamId);
 
-        // Giữ lại giá trị đã lọc để hiển thị lại trên form
         request.setAttribute("searchMa", ma);
         request.setAttribute("searchMauSacId", mauSacId);
         request.setAttribute("searchKichCoId", kichCoId);
@@ -97,7 +102,6 @@ public class SanPhamChiTietServlet extends HttpServlet {
 
     private void showAddSanPhamChiTiet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Integer sanPhamId = Integer.parseInt(request.getParameter("sanPhamId"));
-
         setLookupAttributes(request);
         request.setAttribute("sanPhamId", sanPhamId);
         request.setAttribute("action", "add");
@@ -121,9 +125,10 @@ public class SanPhamChiTietServlet extends HttpServlet {
         request.setAttribute("action", "edit");
         request.getRequestDispatcher("/Admin/QuanLySanPham/QuanLySanPhamChiTiet.jsp").forward(request, response);
     }
+
     private void insertSanPhamChiTiet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         Integer sanPhamId = Integer.parseInt(request.getParameter("sanPhamId"));
-        SanPhamChiTiet sanPhamChiTiet = getSanPhamChiTietFron(request, sanPhamId);
+        SanPhamChiTiet sanPhamChiTiet = getSanPhamChiTietForm(request, sanPhamId);
 
         try {
             if (sanPhamChiTiet.getSoLuongTon() != null && sanPhamChiTiet.getSoLuongTon() < 0) {
@@ -144,7 +149,8 @@ public class SanPhamChiTietServlet extends HttpServlet {
     private void updateSanPhamChiTiet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         Integer sanPhamId = Integer.parseInt(request.getParameter("sanPhamId"));
         Integer id = Integer.parseInt(request.getParameter("id"));
-        SanPhamChiTiet sanPhamChiTiet = getSanPhamChiTietFron(request, sanPhamId);
+
+        SanPhamChiTiet sanPhamChiTiet = getSanPhamChiTietForm(request, sanPhamId);
         sanPhamChiTiet.setId(id);
 
         if (sanPhamChiTiet.getSoLuongTon() != null && sanPhamChiTiet.getSoLuongTon() < 0) {
@@ -158,33 +164,30 @@ public class SanPhamChiTietServlet extends HttpServlet {
         }
 
         sanPhamChiTietService.capNhatBienThe(sanPhamChiTiet);
-        response.sendRedirect(request.getContextPath() + "/SanPhamChiTiet?sanPhamId=" + sanPhamId);
+
+        // Chuyển hướng kèm theo sanPhamId để tải lại đúng danh sách biến thể của sản phẩm đó
+        response.sendRedirect(request.getContextPath() + "/SanPhamChiTiet");
     }
+
     private void deleteSanPhamChiTiet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         String idStr = request.getParameter("id");
-
+        String sanPhamIdStr = request.getParameter("sanPhamId");
 
         try {
-            // 2. Chỉ thực hiện xóa nếu nhận được ID biến thể hợp lệ
             if (idStr != null && !idStr.trim().isEmpty()) {
                 Integer id = Integer.parseInt(idStr);
-                sanPhamChiTietService.xoaBienThe(id); // Gọi xóa mềm
-
-                // 3. Chỉ redirect khi thành công hoàn toàn
-             response.sendRedirect(request.getContextPath() + "/SanPhamChiTiet");
+                sanPhamChiTietService.xoaBienThe(id);
+                response.sendRedirect(request.getContextPath() + "/SanPhamChiTiet");
             } else {
                 throw new IllegalArgumentException("Không nhận được ID biến thể để xóa.");
             }
         } catch (Exception e) {
-            e.printStackTrace(); // 1. In lỗi ra Console của IDE để xem nguyên nhân gốc
-
-            // 2. Forward thay vì redirect để giữ lại thông báo lỗi hiển thị lên JSP
+            e.printStackTrace();
             request.setAttribute("error", "Lỗi chi tiết: " + e.getMessage());
-
-            // Bạn nhớ kiểm tra lại đường dẫn file JSP biến thể này đã chuẩn với project của bạn chưa nhé
             request.getRequestDispatcher("/Admin/QuanLySanPham/QuanLySanPhamChiTiet.jsp").forward(request, response);
         }
     }
+
     private void showTonKho(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Integer sanPhamId = Integer.parseInt(request.getParameter("sanPhamId"));
         Integer id = Integer.parseInt(request.getParameter("id"));
@@ -212,9 +215,9 @@ public class SanPhamChiTietServlet extends HttpServlet {
     }
 
     /**
-     * Lấy dữ liệu SanPhamChiTiet từ request (dùng chung cho insert/update)
+     * Lấy dữ liệu SanPhamChiTiet từ request và xử lý logic Upload ảnh đa phần (Multipart)
      */
-    private SanPhamChiTiet getSanPhamChiTietFron(HttpServletRequest request, Integer sanPhamId) {
+    private SanPhamChiTiet getSanPhamChiTietForm(HttpServletRequest request, Integer sanPhamId) throws IOException, ServletException {
         String ma = request.getParameter("ma");
         String mauSacIdStr = request.getParameter("mauSacId");
         String kichCoIdStr = request.getParameter("kichCoId");
@@ -222,8 +225,35 @@ public class SanPhamChiTietServlet extends HttpServlet {
         String giaBanStr = request.getParameter("giaBan");
         String soLuongTonStr = request.getParameter("soLuongTon");
         String trongLuongStr = request.getParameter("trongLuong");
-        String hinhAnh = request.getParameter("hinhAnh");
         String trangThaiStr = request.getParameter("trangThai");
+
+        // Đọc trường dữ liệu ẩn chứa tên ảnh hiện tại từ JSP
+        String hinhAnhCu = request.getParameter("hinhAnhCu");
+
+        String tenFileAnhHienTai = "";
+
+        // Xử lý đọc File nhị phân từ input file name="hinhAnh"
+        Part filePart = request.getPart("hinhAnh");
+        if (filePart != null && filePart.getSize() > 0) {
+            // Trường hợp 1: Người dùng CÓ chọn file ảnh mới upload lên
+            String originalFileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+
+            // Định dạng tên file tránh trùng: Sử dụng thời gian hệ thống + tên gốc
+            tenFileAnhHienTai = System.currentTimeMillis() + "_" + originalFileName;
+
+            // Đường dẫn vật lý lưu ảnh thực tế trên server của bạn
+            String uploadPath = getServletContext().getRealPath("/") + "File_Anh" + File.separator + "images";
+            File uploadDir = new File(uploadPath);
+            if (!uploadDir.exists()) {
+                uploadDir.mkdirs(); // Tự động tạo thư mục File_Anh/images nếu chưa tồn tại
+            }
+
+            // Ghi dữ liệu file thực tế xuống ổ đĩa cứng
+            filePart.write(uploadPath + File.separator + tenFileAnhHienTai);
+        } else {
+            // Trường hợp 2: Người dùng KHÔNG chọn ảnh mới -> Giữ lại ảnh cũ để tránh lỗi No Image
+            tenFileAnhHienTai = hinhAnhCu;
+        }
 
         SanPhamChiTiet sanPhamChiTiet = new SanPhamChiTiet();
 
@@ -243,7 +273,7 @@ public class SanPhamChiTietServlet extends HttpServlet {
         }
 
         sanPhamChiTiet.setMa(ma);
-        sanPhamChiTiet.setHinhAnh(hinhAnh);
+        sanPhamChiTiet.setHinhAnh(tenFileAnhHienTai); // Đưa tên file ảnh chuẩn vào Entity để lưu DB
         sanPhamChiTiet.setTrangThai((trangThaiStr != null && !trangThaiStr.isEmpty()) ? Integer.parseInt(trangThaiStr) : 1);
 
         if (giaNhapStr != null && !giaNhapStr.isEmpty()) {
@@ -262,22 +292,16 @@ public class SanPhamChiTietServlet extends HttpServlet {
         return sanPhamChiTiet;
     }
 
-    /**
-     * Tìm biến thể theo sanPhamId + id
-     */
+    private void setLookupAttributes(HttpServletRequest request) {
+        request.setAttribute("mauSacList", lookupService.layTatCaMauSac());
+        request.setAttribute("kichCoList", lookupService.layTatCaKichCo());
+    }
+
     private SanPhamChiTiet timBienThe(Integer sanPhamId, Integer id) {
         return sanPhamChiTietService.layTheoSanPham(sanPhamId)
                 .stream()
                 .filter(ct -> ct.getId().equals(id))
                 .findFirst()
                 .orElse(null);
-    }
-
-    /**
-     * Đổ dữ liệu dropdown cho form thêm/sửa
-     */
-    private void setLookupAttributes(HttpServletRequest request) {
-        request.setAttribute("mauSacList", lookupService.layTatCaMauSac());
-        request.setAttribute("kichCoList", lookupService.layTatCaKichCo());
     }
 }
