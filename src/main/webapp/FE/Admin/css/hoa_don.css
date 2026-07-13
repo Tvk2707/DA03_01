@@ -714,6 +714,7 @@
     justify-content: center;
     font-size: 21px;
     border: 1px solid var(--border-color);
+    object-fit: cover;
 }
 
 .invoice-workspace {

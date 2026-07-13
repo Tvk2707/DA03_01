@@ -79,7 +79,14 @@ public class HoaDonDAO {
     public List<ChiTietHoaDonView> findDetailsByHoaDonId(int hoaDonId) throws SQLException {
         String sql = "SELECT sp.ten_san_pham, spct.ma AS ma_san_pham_chi_tiet, "
                 + "dm.ten_danh_muc, th.ten_thuong_hieu, cl.ten_chat_lieu, kd.ten_kieu_dang, "
-                + "hdg.hinh_dang, tk.loai_trong, ms.ten_mau, kc.ten_kich_co, "
+                + "hdg.hinh_dang, "
+                + "CASE "
+                + "WHEN kqk.quai_thang = 1 THEN N'Quai thẳng' "
+                + "WHEN kqk.quai_gap = 1 THEN N'Quai gập' "
+                + "WHEN kqk.quai_loxo = 1 THEN N'Quai lò xo' "
+                + "ELSE NULL END AS kieu_quai_kinh, "
+                + "tk.loai_trong, ms.ten_mau, kc.ten_kich_co, "
+                + "COALESCE(NULLIF(spct.hinh_anh, ''), ha.url_anh) AS hinh_anh_san_pham, "
                 + "cthd.so_luong, cthd.don_gia, cthd.tong_tien "
                 + "FROM chi_tiet_hoa_don cthd "
                 + "LEFT JOIN san_pham_chi_tiet spct ON cthd.id_san_pham_chi_tiet = spct.id "
@@ -90,9 +97,12 @@ public class HoaDonDAO {
                 + "LEFT JOIN kieu_dang kd ON sp.id_kieu_dang = kd.id "
                 + "LEFT JOIN gong_kinh gk ON sp.id_gong_kinh = gk.id "
                 + "LEFT JOIN hinh_dang_gong hdg ON gk.id_hinh_dang_gong = hdg.id "
+                + "LEFT JOIN kieu_quai_kinh kqk ON gk.id_kieu_quai_kinh = kqk.id "
                 + "LEFT JOIN trong_kinh tk ON sp.id_trong_kinh = tk.id "
                 + "LEFT JOIN mau_sac ms ON spct.id_mau_sac = ms.id "
                 + "LEFT JOIN kich_co kc ON spct.id_kich_co = kc.id "
+                + "OUTER APPLY (SELECT TOP 1 url_anh FROM hinh_anh_san_pham "
+                + "WHERE id_san_pham = sp.id ORDER BY is_anh_chinh DESC, id ASC) ha "
                 + "WHERE cthd.id_hoa_don = ? "
                 + "ORDER BY cthd.id";
 
@@ -112,9 +122,11 @@ public class HoaDonDAO {
                     detail.setChatLieu(resultSet.getString("ten_chat_lieu"));
                     detail.setKieuDang(resultSet.getString("ten_kieu_dang"));
                     detail.setHinhDangGong(resultSet.getString("hinh_dang"));
+                    detail.setKieuQuaiKinh(resultSet.getString("kieu_quai_kinh"));
                     detail.setLoaiTrong(resultSet.getString("loai_trong"));
                     detail.setMauSac(resultSet.getString("ten_mau"));
                     detail.setKichCo(resultSet.getString("ten_kich_co"));
+                    detail.setHinhAnhSanPham(resultSet.getString("hinh_anh_san_pham"));
                     detail.setSoLuong(resultSet.getInt("so_luong"));
                     detail.setDonGia(resultSet.getBigDecimal("don_gia"));
                     detail.setTongTien(resultSet.getBigDecimal("tong_tien"));

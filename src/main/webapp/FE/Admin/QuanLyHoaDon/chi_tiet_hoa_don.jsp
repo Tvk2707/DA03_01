@@ -6,6 +6,7 @@
 <%@ page import="java.math.BigDecimal" %>
 <%@ page import="java.text.DecimalFormat" %>
 <%@ page import="java.time.format.DateTimeFormatter" %>
+<%@ page import="java.util.Collections" %>
 <%@ page import="java.util.List" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
@@ -23,6 +24,22 @@
     List<ThanhToanHoaDonView> paymentList = (List<ThanhToanHoaDonView>) request.getAttribute("paymentList");
     List<LichSuThanhToanView> paymentHistoryList = (List<LichSuThanhToanView>) request.getAttribute("paymentHistoryList");
     List<LichSuHoaDonView> historyList = (List<LichSuHoaDonView>) request.getAttribute("historyList");
+
+    if (chiTietList == null) {
+        chiTietList = Collections.emptyList();
+    }
+
+    if (paymentList == null) {
+        paymentList = Collections.emptyList();
+    }
+
+    if (paymentHistoryList == null) {
+        paymentHistoryList = Collections.emptyList();
+    }
+
+    if (historyList == null) {
+        historyList = Collections.emptyList();
+    }
     DecimalFormat moneyFormat = new DecimalFormat("#,###");
     DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     int productCount = 0;
@@ -53,8 +70,23 @@
         appendMeta(builder, "CL", detail.getChatLieu());
         appendMeta(builder, "Dang", detail.getKieuDang());
         appendMeta(builder, "Gong", detail.getHinhDangGong());
+        appendMeta(builder, "Quai", detail.getKieuQuaiKinh());
         appendMeta(builder, "Trong", detail.getLoaiTrong());
         return builder.length() == 0 ? "-" : builder.toString();
+    }
+
+    private String imageUrl(ChiTietHoaDonView detail, String contextPath) {
+        String image = detail.getHinhAnhSanPham();
+
+        if (image == null || image.trim().isEmpty()) {
+            return "";
+        }
+
+        if (image.startsWith("http://") || image.startsWith("https://") || image.startsWith("/")) {
+            return image;
+        }
+
+        return contextPath + "/" + image;
     }
 
     private void appendMeta(StringBuilder builder, String label, String value) {
@@ -167,7 +199,14 @@
                             <tbody>
                             <% for (ChiTietHoaDonView detail : chiTietList) { %>
                             <tr>
-                                <td><span class="invoice-thumb"><i class="fas fa-glasses"></i></span></td>
+                                <td>
+                                    <% String firstImageUrl = imageUrl(detail, request.getContextPath()); %>
+                                    <% if (firstImageUrl.isEmpty()) { %>
+                                    <span class="invoice-thumb"><i class="fas fa-glasses"></i></span>
+                                    <% } else { %>
+                                    <img class="invoice-thumb" src="<%= firstImageUrl %>" alt="<%= text(detail.getTenSanPham()) %>">
+                                    <% } %>
+                                </td>
                                 <td><strong><%= text(detail.getTenSanPham()) %></strong></td>
                                 <td class="invoice-money"><%= moneyFormat.format(detail.getDonGia()) %> đ</td>
                                 <td><%= detail.getSoLuong() %></td>
@@ -469,7 +508,14 @@
                     %>
                     <tr>
                         <td><%= i + 1 %></td>
-                        <td><span class="invoice-thumb"><i class="fas fa-glasses"></i></span></td>
+                        <td>
+                            <% String imageUrl = imageUrl(detail, request.getContextPath()); %>
+                            <% if (imageUrl.isEmpty()) { %>
+                            <span class="invoice-thumb"><i class="fas fa-glasses"></i></span>
+                            <% } else { %>
+                            <img class="invoice-thumb" src="<%= imageUrl %>" alt="<%= text(detail.getTenSanPham()) %>">
+                            <% } %>
+                        </td>
                         <td>
                             <strong><%= text(detail.getTenSanPham()) %></strong>
                             <small class="invoice-product-meta"><%= productMeta(detail) %></small>
@@ -516,7 +562,7 @@
                         <td><%= text(paymentHistory.getGhiChu()) %></td>
                     </tr>
                     <% } %>
-                    <% if (paymentHistoryList == null || paymentHistoryList.isEmpty()) { %>
+                    <% if (paymentHistoryList.isEmpty()) { %>
                     <tr><td colspan="5">Chua co lich su thanh toan.</td></tr>
                     <% } %>
                     </tbody>

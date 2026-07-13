@@ -11,9 +11,11 @@ public class ChiTietHoaDonView {
     private String chatLieu;
     private String kieuDang;
     private String hinhDangGong;
+    private String kieuQuaiKinh;
     private String loaiTrong;
     private String mauSac;
     private String kichCo;
+    private String hinhAnhSanPham;
     private Integer soLuong;
     private BigDecimal donGia;
     private BigDecimal tongTien;
@@ -74,6 +76,14 @@ public class ChiTietHoaDonView {
         this.hinhDangGong = hinhDangGong;
     }
 
+    public String getKieuQuaiKinh() {
+        return kieuQuaiKinh;
+    }
+
+    public void setKieuQuaiKinh(String kieuQuaiKinh) {
+        this.kieuQuaiKinh = kieuQuaiKinh;
+    }
+
     public String getLoaiTrong() {
         return loaiTrong;
     }
@@ -96,6 +106,14 @@ public class ChiTietHoaDonView {
 
     public void setKichCo(String kichCo) {
         this.kichCo = kichCo;
+    }
+
+    public String getHinhAnhSanPham() {
+        return hinhAnhSanPham;
+    }
+
+    public void setHinhAnhSanPham(String hinhAnhSanPham) {
+        this.hinhAnhSanPham = hinhAnhSanPham;
     }
 
     public Integer getSoLuong() {
