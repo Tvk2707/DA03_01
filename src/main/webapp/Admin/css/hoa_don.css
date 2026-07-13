@@ -114,6 +114,7 @@
 
 .invoice-filter-card,
 .invoice-list-card,
+.invoice-form-card,
 .invoice-timeline-card,
 .invoice-detail-summary,
 .invoice-info-panel,
@@ -128,6 +129,33 @@
 .invoice-filter-card {
     margin-bottom: 18px;
     overflow: hidden;
+}
+
+.invoice-form-card {
+    display: none;
+    padding: 22px 24px;
+    margin-bottom: 18px;
+}
+
+.invoice-form-card.is-visible {
+    display: block;
+}
+
+.invoice-simple-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.invoice-form-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    grid-column: 1 / -1;
+}
+
+.invoice-delete-form {
+    margin: 0;
 }
 
 .invoice-section-toggle {
@@ -672,6 +700,133 @@
     border: 1px solid var(--border-color);
 }
 
+.invoice-workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.75fr);
+    gap: 16px;
+    align-items: start;
+    margin-bottom: 18px;
+}
+
+.invoice-workspace__left,
+.invoice-checkout-panel,
+.invoice-video-card {
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+}
+
+.invoice-workspace__left {
+    overflow: hidden;
+}
+
+.invoice-video-card {
+    padding: 18px;
+    margin-bottom: 16px;
+}
+
+.invoice-video-card h3,
+.invoice-checkout-panel h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-dark);
+    font-size: 16px;
+    margin-bottom: 14px;
+}
+
+.invoice-video-card h3 i,
+.invoice-checkout-panel h3 i {
+    color: var(--primary-color);
+}
+
+.invoice-shipping-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.invoice-shipping-grid .invoice-field--full {
+    grid-column: 1 / -1;
+}
+
+.invoice-checkout-panel {
+    padding: 18px;
+    position: sticky;
+    top: 88px;
+}
+
+.invoice-payment-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background: #faf8f4;
+    margin-bottom: 14px;
+    font-weight: 700;
+}
+
+.invoice-discount-box {
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid #cfe9d8;
+    background: #eefaf2;
+    color: #1f7a4d;
+    margin-bottom: 14px;
+    font-size: 13px;
+}
+
+.invoice-total-lines {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.invoice-total-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+.invoice-total-line strong {
+    color: var(--text-dark);
+}
+
+.invoice-total-line--final {
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color);
+    color: var(--text-dark);
+    font-weight: 800;
+}
+
+.invoice-total-line--final strong {
+    color: #a84d68;
+    font-size: 20px;
+}
+
+.invoice-pay-btn {
+    width: 100%;
+    min-height: 46px;
+    border: none;
+    border-radius: 12px;
+    background: #18894f;
+    color: var(--white);
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.invoice-pay-btn:hover {
+    background: #116b3d;
+}
+
 .invoice-modal {
     position: fixed;
     inset: 0;
@@ -819,6 +974,14 @@
     .invoice-info-grid {
         grid-template-columns: 1fr;
     }
+
+    .invoice-workspace {
+        grid-template-columns: 1fr;
+    }
+
+    .invoice-checkout-panel {
+        position: static;
+    }
 }
 
 @media (max-width: 768px) {
@@ -841,10 +1004,16 @@
     }
 
     .invoice-filter-body,
+    .invoice-simple-form,
     .invoice-stats,
     .invoice-mini-grid {
         grid-template-columns: 1fr;
         display: grid;
+    }
+
+    .invoice-form-actions {
+        align-items: stretch;
+        flex-direction: column;
     }
 
     .invoice-timeline {
@@ -876,6 +1045,10 @@
     .invoice-info-panel dl {
         grid-template-columns: 1fr;
         gap: 6px;
+    }
+
+    .invoice-shipping-grid {
+        grid-template-columns: 1fr;
     }
 }
 

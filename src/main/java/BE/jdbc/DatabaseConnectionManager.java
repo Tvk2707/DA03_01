@@ -11,8 +11,8 @@ public class DatabaseConnectionManager {
     private static final String DEFAULT_HOST = "localhost";
     private static final int DEFAULT_PORT = 1433;
     private static final String DEFAULT_DATABASE_NAME = "quan_ly_ban_kinh";
-    private static final String DEFAULT_USERNAME = "sa";
-    private static final String DEFAULT_PASSWORD = "123";
+    private static final String DEFAULT_USERNAME = "minh";
+    private static final String DEFAULT_PASSWORD = "123456";
     private static final boolean DEFAULT_INTEGRATED_SECURITY = false;
 
     private final String url;
@@ -57,6 +57,8 @@ public class DatabaseConnectionManager {
     }
 
     public Connection getConnection() throws SQLException {
+        loadSqlServerDriver();
+
         if (this.integratedSecurity) {
             return DriverManager.getConnection(this.url);
         }
@@ -83,6 +85,14 @@ public class DatabaseConnectionManager {
             return "Windows Authentication";
         }
         return username;
+    }
+
+    private void loadSqlServerDriver() throws SQLException {
+        try {
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+        } catch (ClassNotFoundException e) {
+            throw new SQLException("Không tìm thấy SQL Server JDBC Driver trong WEB-INF/lib.", e);
+        }
     }
 
     private static String getSetting(String propertyName, String environmentName, String defaultValue) {

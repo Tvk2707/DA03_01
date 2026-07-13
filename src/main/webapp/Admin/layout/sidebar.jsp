@@ -45,7 +45,7 @@
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="<%= request.getContextPath() %>/Admin/QuanLyHoaDon/quan_ly_hoa_don.jsp" class="menu-link <%= "hoadon".equals(request.getAttribute("activeMenu"))?"active":""%>">
+                    <a href="<%= request.getContextPath() %>/admin/hoa-don" class="menu-link <%= "hoadon".equals(request.getAttribute("activeMenu"))?"active":""%>">
                         <i class="fas fa-file-invoice"></i>
                         <span>Quản lý hoá đơn</span>
                     </a>
