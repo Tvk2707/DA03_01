@@ -27,7 +27,7 @@
     BigDecimal doanhThu = BigDecimal.ZERO;
     int dangXuLy = 0;
 
-    // Tinh so lieu tong quan hien thi o cac the thong ke.
+    // Tính số liệu tổng quan hiển thị ở các thẻ thống kê.
     for (HoaDonView item : hoaDonList) {
         if (item.getTrangThai() != null && item.getTrangThai() == 3) {
             doanhThu = doanhThu.add(item.getTongTienThanhToan());
@@ -98,11 +98,10 @@
     <%@ include file="../layout/header.jsp" %>
 
     <main id="page-content" class="invoice-page">
-        <%-- Tieu de trang va cac nut thao tac nhanh. --%>
+        <%-- Tiêu đề trang và các nút thao tác nhanh. --%>
         <section class="invoice-page-header">
             <div>
                 <h1 class="invoice-title">Quản lý hóa đơn</h1>
-                <p class="invoice-subtitle">Theo dõi đơn kính mắt từ dữ liệu SQL Server.</p>
             </div>
             <div class="invoice-header-actions">
                 <button class="invoice-btn invoice-btn--outline" id="btnResetFilters" type="button">
@@ -120,7 +119,7 @@
             </div>
         </section>
 
-        <%-- Bo loc tim kiem hoa don tren giao dien, xu ly bang JavaScript. --%>
+        <%-- Bộ lọc tìm kiếm hóa đơn trên giao diện, xử lý bằng JavaScript. --%>
         <section class="invoice-filter-card">
             <button class="invoice-section-toggle" type="button" id="filterToggle">
                 <span>
@@ -162,7 +161,7 @@
             </div>
         </section>
 
-        <%-- Cac the thong ke nhanh: tong hoa don, doanh thu, dang xu ly, da huy. --%>
+        <%-- Các thẻ thống kê nhanh: tổng hóa đơn, doanh thu, đang xử lý, đã hủy. --%>
         <section class="invoice-stats">
             <div class="invoice-stat">
                 <span class="invoice-stat__label">Tổng hóa đơn</span>
@@ -186,7 +185,7 @@
             </div>
         </section>
 
-        <%-- Form them/sua hoa don. action=save se duoc HoaDonController.doPost xu ly. --%>
+        <%-- Form thêm/sửa hóa đơn. action=save sẽ được HoaDonController.doPost xử lý. --%>
         <section class="invoice-form-card" id="invoiceFormCard">
             <div class="invoice-card-heading">
                 <div class="invoice-heading-icon">
@@ -214,7 +213,7 @@
 
                 <label class="invoice-field">
                     <span>Mã hóa đơn</span>
-                    <input id="maHoaDon" name="maHoaDon" type="text" placeholder="Ví dụ: HD006" required>
+                    <input id="maHoaDon" name="maHoaDon" type="text" placeholder="HD001" required>
                 </label>
 
                 <label class="invoice-field">
@@ -256,7 +255,7 @@
             </form>
         </section>
 
-        <%-- Bang danh sach hoa don lay tu request attribute hoaDonList. --%>
+        <%-- Bảng danh sách hóa đơn lấy từ request attribute hoaDonList. --%>
         <section class="invoice-list-card">
             <div class="invoice-card-heading">
                 <div class="invoice-heading-icon">
@@ -306,7 +305,7 @@
                                 + text(hoaDon.getTenKhachHang()) + " "
                                 + text(hoaDon.getSoDienThoai())).toLowerCase();
                     %>
-                    <%-- Moi dong table tuong ung voi 1 hoa don trong database. --%>
+                    <%-- Mỗi dòng table tương ứng với 1 hóa đơn trong database. --%>
                     <tr data-search="<%= searchText %>" data-status="<%= statusLabel %>" data-type="<%= invoiceType %>" data-date="<%= dateValue %>">
                         <td><%= i + 1 %></td>
                         <td><strong><%= hoaDon.getMaHoaDon() %></strong></td>
@@ -322,7 +321,10 @@
                                 <a class="invoice-icon-btn" href="<%= request.getContextPath() %>/admin/hoa-don/chi-tiet?id=<%= hoaDon.getId() %>" title="Xem chi tiết">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                <button class="invoice-icon-btn" type="button" data-print="<%= hoaDon.getMaHoaDon() %>" title="In hóa đơn">
+                                <button class="invoice-icon-btn" type="button"
+                                        data-print="<%= attr(hoaDon.getMaHoaDon()) %>"
+                                        data-print-url="<%= request.getContextPath() %>/admin/hoa-don/chi-tiet?id=<%= hoaDon.getId() %>&print=1"
+                                        title="In hóa đơn">
                                     <i class="fas fa-print"></i>
                                 </button>
                                 <button class="invoice-icon-btn" type="button"
@@ -374,7 +376,7 @@
     </main>
 </div>
 
-<%-- Toast hien thong bao nhanh, noi dung duoc thay doi trong hoa_don.js. --%>
+<%-- Toast hiện thông báo nhanh, nội dung được thay đổi trong hoa_don.js. --%>
 <div class="invoice-toast" id="invoiceToast" role="status" aria-live="polite">
     <i class="fas fa-circle-check"></i>
     <div>

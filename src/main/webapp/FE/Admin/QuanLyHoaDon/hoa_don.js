@@ -48,7 +48,7 @@
 
         if (invoiceCodeInput) {
             invoiceCodeInput.required = false;
-            invoiceCodeInput.placeholder = 'Tự tạo nếu để trống';
+            invoiceCodeInput.placeholder = 'HD001';
         }
 
         // Lọc các dòng trong bảng theo từ khóa, loại, trạng thái và khoảng ngày.
@@ -162,10 +162,15 @@
             });
         });
 
-        // Nút in hiện đang hiển thị thông báo demo.
+        // Nút in ở danh sách mở trang chi tiết và tự bật hộp thoại in.
         document.querySelectorAll('[data-print]').forEach((button) => {
             button.addEventListener('click', () => {
-                showToast('Đã gửi hóa đơn ' + button.dataset.print + ' đến hàng đợi in');
+                if (button.dataset.printUrl) {
+                    window.open(button.dataset.printUrl, '_blank', 'noopener');
+                    return;
+                }
+
+                showToast('Không tìm thấy đường dẫn in hóa đơn ' + button.dataset.print);
             });
         });
 
@@ -189,7 +194,7 @@
         // Hỏi xác nhận trước khi gửi form xóa mềm.
         document.querySelectorAll('.invoice-delete-form').forEach((form) => {
             form.addEventListener('submit', (event) => {
-                if (!confirm('Bạn có chắc muốn xóa mềm hóa đơn này không?')) {
+                if (!confirm('Bạn có muốn xóa hóa đơn này không?')) {
                     event.preventDefault();
                 }
             });
@@ -211,6 +216,12 @@
             window.print();
             showToast('Đã mở cửa sổ in hóa đơn');
         });
+
+        if (new URLSearchParams(window.location.search).get('print') === '1') {
+            window.setTimeout(() => {
+                window.print();
+            }, 500);
+        }
 
         // Mở modal khi bấm nút có data-open-modal.
         document.querySelectorAll('[data-open-modal]').forEach((button) => {

@@ -1,9 +1,14 @@
-param(
+﻿param(
     [string]$Server = "localhost,1433",
     [string]$Database = "quan_ly_ban_kinh",
     [string]$User = "minh",
     [string]$Password = "123456"
 )
+
+$utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+[Console]::InputEncoding = $utf8NoBom
+[Console]::OutputEncoding = $utf8NoBom
+$OutputEncoding = $utf8NoBom
 
 $connectionString = "Server=$Server;Database=$Database;User ID=$User;Password=$Password;Encrypt=False;TrustServerCertificate=True;"
 $connection = New-Object System.Data.SqlClient.SqlConnection($connectionString)
@@ -46,3 +51,4 @@ try {
         $connection.Close()
     }
 }
+

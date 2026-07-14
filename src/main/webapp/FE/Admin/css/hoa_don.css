@@ -1,6 +1,6 @@
 /* ==================== INVOICE MANAGEMENT ==================== */
 
-/* Layout tong cua trang hoa don va cac hang flex dung chung. */
+/* Layout tổng của trang hóa đơn và các hàng flex dùng chung. */
 .invoice-page {
     color: var(--text-dark);
 }
@@ -23,6 +23,10 @@
     justify-content: space-between;
     gap: 18px;
     margin-bottom: 22px;
+}
+
+.invoice-detail-page .invoice-page-header {
+    padding-left: 64px;
 }
 
 .invoice-title {
@@ -54,7 +58,7 @@
     flex-wrap: wrap;
 }
 
-/* Style nut dung chung trong man hinh hoa don. */
+/* Style nút dùng chung trong màn hình hóa đơn. */
 .invoice-btn {
     display: inline-flex;
     align-items: center;
@@ -122,7 +126,7 @@
     transform: none;
 }
 
-/* Cac khoi card: bo loc, form, danh sach, timeline va thong tin chi tiet. */
+/* Các khối card: bộ lọc, form, danh sách, timeline và thông tin chi tiết. */
 .invoice-filter-card,
 .invoice-list-card,
 .invoice-form-card,
@@ -142,7 +146,7 @@
     overflow: hidden;
 }
 
-/* Form them/sua hoa don va nut xoa mem trong bang. */
+/* Form thêm/sửa hóa đơn và nút xóa mềm trong bảng. */
 .invoice-form-card {
     display: none;
     padding: 22px 24px;
@@ -170,7 +174,7 @@
     margin: 0;
 }
 
-/* Nut thu gon/mo rong bo loc. */
+/* Nút thu gọn/mở rộng bộ lọc. */
 .invoice-section-toggle {
     width: 100%;
     border: none;
@@ -200,7 +204,7 @@
     display: none;
 }
 
-/* Khu vuc bo loc tim kiem tren trang danh sach. */
+/* Khu vực bộ lọc tìm kiếm trên trang danh sách. */
 .invoice-filter-body {
     align-items: flex-end;
     gap: 14px;
@@ -344,7 +348,7 @@
     color: var(--white);
 }
 
-/* Bang danh sach hoa don va bang san pham trong chi tiet hoa don. */
+/* Bảng danh sách hóa đơn và bảng sản phẩm trong chi tiết hóa đơn. */
 .invoice-table-wrap {
     width: 100%;
     overflow-x: auto;
@@ -485,7 +489,7 @@
     display: flex;
 }
 
-/* Phan chan bang: tong so dong va phan trang hien thi. */
+/* Phần chân bảng: tổng số dòng và phân trang hiển thị. */
 .invoice-table-footer {
     justify-content: space-between;
     gap: 12px;
@@ -844,7 +848,7 @@
     background: #116b3d;
 }
 
-/* Modal dung de cap nhat trang thai hoa don. */
+/* Modal dùng để cập nhật trạng thái hóa đơn. */
 .invoice-modal {
     position: fixed;
     inset: 0;
@@ -941,7 +945,7 @@
     font-size: 13px;
 }
 
-/* Toast thong bao nhanh sau khi nguoi dung thao tac. */
+/* Toast thông báo nhanh sau khi người dùng thao tác. */
 .invoice-toast {
     position: fixed;
     top: 88px;
@@ -984,7 +988,7 @@
     font-size: 13px;
 }
 
-/* Responsive cho man hinh laptop nho. */
+/* Responsive cho màn hình laptop nhỏ. */
 @media (max-width: 1200px) {
     .invoice-stats,
     .invoice-mini-grid {
@@ -1004,8 +1008,19 @@
     }
 }
 
-/* Responsive cho dien thoai va tablet nho. */
+/* Chừa khoảng trống cho nút menu khi sidebar thu gọn ở tablet/zoom cao. */
+@media (max-width: 1024px) {
+    .invoice-detail-page .invoice-page-header {
+        padding-left: 64px;
+    }
+}
+
+/* Responsive cho điện thoại và tablet nhỏ. */
 @media (max-width: 768px) {
+    .invoice-detail-page .invoice-page-header {
+        padding-left: 56px;
+    }
+
     .invoice-page-header,
     .invoice-detail-actions,
     .invoice-detail-summary,
@@ -1073,7 +1088,7 @@
     }
 }
 
-/* An cac nut/khung khong can thiet khi in hoa don. */
+/* Ẩn các nút/khung không cần thiết khi in hóa đơn. */
 @media print {
     .sidebar,
     .admin-header,

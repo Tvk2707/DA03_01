@@ -10,7 +10,7 @@
 <%@ page import="java.util.List" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
-    // Neu mo truc tiep JSP khong qua controller thi quay ve danh sach hoa don.
+    // Nếu mở trực tiếp JSP không qua controller thì quay về danh sách hóa đơn.
     if (request.getAttribute("hoaDon") == null) {
         response.sendRedirect(request.getContextPath() + "/admin/hoa-don");
         return;
@@ -45,12 +45,12 @@
     int productCount = 0;
     BigDecimal paidTotal = BigDecimal.ZERO;
 
-    // Tinh tong so san pham trong hoa don.
+    // Tính tổng số sản phẩm trong hóa đơn.
     for (ChiTietHoaDonView detail : chiTietList) {
         productCount += detail.getSoLuong() == null ? 0 : detail.getSoLuong();
     }
 
-    // Tinh tong tien da thanh toan.
+    // Tính tổng tiền đã thanh toán.
     for (ThanhToanHoaDonView payment : paymentList) {
         paidTotal = paidTotal.add(payment.getSoTien() == null ? BigDecimal.ZERO : payment.getSoTien());
     }
@@ -163,11 +163,10 @@
     <%@ include file="../layout/header.jsp" %>
 
     <main id="page-content" class="invoice-page invoice-detail-page">
-        <%-- Tieu de trang chi tiet va nut quay lai danh sach. --%>
+        <%-- Tiêu đề trang chi tiết và nút quay lại danh sách. --%>
         <section class="invoice-page-header">
             <div>
                 <h1 class="invoice-title">Chi tiết hóa đơn</h1>
-                <p class="invoice-subtitle">Màn xử lý hóa đơn theo bố cục trong video, dữ liệu lấy từ SQL Server.</p>
             </div>
             <a class="invoice-btn invoice-btn--outline" href="<%= request.getContextPath() %>/admin/hoa-don">
                 <i class="fas fa-arrow-left"></i>
@@ -175,14 +174,13 @@
             </a>
         </section>
 
-        <%-- Khu vuc lam viec chinh: san pham, thong tin giao hang va thanh toan. --%>
+        <%-- Khu vực làm việc chính: sản phẩm, thông tin giao hàng và thanh toán. --%>
         <section class="invoice-workspace">
             <div class="invoice-workspace__left">
                 <div class="invoice-list-card invoice-detail-section">
                     <div class="invoice-card-heading invoice-card-heading--compact">
                         <div>
                             <h2>Sản phẩm trong hóa đơn</h2>
-                            <p>Danh sách sản phẩm tương tự khu vực trên cùng trong video.</p>
                         </div>
                     </div>
                     <div class="invoice-table-wrap">
@@ -309,7 +307,7 @@
             </aside>
         </section>
 
-        <%-- Timeline hien trang thai hien tai cua hoa don. --%>
+        <%-- Timeline hiện trạng thái hiện tại của hóa đơn. --%>
         <section class="invoice-timeline-card">
             <div class="invoice-timeline">
                 <div class="timeline-step<%= stepClass(hoaDon.getTrangThai(), 1) %>">
@@ -330,7 +328,7 @@
             </div>
         </section>
 
-        <%-- Cac nut xu ly: cap nhat trang thai, huy hoa don, in, xem lich su. --%>
+        <%-- Các nút xử lý: cập nhật trạng thái, hủy hóa đơn, in, xem lịch sử. --%>
         <section class="invoice-detail-actions">
             <div class="invoice-action-left">
                 <button class="invoice-btn invoice-btn--primary" type="button" data-open-modal="statusModal" <%= hoaDon.getTrangThai() != null && hoaDon.getTrangThai() == 5 ? "disabled" : "" %>>
@@ -360,7 +358,7 @@
             </div>
         </section>
 
-        <%-- Tom tat nhanh ma hoa don, trang thai, nhan vien va tong tien. --%>
+        <%-- Tóm tắt nhanh mã hóa đơn, trạng thái, nhân viên và tổng tiền. --%>
         <section class="invoice-detail-summary">
             <div>
                 <div class="invoice-summary-title">
@@ -383,7 +381,7 @@
             </div>
         </section>
 
-        <%-- Thong tin nguoi nhan, giao hang va tong tien. --%>
+        <%-- Thông tin người nhận, giao hàng và tổng tiền. --%>
         <section class="invoice-info-grid">
             <article class="invoice-info-panel">
                 <h3><i class="far fa-user"></i> Khách hàng</h3>
@@ -445,7 +443,7 @@
             </div>
         </section>
 
-        <%-- Bang lich su thanh toan cua hoa don. --%>
+        <%-- Bảng lịch sử thanh toán của hóa đơn. --%>
         <section class="invoice-list-card invoice-detail-section">
             <div class="invoice-card-heading invoice-card-heading--compact">
                 <div>
@@ -482,7 +480,7 @@
             </div>
         </section>
 
-        <%-- Bang san pham trong hoa don, doc tu chi_tiet_hoa_don. --%>
+        <%-- Bảng sản phẩm trong hóa đơn, đọc từ chi_tiet_hoa_don. --%>
         <section class="invoice-list-card invoice-detail-section">
             <div class="invoice-card-heading invoice-card-heading--compact">
                 <div>
@@ -533,7 +531,7 @@
             </div>
         </section>
 
-        <%-- Bang lich su thanh toan doc truc tiep tu bang lich_su_thanh_toan. --%>
+        <%-- Bảng lịch sử thanh toán đọc trực tiếp từ bảng lich_su_thanh_toan. --%>
         <section class="invoice-list-card invoice-detail-section">
             <div class="invoice-card-heading invoice-card-heading--compact">
                 <div>
@@ -572,7 +570,7 @@
     </main>
 </div>
 
-<%-- Modal cap nhat trang thai hoa don. Form nay gui action=changeStatus ve controller. --%>
+<%-- Modal cập nhật trạng thái hóa đơn. Form này gửi action=changeStatus về controller. --%>
 <div class="invoice-modal" id="statusModal" aria-hidden="true">
     <div class="invoice-modal__backdrop" data-close-modal></div>
     <section class="invoice-modal__dialog" role="dialog" aria-modal="true">
@@ -609,7 +607,7 @@
     </section>
 </div>
 
-<%-- Modal xem lich su thao tac hoa don. --%>
+<%-- Modal xem lịch sử thao tác hóa đơn. --%>
 <div class="invoice-modal" id="historyModal" aria-hidden="true">
     <div class="invoice-modal__backdrop" data-close-modal></div>
     <section class="invoice-modal__dialog invoice-modal__dialog--wide" role="dialog" aria-modal="true">
@@ -650,7 +648,7 @@
     </section>
 </div>
 
-<%-- Toast hien thong bao nhanh, dieu khien boi hoa_don.js. --%>
+<%-- Toast hiện thông báo nhanh, điều khiển bởi hoa_don.js. --%>
 <div class="invoice-toast" id="invoiceToast" role="status" aria-live="polite">
     <i class="fas fa-circle-check"></i>
     <div>
