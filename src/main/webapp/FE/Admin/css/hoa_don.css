@@ -474,6 +474,126 @@
     background: #faf8f4;
 }
 
+.invoice-product-picker {
+    grid-column: 1 / -1;
+    padding: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background: #faf8f4;
+}
+
+.invoice-product-picker__heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    color: var(--text-dark);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.invoice-product-add {
+    min-height: 32px;
+    padding: 7px 10px;
+    font-size: 12px;
+}
+
+.invoice-product-line {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 110px 34px;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.invoice-product-line select,
+.invoice-product-line input {
+    width: 100%;
+    min-height: 38px;
+    box-sizing: border-box;
+    border: 1px solid var(--border-color);
+    border-radius: 9px;
+    padding: 8px 10px;
+    background: var(--white);
+    color: var(--text-dark);
+    font: inherit;
+}
+
+.invoice-product-picker__note {
+    display: block;
+    color: var(--text-light);
+    font-size: 12px;
+}
+
+/* Công tắc chỉ làm mờ dòng hóa đơn trên giao diện, không xóa dữ liệu. */
+.invoice-display-toggle {
+    display: inline-block;
+    position: relative;
+    width: 38px;
+    height: 22px;
+    margin: 0;
+    cursor: pointer;
+}
+
+.invoice-display-toggle input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
+.invoice-display-toggle__track {
+    display: block;
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background: #d4c4a8;
+    transition: background 0.2s ease;
+}
+
+.invoice-display-toggle__track::before {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--white);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease;
+}
+
+.invoice-display-toggle input:checked + .invoice-display-toggle__track {
+    background: var(--primary-color);
+}
+
+.invoice-display-toggle input:checked + .invoice-display-toggle__track::before {
+    transform: translateX(16px);
+}
+
+.invoice-display-toggle input:focus-visible + .invoice-display-toggle__track {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.invoice-row--dimmed {
+    opacity: 0.48;
+    background: #f5f3ef;
+}
+
+.invoice-row--dimmed .invoice-display-toggle {
+    color: var(--text-light);
+}
+
+.invoice-row--disabled .invoice-actions > a,
+.invoice-row--disabled .invoice-actions > button:not([data-display-toggle]) {
+    opacity: 0.4;
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
 .invoice-empty {
     display: none;
     align-items: center;

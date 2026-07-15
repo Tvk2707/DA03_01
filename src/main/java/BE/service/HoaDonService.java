@@ -1,10 +1,12 @@
 package BE.service;
 
 import BE.Model.ChiTietHoaDonView;
+import BE.Model.ChiTietHoaDonInput;
 import BE.Model.HoaDonView;
 import BE.Model.LichSuHoaDonView;
 import BE.Model.LichSuThanhToanView;
 import BE.Model.NhanVienView;
+import BE.Model.SanPhamHoaDonView;
 import BE.Model.ThanhToanHoaDonView;
 import BE.dao.HoaDonDAO;
 
@@ -27,6 +29,10 @@ public class HoaDonService {
         return hoaDonDAO.findAllNhanVien();
     }
 
+    public List<SanPhamHoaDonView> getAllSanPhamHoaDon() throws SQLException {
+        return hoaDonDAO.findAllSanPhamHoaDon();
+    }
+
     public List<ChiTietHoaDonView> getChiTietHoaDon(int hoaDonId) throws SQLException {
         return hoaDonDAO.findDetailsByHoaDonId(hoaDonId);
     }
@@ -44,12 +50,19 @@ public class HoaDonService {
     }
 
     public void saveHoaDon(HoaDonView hoaDon) throws SQLException {
+        saveHoaDon(hoaDon, java.util.Collections.emptyList());
+    }
+
+    public void saveHoaDon(HoaDonView hoaDon, List<ChiTietHoaDonInput> productLines) throws SQLException {
         // Nếu chưa có id thì thêm mới, nếu đã có id thì cập nhật hóa đơn cũ.
         if (hoaDon.getId() == null) {
             if (isBlank(hoaDon.getMaHoaDon()) || hoaDonDAO.existsByMaHoaDon(hoaDon.getMaHoaDon(), null)) {
                 hoaDon.setMaHoaDon(hoaDonDAO.generateNextMaHoaDon());
             }
-            hoaDonDAO.insert(hoaDon);
+            int invoiceId = hoaDonDAO.insert(hoaDon);
+            if (!productLines.isEmpty()) {
+                hoaDonDAO.insertChiTietHoaDon(invoiceId, productLines);
+            }
         } else {
             if (isBlank(hoaDon.getMaHoaDon()) || hoaDonDAO.existsByMaHoaDon(hoaDon.getMaHoaDon(), hoaDon.getId())) {
                 hoaDon.setMaHoaDon(hoaDonDAO.generateNextMaHoaDon());

@@ -1,5 +1,6 @@
 package BE.controller;
 
+import BE.Model.ChiTietHoaDonInput;
 import BE.Model.HoaDonView;
 import BE.service.HoaDonService;
 import jakarta.servlet.ServletException;
@@ -11,6 +12,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 @WebServlet("/admin/hoa-don")
 public class HoaDonController extends HttpServlet {
@@ -23,6 +26,7 @@ public class HoaDonController extends HttpServlet {
             // GET /admin/hoa-don: lấy danh sách hóa đơn và chuyển sang trang JSP.
             request.setAttribute("hoaDonList", hoaDonService.getAllHoaDon());
             request.setAttribute("nhanVienList", hoaDonService.getAllNhanVien());
+            request.setAttribute("sanPhamList", hoaDonService.getAllSanPhamHoaDon());
             request.getRequestDispatcher("/FE/Admin/QuanLyHoaDon/quan_ly_hoa_don.jsp").forward(request, response);
         } catch (SQLException exception) {
             throw new ServletException("Không thể lấy danh sách hóa đơn từ database.", exception);
@@ -35,10 +39,8 @@ public class HoaDonController extends HttpServlet {
         String action = request.getParameter("action");
 
         try {
-            // action được gửi từ các form bên JSP: save, delete, changeStatus.
-            if ("delete".equals(action)) {
-                hoaDonService.huyHoaDon(parseInt(request.getParameter("id"), 0));
-            } else if ("changeStatus".equals(action)) {
+            // action được gửi từ các form bên JSP: save hoặc changeStatus.
+            if ("changeStatus".equals(action)) {
                 int id = parseInt(request.getParameter("id"), 0);
                 int status = parseInt(request.getParameter("trangThai"), 1);
                 String note = request.getParameter("ghiChu");
@@ -47,7 +49,7 @@ public class HoaDonController extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/admin/hoa-don/chi-tiet?id=" + id);
                 return;
             } else if ("save".equals(action)) {
-                hoaDonService.saveHoaDon(readForm(request));
+                hoaDonService.saveHoaDon(readForm(request), readProductLines(request));
             }
 
             response.sendRedirect(request.getContextPath() + "/admin/hoa-don");
@@ -74,6 +76,26 @@ public class HoaDonController extends HttpServlet {
         hoaDon.setGhiChu(request.getParameter("ghiChu"));
 
         return hoaDon;
+    }
+
+    private List<ChiTietHoaDonInput> readProductLines(HttpServletRequest request) {
+        String[] productIds = request.getParameterValues("productId");
+        String[] quantities = request.getParameterValues("productQuantity");
+        List<ChiTietHoaDonInput> lines = new ArrayList<>();
+
+        if (productIds == null || quantities == null) {
+            return lines;
+        }
+
+        for (int i = 0; i < productIds.length && i < quantities.length; i++) {
+            int productId = parseInt(productIds[i], 0);
+            int quantity = parseInt(quantities[i], 0);
+            if (productId > 0 && quantity > 0) {
+                lines.add(new ChiTietHoaDonInput(productId, quantity));
+            }
+        }
+
+        return lines;
     }
 
     private int parseInt(String value, int defaultValue) {

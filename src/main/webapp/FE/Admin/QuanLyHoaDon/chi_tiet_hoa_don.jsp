@@ -82,11 +82,24 @@
             return "";
         }
 
-        if (image.startsWith("http://") || image.startsWith("https://") || image.startsWith("/")) {
-            return image;
+        String normalizedImage = image.trim().replace("\\", "/");
+
+        if (normalizedImage.startsWith("http://")
+                || normalizedImage.startsWith("https://")
+                || normalizedImage.startsWith("/")) {
+            return normalizedImage;
         }
 
-        return contextPath + "/" + image;
+        if (normalizedImage.startsWith("FE/")) {
+            return contextPath + "/" + normalizedImage;
+        }
+
+        if (normalizedImage.startsWith("hinh_anh_san_pham/")) {
+            return contextPath + "/FE/Admin/" + normalizedImage;
+        }
+
+        // Database lưu tên file, còn ảnh được đặt trong thư mục hinh_anh_san_pham.
+        return contextPath + "/FE/Admin/hinh_anh_san_pham/" + normalizedImage;
     }
 
     private void appendMeta(StringBuilder builder, String label, String value) {
@@ -232,7 +245,7 @@
                         </label>
                         <label class="invoice-field invoice-field--full">
                             <span>Địa chỉ</span>
-                            <textarea readonly placeholder="Chưa có địa chỉ giao hàng trong bảng hoa_don"></textarea>
+                            <textarea readonly placeholder="Chưa có địa chỉ giao hàng"></textarea>
                         </label>
                     </div>
                 </div>
@@ -291,7 +304,7 @@
                         <strong><%= moneyFormat.format(paidTotal) %> đ</strong>
                     </div>
                     <div class="invoice-total-line">
-                        <span>Còn lại</span>
+                        <span>Phải thu</span>
                         <strong><%= moneyFormat.format(hoaDon.getTongTienThanhToan().subtract(paidTotal)) %> đ</strong>
                     </div>
                 </div>
@@ -418,7 +431,7 @@
                     <dd><%= moneyFormat.format(hoaDon.getTongTienThanhToan()) %> đ</dd>
                     <dt>Đã thanh toán</dt>
                     <dd><%= moneyFormat.format(paidTotal) %> đ</dd>
-                    <dt>Còn lại</dt>
+                    <dt>Phải thu</dt>
                     <dd class="invoice-money"><%= moneyFormat.format(hoaDon.getTongTienThanhToan().subtract(paidTotal)) %> đ</dd>
                 </dl>
             </article>
@@ -438,7 +451,7 @@
                 <strong><%= moneyFormat.format(hoaDon.getTongTienThanhToan()) %> đ</strong>
             </div>
             <div class="invoice-mini-card">
-                <span>Còn lại</span>
+                <span>Phải thu</span>
                 <strong><%= moneyFormat.format(hoaDon.getTongTienThanhToan().subtract(paidTotal)) %> đ</strong>
             </div>
         </section>
@@ -536,7 +549,7 @@
             <div class="invoice-card-heading invoice-card-heading--compact">
                 <div>
                     <h2>Lich su thanh toan he thong</h2>
-                    <p>Dữ liệu lấy từ bảng lich_su_thanh_toan</p>
+                    <p>Giao dịch thanh toán của hóa đơn</p>
                 </div>
             </div>
             <div class="invoice-table-wrap">

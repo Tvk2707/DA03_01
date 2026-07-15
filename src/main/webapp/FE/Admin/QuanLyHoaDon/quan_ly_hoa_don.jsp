@@ -1,5 +1,6 @@
 <%@ page import="BE.Model.HoaDonView" %>
 <%@ page import="BE.Model.NhanVienView" %>
+<%@ page import="BE.Model.SanPhamHoaDonView" %>
 <%@ page import="java.math.BigDecimal" %>
 <%@ page import="java.text.DecimalFormat" %>
 <%@ page import="java.time.LocalDate" %>
@@ -19,8 +20,12 @@
 
     List<HoaDonView> hoaDonList = (List<HoaDonView>) request.getAttribute("hoaDonList");
     List<NhanVienView> nhanVienList = (List<NhanVienView>) request.getAttribute("nhanVienList");
+    List<SanPhamHoaDonView> sanPhamList = (List<SanPhamHoaDonView>) request.getAttribute("sanPhamList");
     if (nhanVienList == null) {
         nhanVienList = Collections.emptyList();
+    }
+    if (sanPhamList == null) {
+        sanPhamList = Collections.emptyList();
     }
     DecimalFormat moneyFormat = new DecimalFormat("#,###");
     DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -166,7 +171,7 @@
             <div class="invoice-stat">
                 <span class="invoice-stat__label">Tổng hóa đơn</span>
                 <strong><%= hoaDonList.size() %></strong>
-                <small>Dữ liệu từ bảng hoa_don</small>
+                <small>Tất cả hóa đơn</small>
             </div>
             <div class="invoice-stat">
                 <span class="invoice-stat__label">Doanh thu</span>
@@ -193,7 +198,7 @@
                 </div>
                 <div>
                     <h2 id="formTitle">Thêm hóa đơn</h2>
-                    <p>Form này lưu dữ liệu vào bảng hoa_don.</p>
+                    <p>Nhập thông tin hóa đơn.</p>
                 </div>
             </div>
 
@@ -210,6 +215,34 @@
                         <% } %>
                     </select>
                 </label>
+
+                <div class="invoice-product-picker invoice-field--full">
+                    <div class="invoice-product-picker__heading">
+                        <span>Sản phẩm trong hóa đơn</span>
+                        <button class="invoice-btn invoice-btn--outline invoice-product-add" type="button" id="addInvoiceProduct">
+                            <i class="fas fa-plus"></i>
+                            Thêm sản phẩm
+                        </button>
+                    </div>
+                    <div id="invoiceProductLines">
+                        <div class="invoice-product-line">
+                            <select class="invoice-product-select" name="productId">
+                                <option value="">Chọn sản phẩm</option>
+                                <% for (SanPhamHoaDonView product : sanPhamList) { %>
+                                <option value="<%= product.getId() %>"
+                                        data-price="<%= product.getGiaBan() %>"
+                                        data-stock="<%= product.getSoLuongTon() %>">
+                                    <%= text(product.getTenSanPham()) %> - <%= text(product.getMa()) %> - <%= moneyFormat.format(product.getGiaBan()) %> đ
+                                </option>
+                                <% } %>
+                            </select>
+                            <input class="invoice-product-quantity" name="productQuantity" type="number" min="1" value="1" aria-label="Số lượng sản phẩm">
+                            <button class="invoice-icon-btn invoice-product-remove" type="button" title="Bỏ sản phẩm">
+                                <i class="fas fa-xmark"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
                 <label class="invoice-field">
                     <span>Mã hóa đơn</span>
@@ -228,7 +261,7 @@
 
                 <label class="invoice-field">
                     <span>Tổng tiền</span>
-                    <input id="tongTienThanhToan" name="tongTienThanhToan" type="number" min="0" step="1000" placeholder="Ví dụ: 1500000">
+                    <input id="tongTienThanhToan" name="tongTienThanhToan" type="number" min="0" step="1000" placeholder="Tự tính từ sản phẩm" readonly>
                 </label>
 
                 <label class="invoice-field">
@@ -340,13 +373,10 @@
                                         title="Sửa">
                                     <i class="fas fa-pen"></i>
                                 </button>
-                                <form method="post" action="<%= request.getContextPath() %>/admin/hoa-don" class="invoice-delete-form">
-                                    <input type="hidden" name="action" value="delete">
-                                    <input type="hidden" name="id" value="<%= hoaDon.getId() %>">
-                                    <button class="invoice-icon-btn" type="submit" title="Xóa mềm hóa đơn">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
+                                <label class="invoice-display-toggle" title="Tắt hiển thị hóa đơn">
+                                    <input type="checkbox" data-display-toggle checked>
+                                    <span class="invoice-display-toggle__track"></span>
+                                </label>
                             </div>
                         </td>
                     </tr>

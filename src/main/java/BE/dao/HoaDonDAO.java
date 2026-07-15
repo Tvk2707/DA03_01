@@ -1,10 +1,12 @@
 package BE.dao;
 
 import BE.Model.ChiTietHoaDonView;
+import BE.Model.ChiTietHoaDonInput;
 import BE.Model.HoaDonView;
 import BE.Model.LichSuHoaDonView;
 import BE.Model.LichSuThanhToanView;
 import BE.Model.NhanVienView;
+import BE.Model.SanPhamHoaDonView;
 import BE.Model.ThanhToanHoaDonView;
 import BE.jdbc.DatabaseConnectionManager;
 
@@ -13,6 +15,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -97,6 +100,35 @@ public class HoaDonDAO {
             }
 
             return employees;
+        }
+    }
+
+    // READ: lấy các sản phẩm còn hàng để chọn khi thêm hóa đơn.
+    public List<SanPhamHoaDonView> findAllSanPhamHoaDon() throws SQLException {
+        String sql = "SELECT spct.id, spct.ma, sp.ten_san_pham, spct.gia_ban, spct.so_luong_ton, "
+                + "COALESCE(NULLIF(spct.hinh_anh, ''), ha.url_anh) AS hinh_anh "
+                + "FROM san_pham_chi_tiet spct "
+                + "LEFT JOIN san_pham sp ON spct.id_san_pham = sp.id "
+                + "OUTER APPLY (SELECT TOP 1 url_anh FROM hinh_anh_san_pham "
+                + "WHERE id_san_pham = sp.id ORDER BY is_anh_chinh DESC, id ASC) ha "
+                + "WHERE spct.trang_thai = 1 AND spct.so_luong_ton > 0 "
+                + "ORDER BY sp.ten_san_pham, spct.ma";
+
+        try (Connection connection = connectionManager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet resultSet = statement.executeQuery()) {
+            List<SanPhamHoaDonView> products = new ArrayList<>();
+            while (resultSet.next()) {
+                SanPhamHoaDonView product = new SanPhamHoaDonView();
+                product.setId(resultSet.getInt("id"));
+                product.setMa(resultSet.getString("ma"));
+                product.setTenSanPham(resultSet.getString("ten_san_pham"));
+                product.setGiaBan(resultSet.getBigDecimal("gia_ban"));
+                product.setSoLuongTon(resultSet.getInt("so_luong_ton"));
+                product.setHinhAnh(resultSet.getString("hinh_anh"));
+                products.add(product);
+            }
+            return products;
         }
     }
 
@@ -252,14 +284,57 @@ public class HoaDonDAO {
     }
 
     // CREATE: thêm hóa đơn mới.
-    public void insert(HoaDonView hoaDon) throws SQLException {
+    public int insert(HoaDonView hoaDon) throws SQLException {
         String sql = "INSERT INTO hoa_don (ma_hoa_don, ten_nguoi_nhan, sdt_nguoi_nhan, "
                 + "tong_tien_thanh_toan, trang_thai, ghi_chu, id_nhan_vien) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection connection = connectionManager.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+             PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             setFormParameters(statement, hoaDon);
             statement.executeUpdate();
+            try (ResultSet keys = statement.getGeneratedKeys()) {
+                if (keys.next()) {
+                    return keys.getInt(1);
+                }
+            }
+        }
+        throw new SQLException("Không lấy được id hóa đơn vừa tạo.");
+    }
+
+    // CREATE: lưu sản phẩm vào chi tiết hóa đơn, giá lấy lại từ database.
+    public void insertChiTietHoaDon(int idHoaDon, List<ChiTietHoaDonInput> productLines) throws SQLException {
+        String sql = "INSERT INTO chi_tiet_hoa_don "
+                + "(id_hoa_don, id_san_pham_chi_tiet, so_luong, don_gia, gia_ban_ra, tong_tien, trang_thai) "
+                + "SELECT ?, id, ?, gia_ban, gia_ban, gia_ban * ?, 1 "
+                + "FROM san_pham_chi_tiet "
+                + "WHERE id = ? AND trang_thai = 1 AND so_luong_ton >= ?";
+
+        String totalSql = "UPDATE hoa_don SET tong_tien_thanh_toan = "
+                + "(SELECT COALESCE(SUM(tong_tien), 0) FROM chi_tiet_hoa_don WHERE id_hoa_don = ?) "
+                + "WHERE id = ?";
+
+        try (Connection connection = connectionManager.getConnection()) {
+            connection.setAutoCommit(false);
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                for (ChiTietHoaDonInput line : productLines) {
+                    statement.setInt(1, idHoaDon);
+                    statement.setInt(2, line.getSoLuong());
+                    statement.setInt(3, line.getSoLuong());
+                    statement.setInt(4, line.getIdSanPhamChiTiet());
+                    statement.setInt(5, line.getSoLuong());
+                    if (statement.executeUpdate() != 1) {
+                        throw new SQLException("Sản phẩm không tồn tại hoặc không đủ số lượng tồn.");
+                    }
+                }
+            }
+            try (PreparedStatement totalStatement = connection.prepareStatement(totalSql)) {
+                totalStatement.setInt(1, idHoaDon);
+                totalStatement.setInt(2, idHoaDon);
+                totalStatement.executeUpdate();
+            }
+            connection.commit();
+        } catch (SQLException exception) {
+            throw exception;
         }
     }
 
