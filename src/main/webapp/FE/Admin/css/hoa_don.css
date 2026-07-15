@@ -526,74 +526,6 @@
     font-size: 12px;
 }
 
-/* Công tắc chỉ làm mờ dòng hóa đơn trên giao diện, không xóa dữ liệu. */
-.invoice-display-toggle {
-    display: inline-block;
-    position: relative;
-    width: 38px;
-    height: 22px;
-    margin: 0;
-    cursor: pointer;
-}
-
-.invoice-display-toggle input {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    opacity: 0;
-}
-
-.invoice-display-toggle__track {
-    display: block;
-    position: absolute;
-    inset: 0;
-    border-radius: 999px;
-    background: #d4c4a8;
-    transition: background 0.2s ease;
-}
-
-.invoice-display-toggle__track::before {
-    content: "";
-    position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: var(--white);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-    transition: transform 0.2s ease;
-}
-
-.invoice-display-toggle input:checked + .invoice-display-toggle__track {
-    background: var(--primary-color);
-}
-
-.invoice-display-toggle input:checked + .invoice-display-toggle__track::before {
-    transform: translateX(16px);
-}
-
-.invoice-display-toggle input:focus-visible + .invoice-display-toggle__track {
-    outline: 2px solid var(--primary-color);
-    outline-offset: 2px;
-}
-
-.invoice-row--dimmed {
-    opacity: 0.48;
-    background: #f5f3ef;
-}
-
-.invoice-row--dimmed .invoice-display-toggle {
-    color: var(--text-light);
-}
-
-.invoice-row--disabled .invoice-actions > a,
-.invoice-row--disabled .invoice-actions > button:not([data-display-toggle]) {
-    opacity: 0.4;
-    pointer-events: none;
-    cursor: not-allowed;
-}
-
 .invoice-empty {
     display: none;
     align-items: center;
@@ -914,9 +846,9 @@
 .invoice-discount-box {
     padding: 12px;
     border-radius: 12px;
-    border: 1px solid #cfe9d8;
-    background: #eefaf2;
-    color: #1f7a4d;
+    border: 1px solid var(--border-color);
+    background: #faf8f4;
+    color: var(--primary-dark);
     margin-bottom: 14px;
     font-size: 13px;
 }
@@ -948,7 +880,7 @@
 }
 
 .invoice-total-line--final strong {
-    color: #a84d68;
+    color: var(--primary-color);
     font-size: 20px;
 }
 
@@ -957,7 +889,7 @@
     min-height: 46px;
     border: none;
     border-radius: 12px;
-    background: #18894f;
+    background: var(--primary-color);
     color: var(--white);
     font-size: 15px;
     font-weight: 800;
@@ -965,7 +897,7 @@
 }
 
 .invoice-pay-btn:hover {
-    background: #116b3d;
+    background: var(--primary-dark);
 }
 
 /* Modal dùng để cập nhật trạng thái hóa đơn. */

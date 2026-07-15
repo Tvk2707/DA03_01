@@ -245,29 +245,11 @@
             });
         });
 
-        // Chỉ làm mờ dòng trên giao diện, không xóa mềm và không gọi database.
-        document.querySelectorAll('[data-display-toggle]').forEach((toggle) => {
-            toggle.addEventListener('click', () => {
-                const row = toggle.closest('tr');
-                const isVisible = toggle.checked;
-
-                if (!row) {
-                    return;
+        document.querySelectorAll('.invoice-delete-form').forEach((form) => {
+            form.addEventListener('submit', (event) => {
+                if (!confirm('Bạn có chắc muốn xóa hóa đơn này không?')) {
+                    event.preventDefault();
                 }
-
-                row.classList.toggle('invoice-row--dimmed', !isVisible);
-                row.classList.toggle('invoice-row--disabled', !isVisible);
-                toggle.parentElement.title = isVisible ? 'Tắt hiển thị hóa đơn' : 'Bật hiển thị hóa đơn';
-
-                row.querySelectorAll('.invoice-actions > a, .invoice-actions > button:not([data-display-toggle])')
-                    .forEach((control) => {
-                        if (control instanceof HTMLButtonElement) {
-                            control.disabled = !isVisible;
-                        }
-
-                        control.setAttribute('aria-disabled', String(!isVisible));
-                        control.tabIndex = isVisible ? 0 : -1;
-                    });
             });
         });
 

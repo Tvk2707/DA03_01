@@ -373,10 +373,13 @@
                                         title="Sửa">
                                     <i class="fas fa-pen"></i>
                                 </button>
-                                <label class="invoice-display-toggle" title="Tắt hiển thị hóa đơn">
-                                    <input type="checkbox" data-display-toggle checked>
-                                    <span class="invoice-display-toggle__track"></span>
-                                </label>
+                                <form method="post" action="<%= request.getContextPath() %>/admin/hoa-don" class="invoice-delete-form">
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="id" value="<%= hoaDon.getId() %>">
+                                    <button class="invoice-icon-btn" type="submit" title="Xóa hóa đơn">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>
