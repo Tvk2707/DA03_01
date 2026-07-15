@@ -102,7 +102,7 @@ public class SanPhamDaoImpl extends GenericDaoImpl<SanPham, Integer> implements 
                     "LEFT JOIN FETCH gk.kieuQuaiKinh " +
                     "LEFT JOIN FETCH s.trongKinh " +
                     "WHERE s.isDeleted = false " +
-                    "ORDER BY s.id ";
+                    "ORDER BY s.id  desc ";
             TypedQuery<SanPham> query = em.createQuery(jpql, SanPham.class);
             query.setFirstResult((pageNumber - 1) * pageSize);
             query.setMaxResults(pageSize);
@@ -162,7 +162,10 @@ public class SanPhamDaoImpl extends GenericDaoImpl<SanPham, Integer> implements 
                             "LEFT JOIN FETCH gk.hinhDangGong " +
                             "LEFT JOIN FETCH gk.kieuQuaiKinh " +
                             "LEFT JOIN FETCH s.trongKinh " +
-                            "WHERE s.isDeleted = false");
+                            "WHERE s.isDeleted = false"
+
+                    );
+
             List<String> conditions = new ArrayList<>();
 
             if (tenSanPham != null && !tenSanPham.trim().isEmpty()) {
@@ -178,7 +181,6 @@ public class SanPhamDaoImpl extends GenericDaoImpl<SanPham, Integer> implements 
             for (String condition : conditions) {
                 jpql.append(" AND ").append(condition);
             }
-
             TypedQuery<SanPham> query = em.createQuery(jpql.toString(), SanPham.class);
 
             if (tenSanPham != null && !tenSanPham.trim().isEmpty()) {

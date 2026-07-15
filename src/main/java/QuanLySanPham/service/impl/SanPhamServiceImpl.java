@@ -1,6 +1,7 @@
 package QuanLySanPham.service.impl;
 
 import QuanLySanPham.Entity.SanPham;
+import QuanLySanPham.Entity.SanPhamChiTiet;
 import QuanLySanPham.Utils.EntityManagerUtlis;
 import QuanLySanPham.dao.SanPhamChiTietDao;
 import QuanLySanPham.dao.HinhAnhSanPhamDao;
@@ -11,7 +12,9 @@ import QuanLySanPham.service.SanPhamService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * SanPhamService implementation - quản lý sản phẩm
@@ -136,6 +139,56 @@ public class SanPhamServiceImpl implements SanPhamService {
             }
             e.printStackTrace();
             throw new RuntimeException("Lỗi khi xóa mềm sản phẩm: " + e.getMessage(), e);
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public SanPham themSanPhamVaBienThe(SanPham sanPham, List<SanPhamChiTiet> danhSachBienThe) {
+        EntityManager em = EntityManagerUtlis.getEntityManager();
+        EntityTransaction transaction = em.getTransaction();
+
+        try {
+            transaction.begin();
+
+            // 1. Validate và lưu SanPham (sản phẩm cha)
+            if (sanPham.getTenSanPham() == null || sanPham.getTenSanPham().trim().isEmpty()) {
+                throw new RuntimeException("Tên sản phẩm không được để trống");
+            }
+            em.persist(sanPham);
+
+            // 2. Validate và lưu danh sách SanPhamChiTiet (biến thể)
+            if (danhSachBienThe != null && !danhSachBienThe.isEmpty()) {
+                Set<String> uniqueCombinations = new HashSet<>();
+                for (SanPhamChiTiet spct : danhSachBienThe) {
+                    // Gán sản phẩm cha vừa được lưu vào từng biến thể
+                    spct.setSanPham(sanPham);
+
+                    // Validate
+                    if (spct.getMauSac() == null || spct.getKichCo() == null) {
+                         throw new RuntimeException("Màu sắc hoặc Kích cỡ không hợp lệ.");
+                    }
+                    String combination = spct.getMauSac().getId() + "-" + spct.getKichCo().getId();
+                    if (!uniqueCombinations.add(combination)) {
+                        throw new RuntimeException("Danh sách chứa các biến thể trùng lặp (cùng màu sắc và kích cỡ).");
+                    }
+                    
+                    em.persist(spct);
+                }
+            }
+
+            // 3. Nếu mọi thứ thành công, commit transaction
+            transaction.commit();
+            return sanPham;
+
+        } catch (Exception e) {
+            // 4. Nếu có bất kỳ lỗi nào, rollback toàn bộ transaction
+            if (transaction != null && transaction.isActive()) {
+                transaction.rollback();
+            }
+            // Ném lại exception để Servlet có thể bắt và thông báo lỗi
+            throw new RuntimeException("Lỗi khi thêm sản phẩm và biến thể: " + e.getMessage(), e);
         } finally {
             em.close();
         }

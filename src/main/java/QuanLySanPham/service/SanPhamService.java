@@ -1,6 +1,8 @@
 package QuanLySanPham.service;
 
 import QuanLySanPham.Entity.SanPham;
+import QuanLySanPham.Entity.SanPhamChiTiet;
+
 import java.util.List;
 
 /**
@@ -46,4 +48,12 @@ public interface SanPhamService {
     List<SanPham> timKiem(String tenSanPham, Integer danhMucId, Integer thuongHieuId);
 
     void softdelete(Integer id);
+
+    /**
+     * Thêm sản phẩm và các biến thể của nó trong cùng một transaction.
+     * @param sanPham Sản phẩm cha cần thêm.
+     * @param danhSachBienThe Danh sách các biến thể con.
+     * @return Sản phẩm cha sau khi đã được lưu.
+     */
+    SanPham themSanPhamVaBienThe(SanPham sanPham, List<SanPhamChiTiet> danhSachBienThe);
 }

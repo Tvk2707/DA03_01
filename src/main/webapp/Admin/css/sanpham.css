@@ -266,6 +266,48 @@
 }
 
 /* === Bảng danh mục === */
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+}
+
+.btn-icon-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+/* Mau cho nut Xem (Con mat) */
+.btn-view {
+    background-color: #e1f5fe; /* Nen xanh nhat */
+    color: #0288d1; /* Icon xanh dam */
+}
+
+.btn-view:hover {
+    background-color: #b3e5fc;
+    color: #0277bd;
+}
+
+/* Mau cho nut Xoa (Thung rac) */
+.btn-delete {
+    background-color: #eeeeee; /* Nen xam nhat */
+    color: #757575; /* Icon xam dam */
+}
+
+.btn-delete:hover {
+    background-color: #e0e0e0;
+    color: #616161;
+}
 .category-table {
     width: 100%;
     border-collapse: collapse;

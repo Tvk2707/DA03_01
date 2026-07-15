@@ -25,4 +25,7 @@ public interface SanPhamChiTietDao extends GenericDao<SanPhamChiTiet, Integer> {
      * Dùng khi xóa mềm sản phẩm cha để đồng bộ dữ liệu con
      */
     void softDeleteBySanPhamId(Integer sanPhamId);
+
+    List<SanPhamChiTiet> saveAll(List<SanPhamChiTiet> danhSach);
+    List<SanPhamChiTiet> updateAll(List<SanPhamChiTiet> danhSach);
 }

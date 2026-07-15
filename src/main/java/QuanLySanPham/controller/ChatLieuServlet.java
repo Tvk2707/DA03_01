@@ -34,7 +34,6 @@ public class ChatLieuServlet extends HttpServlet {
             case "/ChatLieu/edit":
                 showEditChatLieu(request, response);
                 break;
-
         }
     }
 
@@ -64,7 +63,7 @@ public class ChatLieuServlet extends HttpServlet {
         } else {
             items = lookupService.layTatCaChatLieu();
         }
-        //List<ChatLieu> chatLieuItems = lookupService.layTatCaChatLieu();
+
         request.setAttribute("items", items);
         request.setAttribute("activeMenu", "product");    // Giữ menu cha mở và sáng lên
         request.setAttribute("activeSubMenu", "category");
@@ -76,18 +75,30 @@ public class ChatLieuServlet extends HttpServlet {
     }
 
     private void showEditChatLieu(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        Integer id = Integer.parseInt(request.getParameter("id"));
-        ChatLieu chatLieu = lookupService.layChatLieuTheoId(id);
-        request.setAttribute("chatLieu", chatLieu);
+        String idStr = request.getParameter("id");
+        if (idStr != null && !idStr.trim().isEmpty()) {
+            Integer id = Integer.parseInt(idStr.trim());
+            ChatLieu chatLieu = lookupService.layChatLieuTheoId(id);
+            request.setAttribute("chatLieu", chatLieu);
+        }
         request.getRequestDispatcher("/Admin/QuanLyBienThe/ChatLieu.jsp").forward(request, response);
     }
 
     private void insertChatLieu(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        ChatLieu chatLieu = getChatLieuFron(request);
+        ChatLieu chatLieu = new ChatLieu();
         try {
+            // Đưa hàm lấy dữ liệu vào trong try để bắt lỗi validate
+            chatLieu = getChatLieuFron(request);
             lookupService.themChatLieu(chatLieu);
             response.sendRedirect(request.getContextPath() + "/ChatLieu");
         } catch (RuntimeException e) {
+            // Giữ lại dữ liệu đang nhập dở
+            chatLieu.setTenChatLieu(request.getParameter("tenChatLieu"));
+            String trangthaiStr = request.getParameter("trangthai");
+            if (trangthaiStr != null && !trangthaiStr.trim().isEmpty()) {
+                try { chatLieu.setTrangThai(Integer.parseInt(trangthaiStr)); } catch (Exception ignored) {}
+            }
+
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("chatLieu", chatLieu);
             request.getRequestDispatcher("/Admin/QuanLyBienThe/ChatLieu.jsp").forward(request, response);
@@ -95,12 +106,30 @@ public class ChatLieuServlet extends HttpServlet {
     }
 
     private void updateChatLieu(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        ChatLieu chatLieu = getChatLieuFron(request);
-        chatLieu.setId(Integer.parseInt(request.getParameter("id")));
+        ChatLieu chatLieu = new ChatLieu();
         try {
+            chatLieu = getChatLieuFron(request);
+
+            String idStr = request.getParameter("id");
+            if (idStr == null || idStr.trim().isEmpty()) {
+                throw new IllegalArgumentException("Không tìm thấy ID chất liệu cần cập nhật!");
+            }
+            chatLieu.setId(Integer.parseInt(idStr.trim()));
+
             lookupService.capNhatChatLieu(chatLieu);
             response.sendRedirect(request.getContextPath() + "/ChatLieu");
         } catch (RuntimeException e) {
+            // Giữ lại dữ liệu đang nhập dở
+            chatLieu.setTenChatLieu(request.getParameter("tenChatLieu"));
+            String idStr = request.getParameter("id");
+            if (idStr != null && !idStr.trim().isEmpty()) {
+                try { chatLieu.setId(Integer.parseInt(idStr)); } catch (Exception ignored) {}
+            }
+            String trangthaiStr = request.getParameter("trangthai");
+            if (trangthaiStr != null && !trangthaiStr.trim().isEmpty()) {
+                try { chatLieu.setTrangThai(Integer.parseInt(trangthaiStr)); } catch (Exception ignored) {}
+            }
+
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("chatLieu", chatLieu);
             request.getRequestDispatcher("/Admin/QuanLyBienThe/ChatLieu.jsp").forward(request, response);
@@ -108,16 +137,36 @@ public class ChatLieuServlet extends HttpServlet {
     }
 
     private void deleteChatLieu(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        Integer id = Integer.parseInt(request.getParameter("id"));
-        lookupService.xoaChatLieu(id);
+        String idStr = request.getParameter("id");
+        if (idStr != null && !idStr.trim().isEmpty()) {
+            Integer id = Integer.parseInt(idStr.trim());
+            lookupService.xoaChatLieu(id);
+        }
         response.sendRedirect(request.getContextPath() + "/ChatLieu");
     }
 
     private ChatLieu getChatLieuFron(HttpServletRequest request) {
         String tenChatLieu = request.getParameter("tenChatLieu");
-        Integer trangthai = Integer.parseInt(request.getParameter("trangthai"));
+        String trangthaiStr = request.getParameter("trangthai");
+
+        // Validate chuỗi null, rỗng hoặc khoảng trắng
+        if (tenChatLieu == null || tenChatLieu.trim().isEmpty()) {
+            throw new IllegalArgumentException("Tên chất liệu không được để trống!");
+        }
+        if (trangthaiStr == null || trangthaiStr.trim().isEmpty()) {
+            throw new IllegalArgumentException("Vui lòng chọn trạng thái!");
+        }
+
         ChatLieu chatLieu = new ChatLieu();
-        chatLieu.setTenChatLieu(tenChatLieu);
+        chatLieu.setTenChatLieu(tenChatLieu.trim());
+
+        // Validate kiểu số cho trạng thái và set vào Object (đã fix lỗi thiếu setTrangThai)
+        try {
+            chatLieu.setTrangThai(Integer.parseInt(trangthaiStr.trim()));
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Trạng thái không hợp lệ!");
+        }
+
         return chatLieu;
     }
 }

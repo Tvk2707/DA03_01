@@ -105,6 +105,66 @@
             50% { background-color: #fff3cd; }
             100% { background-color: transparent; }
         }
+
+        /* CSS cho nut Lam moi */
+        .reset-btn {
+            background-color: #6c757d;
+            color: white;
+            padding: 10px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background-color 0.3s ease;
+        }
+
+        .reset-btn:hover {
+            background-color: #5a6268;
+            color: white;
+        }
+
+        .reset-btn i {
+            font-size: 14px;
+        }
+
+        /* --- CSS MỚI: DÀNH CHO PHÂN TRANG BẰNG JAVASCRIPT --- */
+        .sp-pagination {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 6px;
+            margin-top: 16px;
+            padding: 10px 0;
+        }
+        .sp-page-btn {
+            padding: 6px 12px;
+            border: 1px solid #d1d5db;
+            background-color: #fff;
+            color: #374151;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .sp-page-btn:hover:not(:disabled) {
+            background-color: #f3f4f6;
+        }
+        .sp-page-btn.active {
+            background-color: #b4975a; /* Màu nút đang chọn (đồng bộ theo hệ thống) */
+            color: #fff;
+            border-color: #b4975a;
+        }
+        .sp-page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: #f9fafb;
+        }
     </style>
 </head>
 <body>
@@ -191,6 +251,10 @@
                             <button type="submit" class="add-new-btn" style="padding: 10px 24px;">
                                 <i class="fas fa-search"></i> Tìm kiếm
                             </button>
+
+                            <a href="${pageContext.request.contextPath}/SanPhamChiTiet" class="reset-btn">
+                                <i class="fas fa-sync-alt"> </i>Hiển thị đầy đủ
+                            </a>
                         </div>
                     </form>
                 </div>
@@ -212,7 +276,7 @@
                     </thead>
                     <tbody>
                     <c:forEach var="temp" items="${items}" varStatus="status">
-                        <tr id="product-row-${temp.id}"
+                        <tr class="product-row" id="product-row-${temp.id}"
                             data-id="${temp.id}"
                             data-ma="${temp.ma}"
                             data-mau-sac-id="${temp.mauSac.id}"
@@ -281,18 +345,8 @@
                     </tbody>
                 </table>
 
-                <c:if test="${totalPages > 1}">
-                    <div class="pagination" style="display:flex;gap:6px;justify-content:center;margin-top:20px;">
-                        <c:forEach begin="1" end="${totalPages}" var="p">
-                            <a href="${pageContext.request.contextPath}/SanPhamChiTiet?sanPhamId=${sanPhamId}&page=${p}"
-                               style="padding:6px 12px;border-radius:6px;border:1px solid #ddd;text-decoration:none;
-                                       color:${p == currentPage ? '#fff' : '#333'};
-                                       background:${p == currentPage ? '#4a6cf7' : '#fff'};">
-                                    ${p}
-                            </a>
-                        </c:forEach>
-                    </div>
-                </c:if>
+                <div class="sp-pagination" id="paginationContainer"></div>
+
             </div>
         </div>
     </div>
@@ -416,16 +470,98 @@
         }
         closeBtn.addEventListener('click', closeModal);
         cancelBtn.addEventListener('click', closeModal);
-        // Đóng modal khi click bên ngoài
         window.addEventListener('click', function(event) {
             if (event.target === modal) {
                 closeModal();
             }
         });
+
+        // ==========================================
+        // --- THÊM MỚI: LOGIC PHÂN TRANG BẰNG JS ---
+        // ==========================================
+        const tableBody = document.querySelector(".category-table tbody");
+        if (tableBody) {
+            // Lấy tất cả các dòng sản phẩm (dựa vào class .product-row đã thêm phía trên)
+            const rows = Array.from(tableBody.querySelectorAll(".product-row"));
+
+            if (rows.length > 0) {
+                const rowsPerPage = 5; // Số lượng biến thể trên mỗi trang (Bạn có thể sửa thành 10 tùy ý)
+                let currentPage = 1;
+
+                function displayTable(page) {
+                    const start = (page - 1) * rowsPerPage;
+                    const end = start + rowsPerPage;
+
+                    rows.forEach((row, index) => {
+                        if (index >= start && index < end) {
+                            row.style.display = ""; // Hiển thị
+                        } else {
+                            row.style.display = "none"; // Ẩn đi
+                        }
+                    });
+                }
+
+                function setupPagination() {
+                    const pageCount = Math.ceil(rows.length / rowsPerPage);
+                    const paginationContainer = document.getElementById("paginationContainer");
+                    paginationContainer.innerHTML = "";
+
+                    if (pageCount <= 1) return; // Nếu dữ liệu ít hơn số dòng/trang thì không hiện nút bấm
+
+                    // Nút Prev (Trang trước)
+                    const prevBtn = document.createElement("button");
+                    prevBtn.className = "sp-page-btn";
+                    prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+                    prevBtn.type = "button";
+                    prevBtn.disabled = currentPage === 1;
+                    prevBtn.addEventListener("click", () => {
+                        if (currentPage > 1) {
+                            currentPage--;
+                            updatePagination();
+                        }
+                    });
+                    paginationContainer.appendChild(prevBtn);
+
+                    // Các nút số trang
+                    for (let i = 1; i <= pageCount; i++) {
+                        const btn = document.createElement("button");
+                        btn.className = "sp-page-btn " + (i === currentPage ? "active" : "");
+                        btn.innerText = i;
+                        btn.type = "button";
+                        btn.addEventListener("click", () => {
+                            currentPage = i;
+                            updatePagination();
+                        });
+                        paginationContainer.appendChild(btn);
+                    }
+
+                    // Nút Next (Trang sau)
+                    const nextBtn = document.createElement("button");
+                    nextBtn.className = "sp-page-btn";
+                    nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+                    nextBtn.type = "button";
+                    nextBtn.disabled = currentPage === pageCount;
+                    nextBtn.addEventListener("click", () => {
+                        if (currentPage < pageCount) {
+                            currentPage++;
+                            updatePagination();
+                        }
+                    });
+                    paginationContainer.appendChild(nextBtn);
+                }
+
+                function updatePagination() {
+                    displayTable(currentPage);
+                    setupPagination();
+                }
+
+                // Chạy hàm phân trang ngay khi load xong
+                updatePagination();
+            }
+        }
     });
 
     // --- PREVIEW ẢNH KHI CHỌN FILE ---
-    // Đặt bên ngoài DOMContentLoaded để hàm này là global và có thể được gọi từ onchange attribute
     function previewImage(event) {
         const file = event.target.files[0];
         const imagePreview = document.getElementById('imagePreview');
@@ -438,7 +574,6 @@
             }
             reader.readAsDataURL(file);
         } else {
-            // Nếu người dùng hủy chọn file, quay về hiển thị ảnh cũ ban đầu
             if (updateHinhAnhCu && updateHinhAnhCu !== 'null' && updateHinhAnhCu.trim() !== '') {
                 imagePreview.src = '${pageContext.request.contextPath}/File_Anh/images/' + updateHinhAnhCu;
             } else {

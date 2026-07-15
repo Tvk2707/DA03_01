@@ -60,9 +60,7 @@ public class SanPhamChiTietServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String path = request.getServletPath();
         switch (path) {
-            case "/SanPhamChiTiet/insert":
-                insertSanPhamChiTiet(request, response);
-                break;
+
             case "/SanPhamChiTiet/update":
                 updateSanPhamChiTiet(request, response);
                 break;
@@ -129,25 +127,6 @@ public class SanPhamChiTietServlet extends HttpServlet {
         request.getRequestDispatcher("/Admin/QuanLySanPham/QuanLySanPhamChiTiet.jsp").forward(request, response);
     }
 
-    private void insertSanPhamChiTiet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        Integer sanPhamId = Integer.parseInt(request.getParameter("sanPhamId"));
-        SanPhamChiTiet sanPhamChiTiet = getSanPhamChiTietForm(request, sanPhamId);
-
-        try {
-            if (sanPhamChiTiet.getSoLuongTon() != null && sanPhamChiTiet.getSoLuongTon() < 0) {
-                throw new RuntimeException("Số lượng tồn phải >= 0!");
-            }
-            sanPhamChiTietService.themBienThe(sanPhamChiTiet);
-            response.sendRedirect(request.getContextPath() + "/SanPhamChiTiet?sanPhamId=" + sanPhamId);
-        } catch (RuntimeException e) {
-            request.setAttribute("errorMessage", e.getMessage());
-            request.setAttribute("sanPhamChiTiet", sanPhamChiTiet);
-            setLookupAttributes(request);
-            request.setAttribute("sanPhamId", sanPhamId);
-            request.setAttribute("action", "add");
-            request.getRequestDispatcher("/Admin/QuanLySanPham/QuanLySanPhamChiTiet.jsp").forward(request, response);
-        }
-    }
 
     private void updateSanPhamChiTiet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         Integer sanPhamId = Integer.parseInt(request.getParameter("sanPhamId"));
@@ -166,7 +145,7 @@ public class SanPhamChiTietServlet extends HttpServlet {
             return;
         }
 
-        sanPhamChiTietService.capNhatBienThe(sanPhamChiTiet);
+        sanPhamChiTietService.capNhatDanhSachBienThe(List.of(sanPhamChiTiet));
 
         // Chuyển hướng kèm theo sanPhamId để tải lại đúng danh sách biến thể của sản phẩm đó
         response.sendRedirect(request.getContextPath() + "/SanPhamChiTiet");
@@ -301,7 +280,7 @@ public class SanPhamChiTietServlet extends HttpServlet {
     }
 
     private SanPhamChiTiet timBienThe(Integer sanPhamId, Integer id) {
-        return sanPhamChiTietService.layTheoSanPham(sanPhamId)
+        return sanPhamChiTietService.timBienTheTheoSanPhamId(sanPhamId)
                 .stream()
                 .filter(ct -> ct.getId().equals(id))
                 .findFirst()

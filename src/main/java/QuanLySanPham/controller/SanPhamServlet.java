@@ -24,10 +24,15 @@ import java.io.InputStream;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @WebServlet(name = "SanPhamServlet", value = {
         "/SanPham",
@@ -177,16 +182,17 @@ public class SanPhamServlet extends HttpServlet {
     private void showEditSanPham(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Integer id = Integer.parseInt(request.getParameter("id"));
         SanPham sanPham = sanPhamService.timTheoId(id);
-        SanPhamChiTiet sanPhamChiTiet = sanPhamChiTietService.timBienTheTheoSanPhamId(id);
-
+        
         if (sanPham == null) {
             request.setAttribute("error", "Không tìm thấy sản phẩm");
             ShowSanPham(request, response);
             return;
         }
 
+        List<SanPhamChiTiet> sanPhamChiTietList = sanPhamChiTietService.timBienTheTheoSanPhamId(id);
+
         request.setAttribute("sanPham", sanPham);
-        request.setAttribute("sanPhamChiTiet", sanPhamChiTiet);
+        request.setAttribute("sanPhamChiTietList", sanPhamChiTietList); // Sửa tên attribute
         setLookupAttributes(request);
         request.setAttribute("action", "edit");
         request.getRequestDispatcher("/Admin/QuanLySanPham/SanPhamEdit.jsp").forward(request, response);
@@ -197,59 +203,88 @@ public class SanPhamServlet extends HttpServlet {
         sanPham.setNgayTao(LocalDateTime.now());
         sanPham.setNgaySua(LocalDateTime.now());
 
-        if (sanPham.getTenSanPham() == null || sanPham.getTenSanPham().isEmpty()) {
-            request.setAttribute("error", "Tên sản phẩm không được để trống!");
+        try {
+            // Xử lý upload ảnh và lấy danh sách biến thể từ request
+            Map<String, String> anhTheoMau = xuLyUploadAnhTheoMau(request);
+            List<SanPhamChiTiet> danhSachBienThe = getDanhSachBienTheFromRequest(request, null, anhTheoMau);
+
+            // Gọi service gộp để thực hiện trong 1 transaction
+            sanPhamService.themSanPhamVaBienThe(sanPham, danhSachBienThe);
+
+            response.sendRedirect(request.getContextPath() + "/SanPham?success=Th%C3%AAm%20s%E1%BA%A3n%20ph%E1%BA%A9m%20th%C3%A0nh%20c%C3%B4ng");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.setAttribute("error", e.getMessage());
             request.setAttribute("sanPham", sanPham);
             setLookupAttributes(request);
             request.setAttribute("action", "add");
             request.getRequestDispatcher("/Admin/QuanLySanPham/SanPhamAdd.jsp").forward(request, response);
-            return;
         }
-
-        sanPhamService.themSanPham(sanPham);
-
-        SanPhamChiTiet sanPhamChiTiet = getSanPhamChiTietFrom(request, sanPham.getId());
-        sanPhamChiTietService.themBienThe(sanPhamChiTiet);
-        response.sendRedirect(request.getContextPath() + "/SanPham");
     }
 
     private void updateSanPham(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        SanPham sanPham = getSanPhamFrom(request);
-
         String idStr = request.getParameter("id");
         if (idStr == null || idStr.trim().isEmpty()) {
             request.setAttribute("error", "Không tìm thấy ID sản phẩm để cập nhật!");
             showEditSanPham(request, response);
             return;
         }
+        Integer sanPhamId = Integer.parseInt(idStr);
 
-        sanPham.setId(Integer.parseInt(idStr));
+        SanPham sanPham = getSanPhamFrom(request);
+        sanPham.setId(sanPhamId);
         sanPham.setNgaySua(LocalDateTime.now());
 
-        if (sanPham.getTenSanPham() == null || sanPham.getTenSanPham().isEmpty()) {
-            request.setAttribute("error", "Tên sản phẩm không được để trống!");
+        // Lấy danh sách ID biến thể hiện có trong DB TRƯỚC KHI thay đổi
+        List<Integer> existingIdsInDb = sanPhamChiTietService.timBienTheTheoSanPhamId(sanPhamId)
+                .stream()
+                .map(SanPhamChiTiet::getId)
+                .collect(Collectors.toList());
+
+        try {
+            if (sanPham.getTenSanPham() == null || sanPham.getTenSanPham().isEmpty()) {
+                throw new RuntimeException("Tên sản phẩm không được để trống!");
+            }
+
+            // 1. Cập nhật sản phẩm cha
+            sanPhamService.capNhatSanPham(sanPham);
+
+            // 2. Xử lý upload ảnh và lấy danh sách biến thể từ request
+            Map<String, String> anhTheoMau = xuLyUploadAnhTheoMau(request);
+            List<SanPhamChiTiet> danhSachBienTheTuForm = getDanhSachBienTheFromRequest(request, sanPham.getId(), anhTheoMau);
+
+            // 3. Phân loại biến thể mới và biến thể cũ để xử lý
+            List<SanPhamChiTiet> listUpdate = danhSachBienTheTuForm.stream().filter(spct -> spct.getId() != null).collect(Collectors.toList());
+            List<SanPhamChiTiet> listInsert = danhSachBienTheTuForm.stream().filter(spct -> spct.getId() == null).collect(Collectors.toList());
+
+            if (!listUpdate.isEmpty()) {
+                sanPhamChiTietService.capNhatDanhSachBienThe(listUpdate);
+            }
+            if (!listInsert.isEmpty()) {
+                sanPhamChiTietService.themBienThe(listInsert);
+            }
+
+            // 4. Xử lý xóa các biến thể đã bị loại bỏ khỏi form
+            List<Integer> idsFromForm = listUpdate.stream().map(SanPhamChiTiet::getId).collect(Collectors.toList());
+            for (Integer idInDb : existingIdsInDb) {
+                if (!idsFromForm.contains(idInDb)) {
+                    sanPhamChiTietService.xoaBienThe(idInDb);
+                }
+            }
+
+            response.sendRedirect(request.getContextPath() + "/SanPham");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.setAttribute("error", e.getMessage());
             request.setAttribute("sanPham", sanPham);
+            // Tải lại danh sách biến thể cũ để hiển thị lại form nếu có lỗi
+            request.setAttribute("sanPhamChiTietList", sanPhamChiTietService.timBienTheTheoSanPhamId(sanPhamId));
             setLookupAttributes(request);
             request.setAttribute("action", "edit");
             request.getRequestDispatcher("/Admin/QuanLySanPham/SanPhamEdit.jsp").forward(request, response);
-            return;
         }
-
-        // 1. Cập nhật bảng sản phẩm cha trước
-        sanPhamService.capNhatSanPham(sanPham);
-
-        // 2. Lấy dữ liệu biến thể chi tiết điền từ Form
-        SanPhamChiTiet sanPhamChiTiet = getSanPhamChiTietFrom(request, sanPham.getId());
-
-        // 3. Kiểm tra thông minh: Nếu chưa từng có biến thể cũ (hoặc đã bị xóa hết) -> Tự động chuyển hướng thêm mới
-        String spctIdStr = request.getParameter("sanPhamChiTietId");
-        if (spctIdStr != null && !spctIdStr.trim().isEmpty()) {
-            sanPhamChiTietService.capNhatBienThe(sanPhamChiTiet);
-        } else {
-            sanPhamChiTietService.themBienThe(sanPhamChiTiet);
-        }
-
-        response.sendRedirect(request.getContextPath() + "/SanPham");
     }
 
     private void deleteSanPham(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -354,122 +389,101 @@ public class SanPhamServlet extends HttpServlet {
         return sanPham;
     }
 
-    private SanPhamChiTiet getSanPhamChiTietFrom(HttpServletRequest request, Integer sanPhamId) {
-        SanPhamChiTiet sanPhamChiTiet = new SanPhamChiTiet();
-
-        String spctIdStr = request.getParameter("sanPhamChiTietId");
-        if (spctIdStr != null && !spctIdStr.isEmpty()) {
-            sanPhamChiTiet.setId(Integer.parseInt(spctIdStr));
+    private List<SanPhamChiTiet> getDanhSachBienTheFromRequest(HttpServletRequest request, Integer sanPhamId, Map<String, String> anhTheoMau) {
+        List<SanPhamChiTiet> danhSach = new ArrayList<>();
+        String[] mauSacIds = request.getParameterValues("mauSacId[]");
+        if (mauSacIds == null || mauSacIds.length == 0) {
+            return danhSach;
         }
 
-        SanPham sanPham = new SanPham();
-        sanPham.setId(sanPhamId);
-        sanPhamChiTiet.setSanPham(sanPham);
+        String[] kichCoIds = request.getParameterValues("kichCoId[]");
+        String[] giaNhap = request.getParameterValues("giaNhap[]");
+        String[] giaBan = request.getParameterValues("giaBan[]");
+        String[] soLuongTon = request.getParameterValues("soLuongTon[]");
+        String[] trongLuong = request.getParameterValues("trongLuong[]");
+        String[] ma = request.getParameterValues("ma[]");
+        String[] sanPhamChiTietIds = request.getParameterValues("sanPhamChiTietId[]");
+        String[] hinhAnhCu = request.getParameterValues("hinhAnhCu[]");
+        String[] trangThaiChiTiet = request.getParameterValues("trangThaiChiTiet[]");
 
-        String ma = request.getParameter("ma");
-        sanPhamChiTiet.setMa(ma);
+        for (int i = 0; i < mauSacIds.length; i++) {
+            SanPhamChiTiet spct = new SanPhamChiTiet();
 
-        String mauSacIdStr = request.getParameter("mauSacId");
-        if (mauSacIdStr != null && !mauSacIdStr.isEmpty()) {
-            MauSac mauSac = new MauSac();
-            mauSac.setId(Integer.parseInt(mauSacIdStr));
-            sanPhamChiTiet.setMauSac(mauSac);
-        }
-
-        String kichCoIdStr = request.getParameter("kichCoId");
-        if (kichCoIdStr != null && !kichCoIdStr.isEmpty()) {
-            KichCo kichCo = new KichCo();
-            kichCo.setId(Integer.parseInt(kichCoIdStr));
-            sanPhamChiTiet.setKichCo(kichCo);
-        }
-
-        String giaNhapStr = request.getParameter("giaNhap");
-        if (giaNhapStr != null && !giaNhapStr.isEmpty()) {
-            sanPhamChiTiet.setGiaNhap(new BigDecimal(giaNhapStr));
-        }
-
-        String giaBanStr = request.getParameter("giaBan");
-        if (giaBanStr != null && !giaBanStr.isEmpty()) {
-            sanPhamChiTiet.setGiaBan(new BigDecimal(giaBanStr));
-        }
-
-        String soLuongTonStr = request.getParameter("soLuongTon");
-        if (soLuongTonStr != null && !soLuongTonStr.isEmpty()) {
-            sanPhamChiTiet.setSoLuongTon(Integer.parseInt(soLuongTonStr));
-        }
-
-        String trongLuongStr = request.getParameter("trongLuong");
-        if (trongLuongStr != null && !trongLuongStr.isEmpty()) {
-            sanPhamChiTiet.setTrongLuong(Integer.parseInt(trongLuongStr));
-        }
-
-        String trangThaiChiTietStr = request.getParameter("trangThaiChiTiet");
-        if (trangThaiChiTietStr != null && !trangThaiChiTietStr.isEmpty()) {
-            sanPhamChiTiet.setTrangThai(Integer.parseInt(trangThaiChiTietStr));
-        } else {
-            sanPhamChiTiet.setTrangThai(1);
-        }
-
-        String tenFileAnh = xuLyUploadAnh(request);
-        if (tenFileAnh != null && !tenFileAnh.isEmpty()) {
-            sanPhamChiTiet.setHinhAnh(tenFileAnh);
-        } else {
-            String hinhAnhCu = request.getParameter("hinhAnhCu");
-            if (hinhAnhCu != null && !hinhAnhCu.isEmpty()) {
-                sanPhamChiTiet.setHinhAnh(hinhAnhCu);
+            if (sanPhamChiTietIds != null && sanPhamChiTietIds.length > i && sanPhamChiTietIds[i] != null && !sanPhamChiTietIds[i].isEmpty()) {
+                spct.setId(Integer.parseInt(sanPhamChiTietIds[i]));
             }
-        }
 
-        return sanPhamChiTiet;
+            if(sanPhamId != null) {
+                SanPham sanPham = new SanPham();
+                sanPham.setId(sanPhamId);
+                spct.setSanPham(sanPham);
+            }
+
+            MauSac mauSac = new MauSac();
+            mauSac.setId(Integer.parseInt(mauSacIds[i]));
+            spct.setMauSac(mauSac);
+
+            KichCo kichCo = new KichCo();
+            kichCo.setId(Integer.parseInt(kichCoIds[i]));
+            spct.setKichCo(kichCo);
+
+            spct.setMa((ma != null && ma.length > i && ma[i] != null && !ma[i].trim().isEmpty())
+                    ? ma[i]
+                    : "SP-" + mauSacIds[i] + "-" + kichCoIds[i]);
+            spct.setGiaNhap(new BigDecimal(giaNhap[i]));
+            spct.setGiaBan(new BigDecimal(giaBan[i]));
+            spct.setSoLuongTon(Integer.parseInt(soLuongTon[i]));
+            spct.setTrongLuong(Integer.parseInt(trongLuong[i]));
+            spct.setTrangThai((trangThaiChiTiet != null && trangThaiChiTiet.length > i && !trangThaiChiTiet[i].isEmpty())
+                    ? Integer.parseInt(trangThaiChiTiet[i])
+                    : 1);
+
+            // Xử lý ảnh
+            String tenFileAnh = anhTheoMau.get(mauSacIds[i]);
+            if (tenFileAnh != null) {
+                spct.setHinhAnh(tenFileAnh);
+            } else if (hinhAnhCu != null && hinhAnhCu.length > i) {
+                spct.setHinhAnh(hinhAnhCu[i]);
+            }
+
+            danhSach.add(spct);
+        }
+        return danhSach;
     }
 
-    private String xuLyUploadAnh(HttpServletRequest request) {
-        try {
-            Part filePart = request.getPart("fileAnh");
-            if (filePart == null || filePart.getSize() == 0) {
-                return null;
-            }
+    private Map<String, String> xuLyUploadAnhTheoMau(HttpServletRequest request) throws IOException, ServletException {
+        Map<String, String> uploadedFiles = new HashMap<>();
+        String uploadPath = getServletContext().getRealPath("") + File.separator + UPLOAD_DIR;
+        File uploadDir = new File(uploadPath);
+        if (!uploadDir.exists()) {
+            uploadDir.mkdirs();
+        }
 
-            String tenFileGoc = getFileName(filePart);
-            if (tenFileGoc == null || tenFileGoc.isEmpty()) {
-                return null;
-            }
-
-            String tenFileMoi = System.currentTimeMillis() + "_" + tenFileGoc;
-            String uploadPath = getServletContext().getRealPath("") + File.separator + UPLOAD_DIR;
-            File uploadDir = new File(uploadPath);
-            if (!uploadDir.exists()) {
-                uploadDir.mkdirs();
-            }
-
-            String duongDanDayDu = uploadPath + File.separator + tenFileMoi;
-            try (InputStream input = filePart.getInputStream();
-                 FileOutputStream fos = new FileOutputStream(duongDanDayDu)) {
-
-                byte[] buffer = new byte[1024];
-                int length;
-                while ((length = input.read(buffer)) > 0) {
-                    fos.write(buffer, 0, length);
+        for (Part part : request.getParts()) {
+            if (part.getName().startsWith("fileAnh_") && part.getSize() > 0) {
+                String mauSacId = part.getName().substring("fileAnh_".length());
+                String tenFileGoc = getFileName(part);
+                if (tenFileGoc != null && !tenFileGoc.isEmpty()) {
+                    String tenFileMoi = System.currentTimeMillis() + "_" + tenFileGoc;
+                    String duongDanDayDu = uploadPath + File.separator + tenFileMoi;
+                    try (InputStream input = part.getInputStream();
+                         FileOutputStream fos = new FileOutputStream(duongDanDayDu)) {
+                        byte[] buffer = new byte[1024];
+                        int length;
+                        while ((length = input.read(buffer)) > 0) {
+                            fos.write(buffer, 0, length);
+                        }
+                    }
+                    uploadedFiles.put(mauSacId, tenFileMoi);
                 }
             }
-            return tenFileMoi;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
         }
+        return uploadedFiles;
     }
 
     private String getFileName(Part part) {
         if (part.getSubmittedFileName() != null) {
-            return part.getSubmittedFileName();
-        }
-        String contentDisp = part.getHeader("content-disposition");
-        if (contentDisp != null) {
-            for (String content : contentDisp.split(";")) {
-                if (content.trim().startsWith("filename")) {
-                    return content.substring(content.indexOf("=") + 2, content.length() - 1);
-                }
-            }
+            return Paths.get(part.getSubmittedFileName()).getFileName().toString();
         }
         return null;
     }
