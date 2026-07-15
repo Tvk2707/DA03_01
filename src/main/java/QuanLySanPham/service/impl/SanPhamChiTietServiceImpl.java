@@ -1,9 +1,9 @@
-package main.QuanLySanPham.BE.service.impl;
+package QuanLySanPham.service.impl;
 
-import main.QuanLySanPham.BE.Entity.SanPhamChiTiet;
-import main.QuanLySanPham.BE.dao.SanPhamChiTietDao;
-import main.QuanLySanPham.BE.dao.impl.SanPhamChiTietDaoImpl;
-import main.QuanLySanPham.BE.service.SanPhamChiTietService;
+import QuanLySanPham.Entity.SanPhamChiTiet;
+import QuanLySanPham.dao.SanPhamChiTietDao;
+import QuanLySanPham.dao.impl.SanPhamChiTietDaoImpl;
+import QuanLySanPham.service.SanPhamChiTietService;
 
 import java.util.List;
 

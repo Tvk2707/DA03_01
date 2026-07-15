@@ -1,6 +1,6 @@
-package main.QuanLySanPham.BE.dao;
+package QuanLySanPham.dao;
 
-import main.QuanLySanPham.BE.Entity.SanPhamChiTiet;
+import QuanLySanPham.Entity.SanPhamChiTiet;
 import java.util.List;
 
 public interface SanPhamChiTietDao extends GenericDao<SanPhamChiTiet, Integer> {

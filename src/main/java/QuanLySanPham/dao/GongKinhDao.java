@@ -1,6 +1,6 @@
-package main.QuanLySanPham.BE.dao;
+package QuanLySanPham.dao;
 
-import main.QuanLySanPham.BE.Entity.GongKinh;
+import QuanLySanPham.Entity.GongKinh;
 
 import java.util.List;
 

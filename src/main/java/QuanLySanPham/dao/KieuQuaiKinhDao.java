@@ -1,6 +1,6 @@
-package main.QuanLySanPham.BE.dao;
+package QuanLySanPham.dao;
 
-import main.QuanLySanPham.BE.Entity.KieuQuaiKinh;
+import QuanLySanPham.Entity.KieuQuaiKinh;
 
 /**
  * Interface DAO cho entity KieuQuaiKinh

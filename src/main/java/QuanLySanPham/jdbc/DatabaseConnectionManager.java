@@ -1,4 +1,4 @@
-package main.QuanLySanPham.BE.jdbc;
+package QuanLySanPham.jdbc;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

@@ -1,8 +1,8 @@
-package main.QuanLySanPham.BE.dao.impl;
+package QuanLySanPham.dao.impl;
 
-import main.QuanLySanPham.BE.Entity.KieuDang;
-import main.QuanLySanPham.BE.dao.KieuDangDao;
-import main.QuanLySanPham.BE.Utils.EntityManagerUtlis;
+import QuanLySanPham.Entity.KieuDang;
+import QuanLySanPham.dao.KieuDangDao;
+import QuanLySanPham.Utils.EntityManagerUtlis;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import java.util.List;

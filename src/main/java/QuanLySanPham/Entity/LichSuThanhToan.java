@@ -1,4 +1,4 @@
-package main.QuanLySanPham.BE.Entity;
+package QuanLySanPham.Entity;
 
 import jakarta.persistence.*;
 

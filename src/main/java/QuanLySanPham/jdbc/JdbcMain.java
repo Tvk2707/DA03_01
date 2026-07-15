@@ -1,6 +1,6 @@
-package main.QuanLySanPham.BE.jdbc;
+package QuanLySanPham.jdbc;
 
-import main.QuanLySanPham.BE.Utils.EntityManagerUtlis;
+import QuanLySanPham.Utils.EntityManagerUtlis;
 
 public class JdbcMain {
 

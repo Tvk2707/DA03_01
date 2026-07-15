@@ -1,10 +1,11 @@
-package main.QuanLySanPham.BE.service.impl;
+package QuanLySanPham.service.impl;
 
 
-import main.QuanLySanPham.BE.Entity.*;
-import main.QuanLySanPham.BE.dao.*;
-import main.QuanLySanPham.BE.dao.impl.*;
-import main.QuanLySanPham.BE.service.LookupService;
+import QuanLySanPham.Entity.*;
+import QuanLySanPham.dao.*;
+import QuanLySanPham.dao.impl.*;
+
+import QuanLySanPham.service.LookupService;
 import java.util.List;
 
 /**

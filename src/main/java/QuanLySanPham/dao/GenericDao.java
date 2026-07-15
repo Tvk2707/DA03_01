@@ -1,4 +1,4 @@
-package main.QuanLySanPham.BE.dao;
+package QuanLySanPham.dao;
 
 import java.util.List;
 

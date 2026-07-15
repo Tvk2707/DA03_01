@@ -1,6 +1,6 @@
-package main.QuanLySanPham.BE.dao;
+package QuanLySanPham.dao;
 
-import main.QuanLySanPham.BE.Entity.ChatLieu;
+import QuanLySanPham.Entity.ChatLieu;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package main.QuanLySanPham.BE.Utils;
+package QuanLySanPham.Utils;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;

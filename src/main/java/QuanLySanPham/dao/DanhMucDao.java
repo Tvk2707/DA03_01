@@ -1,6 +1,6 @@
-package main.QuanLySanPham.BE.dao;
+package QuanLySanPham.dao;
 
-import main.QuanLySanPham.BE.Entity.DanhMuc;
+import QuanLySanPham.Entity.DanhMuc;
 import java.util.List;
 
 /**

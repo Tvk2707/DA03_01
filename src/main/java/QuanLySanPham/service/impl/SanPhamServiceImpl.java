@@ -1,13 +1,13 @@
-package main.QuanLySanPham.BE.service.impl;
+package QuanLySanPham.service.impl;
 
-import main.QuanLySanPham.BE.Entity.SanPham;
-import main.QuanLySanPham.BE.Utils.EntityManagerUtlis;
-import main.QuanLySanPham.BE.dao.SanPhamChiTietDao;
-import main.QuanLySanPham.BE.dao.HinhAnhSanPhamDao;
-import main.QuanLySanPham.BE.dao.impl.SanPhamDaoImpl;
-import main.QuanLySanPham.BE.dao.impl.SanPhamChiTietDaoImpl;
-import main.QuanLySanPham.BE.dao.impl.HinhAnhSanPhamDaoImpl;
-import main.QuanLySanPham.BE.service.SanPhamService;
+import QuanLySanPham.Entity.SanPham;
+import QuanLySanPham.Utils.EntityManagerUtlis;
+import QuanLySanPham.dao.SanPhamChiTietDao;
+import QuanLySanPham.dao.HinhAnhSanPhamDao;
+import QuanLySanPham.dao.impl.SanPhamDaoImpl;
+import QuanLySanPham.dao.impl.SanPhamChiTietDaoImpl;
+import QuanLySanPham.dao.impl.HinhAnhSanPhamDaoImpl;
+import QuanLySanPham.service.SanPhamService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 

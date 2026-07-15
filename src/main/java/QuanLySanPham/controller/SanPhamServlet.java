@@ -1,13 +1,13 @@
-package main.QuanLySanPham.BE.controller;
+package QuanLySanPham.controller;
 
 
-import main.QuanLySanPham.BE.Entity.*;
-import main.QuanLySanPham.BE.service.SanPhamChiTietService;
-import main.QuanLySanPham.BE.service.SanPhamService;
-import main.QuanLySanPham.BE.service.LookupService;
-import main.QuanLySanPham.BE.service.impl.SanPhamChiTietServiceImpl;
-import main.QuanLySanPham.BE.service.impl.SanPhamServiceImpl;
-import main.QuanLySanPham.BE.service.impl.LookupServiceImpl;
+import QuanLySanPham.Entity.*;
+import QuanLySanPham.service.SanPhamChiTietService;
+import QuanLySanPham.service.SanPhamService;
+import QuanLySanPham.service.LookupService;
+import QuanLySanPham.service.impl.SanPhamChiTietServiceImpl;
+import QuanLySanPham.service.impl.SanPhamServiceImpl;
+import QuanLySanPham.service.impl.LookupServiceImpl;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;

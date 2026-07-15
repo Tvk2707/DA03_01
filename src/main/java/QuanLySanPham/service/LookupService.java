@@ -1,6 +1,6 @@
-package main.QuanLySanPham.BE.service;
+package QuanLySanPham.service;
 
-import main.QuanLySanPham.BE.Entity.*;
+import QuanLySanPham.Entity.*;
 
 import java.util.List;
 

@@ -1,6 +1,6 @@
-package main.QuanLySanPham.BE.dao;
+package QuanLySanPham.dao;
 
-import main.QuanLySanPham.BE.Entity.MauSac;
+import QuanLySanPham.Entity.MauSac;
 
 import java.util.List;
 

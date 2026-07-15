@@ -1,6 +1,6 @@
-package main.QuanLySanPham.BE.dao;
+package QuanLySanPham.dao;
 
-import main.QuanLySanPham.BE.Entity.HinhDangGong;
+import QuanLySanPham.Entity.HinhDangGong;
 
 /**
  * Interface DAO cho entity HinhDangGong

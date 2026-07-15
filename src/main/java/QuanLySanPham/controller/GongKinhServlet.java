@@ -1,10 +1,10 @@
-package BE.controller;
+package QuanLySanPham.controller;
 
-import BE.Entity.GongKinh;
-import BE.Entity.HinhDangGong;
-import BE.Entity.KieuQuaiKinh;
-import BE.service.LookupService;
-import BE.service.impl.LookupServiceImpl;
+import QuanLySanPham.Entity.GongKinh;
+import QuanLySanPham.Entity.HinhDangGong;
+import QuanLySanPham.Entity.KieuQuaiKinh;
+import QuanLySanPham.service.LookupService;
+import QuanLySanPham.service.impl.LookupServiceImpl;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
