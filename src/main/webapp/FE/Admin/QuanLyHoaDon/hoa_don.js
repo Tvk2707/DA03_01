@@ -16,7 +16,7 @@
         }, 2600);
     }
 
-    // Khởi tạo trang danh sách hóa đơn: lọc, thêm/sửa, xóa mềm, xuất file.
+    // Khởi tạo trang danh sách hóa đơn: lọc, thêm và xuất file.
     function initInvoiceList() {
         const table = document.getElementById('ordersTable');
 
@@ -136,7 +136,6 @@
         // Đưa form về trạng thái ban đầu để thêm hóa đơn mới.
         function resetForm() {
             formTitle.textContent = 'Thêm hóa đơn';
-            document.getElementById('invoiceId').value = '';
             document.getElementById('maHoaDon').value = '';
             document.getElementById('tenNguoiNhan').value = '';
             document.getElementById('soDienThoai').value = '';
@@ -224,32 +223,6 @@
                 }
 
                 showToast('Không tìm thấy đường dẫn in hóa đơn ' + button.dataset.print);
-            });
-        });
-
-        // Lấy dữ liệu từ dòng đang chọn và đưa lên form sửa.
-        document.querySelectorAll('[data-edit]').forEach((button) => {
-            button.addEventListener('click', () => {
-                formTitle.textContent = 'Sửa hóa đơn';
-                document.getElementById('invoiceId').value = button.dataset.id || '';
-                document.getElementById('maHoaDon').value = button.dataset.code || '';
-                document.getElementById('tenNguoiNhan').value = button.dataset.name === '-' ? '' : (button.dataset.name || '');
-                document.getElementById('soDienThoai').value = button.dataset.phone === '-' ? '' : (button.dataset.phone || '');
-                document.getElementById('idNhanVien').value = button.dataset.employeeId || '';
-                document.getElementById('tongTienThanhToan').value = button.dataset.total || '0';
-                document.getElementById('trangThai').value = button.dataset.statusValue || '1';
-                document.getElementById('ghiChu').value = button.dataset.note === '-' ? '' : (button.dataset.note || '');
-                productPicker.style.display = 'none';
-                formCard.classList.add('is-visible');
-                formCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            });
-        });
-
-        document.querySelectorAll('.invoice-delete-form').forEach((form) => {
-            form.addEventListener('submit', (event) => {
-                if (!confirm('Bạn có chắc muốn xóa hóa đơn này không?')) {
-                    event.preventDefault();
-                }
             });
         });
 

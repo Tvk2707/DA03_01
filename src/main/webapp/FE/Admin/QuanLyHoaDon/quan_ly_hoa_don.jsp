@@ -1,7 +1,6 @@
 <%@ page import="BE.Model.HoaDonView" %>
 <%@ page import="BE.Model.NhanVienView" %>
 <%@ page import="BE.Model.SanPhamHoaDonView" %>
-<%@ page import="java.math.BigDecimal" %>
 <%@ page import="java.text.DecimalFormat" %>
 <%@ page import="java.time.LocalDate" %>
 <%@ page import="java.time.format.DateTimeFormatter" %>
@@ -29,19 +28,6 @@
     }
     DecimalFormat moneyFormat = new DecimalFormat("#,###");
     DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-    BigDecimal doanhThu = BigDecimal.ZERO;
-    int dangXuLy = 0;
-
-    // Tính số liệu tổng quan hiển thị ở các thẻ thống kê.
-    for (HoaDonView item : hoaDonList) {
-        if (item.getTrangThai() != null && item.getTrangThai() == 3) {
-            doanhThu = doanhThu.add(item.getTongTienThanhToan());
-        }
-
-        if (item.getTrangThai() == null || item.getTrangThai() == 1) {
-            dangXuLy++;
-        }
-    }
 %>
 <%!
     private String text(String value) {
@@ -143,7 +129,7 @@
                     <select id="orderTypeFilter">
                         <option value="all">Tất cả</option>
                         <option value="Tại quầy">Tại quầy</option>
-                        <option value="Online">Online</option>
+                        <option value="Bán hàng online">Bán hàng online</option>
                     </select>
                 </label>
                 <label class="invoice-field">
@@ -166,31 +152,7 @@
             </div>
         </section>
 
-        <%-- Các thẻ thống kê nhanh: tổng hóa đơn, doanh thu, đang xử lý, đã hủy. --%>
-        <section class="invoice-stats">
-            <div class="invoice-stat">
-                <span class="invoice-stat__label">Tổng hóa đơn</span>
-                <strong><%= hoaDonList.size() %></strong>
-                <small>Tất cả hóa đơn</small>
-            </div>
-            <div class="invoice-stat">
-                <span class="invoice-stat__label">Doanh thu</span>
-                <strong><%= moneyFormat.format(doanhThu) %> đ</strong>
-                <small>Hóa đơn đã thanh toán</small>
-            </div>
-            <div class="invoice-stat">
-                <span class="invoice-stat__label">Đang xử lý</span>
-                <strong><%= dangXuLy %></strong>
-                <small>Chờ thanh toán/xác nhận</small>
-            </div>
-            <div class="invoice-stat">
-                <span class="invoice-stat__label">Đã hủy</span>
-                <strong><%= hoaDonList.stream().filter(item -> item.getTrangThai() != null && item.getTrangThai() == 5).count() %></strong>
-                <small>Hóa đơn ngừng xử lý</small>
-            </div>
-        </section>
-
-        <%-- Form thêm/sửa hóa đơn. action=save sẽ được HoaDonController.doPost xử lý. --%>
+        <%-- Form thêm hóa đơn. action=save sẽ được HoaDonController.doPost xử lý. --%>
         <section class="invoice-form-card" id="invoiceFormCard">
             <div class="invoice-card-heading">
                 <div class="invoice-heading-icon">
@@ -204,7 +166,6 @@
 
             <form class="invoice-simple-form" method="post" action="<%= request.getContextPath() %>/admin/hoa-don">
                 <input type="hidden" name="action" value="save">
-                <input type="hidden" name="id" id="invoiceId">
 
                 <label class="invoice-field">
                     <span>Nhân viên</span>
@@ -327,7 +288,8 @@
                     <% for (int i = 0; i < hoaDonList.size(); i++) {
                         HoaDonView hoaDon = hoaDonList.get(i);
                         String statusLabel = statusText(hoaDon.getTrangThai());
-                        String invoiceType = hoaDon.getTenNhanVien() == null || hoaDon.getTenNhanVien().trim().isEmpty() ? "Online" : "Tại quầy";
+                        String invoiceType = hoaDon.getTenNhanVien() == null || hoaDon.getTenNhanVien().trim().isEmpty()
+                                ? "Bán hàng online" : "Tại quầy";
                         String dateValue = hoaDon.getNgayTao() == null ? "" : hoaDon.getNgayTao().toLocalDate().toString();
                         String customerName = hoaDon.getTenNguoiNhan() == null || hoaDon.getTenNguoiNhan().trim().isEmpty()
                                 ? hoaDon.getTenKhachHang()
@@ -360,26 +322,6 @@
                                         title="In hóa đơn">
                                     <i class="fas fa-print"></i>
                                 </button>
-                                <button class="invoice-icon-btn" type="button"
-                                        data-edit
-                                        data-id="<%= hoaDon.getId() %>"
-                                        data-code="<%= attr(hoaDon.getMaHoaDon()) %>"
-                                        data-name="<%= attr(hoaDon.getTenNguoiNhan()) %>"
-                                        data-phone="<%= attr(hoaDon.getSoDienThoai()) %>"
-                                        data-total="<%= hoaDon.getTongTienThanhToan() %>"
-                                        data-status-value="<%= hoaDon.getTrangThai() %>"
-                                        data-employee-id="<%= hoaDon.getIdNhanVien() == null ? "" : hoaDon.getIdNhanVien() %>"
-                                        data-note="<%= attr(hoaDon.getGhiChu()) %>"
-                                        title="Sửa">
-                                    <i class="fas fa-pen"></i>
-                                </button>
-                                <form method="post" action="<%= request.getContextPath() %>/admin/hoa-don" class="invoice-delete-form">
-                                    <input type="hidden" name="action" value="delete">
-                                    <input type="hidden" name="id" value="<%= hoaDon.getId() %>">
-                                    <button class="invoice-icon-btn" type="submit" title="Xóa hóa đơn">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
                             </div>
                         </td>
                     </tr>

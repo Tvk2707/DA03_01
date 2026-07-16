@@ -377,7 +377,7 @@
                 <div class="invoice-summary-title">
                     <h2>Thông tin đơn hàng</h2>
                     <span class="invoice-status <%= statusClass(hoaDon.getTrangThai()) %>"><%= statusText(hoaDon.getTrangThai()) %></span>
-                    <span class="invoice-pill"><%= text(hoaDon.getTenNhanVien()).equals("-") ? "Online" : "Tại quầy" %></span>
+                    <span class="invoice-pill"><%= text(hoaDon.getTenNhanVien()).equals("-") ? "Bán hàng online" : "Tại quầy" %></span>
                 </div>
                 <p>
                     Mã: <strong><%= hoaDon.getMaHoaDon() %></strong>

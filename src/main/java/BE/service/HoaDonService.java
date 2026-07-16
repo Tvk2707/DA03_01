@@ -54,25 +54,13 @@ public class HoaDonService {
     }
 
     public void saveHoaDon(HoaDonView hoaDon, List<ChiTietHoaDonInput> productLines) throws SQLException {
-        // Nếu chưa có id thì thêm mới, nếu đã có id thì cập nhật hóa đơn cũ.
-        if (hoaDon.getId() == null) {
-            if (isBlank(hoaDon.getMaHoaDon()) || hoaDonDAO.existsByMaHoaDon(hoaDon.getMaHoaDon(), null)) {
-                hoaDon.setMaHoaDon(hoaDonDAO.generateNextMaHoaDon());
-            }
-            int invoiceId = hoaDonDAO.insert(hoaDon);
-            if (!productLines.isEmpty()) {
-                hoaDonDAO.insertChiTietHoaDon(invoiceId, productLines);
-            }
-        } else {
-            if (isBlank(hoaDon.getMaHoaDon()) || hoaDonDAO.existsByMaHoaDon(hoaDon.getMaHoaDon(), hoaDon.getId())) {
-                hoaDon.setMaHoaDon(hoaDonDAO.generateNextMaHoaDon());
-            }
-            hoaDonDAO.update(hoaDon);
+        if (isBlank(hoaDon.getMaHoaDon()) || hoaDonDAO.existsByMaHoaDon(hoaDon.getMaHoaDon(), null)) {
+            hoaDon.setMaHoaDon(hoaDonDAO.generateNextMaHoaDon());
         }
-    }
-
-    public void huyHoaDon(int id) throws SQLException {
-        hoaDonDAO.delete(id);
+        int invoiceId = hoaDonDAO.insert(hoaDon);
+        if (!productLines.isEmpty()) {
+            hoaDonDAO.insertChiTietHoaDon(invoiceId, productLines);
+        }
     }
 
     public void updateTrangThai(int id, int trangThai, String ghiChu) throws SQLException {

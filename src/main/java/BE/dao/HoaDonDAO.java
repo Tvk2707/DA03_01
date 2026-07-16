@@ -377,45 +377,6 @@ public class HoaDonDAO {
         }
     }
 
-    // UPDATE: sửa thông tin cơ bản của hóa đơn.
-    public void update(HoaDonView hoaDon) throws SQLException {
-        String sql = "UPDATE hoa_don SET ma_hoa_don = ?, ten_nguoi_nhan = ?, sdt_nguoi_nhan = ?, "
-                + "tong_tien_thanh_toan = ?, trang_thai = ?, ghi_chu = ?, id_nhan_vien = ? WHERE id = ?";
-
-        try (Connection connection = connectionManager.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-            setFormParameters(statement, hoaDon);
-            statement.setInt(8, hoaDon.getId());
-            statement.executeUpdate();
-        }
-    }
-
-    // DELETE: xóa mềm hóa đơn bằng cách đổi trang_thai = 5.
-    public void delete(int id) throws SQLException {
-        String sql = "UPDATE hoa_don SET trang_thai = 5, ly_do_huy = N'Xóa mềm từ màn hình quản lý hóa đơn' WHERE id = ?";
-        String historySql = "INSERT INTO lich_su_hoa_don (id_hoa_don, hanh_dong, ghi_chu) VALUES (?, ?, ?)";
-
-        try (Connection connection = connectionManager.getConnection()) {
-            connection.setAutoCommit(false);
-
-            try (PreparedStatement statement = connection.prepareStatement(sql);
-                 PreparedStatement historyStatement = connection.prepareStatement(historySql)) {
-                statement.setInt(1, id);
-                statement.executeUpdate();
-
-                historyStatement.setInt(1, id);
-                historyStatement.setString(2, "Xóa mềm hóa đơn");
-                historyStatement.setString(3, "Hóa đơn được xóa mềm từ màn hình quản lý hóa đơn");
-                historyStatement.executeUpdate();
-
-                connection.commit();
-            } catch (SQLException exception) {
-                connection.rollback();
-                throw exception;
-            }
-        }
-    }
-
     // UPDATE: cập nhật trạng thái và ghi thêm lịch sử hóa đơn.
     public void updateStatus(int id, int status, String note) throws SQLException {
         String action = status == 5 ? "H\u1ee7y h\u00f3a \u0111\u01a1n" : "C\u1eadp nh\u1eadt tr\u1ea1ng th\u00e1i";
