@@ -22,6 +22,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class HoaDonDAO {
+    private static final String SOFT_DELETE_REASON = "X\u00f3a m\u1ec1m t\u1eeb m\u00e0n h\u00ecnh qu\u1ea3n l\u00fd h\u00f3a \u0111\u01a1n";
+    private static final String SOFT_DELETE_ACTION = "X\u00f3a m\u1ec1m h\u00f3a \u0111\u01a1n";
+    private static final String SOFT_DELETE_PREFIX = "X\u00f3a m\u1ec1m%";
+
     private final DatabaseConnectionManager connectionManager;
 
     public HoaDonDAO() {

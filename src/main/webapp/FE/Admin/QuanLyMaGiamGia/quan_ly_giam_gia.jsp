@@ -1,10 +1,14 @@
 
 <%
-    request.setAttribute("pageTitle", "Quản Lý giảm giá");
-    request.setAttribute("activeMenu", "giamgia");
+    request.setAttribute("pageTitle", "Quản lý giảm giá");
+    request.setAttribute("activeMenu", "discount");
+
 %>
 
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%
+    String contextPath = request.getContextPath();
+%>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -24,8 +28,11 @@
     <link rel="stylesheet" href="../css/quan_ly_giam_gia.css">
 </head>
 <body>
+<div class="admin-layout">
     <!-- Include Sidebar -->
     <%@ include file="../layout/sidebar.jsp" %>
+
+    <div class="overlay" id="overlay"></div>
 
     <div class="main-content">
         <!-- Include Header -->
@@ -33,26 +40,27 @@
 
         <!-- Page Content -->
         <div id="page-content" class="discount-page">
+
             <!-- Page Header -->
             <div class="page-header">
                 <div class="page-header__info">
                     <h1 class="page-header__title">Quản lý giảm giá</h1>
                     <p class="page-header__subtitle">Mã khuyến mãi & đợt sale sản phẩm</p>
                 </div>
-                <button class="btn btn--primary" id="btnCreate">
+                <button class="btn btn--primary" id="btnCreate" type="button">
                     <i class="fas fa-plus"></i>
                     <span id="btnCreateText">Tạo mã giảm giá</span>
                 </button>
             </div>
 
             <!-- Tabs -->
-            <div class="tabs">
-                <button class="tab tab--active" data-tab="coupon" onclick="showCoupon()">
+            <div class="tabs" role="tablist">
+                <button class="tab tab--active" data-tab="coupon" onclick="showCoupon()" type="button" role="tab">
                     <i class="fas fa-hashtag"></i>
                     <span>Mã giảm giá</span>
                 </button>
-                <button class="tab" data-tab="campaign" onclick="showCampaign()">
-                    <i class="fas fa-tags"></i>
+                <button class="tab" data-tab="campaign" onclick="showCampaign()" type="button" role="tab">
+                    <i class="fas fa-chart-bar"></i>
                     <span>Đợt giảm giá sản phẩm</span>
                 </button>
             </div>
@@ -68,9 +76,13 @@
             </div>
         </div>
     </div>
-
+</div>
 
 <!-- JavaScript -->
+<<<<<<< HEAD:src/main/webapp/FE/Admin/QuanLyMaGiamGia/quan_ly_giam_gia.jsp
 <script src="<%= request.getContextPath() %>/FE/Admin/QuanLyMaGiamGia/quan_ly_giam_gia.js"></script>
+=======
+<script src="quan_ly_giam_gia.js"></script>
+>>>>>>> master:src/main/webapp/Admin/QuanLyMaGiamGia/quan_ly_giam_gia.jsp
 </body>
 </html>

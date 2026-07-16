@@ -1,4 +1,8 @@
+<<<<<<< HEAD:src/main/java/BE/jdbc/DatabaseConnectionManager.java
 package BE.jdbc;
+=======
+package QuanLySanPham.jdbc;
+>>>>>>> master:src/main/java/QuanLySanPham/jdbc/DatabaseConnectionManager.java
 
 import java.sql.Connection;
 import java.sql.DriverManager;

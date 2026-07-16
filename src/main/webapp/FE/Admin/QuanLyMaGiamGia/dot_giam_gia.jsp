@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 
-<!-- Campaign Table -->
+<!-- Campaign Section -->
 <div class="campaign-section">
     <h3 class="campaign-section__title">Đợt giảm giá trực tiếp vào sản phẩm</h3>
 
@@ -8,13 +8,13 @@
         <table class="data-table">
             <thead>
             <tr>
-                <th>TÊN ĐỢT</th>
-                <th>NGÀY BẮT ĐẦU</th>
-                <th>NGÀY KẾT THÚC</th>
-                <th>MỨC GIẢM</th>
-                <th>SỐ SP</th>
-                <th>TRẠNG THÁI</th>
-                <th>THAO TÁC</th>
+                <th>Tên đợt</th>
+                <th>Ngày bắt đầu</th>
+                <th>Ngày kết thúc</th>
+                <th>Mức giảm</th>
+                <th>Số SP</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
             </tr>
             </thead>
             <tbody>
@@ -30,10 +30,10 @@
                 </td>
                 <td>
                     <div class="action-buttons">
-                        <button class="btn-icon btn-icon--sm" title="Xem">
+                        <button class="btn-icon btn-icon--sm" title="Xem" type="button">
                             <i class="far fa-eye"></i>
                         </button>
-                        <button class="btn-icon btn-icon--sm" title="Sửa">
+                        <button class="btn-icon btn-icon--sm" title="Sửa" type="button">
                             <i class="far fa-edit"></i>
                         </button>
                     </div>
@@ -52,10 +52,10 @@
                 </td>
                 <td>
                     <div class="action-buttons">
-                        <button class="btn-icon btn-icon--sm" title="Xem">
+                        <button class="btn-icon btn-icon--sm" title="Xem" type="button">
                             <i class="far fa-eye"></i>
                         </button>
-                        <button class="btn-icon btn-icon--sm" title="Sửa">
+                        <button class="btn-icon btn-icon--sm" title="Sửa" type="button">
                             <i class="far fa-edit"></i>
                         </button>
                     </div>
@@ -74,10 +74,10 @@
                 </td>
                 <td>
                     <div class="action-buttons">
-                        <button class="btn-icon btn-icon--sm" title="Xem">
+                        <button class="btn-icon btn-icon--sm" title="Xem" type="button">
                             <i class="far fa-eye"></i>
                         </button>
-                        <button class="btn-icon btn-icon--sm" title="Sửa">
+                        <button class="btn-icon btn-icon--sm" title="Sửa" type="button">
                             <i class="far fa-edit"></i>
                         </button>
                     </div>

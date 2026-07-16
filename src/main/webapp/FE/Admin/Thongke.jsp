@@ -1,10 +1,3 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: Admin
-  Date: 03/07/2026
-  Time: 00:32
-  To change this template use File | Settings | File Templates.
---%>
 <%
   request.setAttribute("pageTitle", "Thống kê");
   request.setAttribute("activeMenu", "dashboard");
@@ -114,38 +107,7 @@
       </tr>
       </thead>
       <tbody>
-      <tr>
-        <td><span class="order-code">#HD-2847</span></td>
-        <td><span class="customer-name">Nguyễn Thị Lan</span></td>
-        <td><span class="product-name">Gọng Titanium Oval</span></td>
-        <td><span class="order-value">4.850.000₫</span></td>
-        <td><span class="status-badge hoan-thanh">Hoàn thành</span></td>
-        <td><span class="order-date">01/07/2025</span></td>
-      </tr>
-      <tr>
-        <td><span class="order-code">#HD-2846</span></td>
-        <td><span class="customer-name">Trần Văn Minh</span></td>
-        <td><span class="product-name">Kính râm Polarized Aviator</span></td>
-        <td><span class="order-value">2.990.000₫</span></td>
-        <td><span class="status-badge dang-xu-ly">Đang xử lý</span></td>
-        <td><span class="order-date">01/07/2025</span></td>
-      </tr>
-      <tr>
-        <td><span class="order-code">#HD-2845</span></td>
-        <td><span class="customer-name">Lê Phương Thảo</span></td>
-        <td><span class="product-name">Tròng kính chống ánh sáng xanh</span></td>
-        <td><span class="order-value">1.650.000₫</span></td>
-        <td><span class="status-badge hoan-thanh">Hoàn thành</span></td>
-        <td><span class="order-date">30/06/2025</span></td>
-      </tr>
-      <tr>
-        <td><span class="order-code">#HD-2844</span></td>
-        <td><span class="customer-name">Phạm Đức Huy</span></td>
-        <td><span class="product-name">Gọng Acetate Vintage Round</span></td>
-        <td><span class="order-value">3.200.000₫</span></td>
-        <td><span class="status-badge cho-thanh-toan">Chờ thanh toán</span></td>
-        <td><span class="order-date">30/06/2025</span></td>
-      </tr>
+      <!-- Dữ liệu đã được xóa hết, bạn có thể dùng vòng lặp JSTL hoặc Java để render dữ liệu động vào đây -->
       </tbody>
     </table>
   </div>
