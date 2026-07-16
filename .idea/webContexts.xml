@@ -9,6 +9,7 @@
         <entry key="file://$PROJECT_DIR$/src/main/webapp/Admin/QuanLySanPham/SanPhamAdd.jsp" value="file://$PROJECT_DIR$/src/main/webapp/Admin/QuanLySanPham" />
         <entry key="file://$PROJECT_DIR$/src/main/webapp/Admin/Thongke.jsp" value="file://$PROJECT_DIR$/src/main/webapp/Admin" />
         <entry key="file://$PROJECT_DIR$/src/main/webapp/Admin/layout/sidebar.jsp" value="file://$PROJECT_DIR$/src/main/webapp/Admin/layout" />
+        <entry key="file://$PROJECT_DIR$/src/main/webapp/FE/Admin/QuanLyHoaDon/quan_ly_hoa_don.jsp" value="file://$PROJECT_DIR$/src/main/webapp/FE/Admin/QuanLyHoaDon" />
       </map>
     </option>
   </component>
