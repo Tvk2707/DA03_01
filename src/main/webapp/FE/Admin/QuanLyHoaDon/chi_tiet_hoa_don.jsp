@@ -94,12 +94,20 @@
             return contextPath + "/" + normalizedImage;
         }
 
-        if (normalizedImage.startsWith("hinh_anh_san_pham/")) {
+        if (normalizedImage.startsWith("file_anh/")) {
             return contextPath + "/FE/Admin/" + normalizedImage;
         }
 
-        // Database lưu tên file, còn ảnh được đặt trong thư mục hinh_anh_san_pham.
-        return contextPath + "/FE/Admin/hinh_anh_san_pham/" + normalizedImage;
+        if (normalizedImage.startsWith("hinh_anh_san_pham/")) {
+            return contextPath + "/FE/Admin/file_anh/" + normalizedImage.substring("hinh_anh_san_pham/".length());
+        }
+
+        if (normalizedImage.startsWith("images/")) {
+            return contextPath + "/FE/Admin/file_anh/" + normalizedImage.substring("images/".length());
+        }
+
+        // Database lưu tên file, còn ảnh thật đang đặt trong thư mục file_anh.
+        return contextPath + "/FE/Admin/file_anh/" + normalizedImage;
     }
 
     private void appendMeta(StringBuilder builder, String label, String value) {

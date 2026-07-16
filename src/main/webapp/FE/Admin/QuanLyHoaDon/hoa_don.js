@@ -59,10 +59,20 @@
             productLines.querySelectorAll('.invoice-product-line').forEach((line) => {
                 const select = line.querySelector('.invoice-product-select');
                 const quantity = line.querySelector('.invoice-product-quantity');
+                const preview = line.querySelector('.invoice-product-preview');
+                const previewImage = preview && preview.querySelector('img');
+                const previewIcon = preview && preview.querySelector('i');
                 const option = select.options[select.selectedIndex];
                 const price = Number(option && option.dataset.price) || 0;
                 const stock = Number(option && option.dataset.stock) || 0;
+                const image = option && option.dataset.image ? option.dataset.image : '';
                 let amount = Number(quantity.value) || 0;
+
+                if (previewImage && previewIcon) {
+                    previewImage.src = image;
+                    previewImage.style.display = image ? 'block' : 'none';
+                    previewIcon.style.display = image ? 'none' : 'inline-flex';
+                }
 
                 if (stock > 0 && amount > stock) {
                     amount = stock;
@@ -96,8 +106,16 @@
             const newLine = firstLine.cloneNode(true);
             newLine.querySelector('.invoice-product-select').value = '';
             newLine.querySelector('.invoice-product-quantity').value = '1';
+            const previewImage = newLine.querySelector('.invoice-product-preview img');
+            const previewIcon = newLine.querySelector('.invoice-product-preview i');
+            if (previewImage && previewIcon) {
+                previewImage.removeAttribute('src');
+                previewImage.style.display = 'none';
+                previewIcon.style.display = 'inline-flex';
+            }
             productLines.appendChild(newLine);
             bindProductLine(newLine);
+            updateProductTotal();
         });
 
         // Lọc các dòng trong bảng theo từ khóa, loại, trạng thái và khoảng ngày.
@@ -145,7 +163,17 @@
             document.getElementById('trangThai').value = '1';
             document.getElementById('ghiChu').value = '';
             productLines.innerHTML = productLines.querySelector('.invoice-product-line').outerHTML;
-            bindProductLine(productLines.querySelector('.invoice-product-line'));
+            const firstProductLine = productLines.querySelector('.invoice-product-line');
+            firstProductLine.querySelector('.invoice-product-select').value = '';
+            firstProductLine.querySelector('.invoice-product-quantity').value = '1';
+            const previewImage = firstProductLine.querySelector('.invoice-product-preview img');
+            const previewIcon = firstProductLine.querySelector('.invoice-product-preview i');
+            if (previewImage && previewIcon) {
+                previewImage.removeAttribute('src');
+                previewImage.style.display = 'none';
+                previewIcon.style.display = 'inline-flex';
+            }
+            bindProductLine(firstProductLine);
             productPicker.style.display = '';
             formCard.classList.remove('is-visible');
             updateProductTotal();

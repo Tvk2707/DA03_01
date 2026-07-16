@@ -56,6 +56,38 @@
                 .replace(">", "&gt;");
     }
 
+    private String imageUrl(String image, String contextPath) {
+        if (image == null || image.trim().isEmpty()) {
+            return "";
+        }
+
+        String normalizedImage = image.trim().replace("\\", "/");
+
+        if (normalizedImage.startsWith("http://")
+                || normalizedImage.startsWith("https://")
+                || normalizedImage.startsWith("/")) {
+            return normalizedImage;
+        }
+
+        if (normalizedImage.startsWith("FE/")) {
+            return contextPath + "/" + normalizedImage;
+        }
+
+        if (normalizedImage.startsWith("file_anh/")) {
+            return contextPath + "/FE/Admin/" + normalizedImage;
+        }
+
+        if (normalizedImage.startsWith("hinh_anh_san_pham/")) {
+            return contextPath + "/FE/Admin/file_anh/" + normalizedImage.substring("hinh_anh_san_pham/".length());
+        }
+
+        if (normalizedImage.startsWith("images/")) {
+            return contextPath + "/FE/Admin/file_anh/" + normalizedImage.substring("images/".length());
+        }
+
+        return contextPath + "/FE/Admin/file_anh/" + normalizedImage;
+    }
+
     private String statusText(Integer status) {
         if (status == null) {
             return "Chờ thanh toán";
@@ -226,12 +258,17 @@
                     </div>
                     <div id="invoiceProductLines">
                         <div class="invoice-product-line">
+                            <div class="invoice-product-preview">
+                                <i class="fas fa-glasses"></i>
+                                <img alt="Ảnh sản phẩm">
+                            </div>
                             <select class="invoice-product-select" name="productId">
                                 <option value="">Chọn sản phẩm</option>
                                 <% for (SanPhamHoaDonView product : sanPhamList) { %>
                                 <option value="<%= product.getId() %>"
                                         data-price="<%= product.getGiaBan() %>"
-                                        data-stock="<%= product.getSoLuongTon() %>">
+                                        data-stock="<%= product.getSoLuongTon() %>"
+                                        data-image="<%= attr(imageUrl(product.getHinhAnh(), request.getContextPath())) %>">
                                     <%= text(product.getTenSanPham()) %> - <%= text(product.getMa()) %> - <%= moneyFormat.format(product.getGiaBan()) %> đ
                                 </option>
                                 <% } %>

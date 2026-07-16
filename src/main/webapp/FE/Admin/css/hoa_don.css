@@ -501,10 +501,30 @@
 
 .invoice-product-line {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 110px 34px;
+    grid-template-columns: 46px minmax(0, 1fr) 110px 34px;
     align-items: center;
     gap: 8px;
     margin-bottom: 8px;
+}
+
+.invoice-product-preview {
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: #faf8f4;
+    color: var(--primary-color);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.invoice-product-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: none;
 }
 
 .invoice-product-line select,

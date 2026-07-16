@@ -39,10 +39,16 @@ public class HoaDonController extends HttpServlet {
         String action = request.getParameter("action");
 
         try {
+<<<<<<< HEAD
             // action được gửi từ các form bên JSP: save hoặc changeStatus.
             if ("delete".equals(action)) {
                 int id = parseInt(request.getParameter("id"), 0);
 
+=======
+            // action được gửi từ các form bên JSP: delete, save hoặc changeStatus.
+            if ("delete".equals(action)) {
+                int id = parseInt(request.getParameter("id"), 0);
+>>>>>>> 1713992 (add picture)
                 if (id > 0) {
                     hoaDonService.huyHoaDon(id);
                 }
