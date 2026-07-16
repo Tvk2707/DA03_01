@@ -1,4 +1,4 @@
-package com.eyewear.entity;
+package BE.Entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -20,7 +20,7 @@ public class LichSuHoaDon {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_hoa_don", nullable = false)
-    private com.eyewear.entity.HoaDon hoaDon;
+    private BE.Entity.HoaDon hoaDon;
 
     @Column(name = "hanh_dong", length = 250)
     private String hanhDong;
@@ -31,3 +31,4 @@ public class LichSuHoaDon {
     @Column(name = "ghi_chu", columnDefinition = "NVARCHAR(MAX)")
     private String ghiChu;
 }
+

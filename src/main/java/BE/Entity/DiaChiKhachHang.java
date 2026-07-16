@@ -1,4 +1,4 @@
-package com.eyewear.entity;
+package BE.Entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -18,7 +18,7 @@ public class DiaChiKhachHang {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_khach_hang", nullable = false)
-    private com.eyewear.entity.KhachHang khachHang;
+    private BE.Entity.KhachHang khachHang;
 
     @Column(name = "ten_nguoi_nhan", nullable = false, length = 250)
     private String tenNguoiNhan;
@@ -45,3 +45,4 @@ public class DiaChiKhachHang {
     @Builder.Default
     private Integer isMacDinh = 0;
 }
+

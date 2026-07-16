@@ -39,13 +39,13 @@
             <div class="menu-title">Quản trị</div>
             <ul class="menu-list">
                 <li class="menu-item">
-                    <a href="<%= request.getContextPath() %>/FE/Admin/Thongke.jsp" class="menu-link <%= "dashboard".equals(request.getAttribute("activeMenu"))?"active":""%>">
+                    <a href="<%= request.getContextPath() %>/admin/thong-ke" class="menu-link <%= "dashboard".equals(request.getAttribute("activeMenu"))?"active":""%>">
                         <i class="fas fa-chart-bar"></i>
                         <span>Thống kê</span>
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="<%= request.getContextPath() %>/FE/Admin/QuanLyHoaDon/quan_ly_hoa_don.jsp" class="menu-link <%= "hoadon".equals(request.getAttribute("activeMenu"))?"active":""%>">
+                    <a href="<%= request.getContextPath() %>/admin/hoa-don" class="menu-link <%= "hoadon".equals(request.getAttribute("activeMenu"))?"active":""%>">
                         <i class="fas fa-file-invoice"></i>
                         <span>Quản lý hoá đơn</span>
                     </a>

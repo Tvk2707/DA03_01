@@ -1,4 +1,4 @@
-package com.eyewear.entity;
+package BE.Entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -32,3 +32,4 @@ public class KieuQuaiKinh {
     @Builder.Default
     private Integer trangThai = 1;
 }
+

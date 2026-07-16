@@ -442,6 +442,12 @@
     display: flex;
 }
 
+.invoice-empty-cell {
+    padding: 28px !important;
+    color: var(--text-light);
+    text-align: center;
+}
+
 .invoice-table-footer {
     justify-content: space-between;
     gap: 12px;

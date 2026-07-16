@@ -65,21 +65,21 @@
             <div>
                 <div class="invoice-summary-title">
                     <h2>Thông tin đơn hàng</h2>
-                    <span class="invoice-status" id="summaryStatus">Chờ xác nhận</span>
-                    <span class="invoice-pill" id="summaryType">Online</span>
+                    <span class="invoice-status" id="summaryStatus">-</span>
+                    <span class="invoice-pill" id="summaryType">-</span>
                 </div>
                 <p>
-                    Mã: <strong id="summaryCode">HD26042916162</strong>
+                    Mã: <strong id="summaryCode">-</strong>
                     <span>•</span>
-                    Tạo lúc: <strong id="summaryCreated">19:28 29/04/2026</strong>
+                    Tạo lúc: <strong id="summaryCreated">-</strong>
                     <span>•</span>
-                    NV xử lý: <strong id="summaryStaff">SYSTEM - System</strong>
+                    NV xử lý: <strong id="summaryStaff">-</strong>
                 </p>
             </div>
             <div class="invoice-total-box">
                 <span>Tổng thanh toán</span>
-                <strong id="summaryTotal">1.375.000 đ</strong>
-                <small>Đã thanh toán: <b id="summaryPaid">1.375.000 đ</b></small>
+                <strong id="summaryTotal">0 VND</strong>
+                <small>Da thanh toan: <b id="summaryPaid">0 VND</b></small>
             </div>
         </section>
 
@@ -88,13 +88,13 @@
                 <h3><i class="far fa-user"></i> Khách hàng</h3>
                 <dl>
                     <dt>Họ tên</dt>
-                    <dd id="customerName">Quyết</dd>
+                    <dd id="customerName">-</dd>
                     <dt>SĐT</dt>
-                    <dd id="customerPhone">0868219136</dd>
+                    <dd id="customerPhone">-</dd>
                     <dt>Email</dt>
-                    <dd id="customerEmail">quyet.eyewear@gmail.com</dd>
+                    <dd id="customerEmail">-</dd>
                     <dt>Địa chỉ</dt>
-                    <dd id="customerAddress">Thanh Xuân, Hà Nội</dd>
+                    <dd id="customerAddress">-</dd>
                 </dl>
             </article>
 
@@ -102,15 +102,15 @@
                 <h3><i class="fas fa-truck-fast"></i> Giao nhận</h3>
                 <dl>
                     <dt>Người nhận</dt>
-                    <dd id="receiverName">Quyết</dd>
+                    <dd id="receiverName">-</dd>
                     <dt>SĐT nhận</dt>
-                    <dd id="receiverPhone">0868219136</dd>
+                    <dd id="receiverPhone">-</dd>
                     <dt>Địa chỉ nhận</dt>
-                    <dd id="receiverAddress">Thanh Xuân, Hà Nội</dd>
+                    <dd id="receiverAddress">-</dd>
                     <dt>Phí vận chuyển</dt>
-                    <dd id="shippingFee">25.000 đ</dd>
+                    <dd id="shippingFee">-</dd>
                     <dt>Ghi chú</dt>
-                    <dd id="orderNote">Khách đặt gọng titanium màu đen</dd>
+                    <dd id="orderNote">-</dd>
                 </dl>
             </article>
 
@@ -118,13 +118,13 @@
                 <h3><i class="fas fa-coins"></i> Giá trị đơn</h3>
                 <dl>
                     <dt>Tổng tiền</dt>
-                    <dd id="rawTotal">1.500.000 đ</dd>
+                    <dd id="rawTotal">-</dd>
                     <dt>Giảm giá</dt>
-                    <dd id="discountTotal">150.000 đ</dd>
+                    <dd id="discountTotal">-</dd>
                     <dt>Phí vận chuyển</dt>
-                    <dd id="valueShipping">25.000 đ</dd>
+                    <dd id="valueShipping">-</dd>
                     <dt>Phải trả</dt>
-                    <dd class="invoice-money" id="mustPay">1.375.000 đ</dd>
+                    <dd class="invoice-money" id="mustPay">0 VND</dd>
                 </dl>
             </article>
         </section>
@@ -132,19 +132,19 @@
         <section class="invoice-mini-grid">
             <div class="invoice-mini-card">
                 <span>Trạng thái hiện tại</span>
-                <strong id="currentStatusText">Chờ xác nhận</strong>
+                <strong id="currentStatusText">-</strong>
             </div>
             <div class="invoice-mini-card">
                 <span>Số SP</span>
-                <strong id="productCount">1</strong>
+                <strong id="productCount">0</strong>
             </div>
             <div class="invoice-mini-card">
                 <span>Đơn giá trị</span>
-                <strong id="orderValue">1.500.000 đ</strong>
+                <strong id="orderValue">0 VND</strong>
             </div>
             <div class="invoice-mini-card">
                 <span>Còn lại</span>
-                <strong id="remainingAmount">0 đ</strong>
+                <strong id="remainingAmount">0 VND</strong>
             </div>
         </section>
 
@@ -207,17 +207,17 @@
             </button>
         </header>
         <div class="invoice-modal__body">
-            <p>Hóa đơn: <strong id="modalOrderCode">HD26042916162</strong></p>
+            <p>Hóa đơn: <strong id="modalOrderCode">-</strong></p>
             <label class="invoice-field invoice-field--full">
                 <span>Ghi chú</span>
                 <textarea id="statusNote" rows="4" placeholder="Nhập ghi chú xử lý hóa đơn"></textarea>
             </label>
             <div class="status-change-line">
                 <span>Trạng thái hiện tại:</span>
-                <b class="invoice-status" id="modalCurrentStatus">Chờ xác nhận</b>
+                <b class="invoice-status" id="modalCurrentStatus">-</b>
                 <i class="fas fa-arrow-right"></i>
                 <span>Trạng thái mới:</span>
-                <b class="invoice-status" id="modalNextStatus">Đã xác nhận</b>
+                <b class="invoice-status" id="modalNextStatus">-</b>
             </div>
             <small>Hành động này sẽ cập nhật trạng thái và ghi lịch sử hóa đơn.</small>
         </div>

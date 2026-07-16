@@ -57,6 +57,7 @@ public class DatabaseConnectionManager {
     }
 
     public Connection getConnection() throws SQLException {
+        loadSqlServerDriver();
         if (this.integratedSecurity) {
             return DriverManager.getConnection(this.url);
         }
@@ -83,6 +84,14 @@ public class DatabaseConnectionManager {
             return "Windows Authentication";
         }
         return username;
+    }
+
+    private void loadSqlServerDriver() throws SQLException {
+        try {
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+        } catch (ClassNotFoundException e) {
+            throw new SQLException("Không tìm thấy SQL Server JDBC Driver trong WEB-INF/lib.", e);
+        }
     }
 
     private static String getSetting(String propertyName, String environmentName, String defaultValue) {

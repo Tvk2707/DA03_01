@@ -1,4 +1,4 @@
-package com.eyewear.entity;
+package BE.Entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -20,27 +20,27 @@ public class SanPham {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_danh_muc")
-    private com.eyewear.entity.DanhMuc danhMuc;
+    private BE.Entity.DanhMuc danhMuc;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_thuong_hieu")
-    private com.eyewear.entity.ThuongHieu thuongHieu;
+    private BE.Entity.ThuongHieu thuongHieu;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_chat_lieu")
-    private com.eyewear.entity.ChatLieu chatLieu;
+    private BE.Entity.ChatLieu chatLieu;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_kieu_dang")
-    private com.eyewear.entity.KieuDang kieuDang;
+    private BE.Entity.KieuDang kieuDang;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_gong_kinh")
-    private com.eyewear.entity.GongKinh gongKinh;
+    private BE.Entity.GongKinh gongKinh;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_trong_kinh")
-    private com.eyewear.entity.TrongKinh trongKinh;
+    private BE.Entity.TrongKinh trongKinh;
 
     @Column(name = "ma_san_pham", unique = true, nullable = false, length = 50)
     private String maSanPham;
@@ -61,3 +61,4 @@ public class SanPham {
     @Builder.Default
     private Integer trangThai = 1;
 }
+

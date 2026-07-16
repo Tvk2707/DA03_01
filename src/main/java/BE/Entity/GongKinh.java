@@ -1,4 +1,4 @@
-package com.eyewear.entity;
+package BE.Entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -18,13 +18,14 @@ public class GongKinh {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_hinh_dang_gong")
-    private com.eyewear.entity.HinhDangGong hinhDangGong;
+    private BE.Entity.HinhDangGong hinhDangGong;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_kieu_quai_kinh")
-    private com.eyewear.entity.KieuQuaiKinh kieuQuaiKinh;
+    private BE.Entity.KieuQuaiKinh kieuQuaiKinh;
 
     @Column(name = "trang_thai")
     @Builder.Default
     private Integer trangThai = 1;
 }
+

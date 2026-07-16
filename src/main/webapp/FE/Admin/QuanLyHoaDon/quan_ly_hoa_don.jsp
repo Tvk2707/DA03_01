@@ -1,7 +1,82 @@
+<%@ page import="BE.Model.HoaDonView" %>
+<%@ page import="java.math.BigDecimal" %>
+<%@ page import="java.text.DecimalFormat" %>
+<%@ page import="java.time.format.DateTimeFormatter" %>
+<%@ page import="java.util.Collections" %>
+<%@ page import="java.util.List" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
     request.setAttribute("pageTitle", "Quản lý hóa đơn");
     request.setAttribute("activeMenu", "hoadon");
+
+    List<HoaDonView> hoaDonList = (List<HoaDonView>) request.getAttribute("hoaDonList");
+    if (hoaDonList == null && request.getAttribute("errorMessage") == null) {
+        response.sendRedirect(request.getContextPath() + "/admin/hoa-don");
+        return;
+    }
+    if (hoaDonList == null) {
+        hoaDonList = Collections.emptyList();
+    }
+
+    DecimalFormat moneyFormat = new DecimalFormat("#,###");
+    DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+    Integer tongHoaDon = (Integer) request.getAttribute("tongHoaDon");
+    BigDecimal doanhThu = (BigDecimal) request.getAttribute("doanhThu");
+    Integer dangXuLy = (Integer) request.getAttribute("dangXuLy");
+    Integer tongSanPham = (Integer) request.getAttribute("tongSanPham");
+    String errorMessage = (String) request.getAttribute("errorMessage");
+
+    if (tongHoaDon == null) tongHoaDon = hoaDonList.size();
+    if (doanhThu == null) doanhThu = BigDecimal.ZERO;
+    if (dangXuLy == null) dangXuLy = 0;
+    if (tongSanPham == null) tongSanPham = 0;
+%>
+<%!
+    private String safe(String value) {
+        return value == null || value.trim().isEmpty() ? "-" : value;
+    }
+
+    private String money(DecimalFormat formatter, BigDecimal value) {
+        if (value == null) {
+            return "0 VND";
+        }
+        return formatter.format(value) + " VND";
+    }
+
+    private String statusText(int status) {
+        switch (status) {
+            case 1:
+                return "Chờ xác nhận";
+            case 2:
+                return "Đã xác nhận";
+            case 3:
+                return "Đang xử lý";
+            case 4:
+                return "Hoàn thành";
+            case 5:
+                return "Đã hủy";
+            default:
+                return "Không xác định";
+        }
+    }
+
+    private String statusClass(int status) {
+        switch (status) {
+            case 1:
+                return "invoice-status--waiting";
+            case 2:
+                return "invoice-status--confirmed";
+            case 3:
+                return "invoice-status--processing";
+            case 4:
+                return "invoice-status--done";
+            case 5:
+                return "invoice-status--cancelled";
+            default:
+                return "";
+        }
+    }
 %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -11,10 +86,10 @@
     <title>Quản lý hóa đơn - RIOR Admin</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../css/layout.css">
-    <link rel="stylesheet" href="../css/sidebar.css">
-    <link rel="stylesheet" href="../css/header.css">
-    <link rel="stylesheet" href="../css/hoa_don.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/layout.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/sidebar.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/header.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/hoa_don.css?v=202607161130">
 </head>
 <body>
 <%@ include file="../layout/sidebar.jsp" %>
@@ -26,7 +101,7 @@
         <section class="invoice-page-header">
             <div>
                 <h1 class="invoice-title">Quản lý hóa đơn</h1>
-                <p class="invoice-subtitle">Theo dõi đơn kính mắt online, tại quầy và giao hàng</p>
+                <p class="invoice-subtitle">Dữ liệu được lấy trực tiếp từ SQL Server</p>
             </div>
             <div class="invoice-header-actions">
                 <button class="invoice-btn invoice-btn--outline" id="btnResetFilters" type="button">
@@ -58,17 +133,15 @@
                     <select id="orderTypeFilter">
                         <option value="all">Tất cả</option>
                         <option value="Tại quầy">Tại quầy</option>
-                        <option value="Online">Online</option>
-                        <option value="Tại quầy - giao hàng">Tại quầy - giao hàng</option>
                     </select>
                 </label>
                 <label class="invoice-field">
                     <span>Từ ngày</span>
-                    <input id="fromDateFilter" type="date" value="2026-04-29">
+                    <input id="fromDateFilter" type="date">
                 </label>
                 <label class="invoice-field">
                     <span>Đến ngày</span>
-                    <input id="toDateFilter" type="date" value="2026-04-29">
+                    <input id="toDateFilter" type="date">
                 </label>
             </div>
         </section>
@@ -76,25 +149,32 @@
         <section class="invoice-stats">
             <div class="invoice-stat">
                 <span class="invoice-stat__label">Tổng hóa đơn</span>
-                <strong>6</strong>
-                <small>Ngày 29/04/2026</small>
+                <strong><%= tongHoaDon %></strong>
+                <small>Dữ liệu từ SQL Server</small>
             </div>
             <div class="invoice-stat">
                 <span class="invoice-stat__label">Doanh thu</span>
-                <strong>19.850.000 đ</strong>
-                <small>Đơn hoàn tất</small>
+                <strong><%= money(moneyFormat, doanhThu) %></strong>
+                <small>Đơn hoàn thành</small>
             </div>
             <div class="invoice-stat">
                 <span class="invoice-stat__label">Đang xử lý</span>
-                <strong>2</strong>
-                <small>Chờ nhân viên xác nhận</small>
+                <strong><%= dangXuLy %></strong>
+                <small>Chưa hoàn thành</small>
             </div>
             <div class="invoice-stat">
                 <span class="invoice-stat__label">Sản phẩm kính</span>
-                <strong>11</strong>
-                <small>Gọng, tròng, kính râm</small>
+                <strong><%= tongSanPham %></strong>
+                <small>Tổng số lượng trong hóa đơn</small>
             </div>
         </section>
+
+        <% if (errorMessage != null) { %>
+        <div class="invoice-empty is-visible">
+            <i class="fas fa-triangle-exclamation"></i>
+            <%= errorMessage %>
+        </div>
+        <% } %>
 
         <section class="invoice-list-card">
             <div class="invoice-card-heading">
@@ -112,8 +192,6 @@
                 <button class="invoice-tab" type="button" data-status="Chờ xác nhận">Chờ xác nhận</button>
                 <button class="invoice-tab" type="button" data-status="Đã xác nhận">Đã xác nhận</button>
                 <button class="invoice-tab" type="button" data-status="Đang xử lý">Đang xử lý</button>
-                <button class="invoice-tab" type="button" data-status="Đang giao">Đang giao</button>
-                <button class="invoice-tab" type="button" data-status="Đã giao">Đã giao</button>
                 <button class="invoice-tab" type="button" data-status="Hoàn thành">Hoàn thành</button>
                 <button class="invoice-tab" type="button" data-status="Đã hủy">Đã hủy</button>
             </div>
@@ -135,108 +213,38 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr data-id="HD26042981918" data-search="HD26042981918 admin tbt nv001 duy quyet 0868219136 titanium flex amber" data-type="Tại quầy" data-status="Hoàn thành" data-date="2026-04-29">
-                        <td>1</td>
-                        <td><strong>HD26042981918</strong></td>
-                        <td>Admin TBT <small>NV001</small></td>
-                        <td>Duy Quyết</td>
-                        <td>0868219136</td>
-                        <td><span class="invoice-pill">Tại quầy</span></td>
-                        <td class="invoice-money">6.000.000 đ</td>
-                        <td>29/04/2026</td>
-                        <td><span class="invoice-status invoice-status--done">Hoàn thành</span></td>
+                    <% for (HoaDonView hoaDon : hoaDonList) {
+                        String ngayTao = hoaDon.getNgayTao() == null ? "-" : hoaDon.getNgayTao().format(dateFormat);
+                        String trangThai = statusText(hoaDon.getTrangThai());
+                        String searchText = (safe(hoaDon.getMaHoaDon()) + " "
+                                + safe(hoaDon.getTenNhanVien()) + " "
+                                + safe(hoaDon.getMaNhanVien()) + " "
+                                + safe(hoaDon.getTenKhachHang()) + " "
+                                + safe(hoaDon.getSoDienThoai())).toLowerCase();
+                        String dateValue = hoaDon.getNgayTao() == null ? "" : hoaDon.getNgayTao().toLocalDate().toString();
+                    %>
+                    <tr data-id="<%= hoaDon.getId() %>"
+                        data-search="<%= searchText %>"
+                        data-type="<%= safe(hoaDon.getLoaiHoaDon()) %>"
+                        data-status="<%= trangThai %>"
+                        data-date="<%= dateValue %>">
+                        <td><%= hoaDon.getStt() %></td>
+                        <td><strong><%= safe(hoaDon.getMaHoaDon()) %></strong></td>
+                        <td><%= safe(hoaDon.getTenNhanVien()) %> <small><%= safe(hoaDon.getMaNhanVien()) %></small></td>
+                        <td><%= safe(hoaDon.getTenKhachHang()) %></td>
+                        <td><%= safe(hoaDon.getSoDienThoai()) %></td>
+                        <td><span class="invoice-pill"><%= safe(hoaDon.getLoaiHoaDon()) %></span></td>
+                        <td class="invoice-money"><%= money(moneyFormat, hoaDon.getTongTien()) %></td>
+                        <td><%= ngayTao %></td>
+                        <td><span class="invoice-status <%= statusClass(hoaDon.getTrangThai()) %>"><%= trangThai %></span></td>
                         <td>
                             <div class="invoice-actions">
-                                <a class="invoice-icon-btn" href="chi_tiet_hoa_don.jsp?id=HD26042981918" title="Xem chi tiết"><i class="fas fa-eye"></i></a>
-                                <button class="invoice-icon-btn" type="button" data-print="HD26042981918" title="In hóa đơn"><i class="fas fa-print"></i></button>
+                                <a class="invoice-icon-btn" href="<%= request.getContextPath() %>/FE/Admin/QuanLyHoaDon/chi_tiet_hoa_don.jsp?id=<%= hoaDon.getId() %>" title="Xem chi tiết"><i class="fas fa-eye"></i></a>
+                                <button class="invoice-icon-btn" type="button" data-print="<%= safe(hoaDon.getMaHoaDon()) %>" title="In hóa đơn"><i class="fas fa-print"></i></button>
                             </div>
                         </td>
                     </tr>
-                    <tr data-id="HD26042925243" data-search="HD26042925243 admin tbt nv001 duy quyet 0868219136 gong acetate cafe" data-type="Tại quầy" data-status="Hoàn thành" data-date="2026-04-29">
-                        <td>2</td>
-                        <td><strong>HD26042925243</strong></td>
-                        <td>Admin TBT <small>NV001</small></td>
-                        <td>Duy Quyết</td>
-                        <td>0868219136</td>
-                        <td><span class="invoice-pill">Tại quầy</span></td>
-                        <td class="invoice-money">2.800.000 đ</td>
-                        <td>29/04/2026</td>
-                        <td><span class="invoice-status invoice-status--done">Hoàn thành</span></td>
-                        <td>
-                            <div class="invoice-actions">
-                                <a class="invoice-icon-btn" href="chi_tiet_hoa_don.jsp?id=HD26042925243" title="Xem chi tiết"><i class="fas fa-eye"></i></a>
-                                <button class="invoice-icon-btn" type="button" data-print="HD26042925243" title="In hóa đơn"><i class="fas fa-print"></i></button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr data-id="HD26042908574" data-search="HD26042908574 admin tbt nv001 duy quyet 0868219136 kinh ram polarized" data-type="Tại quầy - giao hàng" data-status="Đã giao" data-date="2026-04-29">
-                        <td>3</td>
-                        <td><strong>HD26042908574</strong></td>
-                        <td>Admin TBT <small>NV001</small></td>
-                        <td>Duy Quyết</td>
-                        <td>0868219136</td>
-                        <td><span class="invoice-pill">Tại quầy - giao hàng</span></td>
-                        <td class="invoice-money">2.800.000 đ</td>
-                        <td>29/04/2026</td>
-                        <td><span class="invoice-status invoice-status--shipped">Đã giao</span></td>
-                        <td>
-                            <div class="invoice-actions">
-                                <a class="invoice-icon-btn" href="chi_tiet_hoa_don.jsp?id=HD26042908574" title="Xem chi tiết"><i class="fas fa-eye"></i></a>
-                                <button class="invoice-icon-btn" type="button" data-print="HD26042908574" title="In hóa đơn"><i class="fas fa-print"></i></button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr data-id="HD26042972295" data-search="HD26042972295 admin tbt nv001 khach le kinh can gong oval" data-type="Tại quầy" data-status="Hoàn thành" data-date="2026-04-29">
-                        <td>4</td>
-                        <td><strong>HD26042972295</strong></td>
-                        <td>Admin TBT <small>NV001</small></td>
-                        <td>Khách lẻ</td>
-                        <td>-</td>
-                        <td><span class="invoice-pill">Tại quầy</span></td>
-                        <td class="invoice-money">4.700.000 đ</td>
-                        <td>29/04/2026</td>
-                        <td><span class="invoice-status invoice-status--done">Hoàn thành</span></td>
-                        <td>
-                            <div class="invoice-actions">
-                                <a class="invoice-icon-btn" href="chi_tiet_hoa_don.jsp?id=HD26042972295" title="Xem chi tiết"><i class="fas fa-eye"></i></a>
-                                <button class="invoice-icon-btn" type="button" data-print="HD26042972295" title="In hóa đơn"><i class="fas fa-print"></i></button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr data-id="HD26042977687" data-search="HD26042977687 system quyet 0868219136 trong kinh chong anh sang xanh" data-type="Online" data-status="Đang xử lý" data-date="2026-04-29">
-                        <td>5</td>
-                        <td><strong>HD26042977687</strong></td>
-                        <td>System <small>SYSTEM</small></td>
-                        <td>Quyết</td>
-                        <td>0868219136</td>
-                        <td><span class="invoice-pill">Online</span></td>
-                        <td class="invoice-money">1.375.000 đ</td>
-                        <td>29/04/2026</td>
-                        <td><span class="invoice-status invoice-status--processing">Đang xử lý</span></td>
-                        <td>
-                            <div class="invoice-actions">
-                                <a class="invoice-icon-btn" href="chi_tiet_hoa_don.jsp?id=HD26042977687" title="Xem chi tiết"><i class="fas fa-eye"></i></a>
-                                <button class="invoice-icon-btn" type="button" data-print="HD26042977687" title="In hóa đơn"><i class="fas fa-print"></i></button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr data-id="HD26042916162" data-search="HD26042916162 system quyet 0868219136 gong titanium tron den" data-type="Online" data-status="Chờ xác nhận" data-date="2026-04-29">
-                        <td>6</td>
-                        <td><strong>HD26042916162</strong></td>
-                        <td>System <small>SYSTEM</small></td>
-                        <td>Quyết</td>
-                        <td>0868219136</td>
-                        <td><span class="invoice-pill">Online</span></td>
-                        <td class="invoice-money">1.375.000 đ</td>
-                        <td>29/04/2026</td>
-                        <td><span class="invoice-status invoice-status--waiting">Chờ xác nhận</span></td>
-                        <td>
-                            <div class="invoice-actions">
-                                <a class="invoice-icon-btn" href="chi_tiet_hoa_don.jsp?id=HD26042916162" title="Xem chi tiết"><i class="fas fa-eye"></i></a>
-                                <button class="invoice-icon-btn" type="button" data-print="HD26042916162" title="In hóa đơn"><i class="fas fa-print"></i></button>
-                            </div>
-                        </td>
-                    </tr>
+                    <% } %>
                     </tbody>
                 </table>
                 <div class="invoice-empty" id="emptyState">
@@ -246,7 +254,7 @@
             </div>
 
             <div class="invoice-table-footer">
-                <span id="orderCount">Hiển thị 6 / tổng 6 bản ghi</span>
+                <span id="orderCount">Hiển thị <%= hoaDonList.size() %> / tổng <%= hoaDonList.size() %> bản ghi</span>
                 <div class="invoice-pagination">
                     <button type="button" disabled><i class="fas fa-chevron-left"></i></button>
                     <span>Trang <strong>1</strong></span>
@@ -265,7 +273,7 @@
 <div class="invoice-toast" id="invoiceToast" role="status" aria-live="polite">
     <i class="fas fa-circle-check"></i>
     <div>
-        <strong>Thành công</strong>
+        <strong>Thông báo</strong>
         <span id="toastMessage">Đã cập nhật thao tác</span>
     </div>
 </div>

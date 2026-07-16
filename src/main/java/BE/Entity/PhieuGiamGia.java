@@ -1,4 +1,4 @@
-package com.eyewear.entity;
+package BE.Entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -26,7 +26,7 @@ public class PhieuGiamGia {
     private String tenVoucher;
 
     @Column(name = "loai_giam_gia", length = 50)
-    private String loaiGiamGia; // "Phần trăm" hoặc "Tiền mặt"
+    private String loaiGiamGia; // "Pháº§n trÄƒm" hoáº·c "Tiá»n máº·t"
 
     @Column(name = "gia_tri_giam", precision = 15, scale = 2)
     private BigDecimal giaTriGiam;
@@ -61,3 +61,4 @@ public class PhieuGiamGia {
     @Builder.Default
     private Integer trangThai = 1;
 }
+

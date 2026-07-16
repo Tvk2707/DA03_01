@@ -1,4 +1,4 @@
-package com.eyewear.entity;
+package BE.Entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -20,11 +20,11 @@ public class KhachHangPhieuGiamGia {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_khach_hang", nullable = false)
-    private com.eyewear.entity.KhachHang khachHang;
+    private BE.Entity.KhachHang khachHang;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_phieu_giam_gia", nullable = false)
-    private com.eyewear.entity.PhieuGiamGia phieuGiamGia;
+    private BE.Entity.PhieuGiamGia phieuGiamGia;
 
     @Column(name = "trang_thai")
     @Builder.Default
@@ -33,3 +33,4 @@ public class KhachHangPhieuGiamGia {
     @Column(name = "ngay_su_dung")
     private LocalDateTime ngaySuDung;
 }
+

@@ -1,4 +1,4 @@
-package com.eyewear.entity;
+package BE.Entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -21,11 +21,11 @@ public class ThanhToanHoaDon {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_hoa_don", nullable = false)
-    private com.eyewear.entity.HoaDon hoaDon;
+    private BE.Entity.HoaDon hoaDon;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_pttt", nullable = false)
-    private com.eyewear.entity.HinhThucThanhToan hinhThucThanhToan;
+    private BE.Entity.HinhThucThanhToan hinhThucThanhToan;
 
     @Column(name = "ma_giao_dich", length = 100)
     private String maGiaoDich;
@@ -43,3 +43,4 @@ public class ThanhToanHoaDon {
     @Column(name = "ghi_chu", columnDefinition = "NVARCHAR(MAX)")
     private String ghiChu;
 }
+
