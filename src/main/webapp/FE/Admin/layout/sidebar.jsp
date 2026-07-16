@@ -53,7 +53,6 @@
             <ul class="menu-list">
 
                 <li class="menu-item">
-<<<<<<< HEAD:src/main/webapp/FE/Admin/layout/sidebar.jsp
                     <a href="<%= request.getContextPath() %>/FE/Admin/Thongke.jsp" class="menu-link <%= "dashboard".equals(request.getAttribute("activeMenu"))?"active":""%>">
                         <i class="fas fa-chart-bar"></i>
                         <span>Thống kê</span>
@@ -61,16 +60,13 @@
                 </li>
                 <li class="menu-item">
                     <a href="<%= request.getContextPath() %>/admin/hoa-don" class="menu-link <%= "hoadon".equals(request.getAttribute("activeMenu"))?"active":""%>">
-=======
-                    <a href="#" class="menu-link <%= "invoice".equals(activeMenu) ? "active" : "" %>">
->>>>>>> master:src/main/webapp/Admin/layout/sidebar.jsp
                         <i class="fas fa-file-invoice"></i>
                         <span>Quản lý hoá đơn</span>
                     </a>
                 </li>
 
                 <li class="menu-item <%= "product".equals(activeMenu) ? "open" : "" %>">
-                    <a href="#" class="menu-link <%= "product".equals(activeMenu) ? "active" : "" %>">
+                    <a href="${pageContext.request.contextPath}/SanPham" class="menu-link <%= "product".equals(activeMenu) ? "active" : "" %>">
                         <div class="menu-link-wrapper">
                             <i class="fas fa-box"></i>
                             <span>Quản lý sản phẩm</span>
@@ -86,7 +82,7 @@
                 </li>
 
                 <li class="menu-item <%= "attribute".equals(activeMenu) ? "open" : "" %>">
-                    <a href="#" class="menu-link <%= "attribute".equals(activeMenu) ? "active" : "" %>">
+                    <a href="${pageContext.request.contextPath}/DanhMuc" class="menu-link <%= "attribute".equals(activeMenu) ? "active" : "" %>">
                         <div class="menu-link-wrapper">
                             <i class="fas fa-cubes"></i>
                             <span>Quản lý thuộc tính</span>
@@ -114,12 +110,7 @@
                 </li>
 
                 <li class="menu-item">
-<<<<<<< HEAD:src/main/webapp/FE/Admin/layout/sidebar.jsp
                     <a href="<%= request.getContextPath() %>/FE/Admin/QuanLyMaGiamGia/quan_ly_giam_gia.jsp" class="menu-link <%= "giamgia".equals(request.getAttribute("activeMenu"))?"active":""%>">
-=======
-                    <a href="../QuanLyMaGiamGia/quan_ly_giam_gia.jsp"
-                       class="menu-link <%= "discount".equals(activeMenu) ? "active" : "" %>">
->>>>>>> master:src/main/webapp/Admin/layout/sidebar.jsp
                         <i class="fas fa-tags"></i>
                         <span>Quản lý giảm giá</span>
                     </a>
@@ -234,7 +225,7 @@
             // Kiểm tra xem đường dẫn URL hiện tại có khớp hoàn toàn hoặc kết thúc bằng href không
             if (currentPath.endsWith(href) || currentPath === href) {
                 // Ưu tiên chuỗi href có độ dài lớn nhất (/SanPhamChiTiet thắng /SanPham)
-                if (href.length > maxLength) {
+                if (href.length >= maxLength) {
                     maxLength = href.length;
                     bestMatchLink = link;
                 }

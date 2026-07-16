@@ -9,9 +9,19 @@ public class KieuQuaiKinh {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
-    @Column(name = "kieu_quai", nullable = false, length = 255)
+    @Column(name = "quai_thang")
+    private Integer quaiThang;
+
+    @Column(name = "quai_gap")
+    private Integer quaiGap;
+
+    @Column(name = "quai_loxo")
+    private Integer quaiLoxo;
+
+    // Giữ thuộc tính hiển thị cũ để các màn hình cũ vẫn biên dịch.
+    @Transient
     private String kieuQuai;
 
     @Column(name = "trang_thai")
@@ -23,11 +33,11 @@ public class KieuQuaiKinh {
     public KieuQuaiKinh() {
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -38,6 +48,13 @@ public class KieuQuaiKinh {
     public void setKieuQuai(String kieuQuai) {
         this.kieuQuai = kieuQuai;
     }
+
+    public Integer getQuaiThang() { return quaiThang; }
+    public void setQuaiThang(Integer quaiThang) { this.quaiThang = quaiThang; }
+    public Integer getQuaiGap() { return quaiGap; }
+    public void setQuaiGap(Integer quaiGap) { this.quaiGap = quaiGap; }
+    public Integer getQuaiLoxo() { return quaiLoxo; }
+    public void setQuaiLoxo(Integer quaiLoxo) { this.quaiLoxo = quaiLoxo; }
 
     public Integer getTrangThai() {
         return trangThai;

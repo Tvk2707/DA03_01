@@ -79,10 +79,6 @@
 </div>
 
 <!-- JavaScript -->
-<<<<<<< HEAD:src/main/webapp/FE/Admin/QuanLyMaGiamGia/quan_ly_giam_gia.jsp
 <script src="<%= request.getContextPath() %>/FE/Admin/QuanLyMaGiamGia/quan_ly_giam_gia.js"></script>
-=======
-<script src="quan_ly_giam_gia.js"></script>
->>>>>>> master:src/main/webapp/Admin/QuanLyMaGiamGia/quan_ly_giam_gia.jsp
 </body>
 </html>

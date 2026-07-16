@@ -100,7 +100,7 @@ public class SanPhamChiTietServlet extends HttpServlet {
 
         setLookupAttributes(request);
 
-        request.getRequestDispatcher("/Admin/QuanLySanPham/QuanLySanPhamChiTiet.jsp").forward(request, response);
+        request.getRequestDispatcher("/FE/Admin/QuanLySanPham/QuanLySanPhamChiTiet.jsp").forward(request, response);
     }
 
     private void showAddSanPhamChiTiet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -108,7 +108,7 @@ public class SanPhamChiTietServlet extends HttpServlet {
         setLookupAttributes(request);
         request.setAttribute("sanPhamId", sanPhamId);
         request.setAttribute("action", "add");
-        request.getRequestDispatcher("/Admin/QuanLySanPham/QuanLySanPhamChiTiet.jsp").forward(request, response);
+        request.getRequestDispatcher("/FE/Admin/QuanLySanPham/QuanLySanPhamChiTiet.jsp").forward(request, response);
     }
 
     private void showEditSanPhamChiTiet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -126,7 +126,7 @@ public class SanPhamChiTietServlet extends HttpServlet {
         setLookupAttributes(request);
         request.setAttribute("sanPhamId", sanPhamId);
         request.setAttribute("action", "edit");
-        request.getRequestDispatcher("/Admin/QuanLySanPham/QuanLySanPhamChiTiet.jsp").forward(request, response);
+        request.getRequestDispatcher("/FE/Admin/QuanLySanPham/QuanLySanPhamChiTiet.jsp").forward(request, response);
     }
 
     private void insertSanPhamChiTiet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -145,7 +145,7 @@ public class SanPhamChiTietServlet extends HttpServlet {
             setLookupAttributes(request);
             request.setAttribute("sanPhamId", sanPhamId);
             request.setAttribute("action", "add");
-            request.getRequestDispatcher("/Admin/QuanLySanPham/QuanLySanPhamChiTiet.jsp").forward(request, response);
+            request.getRequestDispatcher("/FE/Admin/QuanLySanPham/QuanLySanPhamChiTiet.jsp").forward(request, response);
         }
     }
 
@@ -162,14 +162,14 @@ public class SanPhamChiTietServlet extends HttpServlet {
             setLookupAttributes(request);
             request.setAttribute("sanPhamId", sanPhamId);
             request.setAttribute("action", "edit");
-            request.getRequestDispatcher("/Admin/QuanLySanPham/QuanLySanPhamChiTiet.jsp").forward(request, response);
+            request.getRequestDispatcher("/FE/Admin/QuanLySanPham/QuanLySanPhamChiTiet.jsp").forward(request, response);
             return;
         }
 
         sanPhamChiTietService.capNhatBienThe(sanPhamChiTiet);
 
         // Chuyển hướng kèm theo sanPhamId để tải lại đúng danh sách biến thể của sản phẩm đó
-        response.sendRedirect(request.getContextPath() + "/SanPhamChiTiet");
+        response.sendRedirect(request.getContextPath() + "/SanPhamChiTiet?sanPhamId=" + sanPhamId);
     }
 
     private void deleteSanPhamChiTiet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -180,14 +180,14 @@ public class SanPhamChiTietServlet extends HttpServlet {
             if (idStr != null && !idStr.trim().isEmpty()) {
                 Integer id = Integer.parseInt(idStr);
                 sanPhamChiTietService.xoaBienThe(id);
-                response.sendRedirect(request.getContextPath() + "/SanPhamChiTiet");
+                response.sendRedirect(request.getContextPath() + "/SanPhamChiTiet?sanPhamId=" + sanPhamIdStr);
             } else {
                 throw new IllegalArgumentException("Không nhận được ID biến thể để xóa.");
             }
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("error", "Lỗi chi tiết: " + e.getMessage());
-            request.getRequestDispatcher("/Admin/QuanLySanPham/QuanLySanPhamChiTiet.jsp").forward(request, response);
+            request.getRequestDispatcher("/FE/Admin/QuanLySanPham/QuanLySanPhamChiTiet.jsp").forward(request, response);
         }
     }
 
@@ -205,7 +205,7 @@ public class SanPhamChiTietServlet extends HttpServlet {
         request.setAttribute("sanPhamChiTiet", sanPhamChiTiet);
         request.setAttribute("sanPhamId", sanPhamId);
         request.setAttribute("action", "tonkho");
-        request.getRequestDispatcher("/Admin/QuanLySanPham/QuanLySanPhamChiTiet.jsp").forward(request, response);
+        request.getRequestDispatcher("/FE/Admin/QuanLySanPham/QuanLySanPhamChiTiet.jsp").forward(request, response);
     }
 
     private void updateTonKho(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -296,6 +296,8 @@ public class SanPhamChiTietServlet extends HttpServlet {
     }
 
     private void setLookupAttributes(HttpServletRequest request) {
+        request.setAttribute("activeMenu", "product");
+        request.setAttribute("activeSubMenu", "pruducthh");
         request.setAttribute("mauSacList", lookupService.layTatCaMauSac());
         request.setAttribute("kichCoList", lookupService.layTatCaKichCo());
     }

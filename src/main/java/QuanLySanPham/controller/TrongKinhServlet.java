@@ -66,18 +66,20 @@ public class TrongKinhServlet extends HttpServlet {
         }
         // List<TrongKinh> items = lookupService.layTatCaTrongKinh();
         request.setAttribute("items", items);
-        request.getRequestDispatcher("/Admin/QuanLyBienThe/TrongKinh.jsp").forward(request, response);
+        request.setAttribute("activeMenu", "attribute");
+        request.setAttribute("activeSubMenu", "lens");
+        request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/TrongKinh.jsp").forward(request, response);
     }
 
     private void showAddTrongKinh(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.getRequestDispatcher("/Admin/QuanLyBienThe/TrongKinh.jsp").forward(request, response);
+        request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/TrongKinh.jsp").forward(request, response);
     }
 
     private void showEditTrongKinh(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Integer id = Integer.parseInt(request.getParameter("id"));
         TrongKinh trongKinh = lookupService.layTrongKinhTheoId(id);
         request.setAttribute("trongKinh", trongKinh);
-        request.getRequestDispatcher("/Admin/QuanLyBienThe/TrongKinh.jsp").forward(request, response);
+        request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/TrongKinh.jsp").forward(request, response);
     }
 
     private void insertTrongKinh(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -88,7 +90,7 @@ public class TrongKinhServlet extends HttpServlet {
         } catch (RuntimeException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("trongKinh", trongKinh);
-            request.getRequestDispatcher("/Admin/QuanLyBienThe/TrongKinh.jsp").forward(request, response);
+            request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/TrongKinh.jsp").forward(request, response);
         }
     }
 
@@ -101,7 +103,7 @@ public class TrongKinhServlet extends HttpServlet {
         } catch (RuntimeException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("trongKinh", trongKinh);
-            request.getRequestDispatcher("/Admin/QuanLyBienThe/TrongKinh.jsp").forward(request, response);
+            request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/TrongKinh.jsp").forward(request, response);
         }
     }
 

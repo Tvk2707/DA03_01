@@ -55,7 +55,7 @@ public class SanPham {
     private Integer trangThai;
 
     // --- THÊM THUỘC TÍNH XÓA MỀM ---
-    @Column(name = "isDeleted", nullable = false)
+    @Transient
     private Boolean isDeleted = false;
     // --------------------------------
 

@@ -56,18 +56,18 @@ public class KieuQuaiKinhServlet extends HttpServlet {
     private void ShowKieuQuaiKinh(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         List<KieuQuaiKinh> items = lookupService.layTatCaKieuQuaiKinh();
         request.setAttribute("items", items);
-        request.getRequestDispatcher("/view/kieuquaikinh/List.jsp").forward(request, response);
+        request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/KieuQuaiKinh.jsp").forward(request, response);
     }
 
     private void showAddKieuQuaiKinh(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.getRequestDispatcher("/view/kieuquaikinh/Add.jsp").forward(request, response);
+        request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/KieuQuaiKinh.jsp").forward(request, response);
     }
 
     private void showEditKieuQuaiKinh(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Integer id = Integer.parseInt(request.getParameter("id"));
         KieuQuaiKinh kieuQuaiKinh = lookupService.layKieuQuaiKinhTheoId(id);
         request.setAttribute("kieuQuaiKinh", kieuQuaiKinh);
-        request.getRequestDispatcher("/view/kieuquaikinh/Edit.jsp").forward(request, response);
+        request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/KieuQuaiKinh.jsp").forward(request, response);
     }
 
     private void insertKieuQuaiKinh(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -78,20 +78,20 @@ public class KieuQuaiKinhServlet extends HttpServlet {
         } catch (RuntimeException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("kieuQuaiKinh", kieuQuaiKinh);
-            request.getRequestDispatcher("/view/kieuquaikinh/Add.jsp").forward(request, response);
+            request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/KieuQuaiKinh.jsp").forward(request, response);
         }
     }
 
     private void updateKieuQuaiKinh(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         KieuQuaiKinh kieuQuaiKinh = getKieuQuaiKinhFron(request);
-        kieuQuaiKinh.setId((long) Integer.parseInt(request.getParameter("id")));
+        kieuQuaiKinh.setId(Integer.parseInt(request.getParameter("id")));
         try {
             lookupService.capNhatKieuQuaiKinh(kieuQuaiKinh);
             response.sendRedirect(request.getContextPath() + "/KieuQuaiKinh");
         } catch (RuntimeException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("kieuQuaiKinh", kieuQuaiKinh);
-            request.getRequestDispatcher("/view/kieuquaikinh/Edit.jsp").forward(request, response);
+            request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/KieuQuaiKinh.jsp").forward(request, response);
         }
     }
 
@@ -102,9 +102,11 @@ public class KieuQuaiKinhServlet extends HttpServlet {
     }
 
     private KieuQuaiKinh getKieuQuaiKinhFron(HttpServletRequest request) {
-        String tenKieuQuaiKinh = request.getParameter("tenKieuQuaiKinh");
         KieuQuaiKinh kieuQuaiKinh = new KieuQuaiKinh();
-        kieuQuaiKinh.setKieuQuai(tenKieuQuaiKinh);
+        kieuQuaiKinh.setQuaiThang(request.getParameter("quaiThang") != null ? 1 : 0);
+        kieuQuaiKinh.setQuaiGap(request.getParameter("quaiGap") != null ? 1 : 0);
+        kieuQuaiKinh.setQuaiLoxo(request.getParameter("quaiLoxo") != null ? 1 : 0);
+        kieuQuaiKinh.setTrangThai(1);
         return kieuQuaiKinh;
     }
 }

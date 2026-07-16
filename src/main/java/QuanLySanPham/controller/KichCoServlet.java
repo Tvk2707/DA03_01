@@ -66,18 +66,20 @@ public class KichCoServlet extends HttpServlet {
         }
         //List<KichCo> items = lookupService.layTatCaKichCo();
         request.setAttribute("items", items);
-        request.getRequestDispatcher("/Admin/QuanLyBienThe/KichCo.jsp").forward(request, response);
+        request.setAttribute("activeMenu", "attribute");
+        request.setAttribute("activeSubMenu", "size");
+        request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/KichCo.jsp").forward(request, response);
     }
 
     private void showAddKichCo(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.getRequestDispatcher("/Admin/QuanLyBienThe/KichCo.jsp").forward(request, response);
+        request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/KichCo.jsp").forward(request, response);
     }
 
     private void showEditKichCo(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Integer id = Integer.parseInt(request.getParameter("id"));
         KichCo kichCo = lookupService.layKichCoTheoId(id);
         request.setAttribute("kichCo", kichCo);
-        request.getRequestDispatcher("/Admin/QuanLyBienThe/KichCo.jsp").forward(request, response);
+        request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/KichCo.jsp").forward(request, response);
     }
 
     private void insertKichCo(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -88,7 +90,7 @@ public class KichCoServlet extends HttpServlet {
         } catch (RuntimeException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("kichCo", kichCo);
-            request.getRequestDispatcher("/Admin/QuanLyBienThe/KichCo.jsp").forward(request, response);
+            request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/KichCo.jsp").forward(request, response);
         }
     }
 
@@ -101,7 +103,7 @@ public class KichCoServlet extends HttpServlet {
         } catch (RuntimeException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("kichCo", kichCo);
-            request.getRequestDispatcher("/Admin/QuanLyBienThe/KichCo.jsp").forward(request, response);
+            request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/KichCo.jsp").forward(request, response);
         }
     }
 

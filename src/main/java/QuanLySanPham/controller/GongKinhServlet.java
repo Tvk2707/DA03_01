@@ -67,16 +67,18 @@ public class GongKinhServlet extends HttpServlet {
             items = lookupService.layTatCaGongKinh();
         }
         request.setAttribute("items", items);
+        request.setAttribute("activeMenu", "attribute");
+        request.setAttribute("activeSubMenu", "frame");
 
         // Nạp danh sách cho 2 dropdown (form Thêm + form Sửa nằm chung trang này)
         napDanhSachDungChung(request);
 
-        request.getRequestDispatcher("/Admin/QuanLyBienThe/GongKinh.jsp").forward(request, response);
+        request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/GongKinh.jsp").forward(request, response);
     }
 
     private void showAddGongKinh(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         napDanhSachDungChung(request);
-        request.getRequestDispatcher("/Admin/QuanLyBienThe/GongKinh.jsp").forward(request, response);
+        request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/GongKinh.jsp").forward(request, response);
     }
 
     private void showEditGongKinh(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -84,7 +86,7 @@ public class GongKinhServlet extends HttpServlet {
         GongKinh gongKinh = lookupService.layGongKinhTheoId(id);
         request.setAttribute("gongKinh", gongKinh);
         napDanhSachDungChung(request);
-        request.getRequestDispatcher("/Admin/QuanLyBienThe/GongKinh.jsp").forward(request, response);
+        request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/GongKinh.jsp").forward(request, response);
     }
 
     private void insertGongKinh(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -98,7 +100,7 @@ public class GongKinhServlet extends HttpServlet {
             // Vẫn cần danh sách items để bảng không bị lỗi khi forward lại
             request.setAttribute("items", lookupService.layTatCaGongKinh());
             napDanhSachDungChung(request);
-            request.getRequestDispatcher("/Admin/QuanLyBienThe/GongKinh.jsp").forward(request, response);
+            request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/GongKinh.jsp").forward(request, response);
         }
     }
 
@@ -112,7 +114,7 @@ public class GongKinhServlet extends HttpServlet {
             request.setAttribute("errorMessage", "Cập nhật gọng kính thất bại: " + e.getMessage());
             request.setAttribute("items", lookupService.layTatCaGongKinh());
             napDanhSachDungChung(request);
-            request.getRequestDispatcher("/Admin/QuanLyBienThe/GongKinh.jsp").forward(request, response);
+            request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/GongKinh.jsp").forward(request, response);
         }
     }
 

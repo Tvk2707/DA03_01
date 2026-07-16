@@ -22,7 +22,7 @@ public class SanPhamChiTietDaoImpl extends GenericDaoImpl<SanPhamChiTiet, Intege
             transaction.begin();
             SanPhamChiTiet entity = em.find(SanPhamChiTiet.class, id);
             if (entity != null) {
-                entity.setIsDeleted(true);
+                entity.setTrangThai(5);
                 em.merge(entity);
                 em.flush(); // ✅ ÉP GHI NGAY LẬP TỨC XUỐNG DATABASE
 
@@ -45,7 +45,7 @@ public class SanPhamChiTietDaoImpl extends GenericDaoImpl<SanPhamChiTiet, Intege
         EntityTransaction transaction = em.getTransaction();
         try {
             transaction.begin();
-            String jpql = "UPDATE SanPhamChiTiet s SET s.isDeleted = true WHERE s.sanPham.id = :sanPhamId AND s.isDeleted = false";
+            String jpql = "UPDATE SanPhamChiTiet s SET s.trangThai = 5 WHERE s.sanPham.id = :sanPhamId AND s.trangThai = 1";
             em.createQuery(jpql)
                     .setParameter("sanPhamId", sanPhamId)
                     .executeUpdate();
@@ -65,7 +65,7 @@ public class SanPhamChiTietDaoImpl extends GenericDaoImpl<SanPhamChiTiet, Intege
     public List<SanPhamChiTiet> findBySanPhamId(Integer sanPhamId) {
         EntityManager em = EntityManagerUtlis.getEntityManager();
         try {
-            String jpql = "SELECT s FROM SanPhamChiTiet s WHERE s.sanPham.id = :sanPhamId AND s.isDeleted = false";
+            String jpql = "SELECT s FROM SanPhamChiTiet s WHERE s.sanPham.id = :sanPhamId AND s.trangThai = 1";
             TypedQuery<SanPhamChiTiet> query = em.createQuery(jpql, SanPhamChiTiet.class);
             query.setParameter("sanPhamId", sanPhamId);
             return query.getResultList();
@@ -85,7 +85,7 @@ public class SanPhamChiTietDaoImpl extends GenericDaoImpl<SanPhamChiTiet, Intege
                     "WHERE s.sanPham.id = :sanPhamId " +
                     "AND s.mauSac.id = :mauSacId " +
                     "AND s.kichCo.id = :kichCoId " +
-                    "AND s.isDeleted = false";
+                    "AND s.trangThai = 1";
             TypedQuery<SanPhamChiTiet> query = em.createQuery(jpql, SanPhamChiTiet.class);
             query.setParameter("sanPhamId", sanPhamId);
             query.setParameter("mauSacId", mauSacId);
@@ -134,7 +134,7 @@ public class SanPhamChiTietDaoImpl extends GenericDaoImpl<SanPhamChiTiet, Intege
                             "LEFT JOIN FETCH s.sanPham " +          // <-- THÊM DÒNG NÀY
                             "LEFT JOIN FETCH s.mauSac " +
                             "LEFT JOIN FETCH s.kichCo " +
-                            "WHERE s.isDeleted = false"
+                    "WHERE s.trangThai = 1"
             );
 
             if (sanPhamId != null) {

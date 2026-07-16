@@ -66,20 +66,20 @@ public class KieuDangServlet extends HttpServlet {
         }
         //  List<KieuDang> items = lookupService.layTatCaKieuDang();
         request.setAttribute("items", items);
-        request.setAttribute("activeMenu", "product");    // Giữ menu cha mở và sáng lên
-        request.setAttribute("activeSubMenu", "category");
-        request.getRequestDispatcher("/Admin/QuanLyBienThe/KieuDang.jsp").forward(request, response);
+        request.setAttribute("activeMenu", "attribute");    // Giữ menu cha mở và sáng lên
+        request.setAttribute("activeSubMenu", "style");
+        request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/KieuDang.jsp").forward(request, response);
     }
 
     private void showAddKieuDang(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.getRequestDispatcher("/Admin/QuanLyBienThe/KieuDang.jsp").forward(request, response);
+        request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/KieuDang.jsp").forward(request, response);
     }
 
     private void showEditKieuDang(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Integer id = Integer.parseInt(request.getParameter("id"));
         KieuDang kieuDang = lookupService.layKieuDangTheoId(id);
         request.setAttribute("kieuDang", kieuDang);
-        request.getRequestDispatcher("/Admin/QuanLyBienThe/KieuDang.jsp").forward(request, response);
+        request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/KieuDang.jsp").forward(request, response);
     }
 
     private void insertKieuDang(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -90,7 +90,7 @@ public class KieuDangServlet extends HttpServlet {
         } catch (RuntimeException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("kieuDang", kieuDang);
-            request.getRequestDispatcher("/Admin/QuanLyBienThe/KieuDang.jsp").forward(request, response);
+            request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/KieuDang.jsp").forward(request, response);
         }
     }
 
@@ -103,7 +103,7 @@ public class KieuDangServlet extends HttpServlet {
         } catch (RuntimeException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("kieuDang", kieuDang);
-            request.getRequestDispatcher("/Admin/QuanLyBienThe/KieuDang.jsp").forward(request, response);
+            request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/KieuDang.jsp").forward(request, response);
         }
     }
 

@@ -46,7 +46,7 @@ public class SanPhamChiTiet {
     private Integer trangThai;
 
     // --- THÊM THUỘC TÍNH XÓA MỀM ---
-    @Column(name = "isDeleted")
+    @Transient
     private Boolean isDeleted = false;
     // --------------------------------
 

@@ -66,20 +66,20 @@ public class DanhMucServlet extends HttpServlet {
         }
         
         request.setAttribute("items", items);
-        request.setAttribute("activeMenu", "product");    // Giữ menu cha mở và sáng lên
+        request.setAttribute("activeMenu", "attribute");    // Giữ menu cha mở và sáng lên
         request.setAttribute("activeSubMenu", "category"); // Làm sáng mục Danh mục
-        request.getRequestDispatcher("/Admin/QuanLyBienThe/DanhMuc.jsp").forward(request, response);
+        request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/DanhMuc.jsp").forward(request, response);
     }
 
     private void showAddDanhMuc(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.getRequestDispatcher("/Admin/QuanLyBienThe/DanhMuc.jsp").forward(request, response);
+        request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/DanhMuc.jsp").forward(request, response);
     }
 
     private void showEditDanhMuc(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Integer id = Integer.parseInt(request.getParameter("id"));
         DanhMuc danhMuc = lookupService.layDanhMucTheoId(id);
         request.setAttribute("danhMuc", danhMuc);
-        request.getRequestDispatcher("/Admin/QuanLyBienThe/DanhMuc.jsp").forward(request, response);
+        request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/DanhMuc.jsp").forward(request, response);
     }
 
     private void insertDanhMuc(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -90,7 +90,7 @@ public class DanhMucServlet extends HttpServlet {
         } catch (RuntimeException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("danhMuc", danhMuc);
-            request.getRequestDispatcher("/Admin/QuanLyBienThe/DanhMuc.jsp").forward(request, response);
+            request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/DanhMuc.jsp").forward(request, response);
         }
     }
 
@@ -103,7 +103,7 @@ public class DanhMucServlet extends HttpServlet {
         } catch (RuntimeException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("danhMuc", danhMuc);
-            request.getRequestDispatcher("/Admin/QuanLyBienThe/DanhMuc.jsp").forward(request, response);
+            request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/DanhMuc.jsp").forward(request, response);
         }
     }
     private void deleteDanhMuc(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -125,7 +125,7 @@ public class DanhMucServlet extends HttpServlet {
             request.setAttribute("items", items);
 
             // Chuyển tiếp về lại trang giao diện chứ không để trắng trang
-            request.getRequestDispatcher("/Admin/QuanLyBienThe/DanhMuc.jsp").forward(request, response);
+            request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/DanhMuc.jsp").forward(request, response);
         }
     }
 

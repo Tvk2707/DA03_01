@@ -9,11 +9,11 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cập nhật sản phẩm - ${sanPham.tenSanPham}</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/layout.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/sidebar.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/header.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/danhmuc.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/sanpham.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/FE/Admin/css/layout.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/FE/Admin/css/sidebar.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/FE/Admin/css/header.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/FE/Admin/css/danhmuc.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/FE/Admin/css/sanpham.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>

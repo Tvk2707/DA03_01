@@ -23,7 +23,7 @@ public class SanPhamDaoImpl extends GenericDaoImpl<SanPham, Integer> implements 
             transaction.begin();
             SanPham sanPham = em.find(SanPham.class, id);
             if (sanPham != null) {
-                sanPham.setIsDeleted(true);
+                sanPham.setTrangThai(5);
                 em.merge(sanPham);
             }
             transaction.commit();
@@ -42,7 +42,7 @@ public class SanPhamDaoImpl extends GenericDaoImpl<SanPham, Integer> implements 
     public List<SanPham> findAll() {
         EntityManager em = EntityManagerUtlis.getEntityManager();
         try {
-            String jpql = "SELECT s FROM SanPham s WHERE s.isDeleted = false ORDER BY s.id DESC";
+            String jpql = "SELECT s FROM SanPham s WHERE s.trangThai = 1 ORDER BY s.id DESC";
             TypedQuery<SanPham> query = em.createQuery(jpql, SanPham.class);
             return query.getResultList();
         } catch (Exception e) {
@@ -57,7 +57,7 @@ public class SanPhamDaoImpl extends GenericDaoImpl<SanPham, Integer> implements 
     public SanPham findById(Integer id) {
         EntityManager em = EntityManagerUtlis.getEntityManager();
         try {
-            String jpql = "SELECT s FROM SanPham s WHERE s.id = :id AND s.isDeleted = false";
+            String jpql = "SELECT s FROM SanPham s WHERE s.id = :id AND s.trangThai = 1";
             TypedQuery<SanPham> query = em.createQuery(jpql, SanPham.class);
             query.setParameter("id", id);
             List<SanPham> results = query.getResultList();
@@ -75,7 +75,7 @@ public class SanPhamDaoImpl extends GenericDaoImpl<SanPham, Integer> implements 
     public SanPham findByTenSanPham(String ten) {
         EntityManager em = EntityManagerUtlis.getEntityManager();
         try {
-            String jpql = "SELECT s FROM SanPham s WHERE s.tenSanPham = :ten AND s.isDeleted = false";
+            String jpql = "SELECT s FROM SanPham s WHERE s.tenSanPham = :ten AND s.trangThai = 1";
             TypedQuery<SanPham> query = em.createQuery(jpql, SanPham.class);
             query.setParameter("ten", ten);
             List<SanPham> results = query.getResultList();
@@ -101,7 +101,7 @@ public class SanPhamDaoImpl extends GenericDaoImpl<SanPham, Integer> implements 
                     "LEFT JOIN FETCH gk.hinhDangGong " +
                     "LEFT JOIN FETCH gk.kieuQuaiKinh " +
                     "LEFT JOIN FETCH s.trongKinh " +
-                    "WHERE s.isDeleted = false " +
+                    "WHERE s.trangThai = 1 " +
                     "ORDER BY s.id ";
             TypedQuery<SanPham> query = em.createQuery(jpql, SanPham.class);
             query.setFirstResult((pageNumber - 1) * pageSize);
@@ -119,7 +119,7 @@ public class SanPhamDaoImpl extends GenericDaoImpl<SanPham, Integer> implements 
     public List<SanPham> findByDanhMuc(Integer danhMucId) {
         EntityManager em = EntityManagerUtlis.getEntityManager();
         try {
-            String jpql = "SELECT s FROM SanPham s WHERE s.danhMuc.id = :danhMucId AND s.isDeleted = false";
+            String jpql = "SELECT s FROM SanPham s WHERE s.danhMuc.id = :danhMucId AND s.trangThai = 1";
             TypedQuery<SanPham> query = em.createQuery(jpql, SanPham.class);
             query.setParameter("danhMucId", danhMucId);
             return query.getResultList();
@@ -135,7 +135,7 @@ public class SanPhamDaoImpl extends GenericDaoImpl<SanPham, Integer> implements 
     public List<SanPham> findByThuongHieu(Integer thuongHieuId) {
         EntityManager em = EntityManagerUtlis.getEntityManager();
         try {
-            String jpql = "SELECT s FROM SanPham s WHERE s.thuongHieu.id = :thuongHieuId AND s.isDeleted = false";
+            String jpql = "SELECT s FROM SanPham s WHERE s.thuongHieu.id = :thuongHieuId AND s.trangThai = 1";
             TypedQuery<SanPham> query = em.createQuery(jpql, SanPham.class);
             query.setParameter("thuongHieuId", thuongHieuId);
             return query.getResultList();
@@ -162,7 +162,7 @@ public class SanPhamDaoImpl extends GenericDaoImpl<SanPham, Integer> implements 
                             "LEFT JOIN FETCH gk.hinhDangGong " +
                             "LEFT JOIN FETCH gk.kieuQuaiKinh " +
                             "LEFT JOIN FETCH s.trongKinh " +
-                            "WHERE s.isDeleted = false");
+                            "WHERE s.trangThai = 1");
             List<String> conditions = new ArrayList<>();
 
             if (tenSanPham != null && !tenSanPham.trim().isEmpty()) {

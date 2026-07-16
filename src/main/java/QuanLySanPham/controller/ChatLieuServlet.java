@@ -66,20 +66,20 @@ public class ChatLieuServlet extends HttpServlet {
         }
         //List<ChatLieu> chatLieuItems = lookupService.layTatCaChatLieu();
         request.setAttribute("items", items);
-        request.setAttribute("activeMenu", "product");    // Giữ menu cha mở và sáng lên
-        request.setAttribute("activeSubMenu", "category");
-        request.getRequestDispatcher("/Admin/QuanLyBienThe/ChatLieu.jsp").forward(request, response);
+        request.setAttribute("activeMenu", "attribute");    // Giữ menu cha mở và sáng lên
+        request.setAttribute("activeSubMenu", "material");
+        request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/ChatLieu.jsp").forward(request, response);
     }
 
     private void showAddChatLieu(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.getRequestDispatcher("/Admin/QuanLyBienThe/ChatLieu.jsp").forward(request, response);
+        request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/ChatLieu.jsp").forward(request, response);
     }
 
     private void showEditChatLieu(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Integer id = Integer.parseInt(request.getParameter("id"));
         ChatLieu chatLieu = lookupService.layChatLieuTheoId(id);
         request.setAttribute("chatLieu", chatLieu);
-        request.getRequestDispatcher("/Admin/QuanLyBienThe/ChatLieu.jsp").forward(request, response);
+        request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/ChatLieu.jsp").forward(request, response);
     }
 
     private void insertChatLieu(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -90,7 +90,7 @@ public class ChatLieuServlet extends HttpServlet {
         } catch (RuntimeException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("chatLieu", chatLieu);
-            request.getRequestDispatcher("/Admin/QuanLyBienThe/ChatLieu.jsp").forward(request, response);
+            request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/ChatLieu.jsp").forward(request, response);
         }
     }
 
@@ -103,7 +103,7 @@ public class ChatLieuServlet extends HttpServlet {
         } catch (RuntimeException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("chatLieu", chatLieu);
-            request.getRequestDispatcher("/Admin/QuanLyBienThe/ChatLieu.jsp").forward(request, response);
+            request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/ChatLieu.jsp").forward(request, response);
         }
     }
 

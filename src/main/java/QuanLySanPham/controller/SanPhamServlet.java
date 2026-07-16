@@ -165,13 +165,13 @@ public class SanPhamServlet extends HttpServlet {
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("totalCount", totalCount);
 
-        request.getRequestDispatcher("/Admin/QuanLySanPham/QuanLySanPham.jsp").forward(request, response);
+        request.getRequestDispatcher("/FE/Admin/QuanLySanPham/QuanLySanPham.jsp").forward(request, response);
     }
 
     private void showAddSanPham(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         setLookupAttributes(request);
         request.setAttribute("action", "add");
-        request.getRequestDispatcher("/Admin/QuanLySanPham/SanPhamAdd.jsp").forward(request, response);
+        request.getRequestDispatcher("/FE/Admin/QuanLySanPham/SanPhamAdd.jsp").forward(request, response);
     }
 
     private void showEditSanPham(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -189,7 +189,7 @@ public class SanPhamServlet extends HttpServlet {
         request.setAttribute("sanPhamChiTiet", sanPhamChiTiet);
         setLookupAttributes(request);
         request.setAttribute("action", "edit");
-        request.getRequestDispatcher("/Admin/QuanLySanPham/SanPhamEdit.jsp").forward(request, response);
+        request.getRequestDispatcher("/FE/Admin/QuanLySanPham/SanPhamEdit.jsp").forward(request, response);
     }
 
     private void insertSanPham(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -202,7 +202,7 @@ public class SanPhamServlet extends HttpServlet {
             request.setAttribute("sanPham", sanPham);
             setLookupAttributes(request);
             request.setAttribute("action", "add");
-            request.getRequestDispatcher("/Admin/QuanLySanPham/SanPhamAdd.jsp").forward(request, response);
+            request.getRequestDispatcher("/FE/Admin/QuanLySanPham/SanPhamAdd.jsp").forward(request, response);
             return;
         }
 
@@ -231,7 +231,7 @@ public class SanPhamServlet extends HttpServlet {
             request.setAttribute("sanPham", sanPham);
             setLookupAttributes(request);
             request.setAttribute("action", "edit");
-            request.getRequestDispatcher("/Admin/QuanLySanPham/SanPhamEdit.jsp").forward(request, response);
+            request.getRequestDispatcher("/FE/Admin/QuanLySanPham/SanPhamEdit.jsp").forward(request, response);
             return;
         }
 
@@ -260,7 +260,7 @@ public class SanPhamServlet extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("error", "Lỗi chi tiết: " + e.getMessage());
-            request.getRequestDispatcher("/Admin/QuanLySanPham/QuanLySanPham.jsp").forward(request, response);
+            request.getRequestDispatcher("/FE/Admin/QuanLySanPham/QuanLySanPham.jsp").forward(request, response);
         }
     }
 
@@ -281,7 +281,7 @@ public class SanPhamServlet extends HttpServlet {
         request.setAttribute("searchDanhMucId", danhMucId);
         request.setAttribute("searchThuongHieuId", thuongHieuId);
 
-        request.getRequestDispatcher("/Admin/QuanLySanPham/QuanLySanPham.jsp").forward(request, response);
+        request.getRequestDispatcher("/FE/Admin/QuanLySanPham/QuanLySanPham.jsp").forward(request, response);
     }
 
     private SanPham getSanPhamFrom(HttpServletRequest request) {
@@ -475,6 +475,8 @@ public class SanPhamServlet extends HttpServlet {
     }
 
     private void setLookupAttributes(HttpServletRequest request) {
+        request.setAttribute("activeMenu", "product");
+        request.setAttribute("activeSubMenu", "product");
         request.setAttribute("danhMucList", lookupService.layTatCaDanhMuc());
         request.setAttribute("thuongHieuList", lookupService.layTatCaThuongHieu());
         request.setAttribute("chatLieuList", lookupService.layTatCaChatLieu());

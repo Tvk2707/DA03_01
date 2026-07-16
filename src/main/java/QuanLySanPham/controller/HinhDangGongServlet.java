@@ -56,18 +56,18 @@ public class HinhDangGongServlet extends HttpServlet {
     private void ShowHinhDangGong(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         List<HinhDangGong> items = lookupService.layTatCaHinhDangGong();
         request.setAttribute("items", items);
-        request.getRequestDispatcher("/view/hinhdanggong/List.jsp").forward(request, response);
+        request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/HinhDangGong.jsp").forward(request, response);
     }
 
     private void showAddHinhDangGong(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.getRequestDispatcher("/view/hinhdanggong/Add.jsp").forward(request, response);
+        request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/HinhDangGong.jsp").forward(request, response);
     }
 
     private void showEditHinhDangGong(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Integer id = Integer.parseInt(request.getParameter("id"));
         HinhDangGong hinhDangGong = lookupService.layHinhDangGongTheoId(id);
         request.setAttribute("hinhDangGong", hinhDangGong);
-        request.getRequestDispatcher("/view/hinhdanggong/Edit.jsp").forward(request, response);
+        request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/HinhDangGong.jsp").forward(request, response);
     }
 
     private void insertHinhDangGong(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -78,7 +78,7 @@ public class HinhDangGongServlet extends HttpServlet {
         } catch (RuntimeException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("hinhDangGong", hinhDangGong);
-            request.getRequestDispatcher("/view/hinhdanggong/Add.jsp").forward(request, response);
+            request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/HinhDangGong.jsp").forward(request, response);
         }
     }
 
@@ -91,7 +91,7 @@ public class HinhDangGongServlet extends HttpServlet {
         } catch (RuntimeException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("hinhDangGong", hinhDangGong);
-            request.getRequestDispatcher("/view/hinhdanggong/Edit.jsp").forward(request, response);
+            request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/HinhDangGong.jsp").forward(request, response);
         }
     }
 

@@ -66,20 +66,20 @@ public class ThuongHieuServlet extends HttpServlet {
         }
         // List<ThuongHieu> items = lookupService.layTatCaThuongHieu();
         request.setAttribute("items", items);
-        request.setAttribute("activeMenu", "product");    // Giữ menu cha mở và sáng lên
-        request.setAttribute("activeSubMenu", "category");
-        request.getRequestDispatcher("/Admin/QuanLyBienThe/ThuongHieu.jsp").forward(request, response);
+        request.setAttribute("activeMenu", "attribute");    // Giữ menu cha mở và sáng lên
+        request.setAttribute("activeSubMenu", "brand");
+        request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/ThuongHieu.jsp").forward(request, response);
     }
 
     private void showAddThuongHieu(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.getRequestDispatcher("/Admin/QuanLyBienThe/ThuongHieu.jsp").forward(request, response);
+        request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/ThuongHieu.jsp").forward(request, response);
     }
 
     private void showEditThuongHieu(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Integer id = Integer.parseInt(request.getParameter("id"));
         ThuongHieu thuongHieu = lookupService.layThuongHieuTheoId(id);
         request.setAttribute("thuongHieu", thuongHieu);
-        request.getRequestDispatcher("/Admin/QuanLyBienThe/ThuongHieu.jsp").forward(request, response);
+        request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/ThuongHieu.jsp").forward(request, response);
     }
 
     private void insertThuongHieu(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -90,7 +90,7 @@ public class ThuongHieuServlet extends HttpServlet {
         } catch (RuntimeException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("thuongHieu", thuongHieu);
-            request.getRequestDispatcher("/Admin/QuanLyBienThe/ThuongHieu.jsp").forward(request, response);
+            request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/ThuongHieu.jsp").forward(request, response);
         }
     }
 
@@ -103,7 +103,7 @@ public class ThuongHieuServlet extends HttpServlet {
         } catch (RuntimeException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("thuongHieu", thuongHieu);
-            request.getRequestDispatcher("/Admin/QuanLyBienThe/ThuongHieu.jsp").forward(request, response);
+            request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/ThuongHieu.jsp").forward(request, response);
         }
     }
 

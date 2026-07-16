@@ -66,18 +66,20 @@ public class MauSacServlet extends HttpServlet {
         }
         //List<MauSac> items = lookupService.layTatCaMauSac();
         request.setAttribute("items", items);
-        request.getRequestDispatcher("/Admin/QuanLyBienThe/MauSac.jsp").forward(request, response);
+        request.setAttribute("activeMenu", "attribute");
+        request.setAttribute("activeSubMenu", "color");
+        request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/MauSac.jsp").forward(request, response);
     }
 
     private void showAddMauSac(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.getRequestDispatcher("/Admin/QuanLyBienThe/MauSac.jsp").forward(request, response);
+        request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/MauSac.jsp").forward(request, response);
     }
 
     private void showEditMauSac(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Integer id = Integer.parseInt(request.getParameter("id"));
         MauSac mauSac = lookupService.layMauSacTheoId(id);
         request.setAttribute("mauSac", mauSac);
-        request.getRequestDispatcher("/Admin/QuanLyBienThe/MauSac.jsp").forward(request, response);
+        request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/MauSac.jsp").forward(request, response);
     }
 
     private void insertMauSac(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -88,7 +90,7 @@ public class MauSacServlet extends HttpServlet {
         } catch (RuntimeException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("mauSac", mauSac);
-            request.getRequestDispatcher("/Admin/QuanLyBienThe/MauSac.jsp").forward(request, response);
+            request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/MauSac.jsp").forward(request, response);
         }
     }
 
@@ -101,7 +103,7 @@ public class MauSacServlet extends HttpServlet {
         } catch (RuntimeException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("mauSac", mauSac);
-            request.getRequestDispatcher("/Admin/QuanLyBienThe/MauSac.jsp").forward(request, response);
+            request.getRequestDispatcher("/FE/Admin/QuanLyBienThe/MauSac.jsp").forward(request, response);
         }
     }
 
