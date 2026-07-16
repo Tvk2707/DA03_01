@@ -2,7 +2,11 @@ package BE.Model;
 
 import java.math.BigDecimal;
 
+<<<<<<< HEAD
 // Dữ liệu sản phẩm chi tiết được lấy từ database để chọn khi thêm hóa đơn.
+=======
+// Sản phẩm còn hàng được lấy từ database để chọn khi thêm hóa đơn.
+>>>>>>> 5a398f6 (delete button)
 public class SanPhamHoaDonView {
     private Integer id;
     private String ma;
