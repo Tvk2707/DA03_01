@@ -27,6 +27,8 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/danhmuc.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/sanpham.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 </head>
 <body>
 <%@include file="../layout/sidebar.jsp" %>
@@ -57,7 +59,6 @@
                 <input type="hidden" name="id" value="${sanPham.id}">
             </c:if>
 
-            <!-- SECTION THÔNG TIN CHUNG SẢN PHẨM -->
             <section class="filter-section sp-card">
                 <div class="filter-header">
                     <div class="filter-title">
@@ -84,8 +85,7 @@
                 <div class="sp-form-grid sp-form-grid-2">
                     <div class="filter-group">
                         <label class="filter-label">Danh mục <span class="required">*</span></label>
-                        <select class="filter-select" name="danhMucId" required>
-                            <option value="">-- Chọn danh mục --</option>
+                        <select class="js-example-basic-multiple filter-select" multiple="multiple" name="danhMucId[]" required>
                             <c:forEach var="dm" items="${danhMucList}">
                                 <option value="${dm.id}" ${dm.id == sanPham.danhMuc.id ? 'selected' : ''}>
                                         ${dm.tenDanhMuc}
@@ -96,8 +96,7 @@
 
                     <div class="filter-group">
                         <label class="filter-label">Thương hiệu <span class="required">*</span></label>
-                        <select class="filter-select" name="thuongHieuId" required>
-                            <option value="">-- Chọn thương hiệu --</option>
+                        <select class="js-example-basic-multiple filter-select" multiple="multiple" name="thuongHieuId[]" required>
                             <c:forEach var="th" items="${thuongHieuList}">
                                 <option value="${th.id}" ${th.id == sanPham.thuongHieu.id ? 'selected' : ''}>
                                         ${th.tenThuongHieu}
@@ -110,8 +109,7 @@
                 <div class="sp-form-grid sp-form-grid-2">
                     <div class="filter-group">
                         <label class="filter-label">Chất liệu <span class="required">*</span></label>
-                        <select class="filter-select" name="chatLieuId" required>
-                            <option value="">-- Chọn chất liệu --</option>
+                        <select class="js-example-basic-multiple filter-select" multiple="multiple" name="chatLieuId[]" required>
                             <c:forEach var="cl" items="${chatLieuList}">
                                 <option value="${cl.id}" ${cl.id == sanPham.chatLieu.id ? 'selected' : ''}>
                                         ${cl.tenChatLieu}
@@ -122,8 +120,7 @@
 
                     <div class="filter-group">
                         <label class="filter-label">Kiểu dáng <span class="required">*</span></label>
-                        <select class="filter-select" name="kieuDangId" required>
-                            <option value="">-- Chọn kiểu dáng --</option>
+                        <select class="js-example-basic-multiple filter-select" multiple="multiple" name="kieuDangId[]" required>
                             <c:forEach var="kd" items="${kieuDangList}">
                                 <option value="${kd.id}" ${kd.id == sanPham.kieuDang.id ? 'selected' : ''}>
                                         ${kd.tenKieuDang}
@@ -136,8 +133,7 @@
                 <div class="sp-form-grid sp-form-grid-2">
                     <div class="filter-group">
                         <label class="filter-label">Gọng kính <span class="required">*</span></label>
-                        <select class="filter-select" name="gongKinhId" required>
-                            <option value="">-- Chọn gọng kính --</option>
+                        <select class="js-example-basic-multiple filter-select" multiple="multiple" name="gongKinhId[]" required>
                             <c:forEach var="gk" items="${gongKinhList}">
                                 <option value="${gk.id}" ${gk.id == sanPham.gongKinh.id ? 'selected' : ''}>
                                         ${gk.hinhDangGong.hinhDang} - ${gk.kieuQuaiKinh.kieuQuai}
@@ -148,8 +144,7 @@
 
                     <div class="filter-group">
                         <label class="filter-label">Tròng kính <span class="required">*</span></label>
-                        <select class="filter-select" name="trongKinhId" required>
-                            <option value="">-- Chọn tròng kính --</option>
+                        <select class="js-example-basic-multiple filter-select" multiple="multiple" name="trongKinhId[]" required>
                             <c:forEach var="tk" items="${trongKinhList}">
                                 <option value="${tk.id}" ${tk.id == sanPham.trongKinh.id ? 'selected' : ''}>
                                         ${tk.loaiTrong}
@@ -176,7 +171,6 @@
                 </div>
             </section>
 
-            <!-- SECTION BỘ CHỌN THUỘC TÍNH ĐỂ TẠO BIẾN THỂ -->
             <section class="filter-section sp-card">
                 <div class="filter-header">
                     <div class="filter-title">
@@ -234,7 +228,6 @@
                 </div>
             </section>
 
-            <!-- SECTION DANH SÁCH BIẾN THỂ (CHIA BOX THEO TỪNG MÀU SẮC) -->
             <section class="sp-hidden" id="variantListCard">
                 <div class="variant-list-head-tools">
                     <h3 class="variant-list-card-title"><i class="fas fa-table-list"></i> Danh sách biến thể theo màu sắc</h3>
@@ -243,11 +236,9 @@
                     </button>
                 </div>
 
-                <!-- Các card nhóm màu sẽ được render tự động bằng JS vào đây -->
                 <div id="colorVariantCardsContainer"></div>
             </section>
 
-            <!-- SECTION ẢNH THEO MÀU SẮC DẠNG GRID GỌN GÀNG PHÍA DƯỚI -->
             <section class="filter-section sp-card sp-hidden" id="colorImageCard">
                 <div class="filter-header">
                     <div class="filter-title" style="font-size: 18px; font-weight: bold;">
@@ -257,7 +248,6 @@
                 <div class="sp-image-grid" id="colorImageGrid"></div>
             </section>
 
-            <!-- BOTTOM BAR ACTIONS -->
             <div class="sp-bottom-actions">
                 <a href="${pageContext.request.contextPath}/SanPham" class="btn-reset" style="text-decoration:none;">
                     <i class="fas fa-times"></i> Hủy
@@ -271,7 +261,6 @@
     </div>
 </div>
 
-<!-- HOP THOAI POPUP NHẬP NHANH GIÁ TRỊ THEO NHÓM -->
 <div class="modal-backdrop sp-hidden" id="bulkApplyModal">
     <div class="modal-box">
         <div class="modal-header">
@@ -485,10 +474,10 @@
         align-items: center;
         gap: 8px;
         padding: 8px 16px;
-        background-color: #fff1f2; /* Nền hồng đỏ nhạt hiện đại */
-        color: #e11d48;            /* Màu chữ đỏ đô nổi bật */
-        border: 1px solid #fecdd3; /* Viền hồng nhạt */
-        border-radius: 8px;        /* Bo góc mềm mại đồng bộ hệ thống */
+        background-color: #fff1f2;
+        color: #e11d48;
+        border: 1px solid #fecdd3;
+        border-radius: 8px;
         font-size: 14px;
         font-weight: 600;
         cursor: pointer;
@@ -496,20 +485,17 @@
         outline: none;
     }
 
-    /* Hiệu ứng khi di chuột qua (Hover) */
     .sp-danger-btn:hover {
-        background-color: #ffe4e6; /* Nền đậm hơn một chút */
-        color: #be123c;            /* Màu đỏ đậm hơn */
+        background-color: #ffe4e6;
+        color: #be123c;
         border-color: #fda4af;
-        box-shadow: 0 2px 6px rgba(225, 29, 72, 0.08); /* Đổ bóng nhẹ */
+        box-shadow: 0 2px 6px rgba(225, 29, 72, 0.08);
     }
 
-    /* Hiệu ứng khi click vào (Active) */
     .sp-danger-btn:active {
-        transform: scale(0.97); /* Hiệu ứng lún nút nhẹ cực chuyên nghiệp */
+        transform: scale(0.97);
     }
 
-    /* Căn chỉnh icon thùng rác bên trong nút */
     .sp-danger-btn i {
         font-size: 14px;
     }
@@ -558,7 +544,7 @@
     }
     .sp-generate-btn:active { transform: scale(0.98); }
 
-    /* --- LAYOUT PHÂN CHIA NHÓM BIẾN THỂ THEO MÀU SẮC (DŨNG THEO ẢNH MẪU) --- */
+    /* --- LAYOUT PHÂN CHIA NHÓM BIẾN THỂ THEO MÀU SẮC --- */
     .variant-list-head-tools {
         display: flex;
         justify-content: space-between;
@@ -810,6 +796,35 @@
     .add-new-btn:hover { background: #a3864b; }
     .add-new-btn:active { transform: scale(0.98); }
 
+    /* Select2 custom styles de dep hon */
+    .select2-container .select2-selection--multiple {
+        min-height: 42px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 2px 8px;
+    }
+    .select2-container--default.select2-container--focus .select2-selection--multiple {
+        border-color: #b4975a;
+        box-shadow: 0 0 0 3px rgba(180, 151, 90, 0.1);
+    }
+    .select2-container--default .select2-selection--multiple .select2-selection__choice {
+        background-color: #f0f4ff;
+        border: 1px solid #dbeafe;
+        border-radius: 6px;
+        color: #1e3a8a;
+        padding: 4px 10px;
+        margin-top: 6px;
+    }
+    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+        color: #93c5fd;
+        margin-right: 6px;
+        border-right: none;
+    }
+    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+        background: transparent;
+        color: #1e3a8a;
+    }
+
     /* RESPONSIVE */
     @media (max-width: 1180px) {
         .sp-form-grid-2, .sp-image-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -823,6 +838,9 @@
     }
 </style>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 <script>
     const variantState = {
         colors: [],
@@ -835,6 +853,15 @@
         colors: readSourceOptions('mauSacSource'),
         sizes: readSourceOptions('kichCoSource')
     };
+
+    // Khoi tao select2
+    $(document).ready(function() {
+        $('.js-example-basic-multiple').select2({
+            placeholder: "-- Chọn thông tin --",
+            allowClear: true,
+            width: '100%'
+        });
+    });
 
     document.addEventListener('DOMContentLoaded', function () {
         // Khởi tạo các ô Tag Input kết hợp Dropdown gọn gàng
@@ -1001,7 +1028,7 @@
         document.getElementById('colorImageCard').classList.remove('sp-hidden');
     }
 
-    /* --- RENDER CARD THEO TỪNG MÀU SẮC (DŨNG THEO LAYOUT ẢNH MẪU) --- */
+    /* --- RENDER CARD THEO TỪNG MÀU SẮC --- */
     function renderColorCards() {
         const container = document.getElementById('colorVariantCardsContainer');
         container.innerHTML = '';
@@ -1159,7 +1186,7 @@
         return productCode + '-' + normalizeCode(color.code || color.label) + '-' + normalizeCode(size.label);
     }
 
-    /* --- RENDERING PHẦN HIỂN THỊ HÌNH ẢNH THEO MÀU SẮC (BLOCK VUÔNG BÊN DƯỚI) --- */
+    /* --- RENDERING PHẦN HIỂN THỊ HÌNH ẢNH THEO MÀU SẮC --- */
     function renderColorUploadCards() {
         const grid = document.getElementById('colorImageGrid');
         grid.innerHTML = '';
