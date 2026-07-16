@@ -16,7 +16,21 @@ public class DatabaseConnectionManager {
                 + ";encrypt=true;" + "trustServerCertificate=true;" + "loginTimeout=30;";
     }
 
+    public static DatabaseConnectionManager fromEnvironment() {
+        String dbName = "quan_ly_ban_kinh"; // Ví dụ: "QuanLySanPham"
+        String user = "sa";                  // Tài khoản SQL Server
+        String pass = "123";
+        DatabaseConnectionManager manager = new DatabaseConnectionManager(dbName, user, pass);
+        return manager;
+    }
+
     public Connection getConnection() throws SQLException {
+        try {
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new SQLException("Failed to load SQL Server driver.", e);
+        }
         return DriverManager.getConnection(this.url);
     }
 }

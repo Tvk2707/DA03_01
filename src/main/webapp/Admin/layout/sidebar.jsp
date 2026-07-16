@@ -53,7 +53,7 @@
             <ul class="menu-list">
 
                 <li class="menu-item">
-                    <a href="#" class="menu-link <%= "invoice".equals(activeMenu) ? "active" : "" %>">
+                    <a href="${pageContext.request.contextPath}/admin/hoa-don" class="menu-link <%= "invoice".equals(activeMenu) ? "active" : "" %>">
                         <i class="fas fa-file-invoice"></i>
                         <span>Quản lý hoá đơn</span>
                     </a>
