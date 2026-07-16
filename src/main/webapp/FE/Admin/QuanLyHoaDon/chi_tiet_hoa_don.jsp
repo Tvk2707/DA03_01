@@ -268,6 +268,6 @@
     </div>
 </div>
 
-<script src="<%= request.getContextPath() %>/Admin/QuanLyHoaDon/hoa_don.js"></script>
+<script src="<%= request.getContextPath() %>/FE/Admin/QuanLyHoaDon/hoa_don.js"></script>
 </body>
 </html>

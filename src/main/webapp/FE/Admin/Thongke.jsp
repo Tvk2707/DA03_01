@@ -11,10 +11,10 @@
     <title>Thống kê - RIOR Admin</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/Admin/css/layout.css">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/Admin/css/sidebar.css">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/Admin/css/header.css">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/Admin/css/thongke.css?v=202607071015">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/layout.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/sidebar.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/header.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/thongke.css?v=202607071015">
 </head>
 <body class="statistics-screen">
 <%@ include file="layout/sidebar.jsp" %>
@@ -265,6 +265,6 @@
     <div><strong>Thành công</strong><span id="statToastMessage"></span></div>
 </div>
 
-<script src="<%= request.getContextPath() %>/Admin/thongke.js?v=202607071015"></script>
+<script src="<%= request.getContextPath() %>/FE/Admin/thongke.js?v=202607071015"></script>
 </body>
 </html>

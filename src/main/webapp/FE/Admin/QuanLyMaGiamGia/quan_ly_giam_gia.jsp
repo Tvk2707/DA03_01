@@ -71,6 +71,6 @@
 
 
 <!-- JavaScript -->
-<script src="<%= request.getContextPath() %>/Admin/QuanLyMaGiamGia/quan_ly_giam_gia.js"></script>
+<script src="<%= request.getContextPath() %>/FE/Admin/QuanLyMaGiamGia/quan_ly_giam_gia.js"></script>
 </body>
 </html>
