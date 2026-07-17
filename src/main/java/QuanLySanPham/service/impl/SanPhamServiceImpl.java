@@ -12,6 +12,7 @@ import QuanLySanPham.service.SanPhamService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -115,8 +116,8 @@ public class SanPhamServiceImpl implements SanPhamService {
      * Các tham số có thể null - nếu null thì bỏ qua điều kiện đó
      */
     @Override
-    public List<SanPham> timKiem(String tenSanPham, Integer danhMucId, Integer thuongHieuId) {
-        return sanPhamDao.search(tenSanPham, danhMucId, thuongHieuId, null, null);
+    public List<SanPham> timKiem(String tenSanPham, Integer danhMucId, Integer thuongHieuId, Double giaTu, Double giaDen) {
+        return sanPhamDao.search(tenSanPham, danhMucId, thuongHieuId, giaTu, giaDen); // Thay thế sanPhamDAO bằng tên biến của bạn
     }
     /**
      * Override lại hàm deleteById của GenericDao để thực hiện XÓA MỀM

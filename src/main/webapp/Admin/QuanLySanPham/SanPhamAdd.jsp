@@ -70,8 +70,10 @@
                     <div class="filter-group">
                         <label class="filter-label">Mã sản phẩm <span class="required">*</span></label>
                         <input type="text" class="filter-input" id="maSanPham" name="maSanPham"
-                               value="${sanPham.maSanPham}" ${isEdit ? 'readonly' : ''} required
-                               placeholder="Ví dụ: SP001" maxlength="60">
+                               value="${isEdit ? sanPham.maSanPham : autoMaSanPham}"
+                               readonly required maxlength="60"
+                               style="background-color: #f3f4f6; cursor: not-allowed; font-weight: 600; color: #4b5563;"
+                               placeholder="Mã tự động sinh...">
                     </div>
 
                     <div class="filter-group">
@@ -85,18 +87,21 @@
                 <div class="sp-form-grid sp-form-grid-2">
                     <div class="filter-group">
                         <label class="filter-label">Danh mục <span class="required">*</span></label>
-                        <select class="js-example-basic-multiple filter-select" multiple="multiple" name="danhMucId[]" required>
+                        <select class="js-example-basic-single filter-select" name="danhMucId" required>
+                            <option value="">-- Chọn danh mục --</option>
                             <c:forEach var="dm" items="${danhMucList}">
                                 <option value="${dm.id}" ${dm.id == sanPham.danhMuc.id ? 'selected' : ''}>
                                         ${dm.tenDanhMuc}
                                 </option>
                             </c:forEach>
+
                         </select>
                     </div>
 
                     <div class="filter-group">
                         <label class="filter-label">Thương hiệu <span class="required">*</span></label>
-                        <select class="js-example-basic-multiple filter-select" multiple="multiple" name="thuongHieuId[]" required>
+                        <select class="js-example-basic-single filter-select" name="thuongHieuId" required>
+                            <option value="">-- Chọn thương hiệu --</option>
                             <c:forEach var="th" items="${thuongHieuList}">
                                 <option value="${th.id}" ${th.id == sanPham.thuongHieu.id ? 'selected' : ''}>
                                         ${th.tenThuongHieu}
@@ -109,7 +114,8 @@
                 <div class="sp-form-grid sp-form-grid-2">
                     <div class="filter-group">
                         <label class="filter-label">Chất liệu <span class="required">*</span></label>
-                        <select class="js-example-basic-multiple filter-select" multiple="multiple" name="chatLieuId[]" required>
+                        <select class="js-example-basic-single filter-select" name="chatLieuId" required>
+                            <option value="">-- Chọn chất liệu --</option>
                             <c:forEach var="cl" items="${chatLieuList}">
                                 <option value="${cl.id}" ${cl.id == sanPham.chatLieu.id ? 'selected' : ''}>
                                         ${cl.tenChatLieu}
@@ -120,7 +126,8 @@
 
                     <div class="filter-group">
                         <label class="filter-label">Kiểu dáng <span class="required">*</span></label>
-                        <select class="js-example-basic-multiple filter-select" multiple="multiple" name="kieuDangId[]" required>
+                        <select class="js-example-basic-single filter-select" name="kieuDangId" required>
+                            <option value="">-- Chọn kiểu dáng --</option>
                             <c:forEach var="kd" items="${kieuDangList}">
                                 <option value="${kd.id}" ${kd.id == sanPham.kieuDang.id ? 'selected' : ''}>
                                         ${kd.tenKieuDang}
@@ -133,7 +140,8 @@
                 <div class="sp-form-grid sp-form-grid-2">
                     <div class="filter-group">
                         <label class="filter-label">Gọng kính <span class="required">*</span></label>
-                        <select class="js-example-basic-multiple filter-select" multiple="multiple" name="gongKinhId[]" required>
+                        <select class="js-example-basic-single filter-select" name="gongKinhId" required>
+                            <option value="">-- Chọn gọng kính --</option>
                             <c:forEach var="gk" items="${gongKinhList}">
                                 <option value="${gk.id}" ${gk.id == sanPham.gongKinh.id ? 'selected' : ''}>
                                         ${gk.hinhDangGong.hinhDang} - ${gk.kieuQuaiKinh.kieuQuai}
@@ -144,7 +152,8 @@
 
                     <div class="filter-group">
                         <label class="filter-label">Tròng kính <span class="required">*</span></label>
-                        <select class="js-example-basic-multiple filter-select" multiple="multiple" name="trongKinhId[]" required>
+                        <select class="js-example-basic-single filter-select" name="trongKinhId" required>
+                            <option value="">-- Chọn tròng kính --</option>
                             <c:forEach var="tk" items="${trongKinhList}">
                                 <option value="${tk.id}" ${tk.id == sanPham.trongKinh.id ? 'selected' : ''}>
                                         ${tk.loaiTrong}
@@ -153,7 +162,6 @@
                         </select>
                     </div>
                 </div>
-
                 <div class="sp-form-grid sp-form-grid-2">
                     <div class="filter-group">
                         <label class="filter-label">Mô tả chi tiết</label>
@@ -164,7 +172,7 @@
                     <div class="filter-group">
                         <label class="filter-label">Trạng thái sản phẩm</label>
                         <select class="filter-select" name="trangThai">
-                            <option value="1" ${sanPham.trangThai == 1 ? 'selected' : ''}>Hoạt động</option>
+                            <option value="1" ${sanPham.trangThai == 1 ? 'selected' : ''}>Đang kinh doanh</option>
                             <option value="0" ${sanPham.trangThai == 0 ? 'selected' : ''}>Ngừng bán</option>
                         </select>
                     </div>
@@ -856,6 +864,14 @@
 
     // Khoi tao select2
     $(document).ready(function() {
+        // Khởi tạo cho các ô chỉ chọn 1 (Chỉ có tính năng tìm kiếm, không cho thêm mới)
+        $('.js-example-basic-single').select2({
+            placeholder: "-- Chọn thông tin --",
+            allowClear: true,
+            width: '100%'
+        });
+
+        // Dành cho các ô chọn nhiều (nếu có)
         $('.js-example-basic-multiple').select2({
             placeholder: "-- Chọn thông tin --",
             allowClear: true,

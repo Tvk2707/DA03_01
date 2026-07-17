@@ -4,6 +4,7 @@
 %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -83,6 +84,253 @@
             align-items: center !important;
             justify-content: center !important;
         }
+
+        /* ========================================================== */
+        /* 🛠️ MỚI: CSS ĐỒNG BỘ SPACING LƯỚI 5 CỘT & POPOVER KHOẢNG GIÁ */
+        /* ========================================================== */
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr); /* Định hình 5 cột hoàn hảo */
+            gap: 16px; /* Hệ thống spacing đồng bộ 16px */
+            align-items: flex-start;
+        }
+
+        .price-popover-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .price-dropdown-trigger {
+            background: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 14px;
+            color: #374151;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 40px;
+            box-sizing: border-box;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+
+        .price-dropdown-trigger:focus, .price-dropdown-trigger.open-active {
+            border-color: #b4975a !important;
+            box-shadow: 0 0 0 3px rgba(180, 151, 90, 0.15);
+        }
+
+        /* Khối Panel Overlay của Khoảng giá */
+        .price-popover-panel {
+            display: none;
+            position: absolute;
+            top: 45px;
+            right: 0;
+            width: 320px;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            overflow: visible;
+        }
+
+        .price-popover-panel.show {
+            display: block;
+        }
+
+        .quick-filter-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+
+        .filter-tag-btn {
+            padding: 4px 10px;
+            background-color: #f3f4f6;
+            color: #4b5563;
+            border: 1px solid #e5e7eb;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-tag-btn:hover {
+            background-color: #e5e7eb;
+            color: #1f2937;
+        }
+
+        .filter-tag-btn.active {
+            background-color: #b4975a;
+            color: #ffffff;
+            border-color: #b4975a;
+        }
+
+        .slider-container {
+            position: relative;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 999px;
+            margin: 25px 10px 20px 10px;
+        }
+
+        .slider-track-bar {
+            position: absolute;
+            height: 100%;
+            background: #b4975a; /* Brand Color hệ thống */
+            border-radius: 999px;
+        }
+
+        .range-input-slider {
+            position: relative;
+        }
+
+        .range-input-slider input[type="range"] {
+            position: absolute;
+            width: 100%;
+            height: 6px;
+            top: -26px;
+            background: none;
+            pointer-events: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+        }
+
+        .range-input-slider input[type="range"]::-webkit-slider-thumb {
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 4px solid #b4975a;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            cursor: pointer;
+            pointer-events: auto;
+            -webkit-appearance: none;
+        }
+
+        .slider-tooltip {
+            position: absolute;
+            background: #b4975a;
+            color: #ffffff;
+            padding: 3px 6px;
+            border-radius: 5px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+            transform: translateX(-50%);
+            top: -30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.15s ease, visibility 0.15s ease;
+        }
+
+        .slider-tooltip::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 4px 4px 0;
+            border-style: solid;
+            border-color: #b4975a transparent transparent;
+        }
+
+        /* Tooltip hiển thị mượt mà khi hover vùng Panel hoặc đang active thanh kéo */
+        .price-popover-panel:hover .slider-tooltip,
+        .range-input-slider input[type="range"]:active ~ .slider-tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .slider-limit-label {
+            position: absolute;
+            top: 12px;
+            font-size: 10px;
+            color: #9ca3af;
+        }
+
+        .input-currency-container {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 12px;
+        }
+
+        .currency-field {
+            flex: 1;
+        }
+
+        .currency-field span {
+            font-size: 11px;
+            color: #6b7280;
+            font-weight: 600;
+        }
+
+        .filter-input:focus {
+            border-color: #b4975a !important;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(180, 151, 90, 0.15);
+        }
+
+        .popover-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 14px;
+            padding-top: 10px;
+            border-top: 1px solid #f3f4f6;
+        }
+
+        .popover-btn {
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .popover-btn-clear {
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+
+        .popover-btn-apply {
+            background: #b4975a;
+            color: #ffffff;
+        }
+
+        /* Responsive Mobile */
+        @media (max-width: 1024px) {
+            .filter-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .price-popover-panel {
+                left: 0;
+                right: auto;
+            }
+        }
+        @media (max-width: 640px) {
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+            .input-currency-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .input-currency-container .input-separator {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
@@ -127,14 +375,15 @@
             </div>
 
             <form action="${pageContext.request.contextPath}/SanPham/search" method="post" id="filterForm">
-                <div class="filter-grid">
+                <!-- Spacing 24px phân ranh giới lưới hàng bộ lọc và nút submit -->
+                <div class="filter-grid" style="margin-bottom: 24px;">
                     <div class="filter-group">
                         <label class="filter-label">Tìm kiếm</label>
                         <input type="text"
                                name="tenSanPham"
                                value="${searchTenSanPham}"
                                class="filter-input"
-                               placeholder="Nhập mã hóa đơn / tên khách / SĐT...">
+                               placeholder="Tìm kiếm ...">
                     </div>
 
                     <div class="filter-group">
@@ -169,13 +418,69 @@
                             <option value="0" ${'0' == searchTrangThai ? 'selected' : ''}>Ngừng bán</option>
                         </select>
                     </div>
+
+                    <!-- 🛠️ MỚI MỤC 1: CỘT THỨ 5 - KHỐI KHOẢNG GIÁ ĐÃ THU GỌN THÀNH DROPDOWN OVERLAY -->
+                    <div class="filter-group price-popover-container" id="pricePopoverContainer">
+                        <label class="filter-label">Khoảng giá</label>
+                        <button type="button" class="price-dropdown-trigger" id="priceDropdownBtn">
+                            <span id="priceTriggerText">Khoảng giá</span>
+                            <i class="fas fa-chevron-down" style="font-size: 12px; color: #9ca3af;"></i>
+                        </button>
+
+                        <div class="price-popover-panel" id="pricePopoverPanel">
+                            <!-- Mốc giá gợi ý nhanh (Quick Filter Tags) -->
+                            <div class="quick-filter-tags">
+                                <button type="button" class="filter-tag-btn" data-min="0" data-max="2000000">Dưới 2tr</button>
+                                <button type="button" class="filter-tag-btn" data-min="2000000" data-max="5000000">2tr - 5tr</button>
+                                <button type="button" class="filter-tag-btn" data-min="5000000" data-max="10000000">5tr - 10tr</button>
+                                <button type="button" class="filter-tag-btn" id="quickTagMax" data-min="10000000" data-max="20000000">Trên 10tr</button>
+                            </div>
+
+                            <div class="slider-container">
+                                <div class="slider-track-bar" id="sliderTrack"></div>
+                                <div class="slider-tooltip" id="tooltipMin">0 đ</div>
+                                <div class="slider-tooltip" id="tooltipMax">20.000.000 đ</div>
+                                <span class="slider-limit-label" style="left: 0;">0 đ</span>
+                                <span class="slider-limit-label" style="right: 0;" id="limitMaxLabel">20.000.000 đ</span>
+                            </div>
+
+                            <div class="range-input-slider">
+                                <!-- Thuộc tính giá trị thô ban đầu để JS tự động Override Max động -->
+                                <input type="range" id="rangeMin" min="0" max="20000000" step="50000" value="${not empty searchGiaTu ? searchGiaTu : 0}">
+                                <input type="range" id="rangeMax" min="0" max="20000000" step="50000" value="${not empty searchGiaDen ? searchGiaDen : 20000000}">
+                            </div>
+
+                            <div class="input-currency-container">
+                                <div class="currency-field">
+                                    <span>Từ (đ)</span>
+                                    <input type="text" id="displayMin" class="filter-input" placeholder="0" style="width: 100%; margin-top: 4px; height: 34px;">
+                                    <input type="hidden" name="giaTu" id="inputMin" value="${not empty searchGiaTu ? searchGiaTu : 0}">
+                                </div>
+                                <span class="input-separator" style="margin-top: 18px; color: #9ca3af; font-weight: bold;">-</span>
+                                <div class="currency-field">
+                                    <span>Đến (đ)</span>
+                                    <input type="text" id="displayMax" class="filter-input" placeholder="Không giới hạn" style="width: 100%; margin-top: 4px; height: 34px;">
+                                    <input type="hidden" name="giaDen" id="inputMax" value="${not empty searchGiaDen ? searchGiaDen : 20000000}">
+                                </div>
+                            </div>
+
+                            <div id="priceValidationError" style="color: #dc2626; font-size: 11px; font-weight: 500; margin-top: 6px; display: none;">
+                                <i class="fas fa-circle-exclamation"></i> Giá từ lớn hơn giá đến!
+                            </div>
+
+                            <div class="popover-actions">
+                                <button type="button" class="popover-btn popover-btn-clear" id="btnPopoverClear">Xóa</button>
+                                <button type="button" class="popover-btn popover-btn-apply" id="btnPopoverApply">Áp dụng</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div style="display: flex; gap: 16px; margin-top: 16px;">
-                    <button type="submit" class="add-new-btn" style="padding: 10px 24px;">
+                <div style="display: flex; gap: 16px;">
+                    <button type="submit" class="add-new-btn" style="padding: 10px 24px;" id="mainSubmitBtn">
                         <i class="fas fa-search"></i> Tìm kiếm
                     </button>
-                    <c:if test="${not empty searchTenSanPham || not empty searchDanhMucId || not empty searchThuongHieuId}">
+                    <c:if test="${not empty searchTenSanPham || not empty searchDanhMucId || not empty searchThuongHieuId || not empty searchGiaTu || not empty searchGiaDen}">
                         <a href="${pageContext.request.contextPath}/SanPham"
                            style="padding: 10px 24px; background: #f3f4f6; color: #6b7280; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
                             <i class="fas fa-times"></i> Xóa bộ lọc
@@ -189,29 +494,60 @@
             <thead>
             <tr>
                 <th>STT</th>
-                <th>Mã SP</th>
-                <th>Tên sản phẩm</th>
-                <th>Danh mục</th>
-                <th>Thương hiệu</th>
-                <th>Chất liệu</th>
-                <th>Kiểu dáng</th>
+                <th>Mã/Sản phẩm</th>
+                <th>Phân Loại/Thương Hiệu</th>
+                <th>Chi Tiết</th>
+                <th>Số lượng</th>
+                <th>Đơn giá</th>
                 <th>Trạng thái</th>
                 <th>Thao tác</th>
             </tr>
             </thead>
             <tbody>
             <c:forEach var="temp" items="${items}" varStatus="status">
-                <tr class="product-row">
-                    <td><span class="category-id">${status.count + (currentPage - 1) * 10}</span></td>
-                    <td><span class="category-code">${temp.maSanPham}</span></td>
-                    <td><span class="category-name">${temp.tenSanPham}</span></td>
-                    <td><span class="category-name">${temp.danhMuc.tenDanhMuc}</span></td>
-                    <td><span class="category-name">${temp.thuongHieu.tenThuongHieu}</span></td>
-                    <td><span class="category-name">${temp.chatLieu.tenChatLieu}</span></td>
-                    <td><span class="category-name">${temp.kieuDang.tenKieuDang}</span></td>
+                <tr class="product-row" data-price="${temp.giaMax}"> <!-- Gắn data-price để JS trích xuất giá max động -->
+                    <td>
+                        <span class="category-id">
+                                ${status.count + ((not empty currentPage ? currentPage : 1) - 1) * 10}
+                        </span>
+                    </td>
+                    <td>
+                        <span style="font-weight: 600; color: #1f2937; display: block; margin-bottom: 4px;">${temp.tenSanPham}</span>
+                        <span style="font-size: 0.85em; color: #6b7280;">${temp.maSanPham}</span>
+                    </td>
+                    <td>
+                        <span style="color: #374151; display: block; margin-bottom: 4px;">${temp.danhMuc.tenDanhMuc}</span>
+                        <span style="font-weight: 600; color: #1f2937; font-size: 0.9em;">${temp.thuongHieu.tenThuongHieu}</span>
+                    </td>
+                    <td>
+                        <span style="color: #374151; display: block; margin-bottom: 4px;">${temp.chatLieu.tenChatLieu}</span>
+                        <span style="color: #6b7280; font-size: 0.9em;">${temp.kieuDang.tenKieuDang}</span>
+                    </td>
+                    <td>
+                        <span style="font-weight: 600; color: #374151;">
+                                ${temp.tongSoLuong != null ? temp.tongSoLuong : 0}
+                        </span>
+                    </td>
+                    <td>
+                        <c:choose>
+                            <c:when test="${temp.giaMin == temp.giaMax && temp.giaMin > 0}">
+                                <strong style="color: #dc2626;">
+                                    <fmt:formatNumber value="${temp.giaMin}" type="number"/> đ
+                                </strong>
+                            </c:when>
+                            <c:when test="${temp.giaMin < temp.giaMax}">
+                                <strong style="color: #dc2626;">
+                                    <fmt:formatNumber value="${temp.giaMin}" type="number"/> - <fmt:formatNumber value="${temp.giaMax}" type="number"/> đ
+                                </strong>
+                            </c:when>
+                            <c:otherwise>
+                                <span style="color: #9ca3af; font-style: italic;">Chưa có giá</span>
+                            </c:otherwise>
+                        </c:choose>
+                    </td>
                     <td>
                         <span class="category-status ${temp.trangThai == 1 ? 'status-active' : 'status-inactive'}">
-                                ${temp.trangThai == 1 ? "Hoạt động" : "Ngừng bán"}
+                                ${temp.trangThai == 1 ? "Đang kinh doanh" : "Ngừng bán"}
                         </span>
                     </td>
                     <td>
@@ -232,7 +568,7 @@
 
             <c:if test="${empty items}">
                 <tr>
-                    <td colspan="9" style="text-align: center; padding: 30px; color: #888;">
+                    <td colspan="8" style="text-align: center; padding: 30px; color: #888;">
                         <i class="fas fa-inbox" style="font-size: 24px; margin-bottom: 10px; display: block;"></i>
                         Không tìm thấy dữ liệu nào.
                     </td>
@@ -243,7 +579,6 @@
 
         <div class="sp-pagination">
             <c:if test="${totalPages > 1}">
-                <%-- Nut Trang truoc --%>
                 <c:choose>
                     <c:when test="${currentPage > 1}">
                         <a href="${pageContext.request.contextPath}/SanPham?page=${currentPage - 1}" class="sp-page-btn">
@@ -255,7 +590,6 @@
                     </c:otherwise>
                 </c:choose>
 
-                <%-- Cac so trang --%>
                 <c:forEach begin="1" end="${totalPages}" var="i">
                     <a href="${pageContext.request.contextPath}/SanPham?page=${i}"
                        class="sp-page-btn ${currentPage == i ? 'active' : ''}">
@@ -263,7 +597,6 @@
                     </a>
                 </c:forEach>
 
-                <%-- Nut Trang sau --%>
                 <c:choose>
                     <c:when test="${currentPage < totalPages}">
                         <a href="${pageContext.request.contextPath}/SanPham?page=${currentPage + 1}" class="sp-page-btn">
@@ -312,7 +645,6 @@
 
     function confirmDelete(button) {
         activeFormToDelete = button.closest('form');
-
         const modalEl = document.getElementById('deleteConfirmModal');
         if (typeof bootstrap !== 'undefined') {
             const bsModal = new bootstrap.Modal(modalEl);
@@ -324,11 +656,8 @@
 
     document.addEventListener('DOMContentLoaded', function () {
         const modalEl = document.getElementById('deleteConfirmModal');
-
         document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
-            if (activeFormToDelete) {
-                activeFormToDelete.submit();
-            }
+            if (activeFormToDelete) activeFormToDelete.submit();
         });
 
         modalEl.querySelectorAll('[data-bs-dismiss="modal"], .btn-close').forEach(btn => {
@@ -340,6 +669,227 @@
                 modalEl.classList.remove('show');
             });
         });
+
+        // =========================================================================
+        // 🛠️ MỚI: TOÀN BỘ LOGIC POPOVER OVERLAY, MAX ĐỘNG, 2 CHIỀU VÀ FORMAT TIỀN TỆ
+        // =========================================================================
+        const dropdownBtn = document.getElementById('priceDropdownBtn');
+        const popoverPanel = document.getElementById('pricePopoverPanel');
+        const triggerText = document.getElementById('priceTriggerText');
+        const rangeMin = document.getElementById('rangeMin');
+        const rangeMax = document.getElementById('rangeMax');
+        const inputMin = document.getElementById('inputMin');
+        const inputMax = document.getElementById('inputMax');
+        const displayMin = document.getElementById('displayMin');
+        const displayMax = document.getElementById('displayMax');
+        const sliderTrack = document.getElementById('sliderTrack');
+        const tooltipMin = document.getElementById('tooltipMin');
+        const tooltipMax = document.getElementById('tooltipMax');
+        const limitMaxLabel = document.getElementById('limitMaxLabel');
+        const quickTagMax = document.getElementById('quickTagMax');
+        const validationError = document.getElementById('priceValidationError');
+        const mainSubmitBtn = document.getElementById('mainSubmitBtn');
+        const btnPopoverApply = document.getElementById('btnPopoverApply');
+        const btnPopoverClear = document.getElementById('btnPopoverClear');
+        const tagButtons = document.querySelectorAll('.filter-tag-btn');
+
+        const minGap = 50000;
+
+        // 1. TÍNH TOÁN GIÁ MAX ĐỘNG TỪ TRANG DATA THỰC TẾ
+        let maxPriceFromData = 10000000; // Ngưỡng sàn dự phòng mặc định 10tr
+        const productRows = document.querySelectorAll('.product-row');
+        productRows.forEach(row => {
+            const priceAttr = parseFloat(row.getAttribute('data-price')) || 0;
+            if (priceAttr > maxPriceFromData) {
+                maxPriceFromData = priceAttr;
+            }
+        });
+
+        // Quy tắc làm tròn lên mốc đẹp (Ví dụ: 8.7tr lên hẳn 10tr hoặc 12tr lên 15tr)
+        let sliderMaxLimit = Math.ceil(maxPriceFromData / 5000000) * 5000000;
+        if(sliderMaxLimit < 10000000) sliderMaxLimit = 10000000;
+
+        // Đồng bộ hóa cấu hình giới hạn cực đại cho các Object
+        rangeMin.max = sliderMaxLimit;
+        rangeMax.max = sliderMaxLimit;
+        limitMaxLabel.textContent = formatCurrencyShort(sliderMaxLimit);
+
+        // Cập nhật lại giá trị cho Tag "Trên 10tr" động khớp với max limit mới
+        quickTagMax.setAttribute('data-max', sliderMaxLimit);
+
+        function formatCurrencyShort(val) {
+            return new Intl.NumberFormat('vi-VN').format(val) + ' đ';
+        }
+
+        function formatNumberString(val) {
+            return new Intl.NumberFormat('vi-VN').format(val);
+        }
+
+        function parseRawNumber(str) {
+            return parseInt(str.replace(/\./g, '')) || 0;
+        }
+
+        // Đóng mở khối popover overlay khi click button
+        dropdownBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            popoverPanel.classList.toggle('show');
+            dropdownBtn.classList.toggle('open-active');
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!document.getElementById('pricePopoverContainer').contains(e.target)) {
+                popoverPanel.classList.remove('show');
+                dropdownBtn.classList.remove('open-active');
+            }
+        });
+
+        popoverPanel.addEventListener('click', function(e){
+            e.stopPropagation(); // Không cho đóng panel khi click bên trong
+        });
+
+        // Cập nhật giao diện (Label, Tooltip) theo thời gian thực (onChange)
+        function updateSliderUI() {
+            const valMin = parseInt(rangeMin.value);
+            const valMax = parseInt(rangeMax.value);
+
+            const percentMin = (valMin / sliderMaxLimit) * 100;
+            const percentMax = (valMax / sliderMaxLimit) * 100;
+
+            sliderTrack.style.left = percentMin + '%';
+            sliderTrack.style.right = (100 - percentMax) + '%';
+
+            tooltipMin.style.left = `calc(${percentMin}% + (${10 - percentMin * 0.2}px))`;
+            tooltipMin.textContent = formatCurrencyShort(valMin);
+
+            tooltipMax.style.left = `calc(${percentMax}% + (${10 - percentMax * 0.2}px))`;
+            tooltipMax.textContent = formatCurrencyShort(valMax);
+
+            displayMin.value = formatNumberString(valMin);
+            displayMax.value = formatNumberString(valMax);
+
+            // Gán giá trị tạm thời vào input hidden
+            inputMin.value = valMin;
+            inputMax.value = valMax;
+
+            // Cập nhật text đại diện trên Nút Dropdown chính
+            triggerText.textContent = formatNumberString(valMin) + "đ - " + formatNumberString(valMax) + "đ";
+
+            validatePrices(valMin, valMax);
+        }
+
+        function validatePrices(minVal, maxVal) {
+            if (minVal > maxVal) {
+                validationError.style.display = 'block';
+                mainSubmitBtn.disabled = true;
+                mainSubmitBtn.style.opacity = '0.5';
+                btnPopoverApply.disabled = true;
+            } else {
+                validationError.style.display = 'none';
+                mainSubmitBtn.disabled = false;
+                mainSubmitBtn.style.opacity = '1';
+                btnPopoverApply.disabled = false;
+            }
+
+            // Tự động highlight Tag gợi ý nhanh nếu trùng khoảng kéo hiện tại
+            tagButtons.forEach(btn => {
+                const tMin = parseInt(btn.getAttribute('data-min'));
+                const tMax = parseInt(btn.getAttribute('data-max'));
+                if (minVal === tMin && maxVal === tMax) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        // Thiết lập lắng nghe sự kiện kéo slider (Chỉ thay đổi UI, không submit ngầm)
+        rangeMin.addEventListener('input', () => {
+            let valMin = parseInt(rangeMin.value);
+            let valMax = parseInt(rangeMax.value);
+            if (valMax - valMin < minGap) rangeMin.value = valMax - minGap;
+            updateSliderUI();
+        });
+
+        rangeMax.addEventListener('input', () => {
+            let valMin = parseInt(rangeMin.value);
+            let valMax = parseInt(rangeMax.value);
+            if (valMax - valMin < minGap) rangeMax.value = valMin + minGap;
+            updateSliderUI();
+        });
+
+        // Đồng bộ gõ phím đảo chiều sang thanh kéo 2 đầu
+        [displayMin, displayMax].forEach(input => {
+            input.addEventListener('input', (e) => {
+                let rawVal = e.target.value.replace(/[^0-9]/g, '');
+                if (rawVal === '') {
+                    e.target.value = '';
+                    return;
+                }
+                const num = parseInt(rawVal);
+                e.target.value = formatNumberString(num);
+
+                const currentMin = parseRawNumber(displayMin.value);
+                const currentMax = parseRawNumber(displayMax.value);
+
+                if (input === displayMin && currentMin <= sliderMaxLimit) rangeMin.value = currentMin;
+                if (input === displayMax && currentMax <= sliderMaxLimit) rangeMax.value = currentMax;
+
+                inputMin.value = currentMin;
+                inputMax.value = currentMax;
+
+                // Đồng bộ nhãn text nút kích hoạt ngoài grid
+                triggerText.textContent = formatNumberString(currentMin) + "đ - " + formatNumberString(currentMax) + "đ";
+
+                const percentMin = (rangeMin.value / sliderMaxLimit) * 100;
+                const percentMax = (rangeMax.value / sliderMaxLimit) * 100;
+                sliderTrack.style.left = percentMin + '%';
+                sliderTrack.style.right = (100 - percentMax) + '%';
+
+                validatePrices(currentMin, currentMax);
+            });
+        });
+
+        // Bấm mốc chọn lọc nhanh
+        tagButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetMin = btn.getAttribute('data-min');
+                const targetMax = btn.getAttribute('data-max');
+
+                rangeMin.value = targetMin;
+                rangeMax.value = targetMax;
+
+                updateSliderUI();
+            });
+        });
+
+        // Nút Xóa riêng phần khoảng giá trong Panel
+        btnPopoverClear.addEventListener('click', () => {
+            rangeMin.value = 0;
+            rangeMax.value = sliderMaxLimit;
+            updateSliderUI();
+            triggerText.textContent = "Khoảng giá";
+            tagButtons.forEach(b => b.classList.remove('active'));
+        });
+
+        // Nút Áp dụng của Popover: Đóng Panel overlay lại
+        btnPopoverApply.addEventListener('click', () => {
+            popoverPanel.classList.remove('show');
+            dropdownBtn.classList.remove('open-active');
+        });
+
+        // Đồng bộ kiểm tra trạng thái cũ lúc tải lại trang (nếu có dữ liệu search cũ)
+        if(parseInt(inputMin.value) > 0 || parseInt(inputMax.value) < sliderMaxLimit) {
+            rangeMin.value = inputMin.value;
+            rangeMax.value = inputMax.value;
+        } else {
+            rangeMax.value = sliderMaxLimit;
+        }
+        updateSliderUI();
+
+        // Nếu ban đầu không có bộ lọc giá, hiển thị text placeholder mặc định
+        if (!'${searchGiaTu}' && !'${searchGiaDen}') {
+            triggerText.textContent = "Khoảng giá";
+        }
     });
 </script>
 </body>

@@ -57,6 +57,39 @@ public class SanPham {
     // --- THÊM THUỘC TÍNH XÓA MỀM ---
     @Column(name = "isDeleted", nullable = false)
     private Boolean isDeleted = false;
+    // -- thêm số lượng , giá min max
+    @jakarta.persistence.Transient
+    private Integer tongSoLuong;
+
+    @jakarta.persistence.Transient
+    private Double giaMin;
+
+    @jakarta.persistence.Transient
+    private Double giaMax;
+
+    public Double getGiaMax() {
+        return giaMax;
+    }
+
+    public void setGiaMax(Double giaMax) {
+        this.giaMax = giaMax;
+    }
+
+    public Double getGiaMin() {
+        return giaMin;
+    }
+
+    public void setGiaMin(Double giaMin) {
+        this.giaMin = giaMin;
+    }
+
+    public Integer getTongSoLuong() {
+        return tongSoLuong;
+    }
+
+    public void setTongSoLuong(Integer tongSoLuong) {
+        this.tongSoLuong = tongSoLuong;
+    }
     // --------------------------------
 
     @OneToMany(mappedBy = "sanPham")

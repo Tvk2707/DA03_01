@@ -101,10 +101,19 @@ public class SanPhamServlet extends HttpServlet {
         String danhMucIdStr = request.getParameter("danhMucId");
         String thuongHieuIdStr = request.getParameter("thuongHieuId");
 
+        // 🛠️ BỔ SUNG: Đón thêm 2 tham số khoảng giá từ Request
+        String giaTuStr = request.getParameter("giaTu");
+        String giaDenStr = request.getParameter("giaDen");
+
         Integer danhMucId = (danhMucIdStr != null && !danhMucIdStr.isEmpty()) ? Integer.parseInt(danhMucIdStr) : null;
         Integer thuongHieuId = (thuongHieuIdStr != null && !thuongHieuIdStr.isEmpty()) ? Integer.parseInt(thuongHieuIdStr) : null;
 
-        List<SanPham> items = sanPhamService.timKiem(tenSanPham, danhMucId, thuongHieuId);
+        // 🛠️ XỬ LÝ AN TOÀN CHỐNG NULL: Nếu tham số trên URL trống thì gán mặc định null chứ không ép kiểu trực tiếp (Sửa lỗi dòng 103)
+        Double giaTu = (giaTuStr != null && !giaTuStr.isEmpty()) ? Double.parseDouble(giaTuStr) : null;
+        Double giaDen = (giaDenStr != null && !giaDenStr.isEmpty()) ? Double.parseDouble(giaDenStr) : null;
+
+        // 🛠️ CẬP NHẬT: Truyền đầy đủ 5 tham số vào hàm timKiem của Service để xuất đúng danh sách đang lọc trên màn hình
+        List<SanPham> items = sanPhamService.timKiem(tenSanPham, danhMucId, thuongHieuId, giaTu, giaDen);
 
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setHeader("Content-Disposition", "attachment; filename=Danh_Sach_San_Pham.xlsx");
@@ -115,7 +124,8 @@ public class SanPhamServlet extends HttpServlet {
             Sheet sheet = workbook.createSheet("Sản Phẩm");
 
             Row headerRow = sheet.createRow(0);
-            String[] columns = {"STT", "Mã SP", "Tên sản phẩm", "Danh mục", "Thương hiệu", "Chất liệu", "Kiểu dáng", "Trạng thái"};
+            // 🛠️ THAY ĐỔI: Thêm cột "Số lượng" và "Đơn giá" vào file Excel của bạn cho khớp giao diện mới
+            String[] columns = {"STT", "Mã SP", "Tên sản phẩm", "Danh mục", "Thương hiệu", "Chất liệu", "Kiểu dáng", "Số lượng", "Đơn giá", "Trạng thái"};
 
             Font headerFont = workbook.createFont();
             headerFont.setBold(true);
@@ -140,8 +150,22 @@ public class SanPhamServlet extends HttpServlet {
                 row.createCell(5).setCellValue(sp.getChatLieu() != null ? sp.getChatLieu().getTenChatLieu() : "");
                 row.createCell(6).setCellValue(sp.getKieuDang() != null ? sp.getKieuDang().getTenKieuDang() : "");
 
-                String trangThaiText = (sp.getTrangThai() == 1) ? "Hoạt động" : "Ngừng bán";
-                row.createCell(7).setCellValue(trangThaiText);
+                // 🛠️ GÁN GIÁ TRỊ: Xuất tổng số lượng biến thể
+                row.createCell(7).setCellValue(sp.getTongSoLuong() != null ? sp.getTongSoLuong() : 0);
+
+                // 🛠️ GÁN GIÁ TRỊ: Xuất chuỗi khoảng giá Min - Max rõ ràng sang Excel
+                String giaText = "Chưa có giá";
+                if (sp.getGiaMin() != null && sp.getGiaMax() != null) {
+                    if (sp.getGiaMin().equals(sp.getGiaMax()) && sp.getGiaMin() > 0) {
+                        giaText = String.format("%,.0f đ", sp.getGiaMin());
+                    } else if (sp.getGiaMin() < sp.getGiaMax()) {
+                        giaText = String.format("%,.0f - %,.0f đ", sp.getGiaMin(), sp.getGiaMax());
+                    }
+                }
+                row.createCell(8).setCellValue(giaText);
+
+                String trangThaiText = (sp.getTrangThai() == 1) ? "Đang kinh doanh" : "Ngừng bán";
+                row.createCell(9).setCellValue(trangThaiText);
             }
 
             for (int i = 0; i < columns.length; i++) {
@@ -160,7 +184,7 @@ public class SanPhamServlet extends HttpServlet {
         int pageSize = 10;
 
         List<SanPham> items = sanPhamService.layCoPhanTrang(page, pageSize);
-        long totalCount = sanPhamService.timKiem("", null, null).size();
+        long totalCount = sanPhamService.timKiem("", null, null,null,null).size();
         int totalPages = (int) Math.ceil((double) totalCount / pageSize);
 
         setLookupAttributes(request);
@@ -174,6 +198,15 @@ public class SanPhamServlet extends HttpServlet {
     }
 
     private void showAddSanPham(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // 1. Đếm tổng số lượng sản phẩm hiện có trong Database
+        int count = sanPhamService.timKiem("", null, null,null,null).size();
+
+        // 2. Sinh mã tự động (Ví dụ có 15 sản phẩm -> tạo mã SP016)
+        String autoMa = String.format("SP%03d", count + 1);
+
+        // 3. Gửi mã này sang file giao diện JSP
+        request.setAttribute("autoMaSanPham", autoMa);
+
         setLookupAttributes(request);
         request.setAttribute("action", "add");
         request.getRequestDispatcher("/Admin/QuanLySanPham/SanPhamAdd.jsp").forward(request, response);
@@ -182,7 +215,7 @@ public class SanPhamServlet extends HttpServlet {
     private void showEditSanPham(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Integer id = Integer.parseInt(request.getParameter("id"));
         SanPham sanPham = sanPhamService.timTheoId(id);
-        
+
         if (sanPham == null) {
             request.setAttribute("error", "Không tìm thấy sản phẩm");
             ShowSanPham(request, response);
@@ -304,21 +337,36 @@ public class SanPhamServlet extends HttpServlet {
         String danhMucIdStr = request.getParameter("danhMucId");
         String thuongHieuIdStr = request.getParameter("thuongHieuId");
 
-        Integer danhMucId = (danhMucIdStr != null && !danhMucIdStr.isEmpty()) ? Integer.parseInt(danhMucIdStr) : null;
-        Integer thuongHieuId = (thuongHieuIdStr != null && !thuongHieuIdStr.isEmpty()) ? Integer.parseInt(thuongHieuIdStr) : null;
+        // Đón 2 tham số khoảng giá dựa vào thuộc tính name="giaTu" và name="giaDen" từ form JSP
+        String giaTuStr = request.getParameter("giaTu");
+        String giaDenStr = request.getParameter("giaDen");
 
-        List<SanPham> items = sanPhamService.timKiem(tenSanPham, danhMucId, thuongHieuId);
+        Integer danhMucId = (danhMucIdStr != null && !danhMucIdStr.isEmpty()) ? Integer.parseInt(danhMucIdStr) : null;
+
+        Integer thuongHieuId = (thuongHieuIdStr != null && !thuongHieuIdStr.isEmpty()) ? Integer.parseInt(thuongHieuIdStr) : null;
+        String pageStr = request.getParameter("page");
+        int page = (pageStr != null && !pageStr.isEmpty()) ? Integer.parseInt(pageStr) : 1;
+        // Ép kiểu sang BigDecimal (hoặc Double tuỳ thuộc kiểu dữ liệu của cột giaBan trong DB)
+        Double giaTu = (giaTuStr != null && !giaTuStr.isEmpty()) ? Double.parseDouble(giaTuStr) : null;
+        Double giaDen = (giaDenStr != null && !giaDenStr.isEmpty()) ? Double.parseDouble(giaDenStr) : null;
+
+        // Truyền thêm giaTu và giaDen xuống Service
+        List<SanPham> items = sanPhamService.timKiem(tenSanPham, danhMucId, thuongHieuId, giaTu, giaDen);
 
         request.setAttribute("items", items);
+        request.setAttribute("currentPage", page); // Thêm dòng này để sửa lỗi STT bị âm
         request.setAttribute("danhMucList", lookupService.layTatCaDanhMuc());
         request.setAttribute("thuongHieuList", lookupService.layTatCaThuongHieu());
         request.setAttribute("searchTenSanPham", tenSanPham);
         request.setAttribute("searchDanhMucId", danhMucId);
         request.setAttribute("searchThuongHieuId", thuongHieuId);
 
+        // Đẩy ngược lại value để giữ trạng thái cho thanh kéo và ô input nhập số
+        request.setAttribute("searchGiaTu", giaTuStr);
+        request.setAttribute("searchGiaDen", giaDenStr);
+
         request.getRequestDispatcher("/Admin/QuanLySanPham/QuanLySanPham.jsp").forward(request, response);
     }
-
     private SanPham getSanPhamFrom(HttpServletRequest request) {
         String tenSanPham = request.getParameter("tenSanPham");
         String maSanPham = request.getParameter("maSanPham");

@@ -45,8 +45,7 @@ public interface SanPhamService {
      * Tìm kiếm sản phẩm theo tên, danh mục, thương hiệu
      * Các tham số có thể null - nếu null thì bỏ qua điều kiện đó
      */
-    List<SanPham> timKiem(String tenSanPham, Integer danhMucId, Integer thuongHieuId);
-
+    List<SanPham> timKiem(String tenSanPham, Integer danhMucId, Integer thuongHieuId, Double giaTu, Double giaDen);
     void softdelete(Integer id);
 
     /**
