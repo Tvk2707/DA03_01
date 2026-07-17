@@ -10,6 +10,11 @@ public class ChiTietHoaDonInput {
         this.soLuong = soLuong;
     }
 
-    public int getIdSanPhamChiTiet() { return idSanPhamChiTiet; }
-    public int getSoLuong() { return soLuong; }
+    public int getIdSanPhamChiTiet() {
+        return idSanPhamChiTiet;
+    }
+
+    public int getSoLuong() {
+        return soLuong;
+    }
 }

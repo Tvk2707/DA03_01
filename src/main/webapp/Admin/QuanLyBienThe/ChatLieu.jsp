@@ -99,14 +99,15 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label for="tenChatLieu">Tên chất liệu</label>
-                    <input type="text" id="tenChatLieu" name="tenChatLieu" placeholder="Nhập tên chất liệu" required>
+                    <input type="text" id="tenChatLieu" name="tenChatLieu" value="${chatLieu.tenChatLieu}" placeholder="Nhập tên chất liệu">
+                    <span class="error-message">${errors.tenChatLieu}</span>
                 </div>
 
                 <div class="form-group">
                     <label for="trangthai">Trạng thái</label>
                     <select id="trangthai" name="trangthai">
-                        <option value="1">Hoạt động</option>
-                        <option value="0">Không hoạt động</option>
+                        <option value="1" ${chatLieu.trangThai == 1 ? 'selected' : ''}>Hoạt động</option>
+                        <option value="0" ${chatLieu.trangThai == 0 ? 'selected' : ''}>Không hoạt động</option>
                     </select>
                 </div>
             </div>
@@ -130,7 +131,8 @@
 
                 <div class="form-group">
                     <label for="editTenChatLieu">Tên chất liệu</label>
-                    <input type="text" id="editTenChatLieu" name="tenChatLieu" value="${chatLieu.tenChatLieu}" placeholder="Nhập tên chất liệu" required>
+                    <input type="text" id="editTenChatLieu" name="tenChatLieu" value="${chatLieu.tenChatLieu}" placeholder="Nhập tên chất liệu">
+                    <span class="error-message">${errors.tenChatLieu}</span>
                 </div>
 
                 <div class="form-group">
@@ -150,7 +152,6 @@
 </div>
 
 <script>
-    // --- XỬ LÝ MODAL THÊM MỚI ---
     function openAddModal() {
         document.getElementById("addCategoryModal").style.display = "flex";
     }
@@ -159,14 +160,10 @@
         document.getElementById("addCategoryModal").style.display = "none";
     }
 
-    // --- XỬ LÝ MODAL SỬA ---
     function openEditModal(id, tenChatLieu, trangThai) {
-        // Đổ dữ liệu từ hàng được click vào các ô input trong Modal Sửa
         document.getElementById("editId").value = id;
         document.getElementById("editTenChatLieu").value = tenChatLieu;
         document.getElementById("editTrangThai").value = trangThai;
-
-        // Hiển thị modal sửa lên màn hình
         document.getElementById("editCategoryModal").style.display = "flex";
     }
 
@@ -174,7 +171,6 @@
         document.getElementById("editCategoryModal").style.display = "none";
     }
 
-    // --- ĐÓNG MODAL KHI CLICK RA NGOÀI VÙNG NỀN TỐI ---
     window.onclick = function(event) {
         let addModal = document.getElementById("addCategoryModal");
         let editModal = document.getElementById("editCategoryModal");
@@ -186,6 +182,17 @@
             editModal.style.display = "none";
         }
     }
+
+    <c:if test="${not empty errors}">
+        <c:choose>
+            <c:when test="${not empty chatLieu.id}">
+                document.getElementById("editCategoryModal").style.display = "flex";
+            </c:when>
+            <c:otherwise>
+                document.getElementById("addCategoryModal").style.display = "flex";
+            </c:otherwise>
+        </c:choose>
+    </c:if>
 </script>
 </body>
 </html>

@@ -20,7 +20,7 @@ public class ChiTietHoaDonController extends HttpServlet {
         try {
             request.setAttribute("hoaDon", hoaDonService.getHoaDonById(id));
             request.setAttribute("chiTietHoaDon", hoaDonService.getChiTietHoaDonById(id));
-            request.getRequestDispatcher("/Admin/Admin/QuanLyHoaDon/chi_tiet_hoa_don.jsp").forward(request, response);
+            request.getRequestDispatcher("/Admin/QuanLyHoaDon/chi_tiet_hoa_don.jsp").forward(request, response);
         } catch (SQLException e) {
             throw new ServletException("Could not get invoice details", e);
         }

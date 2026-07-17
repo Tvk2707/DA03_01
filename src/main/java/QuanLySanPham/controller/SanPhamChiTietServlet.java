@@ -87,12 +87,6 @@ public class SanPhamChiTietServlet extends HttpServlet {
         Integer trangThai = (trangThaiStr != null && !trangThaiStr.isEmpty()) ? Integer.parseInt(trangThaiStr) : null;
 
         List<SanPhamChiTiet> items = sanPhamChiTietService.timKiem(sanPhamId, ma, mauSacId, kichCoId, trangThai);
-        // Neu dang loc theo sanPhamId va tim thay it nhat 1 bien the,
-        // lay thong tin San pham cha gui ra giao dien de hien thi ten/ma tren thong bao
-        if (sanPhamId != null && items != null && !items.isEmpty()) {
-            SanPham sanPhamDuocLoc = items.get(0).getSanPham();
-            request.setAttribute("sanPhamDuocLoc", sanPhamDuocLoc);
-        }
 
         request.setAttribute("items", items);
         request.setAttribute("sanPhamId", sanPhamId);

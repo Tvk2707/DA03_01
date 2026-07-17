@@ -1,11 +1,14 @@
 package QuanLySanPham.controller;
 
 import QuanLySanPham.Entity.ThuongHieu;
+import QuanLySanPham.Utils.ValidationException;
 import QuanLySanPham.service.LookupService;
 import QuanLySanPham.service.impl.LookupServiceImpl;
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
-import jakarta.servlet.annotation.*;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.util.List;
@@ -19,20 +22,23 @@ import java.util.List;
         "/ThuongHieu/delete",
 })
 public class ThuongHieuServlet extends HttpServlet {
-    private LookupService lookupService = new LookupServiceImpl();
+    private final LookupService lookupService = new LookupServiceImpl();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String path = request.getServletPath();
         switch (path) {
             case "/ThuongHieu":
-                ShowThuongHieu(request, response);
+                showThuongHieu(request, response);
                 break;
             case "/ThuongHieu/new":
                 showAddThuongHieu(request, response);
                 break;
             case "/ThuongHieu/edit":
                 showEditThuongHieu(request, response);
+                break;
+            default:
+                showThuongHieu(request, response);
                 break;
         }
     }
@@ -50,10 +56,13 @@ public class ThuongHieuServlet extends HttpServlet {
             case "/ThuongHieu/delete":
                 deleteThuongHieu(request, response);
                 break;
+            default:
+                showThuongHieu(request, response);
+                break;
         }
     }
 
-    private void ShowThuongHieu(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void showThuongHieu(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String keyword = request.getParameter("keyword");
         List<ThuongHieu> items;
 
@@ -65,113 +74,96 @@ public class ThuongHieuServlet extends HttpServlet {
         }
 
         request.setAttribute("items", items);
-        request.setAttribute("activeMenu", "product");    // Giữ menu cha mở và sáng lên
-        request.setAttribute("activeSubMenu", "category");
+        request.setAttribute("activeMenu", "product");
+        request.setAttribute("activeSubMenu", "brand");
         request.getRequestDispatcher("/Admin/QuanLyBienThe/ThuongHieu.jsp").forward(request, response);
     }
 
     private void showAddThuongHieu(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.setAttribute("thuongHieu", new ThuongHieu());
         request.getRequestDispatcher("/Admin/QuanLyBienThe/ThuongHieu.jsp").forward(request, response);
     }
 
     private void showEditThuongHieu(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String idStr = request.getParameter("id");
-        if (idStr != null && !idStr.trim().isEmpty()) {
-            Integer id = Integer.parseInt(idStr.trim());
+        try {
+            int id = Integer.parseInt(request.getParameter("id"));
             ThuongHieu thuongHieu = lookupService.layThuongHieuTheoId(id);
+            if (thuongHieu == null) {
+                response.sendRedirect(request.getContextPath() + "/ThuongHieu");
+                return;
+            }
             request.setAttribute("thuongHieu", thuongHieu);
+            request.getRequestDispatcher("/Admin/QuanLyBienThe/ThuongHieu.jsp").forward(request, response);
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/ThuongHieu");
         }
-        request.getRequestDispatcher("/Admin/QuanLyBienThe/ThuongHieu.jsp").forward(request, response);
     }
 
     private void insertThuongHieu(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        ThuongHieu thuongHieu = new ThuongHieu();
+        ThuongHieu thuongHieu = getThuongHieuFromRequest(request);
         try {
-            thuongHieu = getThuongHieuFron(request);
             lookupService.themThuongHieu(thuongHieu);
             response.sendRedirect(request.getContextPath() + "/ThuongHieu");
-        } catch (RuntimeException e) {
-            // Giữ lại dữ liệu người dùng đã nhập trên form khi có lỗi
-            thuongHieu.setMaThuongHieu(request.getParameter("maThuongHieu"));
-            thuongHieu.setTenThuongHieu(request.getParameter("tenThuongHieu"));
-            String trangthaiStr = request.getParameter("trangthai");
-            if (trangthaiStr != null && !trangthaiStr.trim().isEmpty()) {
-                try { thuongHieu.setTrangThai(Integer.parseInt(trangthaiStr)); } catch (Exception ignored) {}
-            }
-
-            request.setAttribute("errorMessage", e.getMessage());
+        } catch (ValidationException e) {
+            request.setAttribute("errors", e.getErrors());
             request.setAttribute("thuongHieu", thuongHieu);
-            request.getRequestDispatcher("/Admin/QuanLyBienThe/ThuongHieu.jsp").forward(request, response);
+            showThuongHieu(request, response);
         }
     }
 
     private void updateThuongHieu(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        ThuongHieu thuongHieu = new ThuongHieu();
+        ThuongHieu thuongHieu = getThuongHieuFromRequest(request);
         try {
-            thuongHieu = getThuongHieuFron(request);
-
             String idStr = request.getParameter("id");
-            if (idStr == null || idStr.trim().isEmpty()) {
-                throw new IllegalArgumentException("Không tìm thấy ID thương hiệu cần cập nhật!");
-            }
-            thuongHieu.setId(Integer.parseInt(idStr.trim()));
-
+            thuongHieu.setId(Integer.parseInt(idStr));
             lookupService.capNhatThuongHieu(thuongHieu);
             response.sendRedirect(request.getContextPath() + "/ThuongHieu");
-        } catch (RuntimeException e) {
-            // Giữ lại dữ liệu người dùng đã nhập trên form khi có lỗi
-            thuongHieu.setMaThuongHieu(request.getParameter("maThuongHieu"));
-            thuongHieu.setTenThuongHieu(request.getParameter("tenThuongHieu"));
-            String idStr = request.getParameter("id");
-            if (idStr != null && !idStr.trim().isEmpty()) {
-                try { thuongHieu.setId(Integer.parseInt(idStr)); } catch (Exception ignored) {}
-            }
-            String trangthaiStr = request.getParameter("trangthai");
-            if (trangthaiStr != null && !trangthaiStr.trim().isEmpty()) {
-                try { thuongHieu.setTrangThai(Integer.parseInt(trangthaiStr)); } catch (Exception ignored) {}
-            }
-
-            request.setAttribute("errorMessage", e.getMessage());
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/ThuongHieu");
+        } catch (ValidationException e) {
+            request.setAttribute("errors", e.getErrors());
             request.setAttribute("thuongHieu", thuongHieu);
-            request.getRequestDispatcher("/Admin/QuanLyBienThe/ThuongHieu.jsp").forward(request, response);
+            showThuongHieu(request, response);
         }
     }
 
-    private void deleteThuongHieu(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String idStr = request.getParameter("id");
-        if (idStr != null && !idStr.trim().isEmpty()) {
-            Integer id = Integer.parseInt(idStr.trim());
+    private void deleteThuongHieu(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        try {
+            int id = Integer.parseInt(request.getParameter("id"));
             lookupService.xoaThuongHieu(id);
+            response.sendRedirect(request.getContextPath() + "/ThuongHieu");
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/ThuongHieu");
+        } catch (Exception e) {
+            request.setAttribute("errorMessage", "Không thể xóa thương hiệu này vì có sản phẩm đang sử dụng.");
+            showThuongHieu(request, response);
         }
-        response.sendRedirect(request.getContextPath() + "/ThuongHieu");
     }
 
-    private ThuongHieu getThuongHieuFron(HttpServletRequest request) {
+    private ThuongHieu getThuongHieuFromRequest(HttpServletRequest request) {
         String maThuongHieu = request.getParameter("maThuongHieu");
         String tenThuongHieu = request.getParameter("tenThuongHieu");
-        String trangthaiStr = request.getParameter("trangthai");
-
-        // Validate chuỗi null, rỗng hoặc chỉ chứa khoảng trắng
-        if (maThuongHieu == null || maThuongHieu.trim().isEmpty()) {
-            throw new IllegalArgumentException("Mã thương hiệu không được để trống!");
-        }
-        if (tenThuongHieu == null || tenThuongHieu.trim().isEmpty()) {
-            throw new IllegalArgumentException("Tên thương hiệu không được để trống!");
-        }
-        if (trangthaiStr == null || trangthaiStr.trim().isEmpty()) {
-            throw new IllegalArgumentException("Vui lòng chọn trạng thái!");
-        }
+        String trangThaiStr = request.getParameter("trangthai");
 
         ThuongHieu thuongHieu = new ThuongHieu();
-        // Dùng trim() để tự động cắt bỏ khoảng trắng thừa ở hai đầu trước khi lưu
-        thuongHieu.setMaThuongHieu(maThuongHieu.trim());
-        thuongHieu.setTenThuongHieu(tenThuongHieu.trim());
+        thuongHieu.setMaThuongHieu(maThuongHieu);
+        thuongHieu.setTenThuongHieu(tenThuongHieu);
 
-        // Validate kiểu số cho trạng thái
         try {
-            thuongHieu.setTrangThai(Integer.parseInt(trangthaiStr.trim()));
+            if (trangThaiStr != null && !trangThaiStr.isEmpty()) {
+                thuongHieu.setTrangThai(Integer.parseInt(trangThaiStr));
+            }
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Trạng thái không hợp lệ!");
+            // Handle invalid status format if necessary
+        }
+        
+        String idStr = request.getParameter("id");
+        if (idStr != null && !idStr.trim().isEmpty()) {
+            try {
+                thuongHieu.setId(Integer.parseInt(idStr));
+            } catch (NumberFormatException e) {
+                // Ignore if ID is not a valid number
+            }
         }
 
         return thuongHieu;

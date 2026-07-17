@@ -414,7 +414,7 @@ public class HoaDonDAO {
 
     // UPDATE: cập nhật trạng thái và ghi thêm lịch sử hóa đơn.
     public void updateStatus(int id, int status, String note) throws SQLException {
-        String action = status == 5 ? "H\u1ee7y h\u00f3a \u0111\u01a1n" : "C\u1eadp nh\u1eadt tr\u1ea1ng th\u00e1i";
+        String action = status == 5 ? "Hủy hóa đơn" : "Cập nhật trạng thái";
         String sql = "UPDATE hoa_don SET trang_thai = ?, ghi_chu = ? WHERE id = ?";
         String historySql = "INSERT INTO lich_su_hoa_don (id_hoa_don, hanh_dong, ghi_chu) VALUES (?, ?, ?)";
 

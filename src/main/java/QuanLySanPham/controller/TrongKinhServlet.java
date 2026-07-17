@@ -3,9 +3,11 @@ package QuanLySanPham.controller;
 import QuanLySanPham.Entity.TrongKinh;
 import QuanLySanPham.service.LookupService;
 import QuanLySanPham.service.impl.LookupServiceImpl;
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
-import jakarta.servlet.annotation.*;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.util.List;
@@ -19,14 +21,14 @@ import java.util.List;
         "/TrongKinh/delete",
 })
 public class TrongKinhServlet extends HttpServlet {
-    private LookupService lookupService = new LookupServiceImpl();
+    private final LookupService lookupService = new LookupServiceImpl();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String path = request.getServletPath();
         switch (path) {
             case "/TrongKinh":
-                ShowTrongKinh(request, response);
+                showTrongKinh(request, response);
                 break;
             case "/TrongKinh/new":
                 showAddTrongKinh(request, response);
@@ -34,7 +36,9 @@ public class TrongKinhServlet extends HttpServlet {
             case "/TrongKinh/edit":
                 showEditTrongKinh(request, response);
                 break;
-
+            default:
+                showTrongKinh(request, response);
+                break;
         }
     }
 
@@ -51,10 +55,13 @@ public class TrongKinhServlet extends HttpServlet {
             case "/TrongKinh/delete":
                 deleteTrongKinh(request, response);
                 break;
+            default:
+                showTrongKinh(request, response);
+                break;
         }
     }
 
-    private void ShowTrongKinh(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void showTrongKinh(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String keyword = request.getParameter("keyword");
         List<TrongKinh> items;
 
@@ -64,59 +71,98 @@ public class TrongKinhServlet extends HttpServlet {
         } else {
             items = lookupService.layTatCaTrongKinh();
         }
-        // List<TrongKinh> items = lookupService.layTatCaTrongKinh();
+
         request.setAttribute("items", items);
+        request.setAttribute("activeMenu", "product");
+        request.setAttribute("activeSubMenu", "lens");
         request.getRequestDispatcher("/Admin/QuanLyBienThe/TrongKinh.jsp").forward(request, response);
     }
 
     private void showAddTrongKinh(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.setAttribute("trongKinh", new TrongKinh());
         request.getRequestDispatcher("/Admin/QuanLyBienThe/TrongKinh.jsp").forward(request, response);
     }
 
     private void showEditTrongKinh(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        Integer id = Integer.parseInt(request.getParameter("id"));
-        TrongKinh trongKinh = lookupService.layTrongKinhTheoId(id);
-        request.setAttribute("trongKinh", trongKinh);
-        request.getRequestDispatcher("/Admin/QuanLyBienThe/TrongKinh.jsp").forward(request, response);
+        try {
+            int id = Integer.parseInt(request.getParameter("id"));
+            TrongKinh trongKinh = lookupService.layTrongKinhTheoId(id);
+            if (trongKinh == null) {
+                response.sendRedirect(request.getContextPath() + "/TrongKinh");
+                return;
+            }
+            request.setAttribute("trongKinh", trongKinh);
+            request.getRequestDispatcher("/Admin/QuanLyBienThe/TrongKinh.jsp").forward(request, response);
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/TrongKinh");
+        }
     }
 
     private void insertTrongKinh(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        TrongKinh trongKinh = getTrongKinhFron(request);
+        TrongKinh trongKinh = getTrongKinhFromRequest(request);
         try {
             lookupService.themTrongKinh(trongKinh);
             response.sendRedirect(request.getContextPath() + "/TrongKinh");
-        } catch (RuntimeException e) {
+        } catch (IllegalArgumentException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("trongKinh", trongKinh);
-            request.getRequestDispatcher("/Admin/QuanLyBienThe/TrongKinh.jsp").forward(request, response);
+            showTrongKinh(request, response);
         }
     }
 
     private void updateTrongKinh(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        TrongKinh trongKinh = getTrongKinhFron(request);
-        trongKinh.setId(Integer.parseInt(request.getParameter("id")));
+        TrongKinh trongKinh = getTrongKinhFromRequest(request);
         try {
+            String idStr = request.getParameter("id");
+            trongKinh.setId(Integer.parseInt(idStr));
             lookupService.capNhatTrongKinh(trongKinh);
             response.sendRedirect(request.getContextPath() + "/TrongKinh");
-        } catch (RuntimeException e) {
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/TrongKinh");
+        } catch (IllegalArgumentException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("trongKinh", trongKinh);
-            request.getRequestDispatcher("/Admin/QuanLyBienThe/TrongKinh.jsp").forward(request, response);
+            showTrongKinh(request, response);
         }
     }
 
-    private void deleteTrongKinh(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        Integer id = Integer.parseInt(request.getParameter("id"));
-        lookupService.xoaTrongKinh(id);
-        response.sendRedirect(request.getContextPath() + "/TrongKinh");
+    private void deleteTrongKinh(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        try {
+            int id = Integer.parseInt(request.getParameter("id"));
+            lookupService.xoaTrongKinh(id);
+            response.sendRedirect(request.getContextPath() + "/TrongKinh");
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/TrongKinh");
+        } catch (Exception e) {
+            request.setAttribute("errorMessage", "Không thể xóa tròng kính này vì có sản phẩm đang sử dụng.");
+            showTrongKinh(request, response);
+        }
     }
 
-    private TrongKinh getTrongKinhFron(HttpServletRequest request) {
+    private TrongKinh getTrongKinhFromRequest(HttpServletRequest request) {
         String loaiTrong = request.getParameter("loaiTrong");
-        Integer trangthai = Integer.parseInt(request.getParameter("trangthai"));
+        String trangThaiStr = request.getParameter("trangthai");
+
         TrongKinh trongKinh = new TrongKinh();
         trongKinh.setLoaiTrong(loaiTrong);
-        trongKinh.setTrangThai(trangthai);
+
+        try {
+            if (trangThaiStr != null && !trangThaiStr.isEmpty()) {
+                trongKinh.setTrangThai(Integer.parseInt(trangThaiStr));
+            }
+        } catch (NumberFormatException e) {
+            // Handle invalid status format if necessary
+        }
+        
+        String idStr = request.getParameter("id");
+        if (idStr != null && !idStr.trim().isEmpty()) {
+            try {
+                trongKinh.setId(Integer.parseInt(idStr));
+            } catch (NumberFormatException e) {
+                // Ignore if ID is not a valid number
+            }
+        }
+
         return trongKinh;
     }
 }
