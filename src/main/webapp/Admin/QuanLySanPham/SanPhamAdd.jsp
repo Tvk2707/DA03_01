@@ -94,7 +94,6 @@
                                         ${dm.tenDanhMuc}
                                 </option>
                             </c:forEach>
-
                         </select>
                     </div>
 
@@ -864,14 +863,12 @@
 
     // Khoi tao select2
     $(document).ready(function() {
-        // Khởi tạo cho các ô chỉ chọn 1 (Chỉ có tính năng tìm kiếm, không cho thêm mới)
         $('.js-example-basic-single').select2({
             placeholder: "-- Chọn thông tin --",
             allowClear: true,
             width: '100%'
         });
 
-        // Dành cho các ô chọn nhiều (nếu có)
         $('.js-example-basic-multiple').select2({
             placeholder: "-- Chọn thông tin --",
             allowClear: true,
@@ -880,7 +877,6 @@
     });
 
     document.addEventListener('DOMContentLoaded', function () {
-        // Khởi tạo các ô Tag Input kết hợp Dropdown gọn gàng
         initCustomSelect('colors', 'colorInputBox', 'colorDropdown', 'colorOptions', 'colorSelectedTags', 'colorSearch');
         initCustomSelect('sizes', 'sizeInputBox', 'sizeDropdown', 'sizeOptions', 'sizeSelectedTags', 'sizeSearch');
 
@@ -952,6 +948,9 @@
                 optionBtn.classList.toggle('selected');
                 renderSelectedTags(type, selectedTagsId, optionsListId, ghostInput);
                 updateVariantSummary();
+
+                // Cập nhật real-time danh sách hiển thị phía dưới nếu đã bấm tạo trước đó
+                syncVariantsOnAttributeChange();
             });
 
             list.appendChild(optionBtn);
@@ -986,6 +985,9 @@
                 });
 
                 updateVariantSummary();
+
+                // Cập nhật real-time khi gỡ bỏ tag thuộc tính
+                syncVariantsOnAttributeChange();
             });
 
             tagContainer.appendChild(pill);
@@ -1016,6 +1018,23 @@
         document.getElementById('maSanPham').addEventListener('input', refreshVariantCodes);
     }
 
+    // --- HÀM ĐỒNG BỘ REAL-TIME KHI THAY ĐỔI THUỘC TÍNH (MÀU/SIZE) ---
+    function syncVariantsOnAttributeChange() {
+        if (variantState.variants.length === 0) return;
+
+        // Lọc lại mảng chính: giữ lại các biến thể mà màu và kích cỡ của nó vẫn nằm trong danh sách đang chọn
+        variantState.variants = variantState.variants.filter(function(v) {
+            const colorStillExists = variantState.colors.some(c => c.id === v.color.id);
+            const sizeStillExists = variantState.sizes.some(s => s.id === v.size.id);
+            return colorStillExists && sizeStillExists;
+        });
+
+        // Vẽ lại giao diện danh sách biến thể và phần đăng ký ảnh theo màu
+        renderColorCards();
+        renderColorUploadCards();
+        toggleGeneratedCards();
+    }
+
     function generateVariants() {
         if (variantState.colors.length === 0 || variantState.sizes.length === 0) {
             alert('Vui lòng chọn ít nhất 1 màu sắc và 1 kích cỡ.');
@@ -1031,7 +1050,7 @@
                     ma: buildVariantCode(color, size),
                     giaNhap: '',
                     giaBan: '',
-                    soLuongTon: '10', // mac dinh giong anh mau ban gui
+                    soLuongTon: '10',
                     trongLuong: '0',
                     trangThai: '1'
                 });
@@ -1051,7 +1070,6 @@
 
         if (variantState.variants.length === 0) return;
 
-        // Group các biến thể theo color.id
         const grouped = {};
         variantState.variants.forEach(function (v) {
             if (!grouped[v.color.id]) {
@@ -1091,7 +1109,6 @@
             card.innerHTML = cardHtml;
             container.appendChild(card);
 
-            // Render dòng biến thể cụ thể của màu đó
             const tbody = document.getElementById('tbody_' + group.color.id);
             group.items.forEach(function (variant) {
                 const tr = document.createElement('tr');
@@ -1117,13 +1134,18 @@
                     '<button type="button" class="btn-delete-variant" title="Xóa dòng này"><i class="fas fa-times"></i></button>' +
                     '</td>';
 
-                // Sự kiện xóa dòng đơn lẻ
+                // Lắng nghe thay đổi giá trị nhập tay để lưu lại vào state (tránh mất dữ liệu khi vẽ lại)
+                tr.querySelector('.js-ton-kho').addEventListener('input', function(e) { variant.soLuongTon = e.target.value; });
+                tr.querySelector('.js-gia-ban').addEventListener('input', function(e) { variant.giaBan = e.target.value; });
+                tr.querySelector('.js-gia-nhap').addEventListener('input', function(e) { variant.giaNhap = e.target.value; });
+
                 tr.querySelector('.btn-delete-variant').addEventListener('click', function() {
                     const idx = variantState.variants.indexOf(variant);
                     if (idx > -1) {
                         variantState.variants.splice(idx, 1);
                     }
                     renderColorCards();
+                    renderColorUploadCards();
                     toggleGeneratedCards();
                 });
 
@@ -1158,7 +1180,6 @@
         const giaBanVal = document.getElementById('modalGiaBan').value;
         const tonKhoVal = document.getElementById('modalTonKho').value;
 
-        // Cập nhật lại state chính
         variantState.variants.forEach(function (v) {
             if (v.color.id === colorId) {
                 if (giaNhapVal !== '') v.giaNhap = giaNhapVal;
@@ -1167,7 +1188,6 @@
             }
         });
 
-        // Vẽ lại giao diện card nhóm màu
         renderColorCards();
         hideModal();
     }
@@ -1222,7 +1242,6 @@
                 '</label>';
 
             const input = card.querySelector('input[type="file"]');
-            const zone = card.querySelector('.sp-upload-zone-box');
             const previewImg = card.querySelector('#img_prev_' + color.id);
             const previewTxt = card.querySelector('#txt_prev_' + color.id);
 
