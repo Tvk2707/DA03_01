@@ -10,6 +10,7 @@ public class ChiTietHoaDonInput {
         this.soLuong = soLuong;
     }
 
+<<<<<<< HEAD
     public int getIdSanPhamChiTiet() {
         return idSanPhamChiTiet;
     }
@@ -18,3 +19,8 @@ public class ChiTietHoaDonInput {
         return soLuong;
     }
 }
+=======
+    public int getIdSanPhamChiTiet() { return idSanPhamChiTiet; }
+    public int getSoLuong() { return soLuong; }
+}
+>>>>>>> HOA_DON

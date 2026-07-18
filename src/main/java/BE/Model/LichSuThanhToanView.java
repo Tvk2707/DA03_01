@@ -50,4 +50,8 @@ public class LichSuThanhToanView {
     public void setGhiChu(String ghiChu) {
         this.ghiChu = ghiChu;
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> HOA_DON

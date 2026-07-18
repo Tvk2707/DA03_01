@@ -122,4 +122,8 @@ public class HoaDonView {
     public void setTenVoucher(String tenVoucher) {
         this.tenVoucher = tenVoucher;
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> HOA_DON

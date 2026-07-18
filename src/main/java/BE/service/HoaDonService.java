@@ -25,10 +25,13 @@ public class HoaDonService {
         return hoaDonDAO.findById(id);
     }
 
+<<<<<<< HEAD
     public List<ChiTietHoaDonView> getChiTietHoaDonById(int id) throws SQLException {
         return hoaDonDAO.findDetailsByHoaDonId(id);
     }
 
+=======
+>>>>>>> HOA_DON
     public List<NhanVienView> getAllNhanVien() throws SQLException {
         return hoaDonDAO.findAllNhanVien();
     }
@@ -58,6 +61,7 @@ public class HoaDonService {
     }
 
     public void saveHoaDon(HoaDonView hoaDon, List<ChiTietHoaDonInput> productLines) throws SQLException {
+<<<<<<< HEAD
         // Nếu chưa có id thì thêm mới, nếu đã có id thì cập nhật hóa đơn cũ.
         if (hoaDon.getId() == null) {
             if (isBlank(hoaDon.getMaHoaDon()) || hoaDonDAO.existsByMaHoaDon(hoaDon.getMaHoaDon(), null)) {
@@ -77,6 +81,15 @@ public class HoaDonService {
 
     public void huyHoaDon(int id) throws SQLException {
         hoaDonDAO.delete(id);
+=======
+        if (isBlank(hoaDon.getMaHoaDon()) || hoaDonDAO.existsByMaHoaDon(hoaDon.getMaHoaDon(), null)) {
+            hoaDon.setMaHoaDon(hoaDonDAO.generateNextMaHoaDon());
+        }
+        int invoiceId = hoaDonDAO.insert(hoaDon);
+        if (!productLines.isEmpty()) {
+            hoaDonDAO.insertChiTietHoaDon(invoiceId, productLines);
+        }
+>>>>>>> HOA_DON
     }
 
     public void updateTrangThai(int id, int trangThai, String ghiChu) throws SQLException {
@@ -86,4 +99,8 @@ public class HoaDonService {
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> HOA_DON

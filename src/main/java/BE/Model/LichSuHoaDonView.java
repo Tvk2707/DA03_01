@@ -31,4 +31,8 @@ public class LichSuHoaDonView {
     public void setGhiChu(String ghiChu) {
         this.ghiChu = ghiChu;
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> HOA_DON

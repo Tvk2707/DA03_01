@@ -27,7 +27,11 @@ public class HoaDonController extends HttpServlet {
             request.setAttribute("hoaDonList", hoaDonService.getAllHoaDon());
             request.setAttribute("nhanVienList", hoaDonService.getAllNhanVien());
             request.setAttribute("sanPhamList", hoaDonService.getAllSanPhamHoaDon());
+<<<<<<< HEAD
             request.getRequestDispatcher("/Admin/QuanLyHoaDon/quan_ly_hoa_don.jsp").forward(request, response);
+=======
+            request.getRequestDispatcher("/FE/Admin/QuanLyHoaDon/quan_ly_hoa_don.jsp").forward(request, response);
+>>>>>>> HOA_DON
         } catch (SQLException exception) {
             throw new ServletException("Không thể lấy danh sách hóa đơn từ database.", exception);
         }
@@ -115,4 +119,8 @@ public class HoaDonController extends HttpServlet {
             return BigDecimal.ZERO;
         }
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> HOA_DON

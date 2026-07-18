@@ -53,7 +53,17 @@
             <ul class="menu-list">
 
                 <li class="menu-item">
+<<<<<<< HEAD:src/main/webapp/Admin/layout/sidebar.jsp
                     <a href="${pageContext.request.contextPath}/admin/hoa-don" class="menu-link <%= "invoice".equals(activeMenu) ? "active" : "" %>">
+=======
+                    <a href="<%= request.getContextPath() %>/FE/Admin/Thongke.jsp" class="menu-link <%= "dashboard".equals(request.getAttribute("activeMenu"))?"active":""%>">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Thống kê</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="<%= request.getContextPath() %>/admin/hoa-don" class="menu-link <%= "hoadon".equals(request.getAttribute("activeMenu"))?"active":""%>">
+>>>>>>> HOA_DON:src/main/webapp/FE/Admin/layout/sidebar.jsp
                         <i class="fas fa-file-invoice"></i>
                         <span>Quản lý hoá đơn</span>
                     </a>
@@ -104,8 +114,12 @@
                 </li>
 
                 <li class="menu-item">
+<<<<<<< HEAD:src/main/webapp/Admin/layout/sidebar.jsp
                     <a href="../QuanLyMaGiamGia/quan_ly_giam_gia.jsp"
                        class="menu-link <%= "discount".equals(activeMenu) ? "active" : "" %>">
+=======
+                    <a href="<%= request.getContextPath() %>/FE/Admin/QuanLyMaGiamGia/quan_ly_giam_gia.jsp" class="menu-link <%= "giamgia".equals(request.getAttribute("activeMenu"))?"active":""%>">
+>>>>>>> HOA_DON:src/main/webapp/FE/Admin/layout/sidebar.jsp
                         <i class="fas fa-tags"></i>
                         <span>Quản lý giảm giá</span>
                     </a>

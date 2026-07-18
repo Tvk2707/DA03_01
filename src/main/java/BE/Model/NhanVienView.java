@@ -28,4 +28,8 @@ public class NhanVienView {
     public void setHoTen(String hoTen) {
         this.hoTen = hoTen;
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> HOA_DON

@@ -8,7 +8,11 @@ import BE.Model.LichSuThanhToanView;
 import BE.Model.NhanVienView;
 import BE.Model.SanPhamHoaDonView;
 import BE.Model.ThanhToanHoaDonView;
+<<<<<<< HEAD
 import QuanLySanPham.jdbc.DatabaseConnectionManager;
+=======
+import BE.jdbc.DatabaseConnectionManager;
+>>>>>>> HOA_DON
 
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -136,7 +140,11 @@ public class HoaDonDAO {
         String sql = "SELECT sp.ten_san_pham, spct.ma AS ma_san_pham_chi_tiet, "
                 + "dm.ten_danh_muc, th.ten_thuong_hieu, cl.ten_chat_lieu, kd.ten_kieu_dang, "
                 + "hdg.hinh_dang, "
+<<<<<<< HEAD
                 + "kqk.kieu_quai AS kieu_quai_kinh, " // Đã sửa tại đây cực kỳ ngắn gọn
+=======
+                + "kqk.kieu_quai AS kieu_quai_kinh, "
+>>>>>>> HOA_DON
                 + "tk.loai_trong, ms.ten_mau, kc.ten_kich_co, "
                 + "COALESCE(NULLIF(spct.hinh_anh, ''), ha.url_anh) AS hinh_anh_san_pham, "
                 + "cthd.so_luong, cthd.don_gia, cthd.tong_tien "
@@ -373,6 +381,7 @@ public class HoaDonDAO {
         }
     }
 
+<<<<<<< HEAD
     // UPDATE: sửa thông tin cơ bản của hóa đơn.
     public void update(HoaDonView hoaDon) throws SQLException {
         String sql = "UPDATE hoa_don SET ma_hoa_don = ?, ten_nguoi_nhan = ?, sdt_nguoi_nhan = ?, "
@@ -415,6 +424,11 @@ public class HoaDonDAO {
     // UPDATE: cập nhật trạng thái và ghi thêm lịch sử hóa đơn.
     public void updateStatus(int id, int status, String note) throws SQLException {
         String action = status == 5 ? "Hủy hóa đơn" : "Cập nhật trạng thái";
+=======
+    // UPDATE: cập nhật trạng thái và ghi thêm lịch sử hóa đơn.
+    public void updateStatus(int id, int status, String note) throws SQLException {
+        String action = status == 5 ? "H\u1ee7y h\u00f3a \u0111\u01a1n" : "C\u1eadp nh\u1eadt tr\u1ea1ng th\u00e1i";
+>>>>>>> HOA_DON
         String sql = "UPDATE hoa_don SET trang_thai = ?, ghi_chu = ? WHERE id = ?";
         String historySql = "INSERT INTO lich_su_hoa_don (id_hoa_don, hanh_dong, ghi_chu) VALUES (?, ?, ?)";
 
@@ -486,4 +500,8 @@ public class HoaDonDAO {
     private BigDecimal defaultMoney(BigDecimal value) {
         return value == null ? BigDecimal.ZERO : value;
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> HOA_DON
