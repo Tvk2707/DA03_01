@@ -75,9 +75,13 @@ public class DatabaseConnectionManager {
     }
 
     public Connection getConnection() throws SQLException {
+<<<<<<< HEAD
         // DAO gọi hàm này để lấy Connection mới mỗi khi cần truy vấn database.
         loadSqlServerDriver();
 
+=======
+        loadSqlServerDriver();
+>>>>>>> THONG_KE
         if (this.integratedSecurity) {
             return DriverManager.getConnection(this.url);
         }
@@ -108,7 +112,10 @@ public class DatabaseConnectionManager {
     }
 
     private void loadSqlServerDriver() throws SQLException {
+<<<<<<< HEAD
         // Nạp driver JDBC để DriverManager biết cách kết nối SQL Server.
+=======
+>>>>>>> THONG_KE
         try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
         } catch (ClassNotFoundException e) {

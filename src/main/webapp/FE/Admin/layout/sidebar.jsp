@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%
     // Lấy activeMenu một lần, xử lý null để tránh NullPointerException
@@ -10,6 +11,13 @@
 %>
 
 <aside class="sidebar" id="sidebar">
+=======
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+
+
+<aside class="sidebar" id="sidebar">
+    <!-- Logo -->
+>>>>>>> THONG_KE
     <div class="sidebar-logo">
         <div class="logo-icon">
             <i class="fas fa-glasses"></i>
@@ -20,6 +28,7 @@
         </div>
     </div>
 
+<<<<<<< HEAD
     <nav class="sidebar-menu">
 
 
@@ -35,11 +44,26 @@
             </ul>
         </div>
 
+=======
+    <!-- Menu -->
+    <nav class="sidebar-menu">
+        <!-- Sales Channels -->
+>>>>>>> THONG_KE
         <div class="menu-section">
             <div class="menu-title">Kênh bán hàng</div>
             <ul class="menu-list">
                 <li class="menu-item">
+<<<<<<< HEAD
                     <a href="#" class="menu-link <%= "pos".equals(activeMenu) ? "active" : "" %>">
+=======
+                    <a href="#" class="menu-link">
+                        <i class="fas fa-shopping-bag"></i>
+                        <span>Bán hàng online</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="#" class="menu-link">
+>>>>>>> THONG_KE
                         <i class="fas fa-cash-register"></i>
                         <span>Bán tại quầy (POS)</span>
                     </a>
@@ -47,6 +71,7 @@
             </ul>
         </div>
 
+<<<<<<< HEAD
 
         <div class="menu-section">
             <div class="menu-title">Quản trị</div>
@@ -57,17 +82,29 @@
                     <a href="${pageContext.request.contextPath}/admin/hoa-don" class="menu-link <%= "invoice".equals(activeMenu) ? "active" : "" %>">
 =======
                     <a href="<%= request.getContextPath() %>/FE/Admin/Thongke.jsp" class="menu-link <%= "dashboard".equals(request.getAttribute("activeMenu"))?"active":""%>">
+=======
+        <!-- Administration -->
+        <div class="menu-section">
+            <div class="menu-title">Quản trị</div>
+            <ul class="menu-list">
+                <li class="menu-item">
+                    <a href="<%= request.getContextPath() %>/admin/thong-ke" class="menu-link <%= "dashboard".equals(request.getAttribute("activeMenu"))?"active":""%>">
+>>>>>>> THONG_KE
                         <i class="fas fa-chart-bar"></i>
                         <span>Thống kê</span>
                     </a>
                 </li>
                 <li class="menu-item">
                     <a href="<%= request.getContextPath() %>/admin/hoa-don" class="menu-link <%= "hoadon".equals(request.getAttribute("activeMenu"))?"active":""%>">
+<<<<<<< HEAD
 >>>>>>> HOA_DON:src/main/webapp/FE/Admin/layout/sidebar.jsp
+=======
+>>>>>>> THONG_KE
                         <i class="fas fa-file-invoice"></i>
                         <span>Quản lý hoá đơn</span>
                     </a>
                 </li>
+<<<<<<< HEAD
 
                 <li class="menu-item <%= "product".equals(activeMenu) ? "open" : "" %>">
                     <a href="#" class="menu-link <%= "product".equals(activeMenu) ? "active" : "" %>">
@@ -120,18 +157,36 @@
 =======
                     <a href="<%= request.getContextPath() %>/FE/Admin/QuanLyMaGiamGia/quan_ly_giam_gia.jsp" class="menu-link <%= "giamgia".equals(request.getAttribute("activeMenu"))?"active":""%>">
 >>>>>>> HOA_DON:src/main/webapp/FE/Admin/layout/sidebar.jsp
+=======
+                <li class="menu-item">
+                    <a href="#" class="menu-link">
+                        <i class="fas fa-box"></i>
+                        <span>Quản lý sản phẩm</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="<%= request.getContextPath() %>/FE/Admin/QuanLyMaGiamGia/quan_ly_giam_gia.jsp" class="menu-link <%= "giamgia".equals(request.getAttribute("activeMenu"))?"active":""%>">
+>>>>>>> THONG_KE
                         <i class="fas fa-tags"></i>
                         <span>Quản lý giảm giá</span>
                     </a>
                 </li>
                 <li class="menu-item">
+<<<<<<< HEAD
                     <a href="#" class="menu-link <%= "customer".equals(activeMenu) ? "active" : "" %>">
+=======
+                    <a href="#" class="menu-link">
+>>>>>>> THONG_KE
                         <i class="fas fa-users"></i>
                         <span>Quản lý khách hàng</span>
                     </a>
                 </li>
                 <li class="menu-item">
+<<<<<<< HEAD
                     <a href="#" class="menu-link <%= "employee".equals(activeMenu) ? "active" : "" %>">
+=======
+                    <a href="#" class="menu-link">
+>>>>>>> THONG_KE
                         <i class="fas fa-user-tie"></i>
                         <span>Quản lý nhân viên</span>
                     </a>
@@ -140,6 +195,10 @@
         </div>
     </nav>
 
+<<<<<<< HEAD
+=======
+    <!-- Bottom Menu -->
+>>>>>>> THONG_KE
     <div class="sidebar-bottom">
         <ul class="bottom-menu">
             <li class="bottom-item">
@@ -158,6 +217,7 @@
     </div>
 </aside>
 
+<<<<<<< HEAD
 <div class="overlay" id="overlay"></div>
 
 <button class="sidebar-toggle" id="sidebarToggle" type="button">
@@ -165,6 +225,18 @@
 </button>
 <script>
     // --- 1. SIDEBAR TOGGLE TRÊN MOBILE ---
+=======
+<!-- Overlay for mobile -->
+<div class="overlay" id="overlay"></div>
+
+<!-- Mobile Toggle Button -->
+<button class="sidebar-toggle" id="sidebarToggle">
+    <i class="fas fa-bars"></i>
+</button>
+
+<script>
+    // Sidebar toggle functionality
+>>>>>>> THONG_KE
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('overlay');
     const sidebarToggle = document.getElementById('sidebarToggle');
@@ -174,6 +246,7 @@
         overlay.classList.toggle('active');
     }
 
+<<<<<<< HEAD
     if (sidebarToggle) sidebarToggle.addEventListener('click', toggleSidebar);
     if (overlay) overlay.addEventListener('click', toggleSidebar);
 
@@ -343,3 +416,23 @@
         });
     });
 </script>
+=======
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', toggleSidebar);
+    }
+
+    if (overlay) {
+        overlay.addEventListener('click', toggleSidebar);
+    }
+
+    // Close sidebar when clicking on a menu link (mobile)
+    document.querySelectorAll('.menu-link, .bottom-link').forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth <= 1024) {
+                toggleSidebar();
+            }
+        })
+    })
+</script>
+
+>>>>>>> THONG_KE

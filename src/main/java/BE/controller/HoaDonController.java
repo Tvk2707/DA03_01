@@ -1,15 +1,22 @@
 package BE.controller;
 
+<<<<<<< HEAD
 import BE.Model.ChiTietHoaDonInput;
 import BE.Model.HoaDonView;
 import BE.service.HoaDonService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
+=======
+import BE.Model.HoaDonView;
+import BE.service.HoaDonService;
+import jakarta.servlet.ServletException;
+>>>>>>> THONG_KE
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+<<<<<<< HEAD
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -18,11 +25,19 @@ import java.util.List;
 @WebServlet("/admin/hoa-don")
 public class HoaDonController extends HttpServlet {
     // Controller chỉ nhận request từ FE, sau đó gọi service để xử lý nghiệp vụ.
+=======
+import java.sql.SQLException;
+import java.util.Collections;
+import java.util.List;
+
+public class HoaDonController extends HttpServlet {
+>>>>>>> THONG_KE
     private final HoaDonService hoaDonService = new HoaDonService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
+<<<<<<< HEAD
             // GET /admin/hoa-don: lấy danh sách hóa đơn và chuyển sang trang JSP.
             request.setAttribute("hoaDonList", hoaDonService.getAllHoaDon());
             request.setAttribute("nhanVienList", hoaDonService.getAllNhanVien());
@@ -124,3 +139,23 @@ public class HoaDonController extends HttpServlet {
 =======
 }
 >>>>>>> HOA_DON
+=======
+            List<HoaDonView> hoaDonList = hoaDonService.getAllHoaDon();
+            request.setAttribute("hoaDonList", hoaDonList);
+            request.setAttribute("tongHoaDon", hoaDonList.size());
+            request.setAttribute("doanhThu", hoaDonService.tinhTongDoanhThu(hoaDonList));
+            request.setAttribute("dangXuLy", hoaDonService.demDangXuLy(hoaDonList));
+            request.setAttribute("tongSanPham", hoaDonService.demSanPham(hoaDonList));
+        } catch (SQLException e) {
+            request.setAttribute("hoaDonList", Collections.emptyList());
+            request.setAttribute("tongHoaDon", 0);
+            request.setAttribute("doanhThu", java.math.BigDecimal.ZERO);
+            request.setAttribute("dangXuLy", 0);
+            request.setAttribute("tongSanPham", 0);
+            request.setAttribute("errorMessage", "Không lấy được dữ liệu hóa đơn từ database: " + e.getMessage());
+        }
+
+        request.getRequestDispatcher("/FE/Admin/QuanLyHoaDon/quan_ly_hoa_don.jsp").forward(request, response);
+    }
+}
+>>>>>>> THONG_KE

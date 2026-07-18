@@ -7,6 +7,7 @@
     <button class="filter-btn" data-filter="personal">Cá nhân</button>
 </div>
 
+<<<<<<< HEAD
 <!-- Coupons Grid -->
 <div class="coupons-grid">
     <!-- Card 1: RIOR2025 -->
@@ -257,3 +258,12 @@
         </div>
     </div>
 </div>
+=======
+<!-- Coupons Grid: dữ liệu sẽ được đổ từ backend/database sau -->
+<div class="coupons-grid">
+    <div class="empty-state">
+        <i class="fas fa-ticket"></i>
+        <p>Chưa có mã giảm giá từ database</p>
+    </div>
+</div>
+>>>>>>> THONG_KE

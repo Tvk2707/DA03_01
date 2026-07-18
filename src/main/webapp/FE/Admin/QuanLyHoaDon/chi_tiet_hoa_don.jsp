@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <%@ page import="BE.Model.ChiTietHoaDonView" %>
 <%@ page import="BE.Model.HoaDonView" %>
 <%@ page import="BE.Model.LichSuHoaDonView" %>
@@ -155,12 +156,19 @@
 
         return "";
     }
+=======
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%
+    request.setAttribute("pageTitle", "Chi tiết hóa đơn");
+    request.setAttribute("activeMenu", "hoadon");
+>>>>>>> THONG_KE
 %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<<<<<<< HEAD
     <title>Chi tiết hóa đơn</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -168,6 +176,15 @@
     <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/sidebar.css">
     <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/header.css">
     <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/hoa_don.css">
+=======
+    <title>Chi tiết hóa đơn - RIOR Admin</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/layout.css">
+    <link rel="stylesheet" href="../css/sidebar.css">
+    <link rel="stylesheet" href="../css/header.css">
+    <link rel="stylesheet" href="../css/hoa_don.css">
+>>>>>>> THONG_KE
 </head>
 <body>
 <%@ include file="../layout/sidebar.jsp" %>
@@ -176,17 +193,27 @@
     <%@ include file="../layout/header.jsp" %>
 
     <main id="page-content" class="invoice-page invoice-detail-page">
+<<<<<<< HEAD
         <%-- Tiêu đề trang chi tiết và nút quay lại danh sách. --%>
         <section class="invoice-page-header">
             <div>
                 <h1 class="invoice-title">Chi tiết hóa đơn</h1>
             </div>
             <a class="invoice-btn invoice-btn--outline" href="<%= request.getContextPath() %>/admin/hoa-don">
+=======
+        <section class="invoice-page-header">
+            <div>
+                <h1 class="invoice-title">Chi tiết hóa đơn</h1>
+                <p class="invoice-subtitle">Kiểm tra thông tin khách hàng, giao nhận, thanh toán và sản phẩm kính mắt</p>
+            </div>
+            <a class="invoice-btn invoice-btn--outline" href="quan_ly_hoa_don.jsp">
+>>>>>>> THONG_KE
                 <i class="fas fa-arrow-left"></i>
                 Quay lại
             </a>
         </section>
 
+<<<<<<< HEAD
         <%-- Khu vực làm việc chính: sản phẩm, thông tin giao hàng và thanh toán. --%>
         <section class="invoice-workspace">
             <div class="invoice-workspace__left">
@@ -361,6 +388,25 @@
             </div>
             <div class="invoice-action-right">
                 <button class="invoice-btn invoice-btn--outline" type="button" data-open-modal="historyModal">
+=======
+        <section class="invoice-timeline-card">
+            <div class="invoice-timeline" id="invoiceTimeline"></div>
+        </section>
+
+        <section class="invoice-detail-actions">
+            <div class="invoice-action-left">
+                <button class="invoice-btn invoice-btn--primary" id="btnChangeStatus" type="button">
+                    <i class="fas fa-arrows-rotate"></i>
+                    <span>Đổi trạng thái</span>
+                </button>
+                <button class="invoice-btn invoice-btn--danger" id="btnCancelOrder" type="button">
+                    <i class="fas fa-ban"></i>
+                    Hủy đơn
+                </button>
+            </div>
+            <div class="invoice-action-right">
+                <button class="invoice-btn invoice-btn--outline" id="btnHistory" type="button">
+>>>>>>> THONG_KE
                     <i class="fas fa-clock-rotate-left"></i>
                     Chi tiết lịch sử
                 </button>
@@ -371,11 +417,15 @@
             </div>
         </section>
 
+<<<<<<< HEAD
         <%-- Tóm tắt nhanh mã hóa đơn, trạng thái, nhân viên và tổng tiền. --%>
+=======
+>>>>>>> THONG_KE
         <section class="invoice-detail-summary">
             <div>
                 <div class="invoice-summary-title">
                     <h2>Thông tin đơn hàng</h2>
+<<<<<<< HEAD
                     <span class="invoice-status <%= statusClass(hoaDon.getTrangThai()) %>"><%= statusText(hoaDon.getTrangThai()) %></span>
                     <span class="invoice-pill"><%= text(hoaDon.getTenNhanVien()).equals("-") ? "Bán hàng online" : "Tại quầy" %></span>
                 </div>
@@ -385,21 +435,41 @@
                     Tạo lúc: <strong><%= hoaDon.getNgayTao() == null ? "-" : hoaDon.getNgayTao().format(dateFormat) %></strong>
                     <span>•</span>
                     NV xử lý: <strong><%= text(hoaDon.getTenNhanVien()) %></strong>
+=======
+                    <span class="invoice-status" id="summaryStatus">-</span>
+                    <span class="invoice-pill" id="summaryType">-</span>
+                </div>
+                <p>
+                    Mã: <strong id="summaryCode">-</strong>
+                    <span>•</span>
+                    Tạo lúc: <strong id="summaryCreated">-</strong>
+                    <span>•</span>
+                    NV xử lý: <strong id="summaryStaff">-</strong>
+>>>>>>> THONG_KE
                 </p>
             </div>
             <div class="invoice-total-box">
                 <span>Tổng thanh toán</span>
+<<<<<<< HEAD
                 <strong><%= moneyFormat.format(hoaDon.getTongTienThanhToan()) %> đ</strong>
                 <small>Đã ghi nhận: <b><%= moneyFormat.format(paidTotal) %> đ</b></small>
             </div>
         </section>
 
         <%-- Thông tin người nhận, giao hàng và tổng tiền. --%>
+=======
+                <strong id="summaryTotal">0 VND</strong>
+                <small>Da thanh toan: <b id="summaryPaid">0 VND</b></small>
+            </div>
+        </section>
+
+>>>>>>> THONG_KE
         <section class="invoice-info-grid">
             <article class="invoice-info-panel">
                 <h3><i class="far fa-user"></i> Khách hàng</h3>
                 <dl>
                     <dt>Họ tên</dt>
+<<<<<<< HEAD
                     <dd><%= text(hoaDon.getTenNguoiNhan()) %></dd>
                     <dt>SĐT</dt>
                     <dd><%= text(hoaDon.getSoDienThoai()) %></dd>
@@ -407,6 +477,15 @@
                     <dd>-</dd>
                     <dt>Địa chỉ</dt>
                     <dd>-</dd>
+=======
+                    <dd id="customerName">-</dd>
+                    <dt>SĐT</dt>
+                    <dd id="customerPhone">-</dd>
+                    <dt>Email</dt>
+                    <dd id="customerEmail">-</dd>
+                    <dt>Địa chỉ</dt>
+                    <dd id="customerAddress">-</dd>
+>>>>>>> THONG_KE
                 </dl>
             </article>
 
@@ -414,6 +493,7 @@
                 <h3><i class="fas fa-truck-fast"></i> Giao nhận</h3>
                 <dl>
                     <dt>Người nhận</dt>
+<<<<<<< HEAD
                     <dd><%= text(hoaDon.getTenNguoiNhan()) %></dd>
                     <dt>SĐT nhận</dt>
                     <dd><%= text(hoaDon.getSoDienThoai()) %></dd>
@@ -421,6 +501,17 @@
                     <dd>-</dd>
                     <dt>Ghi chú</dt>
                     <dd><%= text(hoaDon.getGhiChu()) %></dd>
+=======
+                    <dd id="receiverName">-</dd>
+                    <dt>SĐT nhận</dt>
+                    <dd id="receiverPhone">-</dd>
+                    <dt>Địa chỉ nhận</dt>
+                    <dd id="receiverAddress">-</dd>
+                    <dt>Phí vận chuyển</dt>
+                    <dd id="shippingFee">-</dd>
+                    <dt>Ghi chú</dt>
+                    <dd id="orderNote">-</dd>
+>>>>>>> THONG_KE
                 </dl>
             </article>
 
@@ -428,11 +519,21 @@
                 <h3><i class="fas fa-coins"></i> Giá trị đơn</h3>
                 <dl>
                     <dt>Tổng tiền</dt>
+<<<<<<< HEAD
                     <dd><%= moneyFormat.format(hoaDon.getTongTienThanhToan()) %> đ</dd>
                     <dt>Đã thanh toán</dt>
                     <dd><%= moneyFormat.format(paidTotal) %> đ</dd>
                     <dt>Phải thu</dt>
                     <dd class="invoice-money"><%= moneyFormat.format(hoaDon.getTongTienThanhToan().subtract(paidTotal)) %> đ</dd>
+=======
+                    <dd id="rawTotal">-</dd>
+                    <dt>Giảm giá</dt>
+                    <dd id="discountTotal">-</dd>
+                    <dt>Phí vận chuyển</dt>
+                    <dd id="valueShipping">-</dd>
+                    <dt>Phải trả</dt>
+                    <dd class="invoice-money" id="mustPay">0 VND</dd>
+>>>>>>> THONG_KE
                 </dl>
             </article>
         </section>
@@ -440,6 +541,7 @@
         <section class="invoice-mini-grid">
             <div class="invoice-mini-card">
                 <span>Trạng thái hiện tại</span>
+<<<<<<< HEAD
                 <strong><%= statusText(hoaDon.getTrangThai()) %></strong>
             </div>
             <div class="invoice-mini-card">
@@ -457,6 +559,24 @@
         </section>
 
         <%-- Bảng lịch sử thanh toán của hóa đơn. --%>
+=======
+                <strong id="currentStatusText">-</strong>
+            </div>
+            <div class="invoice-mini-card">
+                <span>Số SP</span>
+                <strong id="productCount">0</strong>
+            </div>
+            <div class="invoice-mini-card">
+                <span>Đơn giá trị</span>
+                <strong id="orderValue">0 VND</strong>
+            </div>
+            <div class="invoice-mini-card">
+                <span>Còn lại</span>
+                <strong id="remainingAmount">0 VND</strong>
+            </div>
+        </section>
+
+>>>>>>> THONG_KE
         <section class="invoice-list-card invoice-detail-section">
             <div class="invoice-card-heading invoice-card-heading--compact">
                 <div>
@@ -475,6 +595,7 @@
                         <th>Ghi chú</th>
                     </tr>
                     </thead>
+<<<<<<< HEAD
                     <tbody>
                     <% for (ThanhToanHoaDonView payment : paymentList) { %>
                     <tr>
@@ -489,11 +610,17 @@
                     <tr><td colspan="5">Chưa có thanh toán.</td></tr>
                     <% } %>
                     </tbody>
+=======
+                    <tbody id="paymentRows"></tbody>
+>>>>>>> THONG_KE
                 </table>
             </div>
         </section>
 
+<<<<<<< HEAD
         <%-- Bảng sản phẩm trong hóa đơn, đọc từ chi_tiet_hoa_don. --%>
+=======
+>>>>>>> THONG_KE
         <section class="invoice-list-card invoice-detail-section">
             <div class="invoice-card-heading invoice-card-heading--compact">
                 <div>
@@ -513,6 +640,7 @@
                         <th>Thành tiền</th>
                     </tr>
                     </thead>
+<<<<<<< HEAD
                     <tbody>
                     <% for (int i = 0; i < chiTietList.size(); i++) {
                         ChiTietHoaDonView detail = chiTietList.get(i);
@@ -577,22 +705,34 @@
                     <tr><td colspan="5">Chưa có lịch sử thanh toán.</td></tr>
                     <% } %>
                     </tbody>
+=======
+                    <tbody id="productRows"></tbody>
+>>>>>>> THONG_KE
                 </table>
             </div>
         </section>
     </main>
 </div>
 
+<<<<<<< HEAD
 <%-- Modal cập nhật trạng thái hóa đơn. Form này gửi action=changeStatus về controller. --%>
 <div class="invoice-modal" id="statusModal" aria-hidden="true">
     <div class="invoice-modal__backdrop" data-close-modal></div>
     <section class="invoice-modal__dialog" role="dialog" aria-modal="true">
         <header class="invoice-modal__header">
             <h2><i class="fas fa-triangle-exclamation"></i> Xác nhận đổi trạng thái</h2>
+=======
+<div class="invoice-modal" id="statusModal" aria-hidden="true">
+    <div class="invoice-modal__backdrop" data-close-modal></div>
+    <section class="invoice-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="statusModalTitle">
+        <header class="invoice-modal__header">
+            <h2 id="statusModalTitle"><i class="fas fa-triangle-exclamation"></i> Xác nhận đổi trạng thái</h2>
+>>>>>>> THONG_KE
             <button class="invoice-modal__close" type="button" data-close-modal aria-label="Đóng">
                 <i class="fas fa-xmark"></i>
             </button>
         </header>
+<<<<<<< HEAD
         <form method="post" action="<%= request.getContextPath() %>/admin/hoa-don">
             <div class="invoice-modal__body">
                 <input type="hidden" name="action" value="changeStatus">
@@ -627,6 +767,36 @@
         <header class="invoice-modal__header">
             <h2>Chi tiết lịch sử</h2>
             <button class="invoice-modal__close" type="button" data-close-modal aria-label="Đóng">
+=======
+        <div class="invoice-modal__body">
+            <p>Hóa đơn: <strong id="modalOrderCode">-</strong></p>
+            <label class="invoice-field invoice-field--full">
+                <span>Ghi chú</span>
+                <textarea id="statusNote" rows="4" placeholder="Nhập ghi chú xử lý hóa đơn"></textarea>
+            </label>
+            <div class="status-change-line">
+                <span>Trạng thái hiện tại:</span>
+                <b class="invoice-status" id="modalCurrentStatus">-</b>
+                <i class="fas fa-arrow-right"></i>
+                <span>Trạng thái mới:</span>
+                <b class="invoice-status" id="modalNextStatus">-</b>
+            </div>
+            <small>Hành động này sẽ cập nhật trạng thái và ghi lịch sử hóa đơn.</small>
+        </div>
+        <footer class="invoice-modal__footer">
+            <button class="invoice-btn invoice-btn--ghost" type="button" data-close-modal>Hủy</button>
+            <button class="invoice-btn invoice-btn--primary" id="btnConfirmStatus" type="button">Xác nhận</button>
+        </footer>
+    </section>
+</div>
+
+<div class="invoice-modal" id="historyModal" aria-hidden="true">
+    <div class="invoice-modal__backdrop" data-close-history></div>
+    <section class="invoice-modal__dialog invoice-modal__dialog--wide" role="dialog" aria-modal="true" aria-labelledby="historyModalTitle">
+        <header class="invoice-modal__header">
+            <h2 id="historyModalTitle">Chi tiết lịch sử</h2>
+            <button class="invoice-modal__close" type="button" data-close-history aria-label="Đóng">
+>>>>>>> THONG_KE
                 <i class="fas fa-xmark"></i>
             </button>
         </header>
@@ -635,6 +805,7 @@
                 <table class="invoice-table">
                     <thead>
                     <tr>
+<<<<<<< HEAD
                         <th>Hành động</th>
                         <th>Thời gian</th>
                         <th>Mô tả</th>
@@ -652,21 +823,43 @@
                     <tr><td colspan="3">Chưa có lịch sử.</td></tr>
                     <% } %>
                     </tbody>
+=======
+                        <th>Trạng thái</th>
+                        <th>Thời gian</th>
+                        <th>Mã NV</th>
+                        <th>Tên NV</th>
+                        <th>Hành động</th>
+                        <th>Mô tả</th>
+                    </tr>
+                    </thead>
+                    <tbody id="historyRows"></tbody>
+>>>>>>> THONG_KE
                 </table>
             </div>
         </div>
         <footer class="invoice-modal__footer">
+<<<<<<< HEAD
             <button class="invoice-btn invoice-btn--primary" type="button" data-close-modal>Đóng</button>
+=======
+            <button class="invoice-btn invoice-btn--primary" type="button" data-close-history>Đóng</button>
+>>>>>>> THONG_KE
         </footer>
     </section>
 </div>
 
+<<<<<<< HEAD
 <%-- Toast hiện thông báo nhanh, điều khiển bởi hoa_don.js. --%>
+=======
+>>>>>>> THONG_KE
 <div class="invoice-toast" id="invoiceToast" role="status" aria-live="polite">
     <i class="fas fa-circle-check"></i>
     <div>
         <strong>Thành công</strong>
+<<<<<<< HEAD
         <span id="toastMessage">Đã cập nhật thao tác</span>
+=======
+        <span id="toastMessage">Đã cập nhật trạng thái thành công</span>
+>>>>>>> THONG_KE
     </div>
 </div>
 

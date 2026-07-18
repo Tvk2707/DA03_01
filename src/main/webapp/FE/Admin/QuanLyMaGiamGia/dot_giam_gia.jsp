@@ -8,6 +8,7 @@
         <table class="data-table">
             <thead>
             <tr>
+<<<<<<< HEAD
                 <th>TÊN ĐỢT</th>
                 <th>NGÀY BẮT ĐẦU</th>
                 <th>NGÀY KẾT THÚC</th>
@@ -82,8 +83,26 @@
                         </button>
                     </div>
                 </td>
+=======
+                <th>Tên đợt</th>
+                <th>Ngày bắt đầu</th>
+                <th>Ngày kết thúc</th>
+                <th>Mức giảm</th>
+                <th>Số SP</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td colspan="7" class="empty-state">Chưa có đợt giảm giá từ database</td>
+>>>>>>> THONG_KE
             </tr>
             </tbody>
         </table>
     </div>
+<<<<<<< HEAD
 </div>
+=======
+</div>
+>>>>>>> THONG_KE

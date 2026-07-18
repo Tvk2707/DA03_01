@@ -433,7 +433,32 @@
     font-weight: 600;
 }
 
+<<<<<<< HEAD
 /* --- Action Buttons --- */
+=======
+.empty-state {
+    display: flex;
+    min-height: 180px;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 28px;
+    color: var(--text-light);
+    text-align: center;
+    border: 1px dashed var(--border-color);
+    border-radius: 12px;
+    background-color: #faf8f4;
+}
+
+.data-table .empty-state {
+    display: table-cell;
+    min-height: 0;
+    border: 0;
+    border-radius: 0;
+}
+
+/* Action Buttons */
+>>>>>>> THONG_KE
 .action-buttons {
     display: flex;
     gap: 8px;
@@ -485,6 +510,7 @@
         padding: 12px 8px;
     }
 }
+<<<<<<< HEAD
 
 @media (max-width: 480px) {
     .coupon-card__actions {
@@ -496,3 +522,5 @@
         justify-content: center;
     }
 }
+=======
+>>>>>>> THONG_KE

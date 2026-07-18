@@ -1,4 +1,5 @@
 <%@ page import="BE.Model.HoaDonView" %>
+<<<<<<< HEAD
 <%@ page import="BE.Model.NhanVienView" %>
 <%@ page import="BE.Model.SanPhamHoaDonView" %>
 <%@ page import="java.text.DecimalFormat" %>
@@ -14,10 +15,20 @@
         return;
     }
 
+=======
+<%@ page import="java.math.BigDecimal" %>
+<%@ page import="java.text.DecimalFormat" %>
+<%@ page import="java.time.format.DateTimeFormatter" %>
+<%@ page import="java.util.Collections" %>
+<%@ page import="java.util.List" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%
+>>>>>>> THONG_KE
     request.setAttribute("pageTitle", "Quản lý hóa đơn");
     request.setAttribute("activeMenu", "hoadon");
 
     List<HoaDonView> hoaDonList = (List<HoaDonView>) request.getAttribute("hoaDonList");
+<<<<<<< HEAD
     List<NhanVienView> nhanVienList = (List<NhanVienView>) request.getAttribute("nhanVienList");
     List<SanPhamHoaDonView> sanPhamList = (List<SanPhamHoaDonView>) request.getAttribute("sanPhamList");
     if (nhanVienList == null) {
@@ -67,6 +78,74 @@
         }
 
         return "invoice-status--waiting";
+=======
+    if (hoaDonList == null && request.getAttribute("errorMessage") == null) {
+        response.sendRedirect(request.getContextPath() + "/admin/hoa-don");
+        return;
+    }
+    if (hoaDonList == null) {
+        hoaDonList = Collections.emptyList();
+    }
+
+    DecimalFormat moneyFormat = new DecimalFormat("#,###");
+    DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+    Integer tongHoaDon = (Integer) request.getAttribute("tongHoaDon");
+    BigDecimal doanhThu = (BigDecimal) request.getAttribute("doanhThu");
+    Integer dangXuLy = (Integer) request.getAttribute("dangXuLy");
+    Integer tongSanPham = (Integer) request.getAttribute("tongSanPham");
+    String errorMessage = (String) request.getAttribute("errorMessage");
+
+    if (tongHoaDon == null) tongHoaDon = hoaDonList.size();
+    if (doanhThu == null) doanhThu = BigDecimal.ZERO;
+    if (dangXuLy == null) dangXuLy = 0;
+    if (tongSanPham == null) tongSanPham = 0;
+%>
+<%!
+    private String safe(String value) {
+        return value == null || value.trim().isEmpty() ? "-" : value;
+    }
+
+    private String money(DecimalFormat formatter, BigDecimal value) {
+        if (value == null) {
+            return "0 VND";
+        }
+        return formatter.format(value) + " VND";
+    }
+
+    private String statusText(int status) {
+        switch (status) {
+            case 1:
+                return "Chờ xác nhận";
+            case 2:
+                return "Đã xác nhận";
+            case 3:
+                return "Đang xử lý";
+            case 4:
+                return "Hoàn thành";
+            case 5:
+                return "Đã hủy";
+            default:
+                return "Không xác định";
+        }
+    }
+
+    private String statusClass(int status) {
+        switch (status) {
+            case 1:
+                return "invoice-status--waiting";
+            case 2:
+                return "invoice-status--confirmed";
+            case 3:
+                return "invoice-status--processing";
+            case 4:
+                return "invoice-status--done";
+            case 5:
+                return "invoice-status--cancelled";
+            default:
+                return "";
+        }
+>>>>>>> THONG_KE
     }
 %>
 <!DOCTYPE html>
@@ -74,13 +153,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<<<<<<< HEAD
     <title>Quản lý hóa đơn</title>
+=======
+    <title>Quản lý hóa đơn - RIOR Admin</title>
+>>>>>>> THONG_KE
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/layout.css">
     <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/sidebar.css">
     <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/header.css">
+<<<<<<< HEAD
     <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/hoa_don.css">
+=======
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/hoa_don.css?v=202607161130">
+>>>>>>> THONG_KE
 </head>
 <body>
 <%@ include file="../layout/sidebar.jsp" %>
@@ -89,16 +176,24 @@
     <%@ include file="../layout/header.jsp" %>
 
     <main id="page-content" class="invoice-page">
+<<<<<<< HEAD
         <%-- Tiêu đề trang và các nút thao tác nhanh. --%>
         <section class="invoice-page-header">
             <div>
                 <h1 class="invoice-title">Quản lý hóa đơn</h1>
+=======
+        <section class="invoice-page-header">
+            <div>
+                <h1 class="invoice-title">Quản lý hóa đơn</h1>
+                <p class="invoice-subtitle">Dữ liệu được lấy trực tiếp từ SQL Server</p>
+>>>>>>> THONG_KE
             </div>
             <div class="invoice-header-actions">
                 <button class="invoice-btn invoice-btn--outline" id="btnResetFilters" type="button">
                     <i class="fas fa-rotate-right"></i>
                     Đặt lại
                 </button>
+<<<<<<< HEAD
                 <button class="invoice-btn invoice-btn--outline" id="btnExportOrders" type="button">
                     <i class="fas fa-file-excel"></i>
                     Xuất Excel trang HĐ
@@ -111,6 +206,15 @@
         </section>
 
         <%-- Bộ lọc tìm kiếm hóa đơn trên giao diện, xử lý bằng JavaScript. --%>
+=======
+                <button class="invoice-btn invoice-btn--primary" id="btnExportOrders" type="button">
+                    <i class="fas fa-file-excel"></i>
+                    Xuất Excel trang HĐ
+                </button>
+            </div>
+        </section>
+
+>>>>>>> THONG_KE
         <section class="invoice-filter-card">
             <button class="invoice-section-toggle" type="button" id="filterToggle">
                 <span>
@@ -122,13 +226,18 @@
             <div class="invoice-filter-body" id="filterBody">
                 <label class="invoice-field">
                     <span>Tìm kiếm</span>
+<<<<<<< HEAD
                     <input id="orderSearch" type="search" placeholder="Nhập mã hóa đơn, khách hàng hoặc SĐT">
+=======
+                    <input id="orderSearch" type="search" placeholder="Nhập mã hóa đơn / tên khách / SĐT...">
+>>>>>>> THONG_KE
                 </label>
                 <label class="invoice-field">
                     <span>Loại hóa đơn</span>
                     <select id="orderTypeFilter">
                         <option value="all">Tất cả</option>
                         <option value="Tại quầy">Tại quầy</option>
+<<<<<<< HEAD
                         <option value="Bán hàng online">Bán hàng online</option>
                     </select>
                 </label>
@@ -139,6 +248,8 @@
                         <option value="Chờ thanh toán">Chờ thanh toán</option>
                         <option value="Đã thanh toán">Đã thanh toán</option>
                         <option value="Đã hủy">Đã hủy</option>
+=======
+>>>>>>> THONG_KE
                     </select>
                 </label>
                 <label class="invoice-field">
@@ -152,6 +263,7 @@
             </div>
         </section>
 
+<<<<<<< HEAD
         <%-- Form thêm hóa đơn. action=save sẽ được HoaDonController.doPost xử lý. --%>
         <section class="invoice-form-card" id="invoiceFormCard">
             <div class="invoice-card-heading">
@@ -250,6 +362,38 @@
         </section>
 
         <%-- Bảng danh sách hóa đơn lấy từ request attribute hoaDonList. --%>
+=======
+        <section class="invoice-stats">
+            <div class="invoice-stat">
+                <span class="invoice-stat__label">Tổng hóa đơn</span>
+                <strong><%= tongHoaDon %></strong>
+                <small>Dữ liệu từ SQL Server</small>
+            </div>
+            <div class="invoice-stat">
+                <span class="invoice-stat__label">Doanh thu</span>
+                <strong><%= money(moneyFormat, doanhThu) %></strong>
+                <small>Đơn hoàn thành</small>
+            </div>
+            <div class="invoice-stat">
+                <span class="invoice-stat__label">Đang xử lý</span>
+                <strong><%= dangXuLy %></strong>
+                <small>Chưa hoàn thành</small>
+            </div>
+            <div class="invoice-stat">
+                <span class="invoice-stat__label">Sản phẩm kính</span>
+                <strong><%= tongSanPham %></strong>
+                <small>Tổng số lượng trong hóa đơn</small>
+            </div>
+        </section>
+
+        <% if (errorMessage != null) { %>
+        <div class="invoice-empty is-visible">
+            <i class="fas fa-triangle-exclamation"></i>
+            <%= errorMessage %>
+        </div>
+        <% } %>
+
+>>>>>>> THONG_KE
         <section class="invoice-list-card">
             <div class="invoice-card-heading">
                 <div class="invoice-heading-icon">
@@ -263,8 +407,15 @@
 
             <div class="invoice-status-tabs" id="statusTabs" role="tablist" aria-label="Lọc trạng thái hóa đơn">
                 <button class="invoice-tab is-active" type="button" data-status="all">Tất cả</button>
+<<<<<<< HEAD
                 <button class="invoice-tab" type="button" data-status="Chờ thanh toán">Chờ thanh toán</button>
                 <button class="invoice-tab" type="button" data-status="Đã thanh toán">Đã thanh toán</button>
+=======
+                <button class="invoice-tab" type="button" data-status="Chờ xác nhận">Chờ xác nhận</button>
+                <button class="invoice-tab" type="button" data-status="Đã xác nhận">Đã xác nhận</button>
+                <button class="invoice-tab" type="button" data-status="Đang xử lý">Đang xử lý</button>
+                <button class="invoice-tab" type="button" data-status="Hoàn thành">Hoàn thành</button>
+>>>>>>> THONG_KE
                 <button class="invoice-tab" type="button" data-status="Đã hủy">Đã hủy</button>
             </div>
 
@@ -274,7 +425,11 @@
                     <tr>
                         <th>STT</th>
                         <th>Mã hóa đơn</th>
+<<<<<<< HEAD
                         <th>Nhân viên</th>
+=======
+                        <th>Tên nhân viên</th>
+>>>>>>> THONG_KE
                         <th>Khách hàng</th>
                         <th>Số điện thoại</th>
                         <th>Loại hóa đơn</th>
@@ -285,6 +440,7 @@
                     </tr>
                     </thead>
                     <tbody>
+<<<<<<< HEAD
                     <% for (int i = 0; i < hoaDonList.size(); i++) {
                         HoaDonView hoaDon = hoaDonList.get(i);
                         String statusLabel = statusText(hoaDon.getTrangThai());
@@ -322,6 +478,36 @@
                                         title="In hóa đơn">
                                     <i class="fas fa-print"></i>
                                 </button>
+=======
+                    <% for (HoaDonView hoaDon : hoaDonList) {
+                        String ngayTao = hoaDon.getNgayTao() == null ? "-" : hoaDon.getNgayTao().format(dateFormat);
+                        String trangThai = statusText(hoaDon.getTrangThai());
+                        String searchText = (safe(hoaDon.getMaHoaDon()) + " "
+                                + safe(hoaDon.getTenNhanVien()) + " "
+                                + safe(hoaDon.getMaNhanVien()) + " "
+                                + safe(hoaDon.getTenKhachHang()) + " "
+                                + safe(hoaDon.getSoDienThoai())).toLowerCase();
+                        String dateValue = hoaDon.getNgayTao() == null ? "" : hoaDon.getNgayTao().toLocalDate().toString();
+                    %>
+                    <tr data-id="<%= hoaDon.getId() %>"
+                        data-search="<%= searchText %>"
+                        data-type="<%= safe(hoaDon.getLoaiHoaDon()) %>"
+                        data-status="<%= trangThai %>"
+                        data-date="<%= dateValue %>">
+                        <td><%= hoaDon.getStt() %></td>
+                        <td><strong><%= safe(hoaDon.getMaHoaDon()) %></strong></td>
+                        <td><%= safe(hoaDon.getTenNhanVien()) %> <small><%= safe(hoaDon.getMaNhanVien()) %></small></td>
+                        <td><%= safe(hoaDon.getTenKhachHang()) %></td>
+                        <td><%= safe(hoaDon.getSoDienThoai()) %></td>
+                        <td><span class="invoice-pill"><%= safe(hoaDon.getLoaiHoaDon()) %></span></td>
+                        <td class="invoice-money"><%= money(moneyFormat, hoaDon.getTongTien()) %></td>
+                        <td><%= ngayTao %></td>
+                        <td><span class="invoice-status <%= statusClass(hoaDon.getTrangThai()) %>"><%= trangThai %></span></td>
+                        <td>
+                            <div class="invoice-actions">
+                                <a class="invoice-icon-btn" href="<%= request.getContextPath() %>/FE/Admin/QuanLyHoaDon/chi_tiet_hoa_don.jsp?id=<%= hoaDon.getId() %>" title="Xem chi tiết"><i class="fas fa-eye"></i></a>
+                                <button class="invoice-icon-btn" type="button" data-print="<%= safe(hoaDon.getMaHoaDon()) %>" title="In hóa đơn"><i class="fas fa-print"></i></button>
+>>>>>>> THONG_KE
                             </div>
                         </td>
                     </tr>
@@ -330,12 +516,20 @@
                 </table>
                 <div class="invoice-empty" id="emptyState">
                     <i class="fas fa-receipt"></i>
+<<<<<<< HEAD
                     Không có hóa đơn phù hợp.
+=======
+                    Không có dữ liệu phù hợp
+>>>>>>> THONG_KE
                 </div>
             </div>
 
             <div class="invoice-table-footer">
+<<<<<<< HEAD
                 <span id="orderCount">Hiển thị <%= hoaDonList.size() %> / tổng <%= hoaDonList.size() %> hóa đơn</span>
+=======
+                <span id="orderCount">Hiển thị <%= hoaDonList.size() %> / tổng <%= hoaDonList.size() %> bản ghi</span>
+>>>>>>> THONG_KE
                 <div class="invoice-pagination">
                     <button type="button" disabled><i class="fas fa-chevron-left"></i></button>
                     <span>Trang <strong>1</strong></span>
@@ -351,11 +545,18 @@
     </main>
 </div>
 
+<<<<<<< HEAD
 <%-- Toast hiện thông báo nhanh, nội dung được thay đổi trong hoa_don.js. --%>
 <div class="invoice-toast" id="invoiceToast" role="status" aria-live="polite">
     <i class="fas fa-circle-check"></i>
     <div>
         <strong>Thành công</strong>
+=======
+<div class="invoice-toast" id="invoiceToast" role="status" aria-live="polite">
+    <i class="fas fa-circle-check"></i>
+    <div>
+        <strong>Thông báo</strong>
+>>>>>>> THONG_KE
         <span id="toastMessage">Đã cập nhật thao tác</span>
     </div>
 </div>
