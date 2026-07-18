@@ -1,35 +1,57 @@
 package BE.Entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import java.util.List;
 
 @Entity
 @Table(name = "kieu_quai_kinh")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class KieuQuaiKinh {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
-    @Column(name = "quai_thang")
-    @Builder.Default
-    private Integer quaiThang = 0;
-
-    @Column(name = "quai_gap")
-    @Builder.Default
-    private Integer quaiGap = 0;
-
-    @Column(name = "quai_loxo")
-    @Builder.Default
-    private Integer quaiLoxo = 0;
+    @Column(name = "kieu_quai", nullable = false, length = 255)
+    private String kieuQuai;
 
     @Column(name = "trang_thai")
-    @Builder.Default
     private Integer trangThai = 1;
-}
 
+    @OneToMany(mappedBy = "kieuQuaiKinh")
+    private List<GongKinh> gongKinhs;
+
+    public KieuQuaiKinh() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getKieuQuai() {
+        return kieuQuai;
+    }
+
+    public void setKieuQuai(String kieuQuai) {
+        this.kieuQuai = kieuQuai;
+    }
+
+    public Integer getTrangThai() {
+        return trangThai;
+    }
+
+    public void setTrangThai(Integer trangThai) {
+        this.trangThai = trangThai;
+    }
+
+    public List<GongKinh> getGongKinhs() {
+        return gongKinhs;
+    }
+
+    public void setGongKinhs(List<GongKinh> gongKinhs) {
+        this.gongKinhs = gongKinhs;
+    }
+}
