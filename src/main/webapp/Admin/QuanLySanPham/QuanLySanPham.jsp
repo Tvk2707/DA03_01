@@ -86,7 +86,7 @@
         }
 
         /* ========================================================== */
-        /* 🛠️ MỚI: CSS ĐỒNG BỘ SPACING LƯỚI 5 CỘT & POPOVER KHOẢNG GIÁ */
+        /* 🛠️ CSS ĐỒNG BỘ SPACING LƯỚI 5 CỘT & POPOVER KHOẢNG GIÁ     */
         /* ========================================================== */
         .filter-grid {
             display: grid;
@@ -309,6 +309,41 @@
             color: #ffffff;
         }
 
+        /* ========================================================== */
+        /* ✨ CẤU TRÚC TOAST NOTIFICATION GÓC TRÊN BÊN PHẢI MỚI      */
+        /* ========================================================== */
+        .toast-custom {
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            z-index: 1000000; /* Đảm bảo luôn nổi trên mọi thành phần */
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            font-size: 15px;
+            opacity: 1;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            animation: slideInToast 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .toast-success-style {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+        .toast-error-style {
+            background-color: #fdecea;
+            color: #b3261e;
+            border: 1px solid #fad2cf;
+        }
+        @keyframes slideInToast {
+            from { transform: translateX(120%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
         /* Responsive Mobile */
         @media (max-width: 1024px) {
             .filter-grid {
@@ -346,15 +381,18 @@
             </a>
         </div>
 
+        <!-- THÔNG BÁO DẠNG TOAST GÓC TRÊN PHẢI -->
         <c:if test="${not empty error}">
-            <div style="background:#fdecea;color:#b3261e;padding:12px 16px;border-radius:8px;margin-bottom:16px;">
-                <i class="fas fa-circle-exclamation"></i> ${error}
+            <div id="toast-msg" class="toast-custom toast-error-style">
+                <i class="fas fa-circle-exclamation"></i>
+                <span>${error}</span>
             </div>
         </c:if>
 
         <c:if test="${not empty param.success}">
-            <div style="background:#e8f5e9;color:#2e7d32;padding:12px 16px;border-radius:8px;margin-bottom:16px;">
-                <i class="fas fa-check-circle"></i> ${param.success}
+            <div id="toast-msg" class="toast-custom toast-success-style">
+                <i class="fas fa-check-circle"></i>
+                <span>${param.success}</span>
             </div>
         </c:if>
 
@@ -375,7 +413,6 @@
             </div>
 
             <form action="${pageContext.request.contextPath}/SanPham/search" method="post" id="filterForm">
-                <!-- Spacing 24px phân ranh giới lưới hàng bộ lọc và nút submit -->
                 <div class="filter-grid" style="margin-bottom: 24px;">
                     <div class="filter-group">
                         <label class="filter-label">Tìm kiếm</label>
@@ -419,7 +456,6 @@
                         </select>
                     </div>
 
-                    <!-- 🛠️ MỚI MỤC 1: CỘT THỨ 5 - KHỐI KHOẢNG GIÁ ĐÃ THU GỌN THÀNH DROPDOWN OVERLAY -->
                     <div class="filter-group price-popover-container" id="pricePopoverContainer">
                         <label class="filter-label">Khoảng giá</label>
                         <button type="button" class="price-dropdown-trigger" id="priceDropdownBtn">
@@ -428,7 +464,6 @@
                         </button>
 
                         <div class="price-popover-panel" id="pricePopoverPanel">
-                            <!-- Mốc giá gợi ý nhanh (Quick Filter Tags) -->
                             <div class="quick-filter-tags">
                                 <button type="button" class="filter-tag-btn" data-min="0" data-max="2000000">Dưới 2tr</button>
                                 <button type="button" class="filter-tag-btn" data-min="2000000" data-max="5000000">2tr - 5tr</button>
@@ -445,7 +480,6 @@
                             </div>
 
                             <div class="range-input-slider">
-                                <!-- Thuộc tính giá trị thô ban đầu để JS tự động Override Max động -->
                                 <input type="range" id="rangeMin" min="0" max="20000000" step="50000" value="${not empty searchGiaTu ? searchGiaTu : 0}">
                                 <input type="range" id="rangeMax" min="0" max="20000000" step="50000" value="${not empty searchGiaDen ? searchGiaDen : 20000000}">
                             </div>
@@ -505,7 +539,7 @@
             </thead>
             <tbody>
             <c:forEach var="temp" items="${items}" varStatus="status">
-                <tr class="product-row" data-price="${temp.giaMax}"> <!-- Gắn data-price để JS trích xuất giá max động -->
+                <tr class="product-row" data-price="${temp.giaMax}">
                     <td>
                         <span class="category-id">
                                 ${status.count + ((not empty currentPage ? currentPage : 1) - 1) * 10}
@@ -655,6 +689,20 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
+        // =========================================================================
+        // ⚡ MỚI: CHỨC NĂNG TỰ ẨN THÔNG BÁO TOAST SAU 3 GIÂY
+        // =========================================================================
+        const toast = document.getElementById("toast-msg");
+        if (toast) {
+            setTimeout(function () {
+                toast.style.opacity = "0";
+                toast.style.transform = "translateY(-10px)";
+                setTimeout(function () {
+                    toast.remove();
+                }, 500);
+            }, 3000);
+        }
+
         const modalEl = document.getElementById('deleteConfirmModal');
         document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
             if (activeFormToDelete) activeFormToDelete.submit();
@@ -671,7 +719,7 @@
         });
 
         // =========================================================================
-        // 🛠️ MỚI: TOÀN BỘ LOGIC POPOVER OVERLAY, MAX ĐỘNG, 2 CHIỀU VÀ FORMAT TIỀN TỆ
+        // 🛠️ GIỮ NGUYÊN: LOGIC POPOVER OVERLAY, MAX ĐỘNG, 2 CHIỀU VÀ FORMAT TIỀN TỆ
         // =========================================================================
         const dropdownBtn = document.getElementById('priceDropdownBtn');
         const popoverPanel = document.getElementById('pricePopoverPanel');
@@ -695,8 +743,7 @@
 
         const minGap = 50000;
 
-        // 1. TÍNH TOÁN GIÁ MAX ĐỘNG TỪ TRANG DATA THỰC TẾ
-        let maxPriceFromData = 10000000; // Ngưỡng sàn dự phòng mặc định 10tr
+        let maxPriceFromData = 10000000;
         const productRows = document.querySelectorAll('.product-row');
         productRows.forEach(row => {
             const priceAttr = parseFloat(row.getAttribute('data-price')) || 0;
@@ -705,16 +752,13 @@
             }
         });
 
-        // Quy tắc làm tròn lên mốc đẹp (Ví dụ: 8.7tr lên hẳn 10tr hoặc 12tr lên 15tr)
         let sliderMaxLimit = Math.ceil(maxPriceFromData / 5000000) * 5000000;
         if(sliderMaxLimit < 10000000) sliderMaxLimit = 10000000;
 
-        // Đồng bộ hóa cấu hình giới hạn cực đại cho các Object
         rangeMin.max = sliderMaxLimit;
         rangeMax.max = sliderMaxLimit;
         limitMaxLabel.textContent = formatCurrencyShort(sliderMaxLimit);
 
-        // Cập nhật lại giá trị cho Tag "Trên 10tr" động khớp với max limit mới
         quickTagMax.setAttribute('data-max', sliderMaxLimit);
 
         function formatCurrencyShort(val) {
@@ -729,7 +773,6 @@
             return parseInt(str.replace(/\./g, '')) || 0;
         }
 
-        // Đóng mở khối popover overlay khi click button
         dropdownBtn.addEventListener('click', function (e) {
             e.stopPropagation();
             popoverPanel.classList.toggle('show');
@@ -744,10 +787,9 @@
         });
 
         popoverPanel.addEventListener('click', function(e){
-            e.stopPropagation(); // Không cho đóng panel khi click bên trong
+            e.stopPropagation();
         });
 
-        // Cập nhật giao diện (Label, Tooltip) theo thời gian thực (onChange)
         function updateSliderUI() {
             const valMin = parseInt(rangeMin.value);
             const valMax = parseInt(rangeMax.value);
@@ -767,11 +809,9 @@
             displayMin.value = formatNumberString(valMin);
             displayMax.value = formatNumberString(valMax);
 
-            // Gán giá trị tạm thời vào input hidden
             inputMin.value = valMin;
             inputMax.value = valMax;
 
-            // Cập nhật text đại diện trên Nút Dropdown chính
             triggerText.textContent = formatNumberString(valMin) + "đ - " + formatNumberString(valMax) + "đ";
 
             validatePrices(valMin, valMax);
@@ -790,7 +830,6 @@
                 btnPopoverApply.disabled = false;
             }
 
-            // Tự động highlight Tag gợi ý nhanh nếu trùng khoảng kéo hiện tại
             tagButtons.forEach(btn => {
                 const tMin = parseInt(btn.getAttribute('data-min'));
                 const tMax = parseInt(btn.getAttribute('data-max'));
@@ -802,7 +841,6 @@
             });
         }
 
-        // Thiết lập lắng nghe sự kiện kéo slider (Chỉ thay đổi UI, không submit ngầm)
         rangeMin.addEventListener('input', () => {
             let valMin = parseInt(rangeMin.value);
             let valMax = parseInt(rangeMax.value);
@@ -817,7 +855,6 @@
             updateSliderUI();
         });
 
-        // Đồng bộ gõ phím đảo chiều sang thanh kéo 2 đầu
         [displayMin, displayMax].forEach(input => {
             input.addEventListener('input', (e) => {
                 let rawVal = e.target.value.replace(/[^0-9]/g, '');
@@ -837,7 +874,6 @@
                 inputMin.value = currentMin;
                 inputMax.value = currentMax;
 
-                // Đồng bộ nhãn text nút kích hoạt ngoài grid
                 triggerText.textContent = formatNumberString(currentMin) + "đ - " + formatNumberString(currentMax) + "đ";
 
                 const percentMin = (rangeMin.value / sliderMaxLimit) * 100;
@@ -849,7 +885,6 @@
             });
         });
 
-        // Bấm mốc chọn lọc nhanh
         tagButtons.forEach(btn => {
             btn.addEventListener('click', () => {
                 const targetMin = btn.getAttribute('data-min');
@@ -862,7 +897,6 @@
             });
         });
 
-        // Nút Xóa riêng phần khoảng giá trong Panel
         btnPopoverClear.addEventListener('click', () => {
             rangeMin.value = 0;
             rangeMax.value = sliderMaxLimit;
@@ -871,13 +905,11 @@
             tagButtons.forEach(b => b.classList.remove('active'));
         });
 
-        // Nút Áp dụng của Popover: Đóng Panel overlay lại
         btnPopoverApply.addEventListener('click', () => {
             popoverPanel.classList.remove('show');
             dropdownBtn.classList.remove('open-active');
         });
 
-        // Đồng bộ kiểm tra trạng thái cũ lúc tải lại trang (nếu có dữ liệu search cũ)
         if(parseInt(inputMin.value) > 0 || parseInt(inputMax.value) < sliderMaxLimit) {
             rangeMin.value = inputMin.value;
             rangeMax.value = inputMax.value;
@@ -886,7 +918,6 @@
         }
         updateSliderUI();
 
-        // Nếu ban đầu không có bộ lọc giá, hiển thị text placeholder mặc định
         if (!'${searchGiaTu}' && !'${searchGiaDen}') {
             triggerText.textContent = "Khoảng giá";
         }

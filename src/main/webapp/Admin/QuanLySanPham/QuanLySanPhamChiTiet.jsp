@@ -426,7 +426,6 @@
                             data-san-pham-id="${temp.sanPham.id}">
                             <td><span class="category-id js-stt-cell">1</span></td>
 
-                            <!-- ✅ ĐÃ THÊM CLASS js-trigger-qr VÀ THUỘC TÍNH CON TRỎ ĐỂ CLICK ẢNH BẬT QR -->
                             <td>
                                 <c:choose>
                                     <c:when test="${not empty temp.hinhAnh}">
@@ -560,17 +559,12 @@
     </div>
 </div>
 
-<!-- ✅ TÍNH NĂNG MỚI: HTML CARD OVERLAY HIỂN THỊ CHI TIẾT BIẾN THỂ & QR CODE THEO HÌNH MẪU -->
 <div id="qrDetailModal" class="qr-modal">
     <div class="qr-modal-content">
-
         <div class="qr-main-layout">
-            <!-- Cột trái: Vùng hiển thị QR Code hình vuông chính giữa -->
             <div class="qr-left-column">
                 <div id="qrcodeTable"></div>
             </div>
-
-            <!-- Cột phải: Bảng liệt kê thông tin chi tiết thẳng hàng dấu hai chấm -->
             <div class="qr-right-column">
                 <div class="qr-info-row">
                     <span class="qr-info-label">Mã biến thể:</span>
@@ -598,17 +592,12 @@
                 </div>
             </div>
         </div>
-
-        <!-- Hàng nút bấm chức năng chân trang -->
         <div class="qr-bottom-actions">
-            <!-- Nút tải ảnh định vị chính xác dưới trục QR -->
             <div style="width: 210px; display: flex; justify-content: center;">
                 <button type="button" class="qr-action-btn btn-qr-blue" id="btnDownloadQR">
                     <i class="fas fa-download"></i> Tải ảnh QR
                 </button>
             </div>
-
-            <!-- Bộ đôi nút Sửa nhanh và Đóng góc phải -->
             <div class="qr-btn-group-right">
                 <button type="button" class="qr-action-btn btn-qr-blue" id="btnQuickEditQR">
                     <i class="fas fa-wrench"></i> Sửa biến thể
@@ -616,7 +605,6 @@
                 <button type="button" class="qr-action-btn btn-qr-gray" id="btnCancelQR">Đóng</button>
             </div>
         </div>
-
     </div>
 </div>
 
@@ -648,7 +636,6 @@
                 form.querySelector('#updateTrangThai').value = dataset.trangThai;
                 form.querySelector('#updateHinhAnhCu').value = dataset.hinhAnh;
 
-                // Hiển thị ảnh cũ
                 const hinhAnh = dataset.hinhAnh;
                 if (hinhAnh && hinhAnh !== 'null' && hinhAnh.trim() !== '') {
                     imagePreview.src = '${pageContext.request.contextPath}/File_Anh/images/' + hinhAnh;
@@ -657,9 +644,7 @@
                 }
                 imagePreview.style.display = 'block';
 
-                // Reset the file input to ensure onchange fires even if the same file is selected again
                 document.getElementById('updateHinhAnh').value = '';
-
                 modal.style.display = 'block';
             });
         });
@@ -677,7 +662,7 @@
         });
 
         // ==========================================
-        // --- THÊM MỚI: LOGIC PHÂN TRANG BẰNG JS ---
+        // ⚡ ĐÃ CẬP NHẬT: GIỮ SỐ TRANG QUA SESSIONSTORAGE KHI F5
         // ==========================================
         const tableBody = document.querySelector(".category-table tbody");
         if (tableBody) {
@@ -687,20 +672,28 @@
                 const rowsPerPage = 5;
                 let currentPage = 1;
 
+                // Khôi phục lại trang cũ từ bộ nhớ trước đó (nếu có)
+                const savedPage = sessionStorage.getItem('vbt_currentPage');
+                if (savedPage) {
+                    const totalPages = Math.ceil(rows.length / rowsPerPage);
+                    if (parseInt(savedPage) <= totalPages) {
+                        currentPage = parseInt(savedPage);
+                    }
+                }
+
                 function displayTable(page) {
                     const start = (page - 1) * rowsPerPage;
                     const end = start + rowsPerPage;
 
                     rows.forEach((row, index) => {
                         if (index >= start && index < end) {
-                            row.style.display = ""; // Hiển thị
-
+                            row.style.display = "";
                             const sttCell = row.querySelector(".js-stt-cell");
                             if (sttCell) {
                                 sttCell.innerText = index + 1;
                             }
                         } else {
-                            row.style.display = "none"; // Ẩn đi
+                            row.style.display = "none";
                         }
                     });
                 }
@@ -754,14 +747,31 @@
                 function updatePagination() {
                     displayTable(currentPage);
                     setupPagination();
+                    // Lưu lại trang hiện tại vào sessionStorage
+                    sessionStorage.setItem('vbt_currentPage', currentPage);
                 }
 
                 updatePagination();
             }
         }
 
+        // --- RESET SỐ TRANG VỀ TRANg 1 KHI CHỦ ĐỘNG TÌM KIẾM/LÀM MỚI ---
+        const resetBtn = document.querySelector('.reset-btn');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', function() {
+                sessionStorage.removeItem('vbt_currentPage');
+            });
+        }
+
+        const filterForm = document.getElementById('filterForm');
+        if (filterForm) {
+            filterForm.addEventListener('submit', function() {
+                sessionStorage.removeItem('vbt_currentPage');
+            });
+        }
+
         // =========================================================================
-        // ✅ TÍNH NĂNG MỚI: SCRIPT ĐIỀU HƯỚNG TỰ SINH MÃ QR VÀ DOWNLOAD CHUẨN MẪU
+        // ✅ CÁC LOGIC KHÁC ĐƯỢC GIỮ NGUYÊN (QR CODE & DOWNLOAD)
         // =========================================================================
         const qrModal = document.getElementById('qrDetailModal');
         const btnCancelQR = document.getElementById('btnCancelQR');
@@ -776,7 +786,6 @@
                 activeRowForEdit = row;
                 const dataset = row.dataset;
 
-                // Gán dữ liệu sang bảng Card thông tin
                 document.getElementById('qrDetailMa').innerText = dataset.ma;
                 document.getElementById('qrDetailMau').innerText = row.querySelector('td:nth-child(4)').innerText;
                 document.getElementById('qrDetailKichCo').innerText = row.querySelector('td:nth-child(5)').innerText;
@@ -791,7 +800,6 @@
                     statusContainer.innerHTML = `<span style="color: #9ca3af;"><i class="fas fa-minus-circle"></i> Ngừng bán</span>`;
                 }
 
-                // Thực hiện tạo mới vẽ ảnh mã QR Code từ Thư viện
                 qrContainer.innerHTML = "";
                 new QRCode(qrContainer, {
                     text: dataset.ma,
@@ -806,7 +814,6 @@
             });
         });
 
-        // Trigger tải ảnh QR dạng File PNG
         btnDownloadQR.addEventListener('click', function () {
             const canvas = qrContainer.querySelector('canvas');
             if (canvas) {
@@ -822,7 +829,6 @@
             }
         });
 
-        // Liên kết ngầm nút Sửa của hệ thống gốc
         btnQuickEditQR.addEventListener('click', function () {
             if (activeRowForEdit) {
                 qrModal.style.display = 'none';
@@ -841,7 +847,6 @@
         });
     });
 
-    // --- PREVIEW ẢNH KHI CHỌN FILE ---
     function previewImage(event) {
         const file = event.target.files[0];
         const imagePreview = document.getElementById('imagePreview');
@@ -862,6 +867,5 @@
         }
     }
 </script>
-
 </body>
 </html>
