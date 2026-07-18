@@ -11,8 +11,8 @@ public class DatabaseConnectionManager {
     private static final String DEFAULT_HOST = "localhost";
     private static final int DEFAULT_PORT = 1433;
     private static final String DEFAULT_DATABASE_NAME = "quan_ly_ban_kinh";
-    private static final String DEFAULT_USERNAME = "minh";
-    private static final String DEFAULT_PASSWORD = "123456";
+    private static final String DEFAULT_USERNAME = "sa";
+    private static final String DEFAULT_PASSWORD = "123";
     private static final boolean DEFAULT_INTEGRATED_SECURITY = false;
     private static final boolean DEFAULT_ENCRYPT = false;
     private static final boolean DEFAULT_TRUST_SERVER_CERTIFICATE = true;
