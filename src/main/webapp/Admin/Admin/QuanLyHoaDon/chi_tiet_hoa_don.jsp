@@ -548,7 +548,7 @@
         <section class="invoice-list-card invoice-detail-section">
             <div class="invoice-card-heading invoice-card-heading--compact">
                 <div>
-                    <h2>Lich su thanh toan he thong</h2>
+                    <h2>Lịch sử thanh toán hệ thống</h2>
                     <p>Giao dịch thanh toán của hóa đơn</p>
                 </div>
             </div>
@@ -556,11 +556,11 @@
                 <table class="invoice-table">
                     <thead>
                     <tr>
-                        <th>So tien</th>
-                        <th>Phuong thuc</th>
-                        <th>Trang thai</th>
-                        <th>Ngay thanh toan</th>
-                        <th>Ghi chu</th>
+                        <th>Số tiền</th>
+                        <th>Phương thức</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày thanh toán</th>
+                        <th>Ghi chú</th>
                     </tr>
                     </thead>
                     <tbody>

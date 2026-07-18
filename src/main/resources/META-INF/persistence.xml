@@ -1,45 +1,30 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<persistence xmlns="https://jakarta.ee/xml/ns/persistence"
-             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_1.xsd"
-             version="3.1">
-    <persistence-unit name="default" transaction-type="RESOURCE_LOCAL">
+<persistence
+        xmlns="https://jakarta.ee/xml/ns/persistence"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd"
+        version="3.0">
+    <persistence-unit name="default">
+        <description>CRUD MVC JPA Project</description>
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-        <class>QuanLySanPham.Entity.ChatLieu</class>
-        <class>QuanLySanPham.Entity.ChiTietHoaDon</class>
-        <class>QuanLySanPham.Entity.DanhMuc</class>
-        <class>QuanLySanPham.Entity.DiaChiKhachHang</class>
-        <class>QuanLySanPham.Entity.GongKinh</class>
-        <class>QuanLySanPham.Entity.HinhAnhSanPham</class>
-        <class>QuanLySanPham.Entity.HinhDangGong</class>
-        <class>QuanLySanPham.Entity.HinhThucThanhToan</class>
-        <class>QuanLySanPham.Entity.HoaDon</class>
-        <class>QuanLySanPham.Entity.KhachHang</class>
-        <class>QuanLySanPham.Entity.KhachHangPhieuGiamGia</class>
-        <class>QuanLySanPham.Entity.KichCo</class>
-        <class>QuanLySanPham.Entity.KieuDang</class>
-        <class>QuanLySanPham.Entity.KieuQuaiKinh</class>
-        <class>QuanLySanPham.Entity.LichSuHoaDon</class>
-        <class>QuanLySanPham.Entity.LichSuThanhToan</class>
-        <class>QuanLySanPham.Entity.MauSac</class>
-        <class>QuanLySanPham.Entity.NhanVien</class>
-        <class>QuanLySanPham.Entity.PhieuGiamGia</class>
-        <class>QuanLySanPham.Entity.SanPham</class>
-        <class>QuanLySanPham.Entity.SanPhamChiTiet</class>
-        <class>QuanLySanPham.Entity.ThanhToanHoaDon</class>
-        <class>QuanLySanPham.Entity.ThuongHieu</class>
-        <class>QuanLySanPham.Entity.TrongKinh</class>
-        <exclude-unlisted-classes>true</exclude-unlisted-classes>
+        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+
         <properties>
+            <!-- Database Connection -->
             <property name="jakarta.persistence.jdbc.driver" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
-            <property name="jakarta.persistence.jdbc.url" value="jdbc:sqlserver://localhost:1433;databaseName=quan_ly_ban_kinh;encrypt=false;trustServerCertificate=true;loginTimeout=30;"/>
-            <property name="jakarta.persistence.jdbc.user" value="sa"/>
-            <property name="jakarta.persistence.jdbc.password" value="123"/>
-            <property name="hibernate.dialect" value="org.hibernate.dialect.SQLServerDialect"/>
-            <property name="hibernate.hbm2ddl.auto" value="validate"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:sqlserver://localhost:1433;DatabaseName=quan_ly_ban_kinh;encrypt=true;trustServerCertificate=true;"/>
+            <property name="jakarta.persistence.jdbc.user" value="minh"/>
+            <property name="jakarta.persistence.jdbc.password" value="123456"/>
+
+            <!-- Hibernate Properties -->
             <property name="hibernate.show_sql" value="true"/>
             <property name="hibernate.format_sql" value="true"/>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.SQLServerDialect"/>
+
+            <!-- Schema Generation -->
+            <property name="hibernate.hbm2ddl.auto" value="validate"/>
+            <property name="jakarta.persistence.sql-load-script-source" value="create.sql"/>
         </properties>
+
     </persistence-unit>
 </persistence>
-
