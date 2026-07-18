@@ -27,7 +27,7 @@ try {
         },
         @{
             Name = "Kiểm tra chi tiết hóa đơn và sản phẩm"
-            Sql = "SELECT TOP 5 cthd.id_hoa_don, sp.ten_san_pham, spct.ma AS ma_chi_tiet, CASE WHEN kqk.quai_thang = 1 THEN N'Quai thẳng' WHEN kqk.quai_gap = 1 THEN N'Quai gập' WHEN kqk.quai_loxo = 1 THEN N'Quai lò xo' ELSE NULL END AS kieu_quai_kinh, COALESCE(NULLIF(spct.hinh_anh, ''), ha.url_anh) AS hinh_anh, cthd.so_luong, cthd.tong_tien FROM chi_tiet_hoa_don cthd LEFT JOIN san_pham_chi_tiet spct ON cthd.id_san_pham_chi_tiet = spct.id LEFT JOIN san_pham sp ON spct.id_san_pham = sp.id LEFT JOIN gong_kinh gk ON sp.id_gong_kinh = gk.id LEFT JOIN kieu_quai_kinh kqk ON gk.id_kieu_quai_kinh = kqk.id OUTER APPLY (SELECT TOP 1 url_anh FROM hinh_anh_san_pham WHERE id_san_pham = sp.id ORDER BY is_anh_chinh DESC, id ASC) ha ORDER BY cthd.id"
+            Sql = "SELECT TOP 5 cthd.id_hoa_don, sp.ten_san_pham, spct.ma AS ma_chi_tiet, kqk.kieu_quai AS kieu_quai_kinh, COALESCE(NULLIF(spct.hinh_anh, ''), ha.url_anh) AS hinh_anh, cthd.so_luong, cthd.tong_tien FROM chi_tiet_hoa_don cthd LEFT JOIN san_pham_chi_tiet spct ON cthd.id_san_pham_chi_tiet = spct.id LEFT JOIN san_pham sp ON spct.id_san_pham = sp.id LEFT JOIN gong_kinh gk ON sp.id_gong_kinh = gk.id LEFT JOIN kieu_quai_kinh kqk ON gk.id_kieu_quai_kinh = kqk.id OUTER APPLY (SELECT TOP 1 url_anh FROM hinh_anh_san_pham WHERE id_san_pham = sp.id ORDER BY is_anh_chinh DESC, id ASC) ha ORDER BY cthd.id"
         },
         @{
             Name = "Kiểm tra lịch sử thanh toán"

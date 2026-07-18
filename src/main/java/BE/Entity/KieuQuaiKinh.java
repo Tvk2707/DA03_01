@@ -14,19 +14,10 @@ public class KieuQuaiKinh {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
-    @Column(name = "quai_thang")
-    @Builder.Default
-    private Integer quaiThang = 0;
-
-    @Column(name = "quai_gap")
-    @Builder.Default
-    private Integer quaiGap = 0;
-
-    @Column(name = "quai_loxo")
-    @Builder.Default
-    private Integer quaiLoxo = 0;
+    @Column(name = "kieu_quai", nullable = false, length = 255)
+    private String kieuQuai;
 
     @Column(name = "trang_thai")
     @Builder.Default
