@@ -1,18 +1,16 @@
 /* ==================== DISCOUNT PAGE STYLES ==================== */
 
-/* --- Page Header --- */
+/* Page Header */
 .page-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 24px;
     gap: 16px;
-    flex-wrap: wrap;
 }
 
 .page-header__info {
     flex: 1;
-    min-width: 200px;
 }
 
 .page-header__title {
@@ -27,7 +25,7 @@
     color: var(--text-light);
 }
 
-/* --- Buttons --- */
+/* Buttons */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -40,7 +38,6 @@
     cursor: pointer;
     transition: all 0.3s ease;
     text-decoration: none;
-    font-family: inherit;
 }
 
 .btn--primary {
@@ -69,7 +66,7 @@
     font-size: 13px;
 }
 
-/* --- Icon Button --- */
+/* Icon Button */
 .btn-icon {
     background: none;
     border: none;
@@ -78,7 +75,6 @@
     padding: 6px;
     border-radius: 6px;
     transition: all 0.3s ease;
-    font-size: 14px;
 }
 
 .btn-icon:hover {
@@ -91,7 +87,7 @@
     font-size: 14px;
 }
 
-/* --- Tabs --- */
+/* Tabs */
 .tabs {
     display: flex;
     gap: 8px;
@@ -115,7 +111,6 @@
     color: var(--text-light);
     cursor: pointer;
     transition: all 0.3s ease;
-    font-family: inherit;
 }
 
 .tab i {
@@ -125,14 +120,14 @@
 .tab--active {
     background-color: var(--white);
     color: var(--primary-color);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
 }
 
 .tab:hover:not(.tab--active) {
     color: var(--text-dark);
 }
 
-/* --- Tab Content --- */
+/* Tab Content */
 .tab-content {
     display: none;
 }
@@ -141,12 +136,11 @@
     display: block;
 }
 
-/* --- Filters --- */
+/* Filters */
 .filters {
     display: flex;
     gap: 12px;
     margin-bottom: 24px;
-    flex-wrap: wrap;
 }
 
 .filter-btn {
@@ -159,7 +153,6 @@
     color: var(--text-light);
     cursor: pointer;
     transition: all 0.3s ease;
-    font-family: inherit;
 }
 
 .filter-btn--active {
@@ -173,14 +166,14 @@
     color: var(--primary-color);
 }
 
-/* --- Coupons Grid --- */
+/* Coupons Grid */
 .coupons-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
     gap: 20px;
 }
 
-/* --- Coupon Card --- */
+/* Coupon Card */
 .coupon-card {
     background-color: var(--white);
     border-radius: 16px;
@@ -191,7 +184,7 @@
 }
 
 .coupon-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
     transform: translateY(-2px);
 }
 
@@ -204,7 +197,6 @@
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 8px;
-    gap: 12px;
 }
 
 .coupon-card__name {
@@ -224,47 +216,12 @@
     gap: 8px;
 }
 
-.coupon-card__desc {
-    font-size: 14px;
-    color: var(--text-light);
-    margin-bottom: 8px;
-}
-
-.coupon-card__status {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 13px;
-    font-weight: 600;
-}
-
-/* --- Status Dot --- */
-.status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-}
-
-.status-dot--active {
-    background-color: #43a047;
-}
-
-.status-dot--inactive {
-    background-color: #ef5350;
-}
-
-.status-text {
-    color: var(--text-dark);
-}
-
-/* --- Badge --- */
 .badge {
     display: inline-block;
     padding: 4px 12px;
     border-radius: 12px;
     font-size: 12px;
     font-weight: 600;
-    white-space: nowrap;
 }
 
 .badge--public {
@@ -292,7 +249,39 @@
     color: #616161;
 }
 
-/* --- Stats --- */
+.coupon-card__desc {
+    font-size: 14px;
+    color: var(--text-light);
+    margin-bottom: 8px;
+}
+
+.coupon-card__status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.status-dot--active {
+    background-color: #43a047;
+}
+
+.status-dot--inactive {
+    background-color: #ef5350;
+}
+
+.status-text {
+    color: var(--text-dark);
+}
+
+/* Stats */
 .coupon-card__stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -319,7 +308,7 @@
     color: var(--text-light);
 }
 
-/* --- Min Order --- */
+/* Min Order */
 .coupon-card__min-order {
     font-size: 14px;
     color: var(--text-light);
@@ -331,7 +320,7 @@
     font-weight: 600;
 }
 
-/* --- Progress --- */
+/* Progress */
 .coupon-card__progress {
     margin-bottom: 20px;
 }
@@ -358,14 +347,13 @@
     transition: width 0.5s ease;
 }
 
-/* --- Actions --- */
+/* Actions */
 .coupon-card__actions {
     display: flex;
     gap: 8px;
-    flex-wrap: wrap;
 }
 
-/* --- Campaign Section --- */
+/* Campaign Section */
 .campaign-section {
     background-color: var(--white);
     border-radius: 16px;
@@ -381,7 +369,7 @@
     margin-bottom: 20px;
 }
 
-/* --- Table --- */
+/* Table */
 .table-container {
     overflow-x: auto;
 }
@@ -433,9 +421,6 @@
     font-weight: 600;
 }
 
-<<<<<<< HEAD
-/* --- Action Buttons --- */
-=======
 .empty-state {
     display: flex;
     min-height: 180px;
@@ -458,14 +443,12 @@
 }
 
 /* Action Buttons */
->>>>>>> THONG_KE
 .action-buttons {
     display: flex;
     gap: 8px;
 }
 
-/* ==================== RESPONSIVE ==================== */
-
+/* Responsive */
 @media (max-width: 1024px) {
     .coupons-grid {
         grid-template-columns: 1fr;
@@ -473,11 +456,6 @@
 
     .page-header {
         flex-direction: column;
-    }
-
-    .btn--primary {
-        width: 100%;
-        justify-content: center;
     }
 }
 
@@ -510,17 +488,4 @@
         padding: 12px 8px;
     }
 }
-<<<<<<< HEAD
 
-@media (max-width: 480px) {
-    .coupon-card__actions {
-        flex-direction: column;
-    }
-
-    .coupon-card__actions .btn {
-        width: 100%;
-        justify-content: center;
-    }
-}
-=======
->>>>>>> THONG_KE

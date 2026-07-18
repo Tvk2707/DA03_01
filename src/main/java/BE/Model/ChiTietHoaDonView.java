@@ -139,8 +139,5 @@ public class ChiTietHoaDonView {
     public void setTongTien(BigDecimal tongTien) {
         this.tongTien = tongTien;
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> HOA_DON
+

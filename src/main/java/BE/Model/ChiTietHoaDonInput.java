@@ -1,6 +1,6 @@
 package BE.Model;
 
-// Một sản phẩm và số lượng người dùng chọn khi tạo hóa đơn.
+// San pham va so luong nguoi dung chon khi tao hoa don.
 public class ChiTietHoaDonInput {
     private final int idSanPhamChiTiet;
     private final int soLuong;
@@ -10,7 +10,6 @@ public class ChiTietHoaDonInput {
         this.soLuong = soLuong;
     }
 
-<<<<<<< HEAD
     public int getIdSanPhamChiTiet() {
         return idSanPhamChiTiet;
     }
@@ -19,8 +18,4 @@ public class ChiTietHoaDonInput {
         return soLuong;
     }
 }
-=======
-    public int getIdSanPhamChiTiet() { return idSanPhamChiTiet; }
-    public int getSoLuong() { return soLuong; }
-}
->>>>>>> HOA_DON
+

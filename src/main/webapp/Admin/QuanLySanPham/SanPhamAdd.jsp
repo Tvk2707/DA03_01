@@ -1,5 +1,7 @@
 <%
     request.setAttribute("pageTitle", "Thêm sản phẩm");
+    request.setAttribute("activeMenu", "product");
+    request.setAttribute("activeSubMenu", "product");
 %>
 <%
     String actionAttr = (String) request.getAttribute("action");
@@ -21,19 +23,19 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${pageTitleForm}</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/layout.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/sidebar.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/header.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/danhmuc.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/sanpham.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/FE/Admin/css/layout.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/FE/Admin/css/sidebar.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/FE/Admin/css/header.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/FE/Admin/css/danhmuc.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/FE/Admin/css/sanpham.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 </head>
 <body>
-<%@include file="../layout/sidebar.jsp" %>
+<%@include file="../../FE/Admin/layout/sidebar.jsp" %>
 <div class="dashboard-container sp-wide-page">
-    <%@include file="../layout/header.jsp" %>
+    <%@include file="../../FE/Admin/layout/header.jsp" %>
 
     <div class="category-section sp-product-builder">
         <div class="category-header">

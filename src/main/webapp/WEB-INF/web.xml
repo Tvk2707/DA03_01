@@ -7,17 +7,9 @@
         <welcome-file>index.jsp</welcome-file>
     </welcome-file-list>
     <servlet>
-        <servlet-name>HoaDonController</servlet-name>
-        <servlet-class>BE.controller.HoaDonController</servlet-class>
-    </servlet>
-    <servlet>
         <servlet-name>ThongKeController</servlet-name>
         <servlet-class>BE.controller.ThongKeController</servlet-class>
     </servlet>
-    <servlet-mapping>
-        <servlet-name>HoaDonController</servlet-name>
-        <url-pattern>/admin/hoa-don</url-pattern>
-    </servlet-mapping>
     <servlet-mapping>
         <servlet-name>ThongKeController</servlet-name>
         <url-pattern>/admin/thong-ke</url-pattern>

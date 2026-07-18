@@ -6,10 +6,8 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-// Quản lý kết nối SQL Server cho toàn bộ tầng DAO.
+// Quan ly ket noi SQL Server cho cac DAO trong package BE.
 public class DatabaseConnectionManager {
-
-    // Cấu hình mặc định, có thể ghi đè bằng system property hoặc environment variable.
     private static final String DEFAULT_HOST = "localhost";
     private static final int DEFAULT_PORT = 1433;
     private static final String DEFAULT_DATABASE_NAME = "quan_ly_ban_kinh";
@@ -52,7 +50,6 @@ public class DatabaseConnectionManager {
     }
 
     public static DatabaseConnectionManager fromEnvironment() {
-        // Ưu tiên đọc cấu hình từ biến môi trường, nếu không có thì dùng giá trị mặc định.
         String host = getSetting("db.host", "DB_HOST", DEFAULT_HOST);
         int port = getIntSetting("db.port", "DB_PORT", DEFAULT_PORT);
         String databaseName = getSetting("db.name", "DB_NAME", DEFAULT_DATABASE_NAME);
@@ -75,13 +72,8 @@ public class DatabaseConnectionManager {
     }
 
     public Connection getConnection() throws SQLException {
-<<<<<<< HEAD
-        // DAO gọi hàm này để lấy Connection mới mỗi khi cần truy vấn database.
         loadSqlServerDriver();
 
-=======
-        loadSqlServerDriver();
->>>>>>> THONG_KE
         if (this.integratedSecurity) {
             return DriverManager.getConnection(this.url);
         }
@@ -89,7 +81,6 @@ public class DatabaseConnectionManager {
     }
 
     public Map<String, String> toJpaProperties() {
-        // Hàm này phục vụ JPA nếu cần dùng EntityManager trong các phần khác.
         Map<String, String> properties = new HashMap<>();
         properties.put("jakarta.persistence.jdbc.driver", "com.microsoft.sqlserver.jdbc.SQLServerDriver");
         properties.put("jakarta.persistence.jdbc.url", this.url);
@@ -112,19 +103,14 @@ public class DatabaseConnectionManager {
     }
 
     private void loadSqlServerDriver() throws SQLException {
-<<<<<<< HEAD
-        // Nạp driver JDBC để DriverManager biết cách kết nối SQL Server.
-=======
->>>>>>> THONG_KE
         try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
         } catch (ClassNotFoundException e) {
-            throw new SQLException("Không tìm thấy SQL Server JDBC Driver trong WEB-INF/lib.", e);
+            throw new SQLException("Khong tim thay SQL Server JDBC Driver trong WEB-INF/lib.", e);
         }
     }
 
     private static String getSetting(String propertyName, String environmentName, String defaultValue) {
-        // Đọc giá trị theo thứ tự: JVM property -> biến môi trường -> mặc định.
         String propertyValue = System.getProperty(propertyName);
         if (propertyValue != null && !propertyValue.trim().isEmpty()) {
             return propertyValue;
@@ -152,3 +138,4 @@ public class DatabaseConnectionManager {
         return Boolean.parseBoolean(value);
     }
 }
+

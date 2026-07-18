@@ -134,7 +134,7 @@ public class SanPhamServlet extends HttpServlet {
             request.setAttribute("sanPhamChiTietList", sanPhamChiTietList);
             setLookupAttributes(request);
             request.setAttribute("action", "edit");
-            request.getRequestDispatcher("/Admin/QuanLySanPham/SanPhamEdit.jsp").forward(request, response);
+            request.getRequestDispatcher("/Admin/QuanLySanPham/SanPhamAdd.jsp").forward(request, response);
         } catch (NumberFormatException e) {
             response.sendRedirect(request.getContextPath() + "/SanPham");
         }
@@ -214,7 +214,7 @@ public class SanPhamServlet extends HttpServlet {
             request.setAttribute("sanPhamChiTietList", danhSachBienTheTuForm);
             setLookupAttributes(request);
             request.setAttribute("action", "edit");
-            request.getRequestDispatcher("/Admin/QuanLySanPham/SanPhamEdit.jsp").forward(request, response);
+            request.getRequestDispatcher("/Admin/QuanLySanPham/SanPhamAdd.jsp").forward(request, response);
         }
     }
 

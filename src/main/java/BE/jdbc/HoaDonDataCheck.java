@@ -11,7 +11,7 @@ public class HoaDonDataCheck {
         List<HoaDonView> hoaDonList = service.getAllHoaDon();
         System.out.println("Hoa don count: " + hoaDonList.size());
         for (HoaDonView hoaDon : hoaDonList) {
-            System.out.println(hoaDon.getMaHoaDon() + " | " + hoaDon.getTenKhachHang() + " | " + hoaDon.getTongTien());
+            System.out.println(hoaDon.getMaHoaDon() + " | " + hoaDon.getTenKhachHang() + " | " + hoaDon.getTongTienThanhToan());
         }
     }
 }

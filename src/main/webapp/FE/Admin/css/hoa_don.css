@@ -541,16 +541,7 @@
     display: flex;
 }
 
-<<<<<<< HEAD
 /* Phần chân bảng: tổng số dòng và phân trang hiển thị. */
-=======
-.invoice-empty-cell {
-    padding: 28px !important;
-    color: var(--text-light);
-    text-align: center;
-}
-
->>>>>>> THONG_KE
 .invoice-table-footer {
     justify-content: space-between;
     gap: 12px;

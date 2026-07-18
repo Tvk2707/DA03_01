@@ -1,5 +1,6 @@
 package BE.Model;
 
+// Du lieu nhan vien dung cho danh sach chon trong hoa don.
 public class NhanVienView {
     private Integer id;
     private String maNhanVien;
@@ -28,8 +29,5 @@ public class NhanVienView {
     public void setHoTen(String hoTen) {
         this.hoTen = hoTen;
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> HOA_DON
+

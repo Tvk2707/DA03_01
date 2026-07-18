@@ -1,6 +1,5 @@
 package BE.service;
 
-<<<<<<< HEAD
 import BE.Model.ChiTietHoaDonView;
 import BE.Model.ChiTietHoaDonInput;
 import BE.Model.HoaDonView;
@@ -11,38 +10,21 @@ import BE.Model.SanPhamHoaDonView;
 import BE.Model.ThanhToanHoaDonView;
 import BE.dao.HoaDonDAO;
 
-=======
-import BE.Model.HoaDonView;
-import BE.dao.HoaDonDAO;
-
-import java.math.BigDecimal;
->>>>>>> THONG_KE
 import java.sql.SQLException;
 import java.util.List;
 
 public class HoaDonService {
-<<<<<<< HEAD
     // Service là tầng trung gian: controller không gọi SQL trực tiếp mà gọi qua service.
-=======
->>>>>>> THONG_KE
     private final HoaDonDAO hoaDonDAO = new HoaDonDAO();
 
     public List<HoaDonView> getAllHoaDon() throws SQLException {
         return hoaDonDAO.findAll();
     }
 
-<<<<<<< HEAD
     public HoaDonView getHoaDonById(int id) throws SQLException {
         return hoaDonDAO.findById(id);
     }
 
-<<<<<<< HEAD
-    public List<ChiTietHoaDonView> getChiTietHoaDonById(int id) throws SQLException {
-        return hoaDonDAO.findDetailsByHoaDonId(id);
-    }
-
-=======
->>>>>>> HOA_DON
     public List<NhanVienView> getAllNhanVien() throws SQLException {
         return hoaDonDAO.findAllNhanVien();
     }
@@ -72,27 +54,6 @@ public class HoaDonService {
     }
 
     public void saveHoaDon(HoaDonView hoaDon, List<ChiTietHoaDonInput> productLines) throws SQLException {
-<<<<<<< HEAD
-        // Nếu chưa có id thì thêm mới, nếu đã có id thì cập nhật hóa đơn cũ.
-        if (hoaDon.getId() == null) {
-            if (isBlank(hoaDon.getMaHoaDon()) || hoaDonDAO.existsByMaHoaDon(hoaDon.getMaHoaDon(), null)) {
-                hoaDon.setMaHoaDon(hoaDonDAO.generateNextMaHoaDon());
-            }
-            int invoiceId = hoaDonDAO.insert(hoaDon);
-            if (!productLines.isEmpty()) {
-                hoaDonDAO.insertChiTietHoaDon(invoiceId, productLines);
-            }
-        } else {
-            if (isBlank(hoaDon.getMaHoaDon()) || hoaDonDAO.existsByMaHoaDon(hoaDon.getMaHoaDon(), hoaDon.getId())) {
-                hoaDon.setMaHoaDon(hoaDonDAO.generateNextMaHoaDon());
-            }
-            hoaDonDAO.update(hoaDon);
-        }
-    }
-
-    public void huyHoaDon(int id) throws SQLException {
-        hoaDonDAO.delete(id);
-=======
         if (isBlank(hoaDon.getMaHoaDon()) || hoaDonDAO.existsByMaHoaDon(hoaDon.getMaHoaDon(), null)) {
             hoaDon.setMaHoaDon(hoaDonDAO.generateNextMaHoaDon());
         }
@@ -100,7 +61,6 @@ public class HoaDonService {
         if (!productLines.isEmpty()) {
             hoaDonDAO.insertChiTietHoaDon(invoiceId, productLines);
         }
->>>>>>> HOA_DON
     }
 
     public void updateTrangThai(int id, int trangThai, String ghiChu) throws SQLException {
@@ -110,38 +70,4 @@ public class HoaDonService {
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> HOA_DON
-=======
-    public BigDecimal tinhTongDoanhThu(List<HoaDonView> hoaDonList) {
-        BigDecimal total = BigDecimal.ZERO;
-        for (HoaDonView hoaDon : hoaDonList) {
-            if (hoaDon.getTongTien() != null && hoaDon.getTrangThai() == 4) {
-                total = total.add(hoaDon.getTongTien());
-            }
-        }
-        return total;
-    }
-
-    public int demDangXuLy(List<HoaDonView> hoaDonList) {
-        int count = 0;
-        for (HoaDonView hoaDon : hoaDonList) {
-            if (hoaDon.getTrangThai() > 0 && hoaDon.getTrangThai() < 4) {
-                count++;
-            }
-        }
-        return count;
-    }
-
-    public int demSanPham(List<HoaDonView> hoaDonList) {
-        int count = 0;
-        for (HoaDonView hoaDon : hoaDonList) {
-            count += hoaDon.getSoLuongSanPham();
-        }
-        return count;
-    }
-}
->>>>>>> THONG_KE

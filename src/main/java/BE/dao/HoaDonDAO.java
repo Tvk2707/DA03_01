@@ -1,6 +1,5 @@
 package BE.dao;
 
-<<<<<<< HEAD
 import BE.Model.ChiTietHoaDonView;
 import BE.Model.ChiTietHoaDonInput;
 import BE.Model.HoaDonView;
@@ -9,34 +8,20 @@ import BE.Model.LichSuThanhToanView;
 import BE.Model.NhanVienView;
 import BE.Model.SanPhamHoaDonView;
 import BE.Model.ThanhToanHoaDonView;
-<<<<<<< HEAD
-import QuanLySanPham.jdbc.DatabaseConnectionManager;
-=======
 import BE.jdbc.DatabaseConnectionManager;
->>>>>>> HOA_DON
 
 import java.math.BigDecimal;
-=======
-import BE.Model.HoaDonView;
-import BE.jdbc.DatabaseConnectionManager;
-
->>>>>>> THONG_KE
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-<<<<<<< HEAD
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
-=======
-import java.sql.Timestamp;
->>>>>>> THONG_KE
 import java.util.ArrayList;
 import java.util.List;
 
 public class HoaDonDAO {
-<<<<<<< HEAD
     private final DatabaseConnectionManager connectionManager;
 
     public HoaDonDAO() {
@@ -151,11 +136,7 @@ public class HoaDonDAO {
         String sql = "SELECT sp.ten_san_pham, spct.ma AS ma_san_pham_chi_tiet, "
                 + "dm.ten_danh_muc, th.ten_thuong_hieu, cl.ten_chat_lieu, kd.ten_kieu_dang, "
                 + "hdg.hinh_dang, "
-<<<<<<< HEAD
-                + "kqk.kieu_quai AS kieu_quai_kinh, " // Đã sửa tại đây cực kỳ ngắn gọn
-=======
                 + "kqk.kieu_quai AS kieu_quai_kinh, "
->>>>>>> HOA_DON
                 + "tk.loai_trong, ms.ten_mau, kc.ten_kich_co, "
                 + "COALESCE(NULLIF(spct.hinh_anh, ''), ha.url_anh) AS hinh_anh_san_pham, "
                 + "cthd.so_luong, cthd.don_gia, cthd.tong_tien "
@@ -392,54 +373,9 @@ public class HoaDonDAO {
         }
     }
 
-<<<<<<< HEAD
-    // UPDATE: sửa thông tin cơ bản của hóa đơn.
-    public void update(HoaDonView hoaDon) throws SQLException {
-        String sql = "UPDATE hoa_don SET ma_hoa_don = ?, ten_nguoi_nhan = ?, sdt_nguoi_nhan = ?, "
-                + "tong_tien_thanh_toan = ?, trang_thai = ?, ghi_chu = ?, id_nhan_vien = ? WHERE id = ?";
-
-        try (Connection connection = connectionManager.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-            setFormParameters(statement, hoaDon);
-            statement.setInt(8, hoaDon.getId());
-            statement.executeUpdate();
-        }
-    }
-
-    // DELETE: xóa mềm hóa đơn bằng cách đổi trang_thai = 5.
-    public void delete(int id) throws SQLException {
-        String sql = "UPDATE hoa_don SET trang_thai = 5, ly_do_huy = N'Xóa mềm từ màn hình quản lý hóa đơn' WHERE id = ?";
-        String historySql = "INSERT INTO lich_su_hoa_don (id_hoa_don, hanh_dong, ghi_chu) VALUES (?, ?, ?)";
-
-        try (Connection connection = connectionManager.getConnection()) {
-            connection.setAutoCommit(false);
-
-            try (PreparedStatement statement = connection.prepareStatement(sql);
-                 PreparedStatement historyStatement = connection.prepareStatement(historySql)) {
-                statement.setInt(1, id);
-                statement.executeUpdate();
-
-                historyStatement.setInt(1, id);
-                historyStatement.setString(2, "Xóa mềm hóa đơn");
-                historyStatement.setString(3, "Hóa đơn được xóa mềm từ màn hình quản lý hóa đơn");
-                historyStatement.executeUpdate();
-
-                connection.commit();
-            } catch (SQLException exception) {
-                connection.rollback();
-                throw exception;
-            }
-        }
-    }
-
-    // UPDATE: cập nhật trạng thái và ghi thêm lịch sử hóa đơn.
-    public void updateStatus(int id, int status, String note) throws SQLException {
-        String action = status == 5 ? "Hủy hóa đơn" : "Cập nhật trạng thái";
-=======
     // UPDATE: cập nhật trạng thái và ghi thêm lịch sử hóa đơn.
     public void updateStatus(int id, int status, String note) throws SQLException {
         String action = status == 5 ? "H\u1ee7y h\u00f3a \u0111\u01a1n" : "C\u1eadp nh\u1eadt tr\u1ea1ng th\u00e1i";
->>>>>>> HOA_DON
         String sql = "UPDATE hoa_don SET trang_thai = ?, ghi_chu = ? WHERE id = ?";
         String historySql = "INSERT INTO lich_su_hoa_don (id_hoa_don, hanh_dong, ghi_chu) VALUES (?, ?, ?)";
 
@@ -511,64 +447,4 @@ public class HoaDonDAO {
     private BigDecimal defaultMoney(BigDecimal value) {
         return value == null ? BigDecimal.ZERO : value;
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> HOA_DON
-=======
-    private final DatabaseConnectionManager connectionManager = DatabaseConnectionManager.fromEnvironment();
-
-    public List<HoaDonView> findAll() throws SQLException {
-        String sql = "SELECT hd.id, hd.ma_hoa_don, hd.ten_nguoi_nhan, hd.sdt_nguoi_nhan, "
-                + "hd.ngay_tao, hd.tong_tien_thanh_toan, hd.trang_thai, "
-                + "kh.ho_ten AS ten_khach_hang, kh.so_dien_thoai AS sdt_khach_hang, "
-                + "nv.ho_ten AS ten_nhan_vien, nv.ma_nhan_vien, "
-                + "COALESCE(SUM(ct.so_luong), 0) AS so_luong_san_pham "
-                + "FROM hoa_don hd "
-                + "LEFT JOIN khach_hang kh ON hd.id_khach_hang = kh.id "
-                + "LEFT JOIN nhan_vien nv ON hd.id_nhan_vien = nv.id "
-                + "LEFT JOIN chi_tiet_hoa_don ct ON hd.id = ct.id_hoa_don "
-                + "WHERE ISNULL(hd.trang_thai, 1) <> 5 "
-                + "GROUP BY hd.id, hd.ma_hoa_don, hd.ten_nguoi_nhan, hd.sdt_nguoi_nhan, "
-                + "hd.ngay_tao, hd.tong_tien_thanh_toan, hd.trang_thai, "
-                + "kh.ho_ten, kh.so_dien_thoai, nv.ho_ten, nv.ma_nhan_vien "
-                + "ORDER BY hd.id DESC";
-
-        List<HoaDonView> result = new ArrayList<>();
-        try (Connection connection = connectionManager.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql);
-             ResultSet rs = statement.executeQuery()) {
-            int stt = 1;
-            while (rs.next()) {
-                HoaDonView item = new HoaDonView();
-                item.setStt(stt++);
-                item.setId(rs.getInt("id"));
-                item.setMaHoaDon(rs.getString("ma_hoa_don"));
-                item.setTenNhanVien(valueOrDefault(rs.getString("ten_nhan_vien"), "System"));
-                item.setMaNhanVien(valueOrDefault(rs.getString("ma_nhan_vien"), "SYSTEM"));
-                item.setTenKhachHang(valueOrDefault(rs.getString("ten_khach_hang"), rs.getString("ten_nguoi_nhan")));
-                item.setSoDienThoai(valueOrDefault(rs.getString("sdt_khach_hang"), rs.getString("sdt_nguoi_nhan")));
-                item.setLoaiHoaDon("Tại quầy");
-                item.setTongTien(rs.getBigDecimal("tong_tien_thanh_toan"));
-                item.setTrangThai(rs.getInt("trang_thai"));
-                item.setSoLuongSanPham(rs.getInt("so_luong_san_pham"));
-
-                Timestamp ngayTao = rs.getTimestamp("ngay_tao");
-                if (ngayTao != null) {
-                    item.setNgayTao(ngayTao.toLocalDateTime());
-                }
-                result.add(item);
-            }
-        }
-        return result;
-    }
-
-    private String valueOrDefault(String value, String fallback) {
-        if (value == null || value.trim().isEmpty()) {
-            return fallback == null || fallback.trim().isEmpty() ? "-" : fallback;
-        }
-        return value;
-    }
-}
->>>>>>> THONG_KE
