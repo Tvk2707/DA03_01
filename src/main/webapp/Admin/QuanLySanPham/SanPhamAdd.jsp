@@ -167,14 +167,8 @@
                         <textarea class="filter-input" name="moTaChiTiet" rows="3"
                                   maxlength="1000" placeholder="Nhập mô tả chi tiết">${sanPham.moTaChiTiet}</textarea>
                     </div>
-
-                    <div class="filter-group">
-                        <label class="filter-label">Trạng thái sản phẩm</label>
-                        <select class="filter-select" name="trangThai">
-                            <option value="1" ${sanPham.trangThai == 1 ? 'selected' : ''}>Đang kinh doanh</option>
-                            <option value="0" ${sanPham.trangThai == 0 ? 'selected' : ''}>Ngừng bán</option>
-                        </select>
-                    </div>
+                    <!-- Trạng thái mặc định tự động là Đang kinh doanh (1) và ẩn khỏi giao diện -->
+                    <input type="hidden" name="trangThai" value="1" />
                 </div>
             </section>
 
