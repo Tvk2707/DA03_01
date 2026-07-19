@@ -344,6 +344,121 @@
             to { transform: translateX(0); opacity: 1; }
         }
 
+        /* ========================================================== */
+        /* 🆕 CSS BỔ SUNG: HÀNG HÀNH ĐỘNG BỘ LỌC & THANH TOOLBAR STICKY*/
+        /* ========================================================== */
+        .filter-action-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px dashed #e5e7eb;
+        }
+        .filter-action-left {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .filter-action-right {
+            display: flex;
+            align-items: center;
+        }
+        .btn-secondary-outline {
+            background: #ffffff !important;
+            color: #4b5563 !important;
+            border: 1px solid #d1d5db !important;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-secondary-outline:hover {
+            background: #f9fafb !important;
+            border-color: #9ca3af !important;
+            color: #1f2937 !important;
+        }
+
+        /* Toolbar dính phía trên bảng dữ liệu */
+        .table-toolbar {
+            position: -webkit-sticky;
+            position: sticky;
+            top: 70px; /* Điều chỉnh lại theo chiều cao thực tế của Header dự án nếu bị đè */
+            background: #ffffff;
+            z-index: 90;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+            margin-top: 24px;
+            border: 1px solid #e5e7eb;
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .toolbar-left-results {
+            font-size: 14px;
+            font-weight: 500;
+            color: #4b5563;
+        }
+        .toolbar-left-results span {
+            font-weight: 700;
+            color: #1f2937;
+        }
+        /* Thay đổi border-radius của bảng để khớp mượt với toolbar phía trên */
+        .category-table {
+            margin-top: 0 !important;
+            border-top-left-radius: 0 !important;
+            border-top-right-radius: 0 !important;
+        }
+
+        /* ========================================================== */
+        /* 🎛️ CUSTOM TOGGLE SWITCH CHO TRẠNG THÁI SẢN PHẨM MỚI       */
+        /* ========================================================== */
+        .status-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 22px;
+        }
+        .status-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .status-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #94a3b8;
+            transition: .3s;
+            border-radius: 22px;
+        }
+        .status-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .status-switch input:checked + .status-slider {
+            background-color: #b4975a; /* Khớp với màu thương hiệu hệ thống */
+        }
+        .status-switch input:checked + .status-slider:before {
+            transform: translateX(22px);
+        }
+
         /* Responsive Mobile */
         @media (max-width: 1024px) {
             .filter-grid {
@@ -365,6 +480,19 @@
             .input-currency-container .input-separator {
                 display: none;
             }
+            .filter-action-row {
+                flex-direction: column;
+                gap: 12px;
+                align-items: stretch;
+            }
+            .filter-action-left {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .filter-action-right .btn-secondary-outline {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
@@ -376,12 +504,10 @@
     <div class="category-section">
         <div class="category-header">
             <h2 class="category-title">Sản Phẩm</h2>
-            <a href="${pageContext.request.contextPath}/SanPham/new" class="add-new-btn" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
-                <i class="fas fa-plus"></i> Thêm mới
-            </a>
         </div>
 
         <!-- THÔNG BÁO DẠNG TOAST GÓC TRÊN PHẢI -->
+        <div id="toast-container"></div>
         <c:if test="${not empty error}">
             <div id="toast-msg" class="toast-custom toast-error-style">
                 <i class="fas fa-circle-exclamation"></i>
@@ -402,18 +528,10 @@
                     <i class="fas fa-filter"></i>
                     Bộ lọc tìm kiếm
                 </div>
-                <div class="filter-actions">
-                    <a href="${pageContext.request.contextPath}/SanPham/export" class="btn-export">
-                        <i class="fas fa-file-excel"></i> Xuất Excel
-                    </a>
-                    <button type="button" class="btn-reset" onclick="resetFilters()">
-                        <i class="fas fa-undo"></i> Đặt lại
-                    </button>
-                </div>
             </div>
 
             <form action="${pageContext.request.contextPath}/SanPham/search" method="post" id="filterForm">
-                <div class="filter-grid" style="margin-bottom: 24px;">
+                <div class="filter-grid">
                     <div class="filter-group">
                         <label class="filter-label">Tìm kiếm</label>
                         <input type="text"
@@ -510,18 +628,42 @@
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 16px;">
-                    <button type="submit" class="add-new-btn" style="padding: 10px 24px;" id="mainSubmitBtn">
-                        <i class="fas fa-search"></i> Tìm kiếm
-                    </button>
-                    <c:if test="${not empty searchTenSanPham || not empty searchDanhMucId || not empty searchThuongHieuId || not empty searchGiaTu || not empty searchGiaDen}">
-                        <a href="${pageContext.request.contextPath}/SanPham"
-                           style="padding: 10px 24px; background: #f3f4f6; color: #6b7280; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
-                            <i class="fas fa-times"></i> Xóa bộ lọc
+                <div class="filter-action-row">
+                    <div class="filter-action-left">
+                        <button type="submit" class="add-new-btn" style="padding: 10px 24px;" id="mainSubmitBtn">
+                            <i class="fas fa-search"></i> Tìm kiếm
+                        </button>
+
+                        <button type="button" class="btn-secondary-outline" onclick="resetFilters()">
+                            <i class="fas fa-rotate-left"></i> Đặt lại
+                        </button>
+
+                        <c:if test="${not empty searchTenSanPham || not empty searchDanhMucId || not empty searchThuongHieuId || not empty searchGiaTu || not empty searchGiaDen}">
+                            <a href="${pageContext.request.contextPath}/SanPham"
+                               style="padding: 10px 20px; background: #fee2e2; color: #dc2626; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 14px;">
+                                <i class="fas fa-xmark"></i> Xóa bộ lọc nâng cao
+                            </a>
+                        </c:if>
+                    </div>
+
+                    <div class="filter-action-right">
+                        <a href="${pageContext.request.contextPath}/SanPham/export" class="btn-secondary-outline">
+                            <i class="fas fa-file-export"></i> Xuất Excel
                         </a>
-                    </c:if>
+                    </div>
                 </div>
             </form>
+        </div>
+
+        <div class="table-toolbar">
+            <div class="toolbar-left-results">
+                Hiển thị <span>${fn:length(items)}</span> sản phẩm
+            </div>
+            <div>
+                <a href="${pageContext.request.contextPath}/SanPham/new" class="add-new-btn" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px;">
+                    <i class="fas fa-plus"></i> Thêm mới
+                </a>
+            </div>
         </div>
 
         <table class="category-table">
@@ -580,21 +722,25 @@
                         </c:choose>
                     </td>
                     <td>
-                        <span class="category-status ${temp.trangThai == 1 ? 'status-active' : 'status-inactive'}">
+                        <!-- Gắn thêm class JS-status-text để JS dễ tìm kiếm và đổi text/màu nhanh -->
+                        <span class="category-status JS-status-text ${temp.trangThai == 1 ? 'status-active' : 'status-inactive'}">
                                 ${temp.trangThai == 1 ? "Đang kinh doanh" : "Ngừng bán"}
                         </span>
                     </td>
                     <td>
-                        <div class="action-buttons">
+                        <div class="action-buttons" style="align-items: center; gap: 12px;">
                             <a href="${pageContext.request.contextPath}/SanPhamChiTiet?sanPhamId=${temp.id}" class="btn-icon-circle btn-view" title="Xem biến thể">
                                 <i class="fas fa-eye"></i>
                             </a>
-                            <form action="${pageContext.request.contextPath}/SanPham/delete" method="post" style="display:inline;">
-                                <input type="hidden" name="id" value="${temp.id}">
-                                <button type="button" class="btn-icon-circle btn-delete" title="Xóa" onclick="confirmDelete(this)">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </form>
+
+                            <!-- Đã đổi nút Xóa thành Switch thay đổi trạng thái bán hàng -->
+                            <label class="status-switch" title="Gạt để thay đổi trạng thái bán">
+                                <input type="checkbox"
+                                       class="JS-status-toggle"
+                                       data-id="${temp.id}"
+                                    ${temp.trangThai == 1 ? 'checked' : ''}>
+                                <span class="status-slider"></span>
+                            </label>
                         </div>
                     </td>
                 </tr>
@@ -647,26 +793,6 @@
     </div>
 </div>
 
-<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.25); width: 100%;">
-            <div class="modal-header" style="background: #fff5f5; border-bottom: 1px solid #fee2e2; padding: 16px 20px;">
-                <h5 class="modal-title text-danger" id="deleteModalLabel" style="font-weight: 700; font-size: 16px; margin: 0; display: flex; align-items: center; gap: 8px;">
-                    <i class="fas fa-exclamation-triangle"></i> Xác Nhận Xóa
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Dong" style="background: none; border: none; font-size: 22px; cursor: pointer; color: #94a3b8; line-height: 1;">&times;</button>
-            </div>
-            <div class="modal-body" style="padding: 24px; font-size: 15px; color: #4b5563; line-height: 1.6;">
-                Bạn có chắc chắn muốn xóa sản phẩm này không?<br>Hành động này sẽ không thể hoàn tác và dữ liệu sẽ bị mất vĩnh viễn.
-            </div>
-            <div class="modal-footer" style="background: #f9fafb; border-top: 1px solid #f3f4f6; padding: 14px 20px; display: flex; justify-content: flex-end; gap: 12px;">
-                <button type="button" class="btn-reset" data-bs-dismiss="modal" style="padding: 8px 20px; font-weight: 600; cursor: pointer; border-radius: 6px;">Hủy Bỏ</button>
-                <button type="button" class="add-new-btn" id="confirmDeleteBtn" style="background: #dc2626; padding: 8px 20px; font-weight: 600; cursor: pointer; border-radius: 6px;">Đồng Ý Xóa</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
@@ -675,23 +801,73 @@
         window.location.href = '${pageContext.request.contextPath}/SanPham';
     }
 
-    let activeFormToDelete = null;
+    // Hàm tạo Toast thông báo nhanh góc màn hình cho việc cập nhật Switch thái
+    function showLiveToast(message, isSuccess) {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast-custom ${isSuccess ? 'toast-success-style' : 'toast-error-style'}`;
+        toast.innerHTML = `<i class="fas ${isSuccess ? 'fa-check-circle' : 'fa-circle-exclamation'}"></i><span>\${message}</span>`;
+        container.appendChild(toast);
 
-    function confirmDelete(button) {
-        activeFormToDelete = button.closest('form');
-        const modalEl = document.getElementById('deleteConfirmModal');
-        if (typeof bootstrap !== 'undefined') {
-            const bsModal = new bootstrap.Modal(modalEl);
-            bsModal.show();
-        } else {
-            modalEl.classList.add('show');
-        }
+        setTimeout(() => {
+            toast.style.opacity = "0";
+            toast.style.transform = "translateY(-10px)";
+            setTimeout(() => toast.remove(), 500);
+        }, 2500);
     }
 
     document.addEventListener('DOMContentLoaded', function () {
         // =========================================================================
-        // ⚡ MỚI: CHỨC NĂNG TỰ ẨN THÔNG BÁO TOAST SAU 3 GIÂY
+        // 🔄 XỬ LÝ SỰ KIỆN TOGGLE SWITCH ĐỔI TRẠNG THÁI (REAL-TIME AJAX)
         // =========================================================================
+        document.querySelectorAll('.JS-status-toggle').forEach(toggle => {
+            toggle.addEventListener('change', function() {
+                const productId = this.getAttribute('data-id');
+                const isChecked = this.checked;
+
+                // Quy đổi trạng thái số tương ứng (1: Đang kinh doanh, 0: Ngừng bán)
+                const statusValue = isChecked ? 1 : 0;
+                const statusText = isChecked ? "Đang kinh doanh" : "Ngừng bán";
+
+                const row = this.closest('tr');
+                const textLabel = row.querySelector('.JS-status-text');
+
+                // Gửi Request cập nhật trạng thái ngay lập tức về Backend bằng Fetch API
+                fetch('${pageContext.request.contextPath}/SanPham/update-status', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `id=\${productId}&trangThai=\${statusValue}`
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            // Cập nhật giao diện trực tiếp tại hàng đó mà không cần reload
+                            if (textLabel) {
+                                textLabel.textContent = statusText;
+                                if (isChecked) {
+                                    textLabel.classList.remove('status-inactive');
+                                    textLabel.classList.add('status-active');
+                                } else {
+                                    textLabel.classList.remove('status-active');
+                                    textLabel.classList.add('status-inactive');
+                                }
+                            }
+                            showLiveToast(`Đã chuyển sản phẩm sang: \${statusText}`, true);
+                        } else {
+                            showLiveToast("Cập nhật trạng thái không thành công!", false);
+                            this.checked = !isChecked; // Hoàn tác gạt nếu Server báo lỗi
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showLiveToast("Lỗi kết nối đến máy chủ!", false);
+                        this.checked = !isChecked; // Hoàn tác gạt nếu lỗi mạng
+                    });
+            });
+        });
+
+        // ⚡ Tự ẩn thông báo Toast mặc định sau 3 giây
         const toast = document.getElementById("toast-msg");
         if (toast) {
             setTimeout(function () {
@@ -703,23 +879,8 @@
             }, 3000);
         }
 
-        const modalEl = document.getElementById('deleteConfirmModal');
-        document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
-            if (activeFormToDelete) activeFormToDelete.submit();
-        });
-
-        modalEl.querySelectorAll('[data-bs-dismiss="modal"], .btn-close').forEach(btn => {
-            btn.addEventListener('click', function() {
-                if (typeof bootstrap !== 'undefined') {
-                    const bsModal = bootstrap.Modal.getInstance(modalEl);
-                    if (bsModal) bsModal.hide();
-                }
-                modalEl.classList.remove('show');
-            });
-        });
-
         // =========================================================================
-        // 🛠️ GIỮ NGUYÊN: LOGIC POPOVER OVERLAY, MAX ĐỘNG, 2 CHIỀU VÀ FORMAT TIỀN TỆ
+        // 🛠️ GIỮ NGUYÊN HOÀN TOÀN: LOGIC POPOVER OVERLAY KHOẢNG GIÁ
         // =========================================================================
         const dropdownBtn = document.getElementById('priceDropdownBtn');
         const popoverPanel = document.getElementById('pricePopoverPanel');
@@ -800,10 +961,10 @@
             sliderTrack.style.left = percentMin + '%';
             sliderTrack.style.right = (100 - percentMax) + '%';
 
-            tooltipMin.style.left = `calc(${percentMin}% + (${10 - percentMin * 0.2}px))`;
+            tooltipMin.style.left = `calc(\${percentMin}% + (\${10 - percentMin * 0.2}px))`;
             tooltipMin.textContent = formatCurrencyShort(valMin);
 
-            tooltipMax.style.left = `calc(${percentMax}% + (${10 - percentMax * 0.2}px))`;
+            tooltipMax.style.left = `calc(\${percentMax}% + (\${10 - percentMax * 0.2}px))`;
             tooltipMax.textContent = formatCurrencyShort(valMax);
 
             displayMin.value = formatNumberString(valMin);

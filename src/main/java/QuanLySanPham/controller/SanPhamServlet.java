@@ -1,6 +1,5 @@
 package QuanLySanPham.controller;
 
-
 import QuanLySanPham.Entity.*;
 import QuanLySanPham.service.SanPhamChiTietService;
 import QuanLySanPham.service.SanPhamService;
@@ -40,6 +39,7 @@ import java.util.stream.Collectors;
         "/SanPham/insert",
         "/SanPham/edit",
         "/SanPham/update",
+        "/SanPham/update-status", // 🆕 Bổ sung URL Pattern đón nhận request từ Switch
         "/SanPham/delete",
         "/SanPham/search",
         "/SanPham/export"
@@ -87,6 +87,9 @@ public class SanPhamServlet extends HttpServlet {
             case "/SanPham/update":
                 updateSanPham(request, response);
                 break;
+            case "/SanPham/update-status": // 🆕 Xử lý thay đổi trạng thái AJAX từ Switch
+                updateStatus(request, response);
+                break;
             case "/SanPham/search":
                 searchSanPham(request, response);
                 break;
@@ -96,23 +99,54 @@ public class SanPhamServlet extends HttpServlet {
         }
     }
 
+    // 🆕 PHƯƠNG THỨC MỚI: Xử lý cập nhật trạng thái nhanh qua Switch không reload trang
+    private void updateStatus(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        try {
+            String idStr = request.getParameter("id");
+            String trangThaiStr = request.getParameter("trangThai");
+
+            if (idStr != null && trangThaiStr != null) {
+                Integer id = Integer.parseInt(idStr);
+                Integer trangThai = Integer.parseInt(trangThaiStr);
+
+                // Lấy đối tượng sản phẩm hiện tại lên từ Database
+                SanPham sanPham = sanPhamService.timTheoId(id);
+                if (sanPham != null) {
+                    sanPham.setTrangThai(trangThai);
+                    sanPham.setNgaySua(LocalDateTime.now());
+
+                    // Thực hiện cập nhật lại trạng thái vào DB
+                    sanPhamService.capNhatSanPham(sanPham);
+
+                    // Trả về mã trạng thái HTTP 200 (Thành công)
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.getWriter().write("Cập nhật trạng thái thành công!");
+                    return;
+                }
+            }
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("Dữ liệu không hợp lệ!");
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write("Lỗi hệ thống: " + e.getMessage());
+        }
+    }
+
     private void exportExcel(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String tenSanPham = request.getParameter("tenSanPham");
         String danhMucIdStr = request.getParameter("danhMucId");
         String thuongHieuIdStr = request.getParameter("thuongHieuId");
 
-        // 🛠️ BỔ SUNG: Đón thêm 2 tham số khoảng giá từ Request
         String giaTuStr = request.getParameter("giaTu");
         String giaDenStr = request.getParameter("giaDen");
 
         Integer danhMucId = (danhMucIdStr != null && !danhMucIdStr.isEmpty()) ? Integer.parseInt(danhMucIdStr) : null;
         Integer thuongHieuId = (thuongHieuIdStr != null && !thuongHieuIdStr.isEmpty()) ? Integer.parseInt(thuongHieuIdStr) : null;
 
-        // 🛠️ XỬ LÝ AN TOÀN CHỐNG NULL: Nếu tham số trên URL trống thì gán mặc định null chứ không ép kiểu trực tiếp (Sửa lỗi dòng 103)
         Double giaTu = (giaTuStr != null && !giaTuStr.isEmpty()) ? Double.parseDouble(giaTuStr) : null;
         Double giaDen = (giaDenStr != null && !giaDenStr.isEmpty()) ? Double.parseDouble(giaDenStr) : null;
 
-        // 🛠️ CẬP NHẬT: Truyền đầy đủ 5 tham số vào hàm timKiem của Service để xuất đúng danh sách đang lọc trên màn hình
         List<SanPham> items = sanPhamService.timKiem(tenSanPham, danhMucId, thuongHieuId, giaTu, giaDen);
 
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
@@ -124,7 +158,6 @@ public class SanPhamServlet extends HttpServlet {
             Sheet sheet = workbook.createSheet("Sản Phẩm");
 
             Row headerRow = sheet.createRow(0);
-            // 🛠️ THAY ĐỔI: Thêm cột "Số lượng" và "Đơn giá" vào file Excel của bạn cho khớp giao diện mới
             String[] columns = {"STT", "Mã SP", "Tên sản phẩm", "Danh mục", "Thương hiệu", "Chất liệu", "Kiểu dáng", "Số lượng", "Đơn giá", "Trạng thái"};
 
             Font headerFont = workbook.createFont();
@@ -150,10 +183,8 @@ public class SanPhamServlet extends HttpServlet {
                 row.createCell(5).setCellValue(sp.getChatLieu() != null ? sp.getChatLieu().getTenChatLieu() : "");
                 row.createCell(6).setCellValue(sp.getKieuDang() != null ? sp.getKieuDang().getTenKieuDang() : "");
 
-                // 🛠️ GÁN GIÁ TRỊ: Xuất tổng số lượng biến thể
                 row.createCell(7).setCellValue(sp.getTongSoLuong() != null ? sp.getTongSoLuong() : 0);
 
-                // 🛠️ GÁN GIÁ TRỊ: Xuất chuỗi khoảng giá Min - Max rõ ràng sang Excel
                 String giaText = "Chưa có giá";
                 if (sp.getGiaMin() != null && sp.getGiaMax() != null) {
                     if (sp.getGiaMin().equals(sp.getGiaMax()) && sp.getGiaMin() > 0) {
@@ -184,7 +215,7 @@ public class SanPhamServlet extends HttpServlet {
         int pageSize = 10;
 
         List<SanPham> items = sanPhamService.layCoPhanTrang(page, pageSize);
-        long totalCount = sanPhamService.timKiem("", null, null,null,null).size();
+        long totalCount = sanPhamService.timKiem("", null, null, null, null).size();
         int totalPages = (int) Math.ceil((double) totalCount / pageSize);
 
         setLookupAttributes(request);
@@ -198,13 +229,8 @@ public class SanPhamServlet extends HttpServlet {
     }
 
     private void showAddSanPham(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // 1. Đếm tổng số lượng sản phẩm hiện có trong Database
-        int count = sanPhamService.timKiem("", null, null,null,null).size();
-
-        // 2. Sinh mã tự động (Ví dụ có 15 sản phẩm -> tạo mã SP016)
+        int count = sanPhamService.timKiem("", null, null, null, null).size();
         String autoMa = String.format("SP%03d", count + 1);
-
-        // 3. Gửi mã này sang file giao diện JSP
         request.setAttribute("autoMaSanPham", autoMa);
 
         setLookupAttributes(request);
@@ -225,7 +251,7 @@ public class SanPhamServlet extends HttpServlet {
         List<SanPhamChiTiet> sanPhamChiTietList = sanPhamChiTietService.timBienTheTheoSanPhamId(id);
 
         request.setAttribute("sanPham", sanPham);
-        request.setAttribute("sanPhamChiTietList", sanPhamChiTietList); // Sửa tên attribute
+        request.setAttribute("sanPhamChiTietList", sanPhamChiTietList);
         setLookupAttributes(request);
         request.setAttribute("action", "edit");
         request.getRequestDispatcher("/Admin/QuanLySanPham/SanPhamEdit.jsp").forward(request, response);
@@ -237,11 +263,9 @@ public class SanPhamServlet extends HttpServlet {
         sanPham.setNgaySua(LocalDateTime.now());
 
         try {
-            // Xử lý upload ảnh và lấy danh sách biến thể từ request
             Map<String, String> anhTheoMau = xuLyUploadAnhTheoMau(request);
             List<SanPhamChiTiet> danhSachBienThe = getDanhSachBienTheFromRequest(request, null, anhTheoMau);
 
-            // Gọi service gộp để thực hiện trong 1 transaction
             sanPhamService.themSanPhamVaBienThe(sanPham, danhSachBienThe);
 
             response.sendRedirect(request.getContextPath() + "/SanPham?success=Th%C3%AAm%20s%E1%BA%A3n%20ph%E1%BA%A9m%20th%C3%A0nh%20c%C3%B4ng");
@@ -269,7 +293,6 @@ public class SanPhamServlet extends HttpServlet {
         sanPham.setId(sanPhamId);
         sanPham.setNgaySua(LocalDateTime.now());
 
-        // Lấy danh sách ID biến thể hiện có trong DB TRƯỚC KHI thay đổi
         List<Integer> existingIdsInDb = sanPhamChiTietService.timBienTheTheoSanPhamId(sanPhamId)
                 .stream()
                 .map(SanPhamChiTiet::getId)
@@ -280,14 +303,11 @@ public class SanPhamServlet extends HttpServlet {
                 throw new RuntimeException("Tên sản phẩm không được để trống!");
             }
 
-            // 1. Cập nhật sản phẩm cha
             sanPhamService.capNhatSanPham(sanPham);
 
-            // 2. Xử lý upload ảnh và lấy danh sách biến thể từ request
             Map<String, String> anhTheoMau = xuLyUploadAnhTheoMau(request);
             List<SanPhamChiTiet> danhSachBienTheTuForm = getDanhSachBienTheFromRequest(request, sanPham.getId(), anhTheoMau);
 
-            // 3. Phân loại biến thể mới và biến thể cũ để xử lý
             List<SanPhamChiTiet> listUpdate = danhSachBienTheTuForm.stream().filter(spct -> spct.getId() != null).collect(Collectors.toList());
             List<SanPhamChiTiet> listInsert = danhSachBienTheTuForm.stream().filter(spct -> spct.getId() == null).collect(Collectors.toList());
 
@@ -298,7 +318,6 @@ public class SanPhamServlet extends HttpServlet {
                 sanPhamChiTietService.themBienThe(listInsert);
             }
 
-            // 4. Xử lý xóa các biến thể đã bị loại bỏ khỏi form
             List<Integer> idsFromForm = listUpdate.stream().map(SanPhamChiTiet::getId).collect(Collectors.toList());
             for (Integer idInDb : existingIdsInDb) {
                 if (!idsFromForm.contains(idInDb)) {
@@ -312,7 +331,6 @@ public class SanPhamServlet extends HttpServlet {
             e.printStackTrace();
             request.setAttribute("error", e.getMessage());
             request.setAttribute("sanPham", sanPham);
-            // Tải lại danh sách biến thể cũ để hiển thị lại form nếu có lỗi
             request.setAttribute("sanPhamChiTietList", sanPhamChiTietService.timBienTheTheoSanPhamId(sanPhamId));
             setLookupAttributes(request);
             request.setAttribute("action", "edit");
@@ -337,36 +355,33 @@ public class SanPhamServlet extends HttpServlet {
         String danhMucIdStr = request.getParameter("danhMucId");
         String thuongHieuIdStr = request.getParameter("thuongHieuId");
 
-        // Đón 2 tham số khoảng giá dựa vào thuộc tính name="giaTu" và name="giaDen" từ form JSP
         String giaTuStr = request.getParameter("giaTu");
         String giaDenStr = request.getParameter("giaDen");
 
         Integer danhMucId = (danhMucIdStr != null && !danhMucIdStr.isEmpty()) ? Integer.parseInt(danhMucIdStr) : null;
-
         Integer thuongHieuId = (thuongHieuIdStr != null && !thuongHieuIdStr.isEmpty()) ? Integer.parseInt(thuongHieuIdStr) : null;
         String pageStr = request.getParameter("page");
         int page = (pageStr != null && !pageStr.isEmpty()) ? Integer.parseInt(pageStr) : 1;
-        // Ép kiểu sang BigDecimal (hoặc Double tuỳ thuộc kiểu dữ liệu của cột giaBan trong DB)
+
         Double giaTu = (giaTuStr != null && !giaTuStr.isEmpty()) ? Double.parseDouble(giaTuStr) : null;
         Double giaDen = (giaDenStr != null && !giaDenStr.isEmpty()) ? Double.parseDouble(giaDenStr) : null;
 
-        // Truyền thêm giaTu và giaDen xuống Service
         List<SanPham> items = sanPhamService.timKiem(tenSanPham, danhMucId, thuongHieuId, giaTu, giaDen);
 
         request.setAttribute("items", items);
-        request.setAttribute("currentPage", page); // Thêm dòng này để sửa lỗi STT bị âm
+        request.setAttribute("currentPage", page);
         request.setAttribute("danhMucList", lookupService.layTatCaDanhMuc());
         request.setAttribute("thuongHieuList", lookupService.layTatCaThuongHieu());
         request.setAttribute("searchTenSanPham", tenSanPham);
         request.setAttribute("searchDanhMucId", danhMucId);
         request.setAttribute("searchThuongHieuId", thuongHieuId);
 
-        // Đẩy ngược lại value để giữ trạng thái cho thanh kéo và ô input nhập số
         request.setAttribute("searchGiaTu", giaTuStr);
         request.setAttribute("searchGiaDen", giaDenStr);
 
         request.getRequestDispatcher("/Admin/QuanLySanPham/QuanLySanPham.jsp").forward(request, response);
     }
+
     private SanPham getSanPhamFrom(HttpServletRequest request) {
         String tenSanPham = request.getParameter("tenSanPham");
         String maSanPham = request.getParameter("maSanPham");
@@ -486,7 +501,6 @@ public class SanPhamServlet extends HttpServlet {
                     ? Integer.parseInt(trangThaiChiTiet[i])
                     : 1);
 
-            // Xử lý ảnh
             String tenFileAnh = anhTheoMau.get(mauSacIds[i]);
             if (tenFileAnh != null) {
                 spct.setHinhAnh(tenFileAnh);
