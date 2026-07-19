@@ -115,45 +115,58 @@
     }
 
     private String statusText(Integer status) {
-        if (status != null && status == 3) {
-            return "Đã thanh toán";
+        if (status == null) {
+            return "Chờ thanh toán";
         }
 
-        if (status != null && status == 5) {
-            return "Đã hủy";
+        switch (status) {
+            case 1:
+                return "Chờ thanh toán";
+            case 2:
+            case 3:
+            case 4:
+                return "Đã thanh toán";
+            case 5:
+                return "Đã hủy";
+            default:
+                return "Chờ thanh toán";
         }
-
-        return "Chờ thanh toán";
     }
 
     private String statusClass(Integer status) {
-        if (status != null && status == 3) {
-            return "invoice-status--done";
+        if (status == null) {
+            return "invoice-status--waiting";
         }
 
-        if (status != null && status == 5) {
-            return "invoice-status--cancelled";
+        switch (status) {
+            case 2:
+            case 3:
+            case 4:
+                return "invoice-status--done";
+            case 5:
+                return "invoice-status--cancelled";
+            default:
+                return "invoice-status--waiting";
         }
-
-        return "invoice-status--waiting";
     }
 
     private String stepClass(Integer status, int step) {
         int current = status == null ? 1 : status;
 
-        if (current == 5 && step == 5) {
-            return " is-current";
+        if (current == 5) {
+            return step == 5 ? " is-current" : "";
         }
 
-        if (current == 3 && step <= 3) {
-            return step == 3 ? " is-current" : " is-done";
+        // Trạng thái 1 chờ thanh toán; các trạng thái 2, 3, 4 là đã thanh toán.
+        int currentStep = current <= 1 ? 1 : 3;
+        if (step == 5) {
+            return "";
         }
 
-        if (current == 1 && step == 1) {
-            return " is-current";
+        if (currentStep < step) {
+            return "";
         }
-
-        return "";
+        return currentStep == step ? " is-current" : " is-done";
     }
 %>
 <!DOCTYPE html>
@@ -548,7 +561,7 @@
         <section class="invoice-list-card invoice-detail-section">
             <div class="invoice-card-heading invoice-card-heading--compact">
                 <div>
-                    <h2>Lich su thanh toan he thong</h2>
+                        <h2>Lịch sử thanh toán hệ thống</h2>
                     <p>Giao dịch thanh toán của hóa đơn</p>
                 </div>
             </div>
@@ -556,11 +569,11 @@
                 <table class="invoice-table">
                     <thead>
                     <tr>
-                        <th>So tien</th>
-                        <th>Phuong thuc</th>
-                        <th>Trang thai</th>
-                        <th>Ngay thanh toan</th>
-                        <th>Ghi chu</th>
+                        <th>Số tiền</th>
+                        <th>Phương thức</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày thanh toán</th>
+                        <th>Ghi chú</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -602,7 +615,7 @@
                     <span>Trạng thái mới</span>
                     <select name="trangThai">
                         <option value="1" <%= hoaDon.getTrangThai() == null || hoaDon.getTrangThai() == 1 ? "selected" : "" %>>Chờ thanh toán</option>
-                        <option value="3" <%= hoaDon.getTrangThai() != null && hoaDon.getTrangThai() == 3 ? "selected" : "" %>>Đã thanh toán</option>
+                        <option value="3" <%= hoaDon.getTrangThai() != null && (hoaDon.getTrangThai() == 2 || hoaDon.getTrangThai() == 3 || hoaDon.getTrangThai() == 4) ? "selected" : "" %>>Đã thanh toán</option>
                         <option value="5" <%= hoaDon.getTrangThai() != null && hoaDon.getTrangThai() == 5 ? "selected" : "" %>>Đã hủy</option>
                     </select>
                 </label>

@@ -1,11 +1,8 @@
 <%@ page import="BE.Model.HoaDonView" %>
-<%@ page import="BE.Model.NhanVienView" %>
-<%@ page import="BE.Model.SanPhamHoaDonView" %>
 <%@ page import="java.text.DecimalFormat" %>
 <%@ page import="java.time.LocalDate" %>
 <%@ page import="java.time.format.DateTimeFormatter" %>
 <%@ page import="java.util.List" %>
-<%@ page import="java.util.Collections" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
     // Nếu người dùng mở trực tiếp JSP thì chuyển về controller để nạp dữ liệu trước.
@@ -18,14 +15,6 @@
     request.setAttribute("activeMenu", "hoadon");
 
     List<HoaDonView> hoaDonList = (List<HoaDonView>) request.getAttribute("hoaDonList");
-    List<NhanVienView> nhanVienList = (List<NhanVienView>) request.getAttribute("nhanVienList");
-    List<SanPhamHoaDonView> sanPhamList = (List<SanPhamHoaDonView>) request.getAttribute("sanPhamList");
-    if (nhanVienList == null) {
-        nhanVienList = Collections.emptyList();
-    }
-    if (sanPhamList == null) {
-        sanPhamList = Collections.emptyList();
-    }
     DecimalFormat moneyFormat = new DecimalFormat("#,###");
     DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 %>
@@ -48,7 +37,11 @@
         }
 
         switch (status) {
+            case 1:
+                return "Chờ thanh toán";
+            case 2:
             case 3:
+            case 4:
                 return "Đã thanh toán";
             case 5:
                 return "Đã hủy";
@@ -58,15 +51,20 @@
     }
 
     private String statusClass(Integer status) {
-        if (status != null && status == 3) {
-            return "invoice-status--done";
+        if (status == null) {
+            return "invoice-status--waiting";
         }
 
-        if (status != null && status == 5) {
-            return "invoice-status--cancelled";
+        switch (status) {
+            case 2:
+            case 3:
+            case 4:
+                return "invoice-status--done";
+            case 5:
+                return "invoice-status--cancelled";
+            default:
+                return "invoice-status--waiting";
         }
-
-        return "invoice-status--waiting";
     }
 %>
 <!DOCTYPE html>
@@ -103,16 +101,12 @@
                     <i class="fas fa-file-excel"></i>
                     Xuất Excel trang HĐ
                 </button>
-                <button class="invoice-btn invoice-btn--primary" id="btnShowForm" type="button">
-                    <i class="fas fa-plus"></i>
-                    Thêm hóa đơn
-                </button>
             </div>
         </section>
 
         <%-- Bộ lọc tìm kiếm hóa đơn trên giao diện, xử lý bằng JavaScript. --%>
         <section class="invoice-filter-card">
-            <button class="invoice-section-toggle" type="button" id="filterToggle">
+            <button class="invoice-section-toggle" type="button" id="filterToggle" aria-expanded="true" aria-controls="filterBody">
                 <span>
                     <i class="fas fa-filter"></i>
                     Bộ lọc tìm kiếm
@@ -150,103 +144,6 @@
                     <input id="toDateFilter" type="date">
                 </label>
             </div>
-        </section>
-
-        <%-- Form thêm hóa đơn. action=save sẽ được HoaDonController.doPost xử lý. --%>
-        <section class="invoice-form-card" id="invoiceFormCard">
-            <div class="invoice-card-heading">
-                <div class="invoice-heading-icon">
-                    <i class="fas fa-file-circle-plus"></i>
-                </div>
-                <div>
-                    <h2 id="formTitle">Thêm hóa đơn</h2>
-                    <p>Nhập thông tin hóa đơn.</p>
-                </div>
-            </div>
-
-            <form class="invoice-simple-form" method="post" action="<%= request.getContextPath() %>/admin/hoa-don">
-                <input type="hidden" name="action" value="save">
-
-                <label class="invoice-field">
-                    <span>Nhân viên</span>
-                    <select id="idNhanVien" name="idNhanVien">
-                        <option value="">Chọn nhân viên</option>
-                        <% for (NhanVienView nhanVien : nhanVienList) { %>
-                        <option value="<%= nhanVien.getId() %>"><%= text(nhanVien.getHoTen()) %> - <%= text(nhanVien.getMaNhanVien()) %></option>
-                        <% } %>
-                    </select>
-                </label>
-
-                <div class="invoice-product-picker invoice-field--full">
-                    <div class="invoice-product-picker__heading">
-                        <span>Sản phẩm trong hóa đơn</span>
-                        <button class="invoice-btn invoice-btn--outline invoice-product-add" type="button" id="addInvoiceProduct">
-                            <i class="fas fa-plus"></i>
-                            Thêm sản phẩm
-                        </button>
-                    </div>
-                    <div id="invoiceProductLines">
-                        <div class="invoice-product-line">
-                            <select class="invoice-product-select" name="productId">
-                                <option value="">Chọn sản phẩm</option>
-                                <% for (SanPhamHoaDonView product : sanPhamList) { %>
-                                <option value="<%= product.getId() %>"
-                                        data-price="<%= product.getGiaBan() %>"
-                                        data-stock="<%= product.getSoLuongTon() %>">
-                                    <%= text(product.getTenSanPham()) %> - <%= text(product.getMa()) %> - <%= moneyFormat.format(product.getGiaBan()) %> đ
-                                </option>
-                                <% } %>
-                            </select>
-                            <input class="invoice-product-quantity" name="productQuantity" type="number" min="1" value="1" aria-label="Số lượng sản phẩm">
-                            <button class="invoice-icon-btn invoice-product-remove" type="button" title="Bỏ sản phẩm">
-                                <i class="fas fa-xmark"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <label class="invoice-field">
-                    <span>Mã hóa đơn</span>
-                    <input id="maHoaDon" name="maHoaDon" type="text" placeholder="HD001" required>
-                </label>
-
-                <label class="invoice-field">
-                    <span>Tên người nhận</span>
-                    <input id="tenNguoiNhan" name="tenNguoiNhan" type="text" placeholder="Ví dụ: Nguyễn Văn A">
-                </label>
-
-                <label class="invoice-field">
-                    <span>Số điện thoại</span>
-                    <input id="soDienThoai" name="soDienThoai" type="text" placeholder="Ví dụ: 0901234567">
-                </label>
-
-                <label class="invoice-field">
-                    <span>Tổng tiền</span>
-                    <input id="tongTienThanhToan" name="tongTienThanhToan" type="number" min="0" step="1000" placeholder="Tự tính từ sản phẩm" readonly>
-                </label>
-
-                <label class="invoice-field">
-                    <span>Trạng thái</span>
-                    <select id="trangThai" name="trangThai">
-                        <option value="1">Chờ thanh toán</option>
-                        <option value="3">Đã thanh toán</option>
-                        <option value="5">Đã hủy</option>
-                    </select>
-                </label>
-
-                <label class="invoice-field invoice-field--full">
-                    <span>Ghi chú</span>
-                    <textarea id="ghiChu" name="ghiChu" placeholder="Nhập ghi chú nếu có"></textarea>
-                </label>
-
-                <div class="invoice-form-actions">
-                    <button class="invoice-btn invoice-btn--primary" type="submit">
-                        <i class="fas fa-floppy-disk"></i>
-                        Lưu hóa đơn
-                    </button>
-                    <button class="invoice-btn invoice-btn--outline" id="btnCancelForm" type="button">Hủy</button>
-                </div>
-            </form>
         </section>
 
         <%-- Bảng danh sách hóa đơn lấy từ request attribute hoaDonList. --%>
@@ -360,6 +257,6 @@
     </div>
 </div>
 
-<script src="<%= request.getContextPath() %>/FE/Admin/QuanLyHoaDon/hoa_don.js"></script>
+<script src="<%= request.getContextPath() %>/FE/Admin/QuanLyHoaDon/hoa_don.js?v=2026071901"></script>
 </body>
 </html>

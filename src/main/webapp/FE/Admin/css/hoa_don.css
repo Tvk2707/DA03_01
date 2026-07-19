@@ -201,7 +201,7 @@
 }
 
 .invoice-filter-card.is-collapsed .invoice-filter-body {
-    display: none;
+    display: none !important;
 }
 
 /* Khu vực bộ lọc tìm kiếm trên trang danh sách. */
