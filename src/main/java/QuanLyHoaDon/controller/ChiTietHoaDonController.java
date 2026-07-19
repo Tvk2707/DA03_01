@@ -1,6 +1,6 @@
-package BE.controller;
+package QuanLyHoaDon.controller;
 
-import BE.service.HoaDonService;
+import QuanLyHoaDon.service.HoaDonService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;

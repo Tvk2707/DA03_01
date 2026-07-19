@@ -1,8 +1,8 @@
-package BE.controller;
+package QuanLyHoaDon.controller;
 
-import BE.Model.ChiTietHoaDonInput;
-import BE.Model.HoaDonView;
-import BE.service.HoaDonService;
+import QuanLyHoaDon.Model.ChiTietHoaDonInput;
+import QuanLyHoaDon.Model.HoaDonView;
+import QuanLyHoaDon.service.HoaDonService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;

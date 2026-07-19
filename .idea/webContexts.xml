@@ -11,6 +11,7 @@
         <entry key="file://$PROJECT_DIR$/src/main/webapp/Admin/Thongke.jsp" value="file://$PROJECT_DIR$/src/main/webapp/Admin" />
         <entry key="file://$PROJECT_DIR$/src/main/webapp/Admin/layout/sidebar.jsp" value="file://$PROJECT_DIR$/src/main/webapp/Admin/layout" />
         <entry key="file://$PROJECT_DIR$/src/main/webapp/FE/Admin/QuanLyHoaDon/quan_ly_hoa_don.jsp" value="file://$PROJECT_DIR$/src/main/webapp/FE/Admin/QuanLyHoaDon" />
+        <entry key="file://$PROJECT_DIR$/src/main/webapp/QuanLyKhachHang/quan_ly_khach_hang.jsp" value="file://$PROJECT_DIR$/src/main/webapp/QuanLyKhachHang" />
       </map>
     </option>
   </component>

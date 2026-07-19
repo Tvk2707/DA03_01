@@ -3,11 +3,16 @@ package QuanLySanPham.Entity;
 import jakarta.persistence.*;
 import java.util.List;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Entity
 @Table(name = "phieu_giam_gia")
 public class PhieuGiamGia {
+    private static final DateTimeFormatter DATE_TEXT_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter DATE_VALUE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -111,4 +116,76 @@ public class PhieuGiamGia {
     public void setHoaDons(List<HoaDon> hoaDons) { this.hoaDons = hoaDons; }
     public List<KhachHangPhieuGiamGia> getKhachHangPhieuGiamGias() { return khachHangPhieuGiamGias; }
     public void setKhachHangPhieuGiamGias(List<KhachHangPhieuGiamGia> khachHangPhieuGiamGias) { this.khachHangPhieuGiamGias = khachHangPhieuGiamGias; }
+
+    public boolean isGiamPhanTram() {
+        if (loaiGiamGia == null) {
+            return true;
+        }
+        String value = loaiGiamGia.toLowerCase();
+        return value.contains("%") || value.contains("phần") || value.contains("phan") || value.contains("percent");
+    }
+
+    public String getLoaiGiamGiaText() {
+        return isGiamPhanTram() ? "Giảm phần trăm" : "Giảm tiền";
+    }
+
+    public String getLoaiGiamGiaFilterValue() {
+        return isGiamPhanTram() ? "percent" : "amount";
+    }
+
+    public String getLoaiPhieuText() {
+        return loaiPhieu != null && loaiPhieu == 1 ? "Cá nhân" : "Công khai";
+    }
+
+    public String getLoaiPhieuFilterValue() {
+        return loaiPhieu != null && loaiPhieu == 1 ? "personal" : "public";
+    }
+
+    public String getTrangThaiHienThi() {
+        LocalDateTime now = LocalDateTime.now();
+        if (trangThai == null || trangThai != 1) {
+            return "Ngừng áp dụng";
+        }
+        if (ngayBatDau != null && now.isBefore(ngayBatDau)) {
+            return "Chưa bắt đầu";
+        }
+        if (ngayKetThuc != null && now.isAfter(ngayKetThuc)) {
+            return "Kết thúc";
+        }
+        return "Đang áp dụng";
+    }
+
+    public String getTrangThaiCssClass() {
+        String text = getTrangThaiHienThi();
+        if ("Đang áp dụng".equals(text)) {
+            return "status-active";
+        }
+        if ("Chưa bắt đầu".equals(text)) {
+            return "status-upcoming";
+        }
+        if ("Kết thúc".equals(text)) {
+            return "status-expired";
+        }
+        return "status-inactive";
+    }
+
+    public boolean isDangBat() {
+        return trangThai != null && trangThai == 1;
+    }
+
+    public String getNgayBatDauText() {
+        return ngayBatDau == null ? "" : ngayBatDau.toLocalDate().format(DATE_TEXT_FORMATTER);
+    }
+
+    public String getNgayKetThucText() {
+        return ngayKetThuc == null ? "" : ngayKetThuc.toLocalDate().format(DATE_TEXT_FORMATTER);
+    }
+
+    public String getNgayBatDauValue() {
+        return ngayBatDau == null ? "" : ngayBatDau.toLocalDate().format(DATE_VALUE_FORMATTER);
+    }
+
+    public String getNgayKetThucValue() {
+        return ngayKetThuc == null ? "" : ngayKetThuc.toLocalDate().format(DATE_VALUE_FORMATTER);
+    }
 }

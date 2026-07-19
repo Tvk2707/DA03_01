@@ -1,13 +1,13 @@
-package BE.dao;
+package QuanLyHoaDon.dao;
 
-import BE.Model.ChiTietHoaDonView;
-import BE.Model.ChiTietHoaDonInput;
-import BE.Model.HoaDonView;
-import BE.Model.LichSuHoaDonView;
-import BE.Model.LichSuThanhToanView;
-import BE.Model.NhanVienView;
-import BE.Model.SanPhamHoaDonView;
-import BE.Model.ThanhToanHoaDonView;
+import QuanLyHoaDon.Model.ChiTietHoaDonView;
+import QuanLyHoaDon.Model.ChiTietHoaDonInput;
+import QuanLyHoaDon.Model.HoaDonView;
+import QuanLyHoaDon.Model.LichSuHoaDonView;
+import QuanLyHoaDon.Model.LichSuThanhToanView;
+import QuanLyHoaDon.Model.NhanVienView;
+import QuanLyHoaDon.Model.SanPhamHoaDonView;
+import QuanLyHoaDon.Model.ThanhToanHoaDonView;
 import QuanLySanPham.jdbc.DatabaseConnectionManager;
 
 import java.math.BigDecimal;

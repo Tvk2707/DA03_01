@@ -1,4 +1,4 @@
-package BE.Model;
+package QuanLyHoaDon.Model;
 
 import java.math.BigDecimal;
 

@@ -104,14 +104,14 @@
                 </li>
 
                 <li class="menu-item">
-                    <a href="../QuanLyMaGiamGia/quan_ly_giam_gia.jsp"
+                    <a href="${pageContext.request.contextPath}/PhieuGiamGia"
                        class="menu-link <%= "discount".equals(activeMenu) ? "active" : "" %>">
                         <i class="fas fa-tags"></i>
                         <span>Quản lý giảm giá</span>
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="#" class="menu-link <%= "customer".equals(activeMenu) ? "active" : "" %>">
+                    <a href="${pageContext.request.contextPath}/khach-hang/hien-thi" class="menu-link <%= "customer".equals(activeMenu) ? "active" : "" %>">
                         <i class="fas fa-users"></i>
                         <span>Quản lý khách hàng</span>
                     </a>

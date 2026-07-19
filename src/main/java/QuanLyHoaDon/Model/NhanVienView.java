@@ -1,4 +1,4 @@
-package BE.Model;
+package QuanLyHoaDon.Model;
 
 public class NhanVienView {
     private Integer id;

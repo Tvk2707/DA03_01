@@ -1,4 +1,4 @@
-package BE.Model;
+package QuanLyHoaDon.Model;
 
 // Một sản phẩm và số lượng người dùng chọn khi tạo hóa đơn.
 public class ChiTietHoaDonInput {
