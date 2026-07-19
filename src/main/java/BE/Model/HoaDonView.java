@@ -15,6 +15,7 @@ public class HoaDonView {
     private String ghiChu;
     private Integer idNhanVien;
     private String tenNhanVien;
+    private String maNhanVien;
     private String tenKhachHang;
     private String maVoucher;
     private String tenVoucher;
@@ -97,6 +98,14 @@ public class HoaDonView {
 
     public void setTenNhanVien(String tenNhanVien) {
         this.tenNhanVien = tenNhanVien;
+    }
+
+    public String getMaNhanVien() {
+        return maNhanVien;
+    }
+
+    public void setMaNhanVien(String maNhanVien) {
+        this.maNhanVien = maNhanVien;
     }
 
     public String getTenKhachHang() {

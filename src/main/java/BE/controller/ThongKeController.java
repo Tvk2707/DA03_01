@@ -1,9 +1,6 @@
 package BE.controller;
 
-import BE.Model.HoaDonView;
-import BE.Model.SanPhamHoaDonView;
 import BE.Model.ThongKeOverview;
-import BE.service.HoaDonService;
 import BE.service.ThongKeService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -16,7 +13,6 @@ import java.util.Collections;
 
 public class ThongKeController extends HttpServlet {
     private final ThongKeService thongKeService = new ThongKeService();
-    private final HoaDonService hoaDonService = new HoaDonService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -35,16 +31,6 @@ public class ThongKeController extends HttpServlet {
             request.setAttribute("bestSellers", Collections.emptyList());
             request.setAttribute("topCustomers", Collections.emptyList());
             request.setAttribute("slowStockProducts", Collections.emptyList());
-        }
-
-        // Trang tổng hợp dùng chung dữ liệu hóa đơn và sản phẩm, không cần sửa entity.
-        try {
-            request.setAttribute("hoaDonList", hoaDonService.getAllHoaDon());
-            request.setAttribute("sanPhamList", hoaDonService.getAllSanPhamHoaDon());
-        } catch (SQLException e) {
-            request.setAttribute("combinedDataError", "Không lấy được danh sách hóa đơn hoặc sản phẩm: " + e.getMessage());
-            request.setAttribute("hoaDonList", Collections.<HoaDonView>emptyList());
-            request.setAttribute("sanPhamList", Collections.<SanPhamHoaDonView>emptyList());
         }
 
         request.getRequestDispatcher("/FE/Admin/Thongke.jsp").forward(request, response);

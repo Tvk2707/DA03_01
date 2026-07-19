@@ -39,66 +39,16 @@
         const exportButton = document.getElementById('btnExportOrders');
         const resetButton = document.getElementById('btnResetFilters');
         const tabs = Array.from(document.querySelectorAll('#statusTabs .invoice-tab'));
-        const formCard = document.getElementById('invoiceFormCard');
-        const showFormButton = document.getElementById('btnShowForm');
-        const cancelFormButton = document.getElementById('btnCancelForm');
-        const formTitle = document.getElementById('formTitle');
-        const invoiceCodeInput = document.getElementById('maHoaDon');
-        const productLines = document.getElementById('invoiceProductLines');
-        const addProductButton = document.getElementById('addInvoiceProduct');
-        const productPicker = document.querySelector('.invoice-product-picker');
         let selectedTabStatus = 'all';
 
-        if (invoiceCodeInput) {
-            invoiceCodeInput.required = false;
-            invoiceCodeInput.placeholder = 'HD001';
+        // Mặc định bộ lọc "Đến ngày" là ngày hiện tại mỗi khi mở trang.
+        if (toDate && !toDate.value) {
+            const today = new Date();
+            const localDate = new Date(today.getTime() - today.getTimezoneOffset() * 60000)
+                .toISOString()
+                .slice(0, 10);
+            toDate.value = localDate;
         }
-
-        function updateProductTotal() {
-            let total = 0;
-            productLines.querySelectorAll('.invoice-product-line').forEach((line) => {
-                const select = line.querySelector('.invoice-product-select');
-                const quantity = line.querySelector('.invoice-product-quantity');
-                const option = select.options[select.selectedIndex];
-                const price = Number(option && option.dataset.price) || 0;
-                const stock = Number(option && option.dataset.stock) || 0;
-                let amount = Number(quantity.value) || 0;
-
-                if (stock > 0 && amount > stock) {
-                    amount = stock;
-                    quantity.value = stock;
-                }
-
-                total += price * amount;
-            });
-
-            document.getElementById('tongTienThanhToan').value = total > 0 ? total : '';
-        }
-
-        function bindProductLine(line) {
-            line.querySelector('.invoice-product-select').addEventListener('change', updateProductTotal);
-            line.querySelector('.invoice-product-quantity').addEventListener('input', updateProductTotal);
-            line.querySelector('.invoice-product-remove').addEventListener('click', () => {
-                const allLines = productLines.querySelectorAll('.invoice-product-line');
-                if (allLines.length > 1) {
-                    line.remove();
-                } else {
-                    line.querySelector('.invoice-product-select').value = '';
-                    line.querySelector('.invoice-product-quantity').value = '1';
-                }
-                updateProductTotal();
-            });
-        }
-
-        bindProductLine(productLines.querySelector('.invoice-product-line'));
-        addProductButton.addEventListener('click', () => {
-            const firstLine = productLines.querySelector('.invoice-product-line');
-            const newLine = firstLine.cloneNode(true);
-            newLine.querySelector('.invoice-product-select').value = '';
-            newLine.querySelector('.invoice-product-quantity').value = '1';
-            productLines.appendChild(newLine);
-            bindProductLine(newLine);
-        });
 
         // Lọc các dòng trong bảng theo từ khóa, loại, trạng thái và khoảng ngày.
         function filterRows() {
@@ -133,31 +83,17 @@
             orderCount.textContent = 'Hiển thị ' + visibleCount + ' / tổng ' + rows.length + ' hóa đơn';
         }
 
-        // Đưa form về trạng thái ban đầu để thêm hóa đơn mới.
-        function resetForm() {
-            formTitle.textContent = 'Thêm hóa đơn';
-            document.getElementById('maHoaDon').value = '';
-            document.getElementById('tenNguoiNhan').value = '';
-            document.getElementById('soDienThoai').value = '';
-            document.getElementById('idNhanVien').value = '';
-            document.getElementById('tongTienThanhToan').value = '';
-            document.getElementById('trangThai').value = '1';
-            document.getElementById('ghiChu').value = '';
-            productLines.innerHTML = productLines.querySelector('.invoice-product-line').outerHTML;
-            bindProductLine(productLines.querySelector('.invoice-product-line'));
-            productPicker.style.display = '';
-            formCard.classList.remove('is-visible');
-            updateProductTotal();
-        }
-
         // Xuất các dòng đang hiển thị ra file CSV.
         function exportVisibleRows() {
             const visibleRows = rows.filter((row) => row.style.display !== 'none');
             const header = ['STT', 'Mã hóa đơn', 'Nhân viên', 'Khách hàng', 'Số điện thoại', 'Loại hóa đơn', 'Tổng tiền', 'Ngày tạo', 'Trạng thái'];
             const lines = [header.join(',')];
 
-            visibleRows.forEach((row) => {
-                const cells = Array.from(row.children).slice(0, 9).map((cell) => {
+            visibleRows.forEach((row, index) => {
+                const cells = Array.from(row.children).slice(0, 9).map((cell, cellIndex) => {
+                    if (cellIndex === 0) {
+                        return String(index + 1);
+                    }
                     return '"' + cell.innerText.replace(/\s+/g, ' ').trim().replace(/"/g, '""') + '"';
                 });
                 lines.push(cells.join(','));
@@ -172,14 +108,6 @@
             showToast('Đã xuất danh sách hóa đơn hiện tại');
         }
 
-        // Mở form thêm mới hóa đơn.
-        showFormButton.addEventListener('click', () => {
-            resetForm();
-            formCard.classList.add('is-visible');
-            document.getElementById('maHoaDon').focus();
-        });
-
-        cancelFormButton.addEventListener('click', resetForm);
         searchInput.addEventListener('input', filterRows);
         typeFilter.addEventListener('change', filterRows);
         statusFilter.addEventListener('change', filterRows);

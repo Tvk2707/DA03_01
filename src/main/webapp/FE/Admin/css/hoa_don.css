@@ -25,6 +25,32 @@
     margin-bottom: 22px;
 }
 
+.invoice-detail-page-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 22px;
+    padding-left: 64px;
+}
+
+.invoice-detail-page-heading .invoice-title {
+    margin-bottom: 4px;
+}
+
+.invoice-detail-page-heading .invoice-subtitle {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin: 0;
+    font-size: 13px;
+}
+
+.invoice-detail-page-heading .invoice-subtitle strong {
+    color: var(--text-dark);
+}
+
 .invoice-detail-page .invoice-page-header {
     padding-left: 64px;
 }
@@ -47,6 +73,144 @@
 .invoice-subtitle {
     color: var(--text-light);
     font-size: 14px;
+}
+
+.invoice-detail-header-copy {
+    min-width: 0;
+}
+
+.invoice-customer-summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 28px;
+    margin-top: 18px;
+}
+
+.invoice-customer-summary div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.invoice-customer-summary span {
+    color: var(--text-light);
+    font-size: 13px;
+}
+
+.invoice-customer-summary strong {
+    color: var(--text-dark);
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+
+.invoice-detail-summary-card {
+    padding: 22px 24px;
+    margin-bottom: 18px;
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    background: var(--white);
+    box-shadow: var(--shadow);
+}
+
+.invoice-history-layout {
+    display: grid;
+    grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.2fr);
+    gap: 16px;
+    align-items: stretch;
+    margin-bottom: 18px;
+}
+
+.invoice-history-layout .invoice-detail-summary-card {
+    display: flex;
+    align-items: stretch;
+    flex-direction: column;
+    gap: 18px;
+    min-width: 0;
+    height: 100%;
+    margin-bottom: 0;
+    padding-left: 24px;
+}
+
+.invoice-history-layout .invoice-header-actions {
+    width: 100%;
+}
+
+.invoice-history-layout .invoice-btn {
+    flex: 1;
+}
+
+.invoice-history-layout .invoice-detail-header-total {
+    min-width: 0;
+    padding: 16px 0 0;
+    border-top: 1px solid var(--border-color);
+    border-left: none;
+}
+
+.invoice-history-layout > .invoice-list-card {
+    min-width: 0;
+    margin-bottom: 0;
+}
+
+.invoice-detail-header-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.invoice-detail-header-copy .invoice-subtitle {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin: 0;
+    font-size: 13px;
+}
+
+.invoice-detail-header-copy .invoice-subtitle strong {
+    color: var(--text-dark);
+}
+
+.invoice-detail-header-total {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    min-width: 230px;
+    min-height: 62px;
+    padding: 0 22px;
+    border-left: 1px solid var(--border-color);
+    background: #fffdf9;
+}
+
+.invoice-detail-header-total__label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.invoice-detail-header-total span,
+.invoice-detail-header-total small {
+    display: block;
+    color: var(--text-light);
+    font-size: 13px;
+}
+
+.invoice-detail-header-total strong {
+    display: block;
+    color: #a84d68;
+    font-size: 22px;
+    line-height: 1.1;
+}
+
+.invoice-detail-header-total small {
+    text-align: right;
+}
+
+.invoice-detail-header-total small b {
+    color: var(--text-dark);
 }
 
 .invoice-header-actions,
@@ -570,6 +734,11 @@
     margin-bottom: 14px;
 }
 
+.invoice-timeline-card--top {
+    margin-top: 0;
+    margin-bottom: 22px;
+}
+
 .invoice-timeline {
     display: grid;
     grid-template-columns: repeat(6, minmax(120px, 1fr));
@@ -900,6 +1069,23 @@
     background: var(--primary-dark);
 }
 
+.invoice-pay-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.invoice-pay-btn--qr {
+    margin-top: 8px;
+    background: #1677c8;
+}
+
+.invoice-pay-btn--qr:hover {
+    background: #0f5f9f;
+}
+
+
 /* Modal dùng để cập nhật trạng thái hóa đơn. */
 .invoice-modal {
     position: fixed;
@@ -957,6 +1143,105 @@
 
 .invoice-modal__header h2 i {
     color: var(--primary-color);
+}
+
+.qr-payment-modal__dialog {
+    width: min(500px, calc(100vw - 32px));
+}
+
+.qr-payment-modal__header {
+    align-items: flex-start;
+}
+
+.qr-payment-modal__header p {
+    margin-top: 4px;
+    color: var(--text-light);
+    font-size: 12px;
+}
+
+.qr-payment-modal__body {
+    display: grid;
+    gap: 12px;
+    background: #fbfbfd;
+}
+
+.qr-payment-summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.qr-payment-summary__item,
+.qr-payment-order {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-width: 0;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--white);
+}
+
+.qr-payment-summary__item span,
+.qr-payment-order span {
+    color: var(--text-light);
+    font-size: 12px;
+}
+
+.qr-payment-summary__item strong,
+.qr-payment-order strong {
+    color: var(--text-dark);
+    font-size: 12px;
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+.qr-payment-summary__item--amount strong {
+    color: #b34b63;
+    font-size: 18px;
+}
+
+.qr-payment-code {
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+    padding: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: #f8f8fc;
+}
+
+.qr-payment-code img {
+    width: 180px;
+    height: 180px;
+    padding: 10px;
+    border-radius: 10px;
+    background: var(--white);
+    box-shadow: 0 4px 14px rgba(40, 36, 33, 0.08);
+    object-fit: contain;
+}
+
+.qr-payment-code span {
+    color: var(--text-light);
+    font-size: 12px;
+}
+
+.qr-payment-note input {
+    min-height: 42px;
+}
+
+.qr-payment-modal__footer {
+    flex-wrap: wrap;
+}
+
+.qr-payment-confirm {
+    background: #1ab862;
+}
+
+.qr-payment-confirm:hover {
+    background: #159a52;
 }
 
 .invoice-modal__close {
@@ -1058,10 +1343,18 @@
     .invoice-checkout-panel {
         position: static;
     }
+
+    .invoice-history-layout {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* Chừa khoảng trống cho nút menu khi sidebar thu gọn ở tablet/zoom cao. */
 @media (max-width: 1024px) {
+    .invoice-detail-page-heading {
+        padding-left: 64px;
+    }
+
     .invoice-detail-page .invoice-page-header {
         padding-left: 64px;
     }
@@ -1069,6 +1362,12 @@
 
 /* Responsive cho điện thoại và tablet nhỏ. */
 @media (max-width: 768px) {
+    .invoice-detail-page-heading {
+        align-items: stretch;
+        flex-direction: column;
+        padding-left: 56px;
+    }
+
     .invoice-detail-page .invoice-page-header {
         padding-left: 56px;
     }
@@ -1138,12 +1437,82 @@
     .invoice-shipping-grid {
         grid-template-columns: 1fr;
     }
+
+    .invoice-detail-header-total {
+        align-items: flex-start;
+        flex-direction: column;
+        width: 100%;
+        min-width: 0;
+        padding: 16px 0 0;
+        margin-top: 16px;
+        border-top: 1px solid var(--border-color);
+        border-left: none;
+    }
+
+    .invoice-detail-header-total small {
+        text-align: left;
+    }
+
+    .invoice-history-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .invoice-history-layout .invoice-detail-summary-card {
+        padding-left: 18px;
+    }
+
+    .qr-payment-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .qr-payment-modal__footer {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .qr-payment-modal__footer .invoice-btn {
+        width: 100%;
+    }
+}
+
+/* Phiếu in khổ nhỏ theo mẫu hóa đơn bán lẻ. */
+.invoice-receipt-print {
+    display: none;
+}
+
+.receipt-qr span {
+    color: var(--text-light);
+    font-size: 12px;
+}
+
+.receipt-qr {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    margin: 10px 0;
+    text-align: center;
+}
+
+.receipt-qr img {
+    width: 72px;
+    height: 72px;
 }
 
 /* Ẩn các nút/khung không cần thiết khi in hóa đơn. */
 @media print {
+    @page {
+        /* Khổ giấy in nhiệt dọc, không dùng khổ ngang mặc định của trình duyệt. */
+        size: 80mm 150mm;
+        margin: 0;
+    }
+
     .sidebar,
     .admin-header,
+    .sidebar-toggle,
+    .overlay,
+    #page-content,
     .invoice-detail-actions,
     .invoice-page-header .invoice-btn,
     .invoice-toast,
@@ -1151,11 +1520,192 @@
         display: none !important;
     }
 
+    /* Ẩn toàn bộ khung màn hình quản trị để không tạo trang trắng trước hóa đơn. */
     .main-content {
-        margin-left: 0;
+        display: none !important;
     }
 
     body {
         background: var(--white);
+        width: 80mm;
+        min-height: 0 !important;
+        height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+    }
+
+    html {
+        width: 80mm;
+        min-height: 0 !important;
+        height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .invoice-receipt-print {
+        display: block !important;
+        width: 72mm;
+        margin: 0 auto;
+        page-break-before: avoid;
+        page-break-after: avoid;
+        page-break-inside: avoid;
+        break-inside: avoid;
+        color: #000;
+        background: #fff;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 9px;
+        line-height: 1.2;
+    }
+
+    .receipt-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        line-height: 1.25;
+    }
+
+    .receipt-header strong {
+        color: #08752d;
+        font-size: 14px;
+    }
+
+    .receipt-header h1 {
+        margin: 4px 0 1px;
+        color: #07558f;
+        font-size: 11px;
+    }
+
+    .receipt-header em {
+        font-size: 10px;
+    }
+
+    .receipt-divider {
+        border-top: 1px dashed #333;
+        margin: 5px 0;
+    }
+
+    .receipt-info {
+        margin: 5px 0;
+        line-height: 1.35;
+        overflow-wrap: anywhere;
+    }
+
+    .receipt-meta-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 6px;
+    }
+
+    .receipt-meta-row span:last-child {
+        text-align: right;
+    }
+
+    .receipt-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+        font-size: 8px;
+    }
+
+    .receipt-table th,
+    .receipt-table td {
+        padding: 3px 1px;
+        border: 0;
+        border-bottom: 1px dashed #777;
+        vertical-align: middle;
+        overflow-wrap: anywhere;
+    }
+
+    .receipt-table th:nth-child(1),
+    .receipt-table td:nth-child(1) {
+        width: 44%;
+        text-align: left;
+    }
+
+    .receipt-table th:nth-child(2),
+    .receipt-table td:nth-child(2) {
+        width: 10%;
+        text-align: center;
+    }
+
+    .receipt-table th:nth-child(3),
+    .receipt-table td:nth-child(3) {
+        width: 23%;
+        text-align: right;
+    }
+
+    .receipt-table th:nth-child(4),
+    .receipt-table td:nth-child(4) {
+        width: 23%;
+        text-align: right;
+    }
+
+    .receipt-table tfoot th {
+        border-top: 1px dashed #333;
+        border-bottom: 0;
+    }
+
+    .receipt-summary {
+        margin-top: 5px;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 2px 6px;
+    }
+
+    .receipt-summary div {
+        display: contents;
+    }
+
+    .receipt-summary strong {
+        text-align: right;
+        font-weight: 400;
+    }
+
+    .receipt-summary-total span,
+    .receipt-summary-total strong {
+        border-top: 1px solid #333;
+        padding-top: 3px;
+        font-weight: 700;
+    }
+
+    .receipt-words {
+        margin: 6px 0 0;
+        font-size: 8px;
+    }
+
+    .receipt-thanks {
+        margin: 2px 0 0;
+        color: #000;
+        text-align: center;
+        font-weight: 700;
+        font-size: 9px;
+    }
+
+    .receipt-qr {
+        margin: 5px 0 0;
+        gap: 2px;
+    }
+
+    .receipt-qr img {
+        width: 52px;
+        height: 52px;
+    }
+
+    .receipt-qr span {
+        color: #333;
+        font-size: 7px;
+    }
+
+    /* Không để các dòng trong phiếu bị đẩy sang trang khác. */
+    .receipt-header,
+    .receipt-info,
+    .receipt-table,
+    .receipt-summary,
+    .receipt-words,
+    .receipt-thanks {
+        page-break-inside: avoid;
+        break-inside: avoid;
     }
 }
