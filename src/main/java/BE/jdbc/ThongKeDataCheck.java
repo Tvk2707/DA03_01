@@ -1,7 +1,7 @@
 package BE.jdbc;
 
-import BE.Model.ThongKeOverview;
-import BE.service.ThongKeService;
+import QuanLyHoaDon.Model.ThongKeOverview;
+import QuanLyHoaDon.service.ThongKeService;
 
 public class ThongKeDataCheck {
     public static void main(String[] args) throws Exception {

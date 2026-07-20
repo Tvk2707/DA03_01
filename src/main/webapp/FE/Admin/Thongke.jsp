@@ -1,6 +1,6 @@
-<%@ page import="BE.Model.ThongKeCustomer" %>
-<%@ page import="BE.Model.ThongKeOverview" %>
-<%@ page import="BE.Model.ThongKeProduct" %>
+<%@ page import="QuanLyHoaDon.Model.ThongKeCustomer" %>
+<%@ page import="QuanLyHoaDon.Model.ThongKeOverview" %>
+<%@ page import="QuanLyHoaDon.Model.ThongKeProduct" %>
 <%@ page import="java.math.BigDecimal" %>
 <%@ page import="java.text.DecimalFormat" %>
 <%@ page import="java.util.Collections" %>
@@ -61,10 +61,10 @@
     <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/thongke.css?v=202607161120">
 </head>
 <body class="statistics-screen">
-<%@ include file="layout/sidebar.jsp" %>
+<%@ include file="/Admin/layout/sidebar.jsp" %>
 
 <div class="main-content">
-    <%@ include file="layout/header.jsp" %>
+    <%@ include file="/Admin/layout/header.jsp" %>
 
     <main id="page-content" class="stat-page">
         <% if (errorMessage != null) { %>

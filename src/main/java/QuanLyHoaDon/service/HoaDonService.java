@@ -1,12 +1,10 @@
 package QuanLyHoaDon.service;
 
 import QuanLyHoaDon.Model.ChiTietHoaDonView;
-import QuanLyHoaDon.Model.ChiTietHoaDonInput;
 import QuanLyHoaDon.Model.HoaDonView;
 import QuanLyHoaDon.Model.LichSuHoaDonView;
 import QuanLyHoaDon.Model.LichSuThanhToanView;
 import QuanLyHoaDon.Model.NhanVienView;
-import QuanLyHoaDon.Model.SanPhamHoaDonView;
 import QuanLyHoaDon.Model.ThanhToanHoaDonView;
 import QuanLyHoaDon.dao.HoaDonDAO;
 import QuanLyHoaDon.Model.ChiTietHoaDonView;

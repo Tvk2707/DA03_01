@@ -1,8 +1,8 @@
-<%@ page import="BE.Model.ChiTietHoaDonView" %>
-<%@ page import="BE.Model.HoaDonView" %>
-<%@ page import="BE.Model.LichSuHoaDonView" %>
-<%@ page import="BE.Model.LichSuThanhToanView" %>
-<%@ page import="BE.Model.ThanhToanHoaDonView" %>
+<%@ page import="QuanLyHoaDon.Model.ChiTietHoaDonView" %>
+<%@ page import="QuanLyHoaDon.Model.HoaDonView" %>
+<%@ page import="QuanLyHoaDon.Model.LichSuHoaDonView" %>
+<%@ page import="QuanLyHoaDon.Model.LichSuThanhToanView" %>
+<%@ page import="QuanLyHoaDon.Model.ThanhToanHoaDonView" %>
 <%@ page import="java.math.BigDecimal" %>
 <%@ page import="java.math.RoundingMode" %>
 <%@ page import="java.text.DecimalFormat" %>
@@ -264,10 +264,10 @@
     <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/hoa_don.css">
 </head>
 <body>
-<%@ include file="../layout/sidebar.jsp" %>
+<%@ include file="/Admin/layout/sidebar.jsp" %>
 
 <div class="main-content">
-    <%@ include file="../layout/header.jsp" %>
+    <%@ include file="/Admin/layout/header.jsp" %>
 
     <main id="page-content" class="invoice-page invoice-detail-page">
         <section class="invoice-detail-page-heading">

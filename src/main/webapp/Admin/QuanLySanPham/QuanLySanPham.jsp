@@ -497,9 +497,9 @@
     </style>
 </head>
 <body>
-<%@include file="../../FE/Admin/layout/sidebar.jsp" %>
+<%@include file="/Admin/layout/sidebar.jsp" %>
 <div class="dashboard-container">
-    <%@include file="../../FE/Admin/layout/header.jsp" %>
+    <%@include file="/Admin/layout/header.jsp" %>
 
     <div class="category-section">
         <div class="category-header">

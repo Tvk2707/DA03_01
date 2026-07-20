@@ -1,7 +1,7 @@
 package BE.jdbc;
 
-import BE.Model.HoaDonView;
-import BE.service.HoaDonService;
+import QuanLyHoaDon.Model.HoaDonView;
+import QuanLyHoaDon.service.HoaDonService;
 
 import java.util.List;
 

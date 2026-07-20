@@ -1,4 +1,4 @@
-<%@ page import="BE.Model.HoaDonView" %>
+<%@ page import="QuanLyHoaDon.Model.HoaDonView" %>
 <%@ page import="java.text.DecimalFormat" %>
 <%@ page import="java.time.LocalDate" %>
 <%@ page import="java.time.format.DateTimeFormatter" %>
@@ -72,10 +72,10 @@
     <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/hoa_don.css">
 </head>
 <body>
-<%@ include file="../layout/sidebar.jsp" %>
+<%@ include file="/Admin/layout/sidebar.jsp" %>
 
 <div class="main-content">
-    <%@ include file="../layout/header.jsp" %>
+    <%@ include file="/Admin/layout/header.jsp" %>
 
     <main id="page-content" class="invoice-page">
         <%-- Tiêu đề trang và các nút thao tác nhanh. --%>

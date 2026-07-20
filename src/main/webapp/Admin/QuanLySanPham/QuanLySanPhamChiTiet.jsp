@@ -222,14 +222,10 @@
 </head>
 <body>
 <div class="admin-layout">
-    <jsp:include page="../../FE/Admin/layout/sidebar.jsp"/>
+    <jsp:include page="/Admin/layout/sidebar.jsp"/>
     <div class="main-content">
-<<<<<<< HEAD
         <jsp:include page="../layout/header.jsp"/>
-=======
-        <jsp:include page="../../FE/Admin/layout/header.jsp"/>
         <div id="page-content">
->>>>>>> origin/combine_HD_SP_TK
             <div class="category-section">
                 <div class="category-header" style="display: flex; justify-content: space-between; align-items: center;">
                     <h2 class="category-title">Biến Thể Sản Phẩm</h2>
