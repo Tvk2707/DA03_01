@@ -13,8 +13,8 @@
             <!-- Database Connection -->
             <property name="jakarta.persistence.jdbc.driver" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
             <property name="jakarta.persistence.jdbc.url" value="jdbc:sqlserver://localhost:1433;DatabaseName=quan_ly_ban_kinh;encrypt=true;trustServerCertificate=true;"/>
-            <property name="jakarta.persistence.jdbc.user" value="sa"/>
-            <property name="jakarta.persistence.jdbc.password" value="123"/>
+            <property name="jakarta.persistence.jdbc.user" value="minh"/>
+            <property name="jakarta.persistence.jdbc.password" value="123456"/>
 
             <!-- Hibernate Properties -->
             <property name="hibernate.show_sql" value="true"/>

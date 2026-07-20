@@ -3,6 +3,7 @@ package BE.service;
 import BE.Model.ThongKeCustomer;
 import BE.Model.ThongKeOverview;
 import BE.Model.ThongKeProduct;
+import BE.dao.ThongKeDAO.RevenuePoint;
 import BE.dao.ThongKeDAO;
 
 import java.sql.SQLException;
@@ -14,6 +15,10 @@ import java.util.List;
 
 public class ThongKeService {
     private final ThongKeDAO thongKeDAO = new ThongKeDAO();
+
+    public ThongKeOverview getOverview(LocalDateTime from, LocalDateTime to) throws SQLException {
+        return thongKeDAO.getOverview(from, to);
+    }
 
     public ThongKeOverview getTodayOverview() throws SQLException {
         LocalDate today = LocalDate.now();
@@ -39,15 +44,34 @@ public class ThongKeService {
     }
 
     public List<ThongKeProduct> getBestSellers() throws SQLException {
-        return thongKeDAO.getBestSellers();
+        LocalDate today = LocalDate.now();
+        return thongKeDAO.getBestSellers(today.withDayOfMonth(1).atStartOfDay(), today.plusDays(1).atStartOfDay());
     }
 
     public List<ThongKeProduct> getSlowStockProducts() throws SQLException {
-        return thongKeDAO.getSlowStockProducts();
+        LocalDate today = LocalDate.now();
+        return thongKeDAO.getSlowStockProducts(today.withDayOfMonth(1).atStartOfDay(), today.plusDays(1).atStartOfDay());
     }
 
     public List<ThongKeCustomer> getTopCustomers() throws SQLException {
-        return thongKeDAO.getTopCustomers();
+        LocalDate today = LocalDate.now();
+        return thongKeDAO.getTopCustomers(today.withDayOfMonth(1).atStartOfDay(), today.plusDays(1).atStartOfDay());
+    }
+
+    public List<ThongKeProduct> getBestSellers(LocalDateTime from, LocalDateTime to) throws SQLException {
+        return thongKeDAO.getBestSellers(from, to);
+    }
+
+    public List<ThongKeProduct> getSlowStockProducts(LocalDateTime from, LocalDateTime to) throws SQLException {
+        return thongKeDAO.getSlowStockProducts(from, to);
+    }
+
+    public List<ThongKeCustomer> getTopCustomers(LocalDateTime from, LocalDateTime to) throws SQLException {
+        return thongKeDAO.getTopCustomers(from, to);
+    }
+
+    public List<RevenuePoint> getRevenueSeries(LocalDateTime from, LocalDateTime to, String mode) throws SQLException {
+        return thongKeDAO.getRevenueSeries(from, to, mode);
     }
 
     public int calculateCompletionRate(ThongKeOverview overview) {

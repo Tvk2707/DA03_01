@@ -30,6 +30,9 @@
     if (topCustomers == null) topCustomers = Collections.emptyList();
     if (slowStockProducts == null) slowStockProducts = Collections.emptyList();
     String errorMessage = (String) request.getAttribute("errorMessage");
+    String reportFrom = (String) request.getAttribute("reportFrom");
+    String reportTo = (String) request.getAttribute("reportTo");
+    String statisticsApi = (String) request.getAttribute("statisticsApi");
 %>
 <%!
     private ThongKeOverview overview(Object value) {
@@ -73,9 +76,6 @@
 
         <section class="stat-page-header">
             <h1 class="stat-page-title"><i class="fas fa-chart-column"></i> Thống kê</h1>
-            <button class="stat-export-link" id="exportReport" type="button">
-                <i class="fas fa-download"></i> Xuất báo cáo
-            </button>
         </section>
 
         <section class="stat-overview" id="overviewCards" aria-label="Số liệu tổng quan">
@@ -143,7 +143,7 @@
                         <i class="fas fa-money-bill-trend-up"></i>
                         <div>
                             <h2>Doanh thu</h2>
-                            <p id="chartDescription">Doanh thu theo ngày trong tháng 04/2026</p>
+                            <p id="chartDescription">Doanh thu theo khoảng thời gian đã chọn</p>
                         </div>
                     </div>
                     <div class="stat-chart-actions">
@@ -182,12 +182,12 @@
             <div class="stat-filter-fields">
                 <label class="stat-date-field">
                     <span>Từ ngày</span>
-                    <input id="reportFrom" type="date" value="2026-04-01">
+                    <input id="reportFrom" type="date" value="<%= reportFrom %>">
                 </label>
                 <span class="stat-date-arrow"><i class="fas fa-arrow-right"></i></span>
                 <label class="stat-date-field">
                     <span>Đến ngày</span>
-                    <input id="reportTo" type="date" value="2026-04-30">
+                    <input id="reportTo" type="date" value="<%= reportTo %>">
                 </label>
             </div>
             <div class="stat-filter-actions">
@@ -353,6 +353,13 @@
     <div><strong>Thành công</strong><span id="statToastMessage"></span></div>
 </div>
 
-<script src="<%= request.getContextPath() %>/FE/Admin/thongke.js?v=202607161120"></script>
+<script>
+    window.statisticsConfig = {
+        apiUrl: "<%= statisticsApi %>",
+        reportFrom: "<%= reportFrom %>",
+        reportTo: "<%= reportTo %>"
+    };
+</script>
+<script src="<%= request.getContextPath() %>/FE/Admin/thongke.js?v=202607202030"></script>
 </body>
 </html>

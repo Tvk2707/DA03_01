@@ -111,52 +111,86 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    min-width: 0;
+    flex: 1;
 }
 
 .toggle-icon {
-    width: auto !important;
     margin-left: auto;
-    font-size: 14px !important;
-    transition: transform 0.25s ease;
+    transition: transform 0.3s ease;
+    font-size: 12px;
+    color: var(--text-light);
+    width: 20px;
+    text-align: center;
 }
 
-.menu-item.open > .menu-link .toggle-icon {
+.menu-item.open .toggle-icon {
     transform: rotate(180deg);
 }
 
-/* Menu con sản phẩm: đóng/mở có hiệu ứng đẩy xuống và kéo lên. */
+/* Submenu */
 .submenu {
-    list-style: none;
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 0 8px 48px !important;
     max-height: 0;
     overflow: hidden;
-    margin: 0 12px;
-    padding: 0;
-    opacity: 0;
-    transition: max-height 0.28s ease, opacity 0.2s ease, margin 0.28s ease;
-}
-
-.menu-item.open > .submenu {
-    max-height: 160px;
-    margin-top: 2px;
-    margin-bottom: 6px;
-    opacity: 1;
-}
-
-.submenu a {
+    transition: max-height 0.4s ease-in-out;
     display: block;
-    padding: 9px 14px 9px 48px;
-    border-radius: 8px;
-    color: var(--text-light);
-    font-size: 13px;
-    text-decoration: none;
-    transition: all 0.2s ease;
 }
 
-.submenu a:hover,
-.submenu a.active {
-    background-color: var(--bg-color);
-    color: var(--primary-color);
+.menu-item.open .submenu {
+    max-height: 600px;
+    margin-top: 4px;
+}
+
+.submenu li {
+    margin: 2px 0;
+}
+
+.submenu li a {
+    display: block;
+    padding: 8px 12px;
+    color: var(--text-light) !important;
+    text-decoration: none !important;
+    font-size: 13px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.submenu li a:hover {
+    background-color: var(--bg-color) !important;
+    color: var(--primary-color) !important;
+}
+
+.submenu li a::before {
+    content: '';
+    position: absolute;
+    left: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 4px;
+    background-color: var(--border-color);
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.submenu li a:hover::before {
+    background-color: var(--primary-color);
+}
+
+.submenu li a.active {
+    background-color: var(--bg-color) !important;
+    color: var(--primary-color) !important;
+    font-weight: 600;
+}
+
+.submenu li a.active::before {
+    background-color: var(--primary-color);
+    width: 6px;
+    height: 6px;
+    left: -11px;
 }
 
 /* Bottom Menu */
