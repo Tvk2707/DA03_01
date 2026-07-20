@@ -3,10 +3,15 @@ package QuanLySanPham.Entity;
 import jakarta.persistence.*;
 import java.util.List;
 import java.time.LocalDate;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "nhan_vien")
 public class NhanVien {
+    // Hằng số vai trò dùng cho phân quyền
+    public static final int VAI_TRO_NHAN_VIEN = 0;
+    public static final int VAI_TRO_QUAN_LY = 1;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -44,6 +49,9 @@ public class NhanVien {
 
     @Column(name = "trang_thai")
     private Integer trangThai;
+    // 0 = Nhân viên, 1 = Quản lý. Dùng để phân quyền, độc lập với "chucVu" (chỉ là chức danh hiển thị).
+    @Column(name = "vai_tro")
+    private Integer vaiTro;
 
     @OneToMany(mappedBy = "nhanVien")
     private List<HoaDon> hoaDons;
@@ -92,4 +100,17 @@ public class NhanVien {
     public void setTrangThai(Integer trangThai) { this.trangThai = trangThai; }
     public List<HoaDon> getHoaDons() { return hoaDons; }
     public void setHoaDons(List<HoaDon> hoaDons) { this.hoaDons = hoaDons; }
+
+    public Integer getVaiTro() {
+        return vaiTro;
+    }
+
+    public void setVaiTro(Integer vaiTro) {
+        this.vaiTro = vaiTro;
+    }
+
+    public boolean isQuanLy() {
+        return vaiTro != null && vaiTro == VAI_TRO_QUAN_LY;
+    }
+
 }

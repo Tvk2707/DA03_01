@@ -3,6 +3,7 @@ package QuanLyHoaDon.controller;
 import QuanLyHoaDon.Model.ThongKeOverview;
 import QuanLyHoaDon.service.ThongKeService;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -10,7 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collections;
-
+@WebServlet("/admin/thong-ke")
 public class ThongKeController extends HttpServlet {
     private final ThongKeService thongKeService = new ThongKeService();
 

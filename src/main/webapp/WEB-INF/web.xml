@@ -4,14 +4,6 @@
          xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
          version="6.0">
     <welcome-file-list>
-        <welcome-file>index.jsp</welcome-file>
+        <welcome-file>Login.jsp</welcome-file>
     </welcome-file-list>
-    <servlet>
-        <servlet-name>ThongKeController</servlet-name>
-        <servlet-class>QuanLyHoaDon.controller.ThongKeController</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>ThongKeController</servlet-name>
-        <url-pattern>/admin/thong-ke</url-pattern>
-    </servlet-mapping>
 </web-app>

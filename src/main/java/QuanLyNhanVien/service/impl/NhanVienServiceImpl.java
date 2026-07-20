@@ -56,5 +56,27 @@ public class NhanVienServiceImpl implements NhanVienService {
     public List<NhanVien> timKiem(String hoTen, String email) {
         return nhanVienDao.search(hoTen, email);
     }
+    @Override
+    public NhanVien dangNhap(String taiKhoan, String matKhau) throws Exception {
+        if (taiKhoan == null || taiKhoan.trim().isEmpty() || matKhau == null || matKhau.trim().isEmpty()) {
+            throw new Exception("Vui lòng nhập đầy đủ tài khoản và mật khẩu");
+        }
+
+        NhanVien nv = nhanVienDao.findByEmail(taiKhoan);
+        if (nv == null) {
+            nv = nhanVienDao.findByMaNhanVien(taiKhoan);
+        }
+        if (nv == null) {
+            throw new Exception("Tài khoản không tồn tại");
+        }
+        if (nv.getTrangThai() != null && nv.getTrangThai() == 0) {
+            throw new Exception("Tài khoản đã bị vô hiệu hóa");
+        }
+        if (!matKhau.equals(nv.getMatKhau().trim())) {
+            throw new Exception("Mật khẩu không đúng");
+        }
+        return nv;
+    }
 }
+
 

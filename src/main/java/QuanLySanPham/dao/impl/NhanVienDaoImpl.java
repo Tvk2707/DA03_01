@@ -68,5 +68,18 @@ public class NhanVienDaoImpl extends GenericDaoImpl<NhanVien, Integer> implement
             em.close();
         }
     }
+
+    @Override
+    public NhanVien findByEmail(String email) {
+        EntityManager em = EntityManagerUtlis.getEntityManager();
+        try {
+            TypedQuery<NhanVien> q = em.createQuery("SELECT n FROM NhanVien n WHERE n.email = :email", NhanVien.class);
+            q.setParameter("email", email);
+            List<NhanVien> list = q.getResultList();
+            return list.isEmpty() ? null : list.get(0);
+        } finally {
+            em.close();
+        }
+    }
 }
 
