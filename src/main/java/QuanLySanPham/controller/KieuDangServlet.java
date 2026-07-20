@@ -3,9 +3,11 @@ package QuanLySanPham.controller;
 import QuanLySanPham.Entity.KieuDang;
 import QuanLySanPham.service.LookupService;
 import QuanLySanPham.service.impl.LookupServiceImpl;
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
-import jakarta.servlet.annotation.*;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.util.List;
@@ -19,14 +21,14 @@ import java.util.List;
         "/KieuDang/delete",
 })
 public class KieuDangServlet extends HttpServlet {
-    private LookupService lookupService = new LookupServiceImpl();
+    private final LookupService lookupService = new LookupServiceImpl();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String path = request.getServletPath();
         switch (path) {
             case "/KieuDang":
-                ShowKieuDang(request, response);
+                showKieuDang(request, response);
                 break;
             case "/KieuDang/new":
                 showAddKieuDang(request, response);
@@ -34,7 +36,9 @@ public class KieuDangServlet extends HttpServlet {
             case "/KieuDang/edit":
                 showEditKieuDang(request, response);
                 break;
-
+            default:
+                showKieuDang(request, response);
+                break;
         }
     }
 
@@ -51,10 +55,13 @@ public class KieuDangServlet extends HttpServlet {
             case "/KieuDang/delete":
                 deleteKieuDang(request, response);
                 break;
+            default:
+                showKieuDang(request, response);
+                break;
         }
     }
 
-    private void ShowKieuDang(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void showKieuDang(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String keyword = request.getParameter("keyword");
         List<KieuDang> items;
 
@@ -64,61 +71,98 @@ public class KieuDangServlet extends HttpServlet {
         } else {
             items = lookupService.layTatCaKieuDang();
         }
-        //  List<KieuDang> items = lookupService.layTatCaKieuDang();
+
         request.setAttribute("items", items);
-        request.setAttribute("activeMenu", "product");    // Giữ menu cha mở và sáng lên
-        request.setAttribute("activeSubMenu", "category");
+        request.setAttribute("activeMenu", "product");
+        request.setAttribute("activeSubMenu", "style");
         request.getRequestDispatcher("/Admin/QuanLyBienThe/KieuDang.jsp").forward(request, response);
     }
 
     private void showAddKieuDang(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.setAttribute("kieuDang", new KieuDang());
         request.getRequestDispatcher("/Admin/QuanLyBienThe/KieuDang.jsp").forward(request, response);
     }
 
     private void showEditKieuDang(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        Integer id = Integer.parseInt(request.getParameter("id"));
-        KieuDang kieuDang = lookupService.layKieuDangTheoId(id);
-        request.setAttribute("kieuDang", kieuDang);
-        request.getRequestDispatcher("/Admin/QuanLyBienThe/KieuDang.jsp").forward(request, response);
+        try {
+            int id = Integer.parseInt(request.getParameter("id"));
+            KieuDang kieuDang = lookupService.layKieuDangTheoId(id);
+            if (kieuDang == null) {
+                response.sendRedirect(request.getContextPath() + "/KieuDang");
+                return;
+            }
+            request.setAttribute("kieuDang", kieuDang);
+            request.getRequestDispatcher("/Admin/QuanLyBienThe/KieuDang.jsp").forward(request, response);
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/KieuDang");
+        }
     }
 
     private void insertKieuDang(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        KieuDang kieuDang = getKieuDangFron(request);
+        KieuDang kieuDang = getKieuDangFromRequest(request);
         try {
             lookupService.themKieuDang(kieuDang);
             response.sendRedirect(request.getContextPath() + "/KieuDang");
-        } catch (RuntimeException e) {
+        } catch (IllegalArgumentException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("kieuDang", kieuDang);
-            request.getRequestDispatcher("/Admin/QuanLyBienThe/KieuDang.jsp").forward(request, response);
+            showKieuDang(request, response);
         }
     }
 
     private void updateKieuDang(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        KieuDang kieuDang = getKieuDangFron(request);
-        kieuDang.setId(Integer.parseInt(request.getParameter("id")));
+        KieuDang kieuDang = getKieuDangFromRequest(request);
         try {
+            String idStr = request.getParameter("id");
+            kieuDang.setId(Integer.parseInt(idStr));
             lookupService.capNhatKieuDang(kieuDang);
             response.sendRedirect(request.getContextPath() + "/KieuDang");
-        } catch (RuntimeException e) {
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/KieuDang");
+        } catch (IllegalArgumentException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("kieuDang", kieuDang);
-            request.getRequestDispatcher("/Admin/QuanLyBienThe/KieuDang.jsp").forward(request, response);
+            showKieuDang(request, response);
         }
     }
 
-    private void deleteKieuDang(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        Integer id = Integer.parseInt(request.getParameter("id"));
-        lookupService.xoaKieuDang(id);
-        response.sendRedirect(request.getContextPath() + "/KieuDang");
+    private void deleteKieuDang(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        try {
+            int id = Integer.parseInt(request.getParameter("id"));
+            lookupService.xoaKieuDang(id);
+            response.sendRedirect(request.getContextPath() + "/KieuDang");
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/KieuDang");
+        } catch (Exception e) {
+            request.setAttribute("errorMessage", "Không thể xóa kiểu dáng này vì có sản phẩm đang sử dụng.");
+            showKieuDang(request, response);
+        }
     }
 
-    private KieuDang getKieuDangFron(HttpServletRequest request) {
+    private KieuDang getKieuDangFromRequest(HttpServletRequest request) {
         String tenKieuDang = request.getParameter("tenKieuDang");
-        Integer trangThai = Integer.parseInt(request.getParameter("trangThai"));
+        String trangThaiStr = request.getParameter("trangthai");
+
         KieuDang kieuDang = new KieuDang();
         kieuDang.setTenKieuDang(tenKieuDang);
-        kieuDang.setTrangThai(trangThai);
+
+        try {
+            if (trangThaiStr != null && !trangThaiStr.isEmpty()) {
+                kieuDang.setTrangThai(Integer.parseInt(trangThaiStr));
+            }
+        } catch (NumberFormatException e) {
+            // Handle invalid status format if necessary
+        }
+        
+        String idStr = request.getParameter("id");
+        if (idStr != null && !idStr.trim().isEmpty()) {
+            try {
+                kieuDang.setId(Integer.parseInt(idStr));
+            } catch (NumberFormatException e) {
+                // Ignore if ID is not a valid number
+            }
+        }
+
         return kieuDang;
     }
 }

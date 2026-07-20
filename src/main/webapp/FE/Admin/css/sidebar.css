@@ -1,8 +1,4 @@
-/* =========================================
-   SIDEBAR STYLES - ĐÃ SỬA LỖI DÃN CHỮ
-   ========================================= */
-
-/* Sidebar container */
+/* Sidebar Styles */
 .sidebar {
     width: 280px;
     background-color: var(--white);
@@ -82,7 +78,6 @@
     margin: 2px 12px;
 }
 
-/* Menu link - GIỮ NGUYÊN cho tất cả menu items */
 .menu-link {
     display: flex;
     align-items: center;
@@ -112,108 +107,59 @@
     font-size: 16px;
 }
 
-/* =========================================
-   CHỈ ÁP DỤNG CHO MENU CÓ SUBMENU
-   ========================================= */
-
-/* Wrapper cho icon và text - chỉ menu có submenu mới có */
 .menu-link-wrapper {
     display: flex;
     align-items: center;
     gap: 12px;
-    flex: 1; /* Chiếm hết không gian còn lại */
+    min-width: 0;
 }
 
-/* Icon toggle - đẩy sang phải */
 .toggle-icon {
+    width: auto !important;
     margin-left: auto;
-    transition: transform 0.3s ease;
-    font-size: 12px;
-    color: var(--text-light);
-    width: 20px;
-    text-align: center;
+    font-size: 14px !important;
+    transition: transform 0.25s ease;
 }
 
-/* Xoay icon khi mở */
-.menu-item.open .toggle-icon {
+.menu-item.open > .menu-link .toggle-icon {
     transform: rotate(180deg);
 }
 
-/* =========================================
-   SUBMENU STYLES
-   ========================================= */
-
+/* Menu con sản phẩm: đóng/mở có hiệu ứng đẩy xuống và kéo lên. */
 .submenu {
-    list-style: none !important;
-    padding: 0 !important;
-    margin: 0 0 8px 48px !important;
+    list-style: none;
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.4s ease-in-out;
+    margin: 0 12px;
+    padding: 0;
+    opacity: 0;
+    transition: max-height 0.28s ease, opacity 0.2s ease, margin 0.28s ease;
+}
+
+.menu-item.open > .submenu {
+    max-height: 160px;
+    margin-top: 2px;
+    margin-bottom: 6px;
+    opacity: 1;
+}
+
+.submenu a {
     display: block;
-}
-
-.menu-item.open .submenu {
-    max-height: 600px;
-    margin-top: 4px;
-}
-
-.submenu li {
-    margin: 2px 0;
-}
-
-.submenu li a {
-    display: block;
-    padding: 8px 12px;
-    color: var(--text-light, #6c757d) !important;
-    text-decoration: none !important;
+    padding: 9px 14px 9px 48px;
+    border-radius: 8px;
+    color: var(--text-light);
     font-size: 13px;
-    border-radius: 6px;
-    transition: all 0.3s ease;
-    position: relative;
+    text-decoration: none;
+    transition: all 0.2s ease;
 }
 
-.submenu li a:hover {
-    background-color: var(--bg-color, #f8f9fa) !important;
-    color: var(--primary-color, #0d6efd) !important;
+.submenu a:hover,
+.submenu a.active {
+    background-color: var(--bg-color);
+    color: var(--primary-color);
 }
 
-.submenu li a::before {
-    content: '';
-    position: absolute;
-    left: -10px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 4px;
-    height: 4px;
-    background-color: var(--border-color, #dee2e6);
-    border-radius: 50%;
-    transition: all 0.3s ease;
-}
-
-.submenu li a:hover::before {
-    background-color: var(--primary-color, #0d6efd);
-}
-
-/* Style cho submenu khi được active */
-.submenu li a.active {
-    background-color: var(--bg-color, #f8f9fa) !important;
-    color: var(--primary-color, #0d6efd) !important;
-    font-weight: 600;
-}
-
-/* Đổi màu và kích thước dấu chấm tròn khi mục con được active */
-.submenu li a.active::before {
-    background-color: var(--primary-color, #0d6efd);
-    width: 6px;
-    height: 6px;
-    left: -11px;
-}
-
-/* =========================================
-   BOTTOM MENU
-   ========================================= */
-
+/* Bottom Menu */
 .sidebar-bottom {
     padding: 16px 12px;
     border-top: 1px solid var(--border-color);
@@ -252,10 +198,7 @@
     background-color: #fff5f5;
 }
 
-/* =========================================
-   MOBILE TOGGLE
-   ========================================= */
-
+/* Mobile Toggle */
 .sidebar-toggle {
     display: none;
     position: fixed;

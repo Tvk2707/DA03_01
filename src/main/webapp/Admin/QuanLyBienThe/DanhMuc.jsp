@@ -101,19 +101,21 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label for="maDanhMuc">Mã danh mục</label>
-                    <input type="text" id="maDanhMuc" name="maDanhMuc" placeholder="Nhập mã danh mục (ví dụ: DM006)" required>
+                    <input type="text" id="maDanhMuc" name="maDanhMuc" value="${danhMuc.maDanhMuc}" placeholder="Nhập mã danh mục (ví dụ: DM006)">
+                    <span class="error-message">${errors.maDanhMuc}</span>
                 </div>
 
                 <div class="form-group">
                     <label for="tenDanhMuc">Tên danh mục</label>
-                    <input type="text" id="tenDanhMuc" name="tenDanhMuc" placeholder="Nhập tên danh mục" required>
+                    <input type="text" id="tenDanhMuc" name="tenDanhMuc" value="${danhMuc.tenDanhMuc}" placeholder="Nhập tên danh mục">
+                    <span class="error-message">${errors.tenDanhMuc}</span>
                 </div>
 
                 <div class="form-group">
                     <label for="trangthai">Trạng thái</label>
                     <select id="trangthai" name="trangthai">
-                        <option value="1">Hoạt động</option>
-                        <option value="0">Không hoạt động</option>
+                        <option value="1" ${danhMuc.trangThai == 1 ? 'selected' : ''}>Hoạt động</option>
+                        <option value="0" ${danhMuc.trangThai == 0 ? 'selected' : ''}>Không hoạt động</option>
                     </select>
                 </div>
             </div>
@@ -142,7 +144,8 @@
 
                 <div class="form-group">
                     <label for="editTenDanhMuc">Tên danh mục</label>
-                    <input type="text" id="editTenDanhMuc" name="tenDanhMuc" value="${danhMuc.tenDanhMuc}" placeholder="Nhập tên danh mục" required>
+                    <input type="text" id="editTenDanhMuc" name="tenDanhMuc" value="${danhMuc.tenDanhMuc}" placeholder="Nhập tên danh mục">
+                    <span class="error-message">${errors.tenDanhMuc}</span>
                 </div>
 
                 <div class="form-group">
@@ -162,7 +165,6 @@
 </div>
 
 <script>
-    // --- XỬ LÝ MODAL THÊM MỚI ---
     function openAddModal() {
         document.getElementById("addCategoryModal").style.display = "flex";
     }
@@ -171,15 +173,11 @@
         document.getElementById("addCategoryModal").style.display = "none";
     }
 
-    // --- XỬ LÝ MODAL SỬA ---
     function openEditModal(id, maDanhMuc, tenDanhMuc, trangThai) {
-        // Đổ dữ liệu từ hàng được click vào các ô input trong Modal Sửa
         document.getElementById("editId").value = id;
         document.getElementById("editMaDanhMuc").value = maDanhMuc;
         document.getElementById("editTenDanhMuc").value = tenDanhMuc;
         document.getElementById("editTrangThai").value = trangThai;
-
-        // Hiển thị modal sửa lên màn hình
         document.getElementById("editCategoryModal").style.display = "flex";
     }
 
@@ -187,7 +185,6 @@
         document.getElementById("editCategoryModal").style.display = "none";
     }
 
-    // --- ĐÓNG MODAL KHI CLICK RA NGOÀI VÙNG NỀN TỐI ---
     window.onclick = function(event) {
         let addModal = document.getElementById("addCategoryModal");
         let editModal = document.getElementById("editCategoryModal");
@@ -199,6 +196,18 @@
             editModal.style.display = "none";
         }
     }
+
+    // Nếu có lỗi từ server, tự động mở lại modal tương ứng
+    <c:if test="${not empty errors}">
+        <c:choose>
+            <c:when test="${not empty danhMuc.id}">
+                document.getElementById("editCategoryModal").style.display = "flex";
+            </c:when>
+            <c:otherwise>
+                document.getElementById("addCategoryModal").style.display = "flex";
+            </c:otherwise>
+        </c:choose>
+    </c:if>
 </script>
 </body>
 </html>

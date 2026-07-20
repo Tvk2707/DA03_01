@@ -100,6 +100,10 @@ public class SanPham {
 
     public SanPham() {}
 
+    public SanPham(Integer id) {
+        this.id = id;
+    }
+
     public SanPham(Integer id, DanhMuc danhMuc, ThuongHieu thuongHieu, ChatLieu chatLieu, KieuDang kieuDang, GongKinh gongKinh, TrongKinh trongKinh, String maSanPham, String tenSanPham, String moTaChiTiet, LocalDateTime ngayTao, LocalDateTime ngaySua, Integer trangThai, List<SanPhamChiTiet> sanPhamChiTiets, List<HinhAnhSanPham> hinhAnhSanPhams) {
         this.id = id;
         this.danhMuc = danhMuc;

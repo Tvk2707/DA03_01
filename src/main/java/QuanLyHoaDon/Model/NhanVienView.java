@@ -1,5 +1,6 @@
 package QuanLyHoaDon.Model;
 
+// Du lieu nhan vien dung cho danh sach chon trong hoa don.
 public class NhanVienView {
     private Integer id;
     private String maNhanVien;
@@ -29,3 +30,4 @@ public class NhanVienView {
         this.hoTen = hoTen;
     }
 }
+

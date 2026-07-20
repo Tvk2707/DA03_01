@@ -22,6 +22,10 @@ public class TrongKinh {
 
     public TrongKinh() {}
 
+    public TrongKinh(Integer id) {
+        this.id = id;
+    }
+
     public TrongKinh(Integer id, String loaiTrong, Integer trangThai, List<SanPham> sanPhams) {
         this.id = id;
         this.loaiTrong = loaiTrong;

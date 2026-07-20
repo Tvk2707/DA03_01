@@ -32,3 +32,4 @@ public class LichSuHoaDonView {
         this.ghiChu = ghiChu;
     }
 }
+

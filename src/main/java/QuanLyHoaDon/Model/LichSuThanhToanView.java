@@ -51,3 +51,4 @@ public class LichSuThanhToanView {
         this.ghiChu = ghiChu;
     }
 }
+

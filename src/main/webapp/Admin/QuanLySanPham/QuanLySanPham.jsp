@@ -1,5 +1,6 @@
 <%
     request.setAttribute("pageTitle", "Sản phẩm");
+    request.setAttribute("activeMenu", "product");
     request.setAttribute("activeSubMenu", "product");
 %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
@@ -11,11 +12,11 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sản phẩm</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/layout.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/sidebar.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/header.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/danhmuc.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/sanpham.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/FE/Admin/css/layout.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/FE/Admin/css/sidebar.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/FE/Admin/css/header.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/FE/Admin/css/danhmuc.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/FE/Admin/css/sanpham.css?v=20260718-fullscreen">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
@@ -496,9 +497,9 @@
     </style>
 </head>
 <body>
-<%@include file="../layout/sidebar.jsp" %>
+<%@include file="../../FE/Admin/layout/sidebar.jsp" %>
 <div class="dashboard-container">
-    <%@include file="../layout/header.jsp" %>
+    <%@include file="../../FE/Admin/layout/header.jsp" %>
 
     <div class="category-section">
         <div class="category-header">
