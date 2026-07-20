@@ -291,17 +291,14 @@
             <div class="invoice-timeline">
                 <div class="timeline-step<%= stepClass(hoaDon.getTrangThai(), 1) %>">
                     <div class="timeline-step__name">Chờ thanh toán</div>
-                    <div class="timeline-step__date"><%= hoaDon.getNgayTao() == null ? "" : hoaDon.getNgayTao().format(dateFormat) %></div>
                     <div class="timeline-step__dot"><i class="fas fa-check"></i></div>
                 </div>
                 <div class="timeline-step<%= stepClass(hoaDon.getTrangThai(), 3) %>">
                     <div class="timeline-step__name">Đã thanh toán</div>
-                    <div class="timeline-step__date"></div>
                     <div class="timeline-step__dot"><i class="fas fa-check"></i></div>
                 </div>
                 <div class="timeline-step<%= stepClass(hoaDon.getTrangThai(), 5) %>">
                     <div class="timeline-step__name">Đã hủy</div>
-                    <div class="timeline-step__date"></div>
                     <div class="timeline-step__dot"><i class="fas fa-xmark"></i></div>
                 </div>
             </div>
