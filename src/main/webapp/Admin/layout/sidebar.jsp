@@ -117,7 +117,7 @@
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="#" class="menu-link <%= "employee".equals(activeMenu) ? "active" : "" %>">
+                    <a href="${pageContext.request.contextPath}/NhanVien" class="menu-link <%= "employee".equals(activeMenu) ? "active" : "" %>">
                         <i class="fas fa-user-tie"></i>
                         <span>Quản lý nhân viên</span>
                     </a>

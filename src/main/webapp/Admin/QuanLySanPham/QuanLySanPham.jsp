@@ -387,7 +387,6 @@
 
         /* Toolbar dính phía trên bảng dữ liệu */
         .table-toolbar {
-            position: -webkit-sticky;
             position: sticky;
             top: 70px; /* Điều chỉnh lại theo chiều cao thực tế của Header dự án nếu bị đè */
             background: #ffffff;
