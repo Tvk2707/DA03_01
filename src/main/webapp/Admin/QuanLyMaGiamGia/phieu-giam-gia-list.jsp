@@ -1,10 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%-- PHAN 0: Khai bao JSTL de dung c:if, c:forEach, c:choose va fmt:formatNumber. --%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <%
-    // PHAN 4: Neu Servlet chua truyen pageTitle thi JSP dat tieu de mac dinh.
     if (request.getAttribute("pageTitle") == null) {
         request.setAttribute("pageTitle", "Quản lý phiếu giảm giá");
     }
@@ -19,41 +17,195 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/sidebar.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/header.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/phieu-giam-gia.css">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- CSS tùy chỉnh cho nút Switch Trạng thái -->
     <style>
-        .coupon-actions {
+        /* ========================================================== */
+        /* 🛠️ SỬA LỖI LAYOUT BỊ SIDEBAR / HEADER CHE MẤT NỘI DUNG    */
+        /* ========================================================== */
+        body {
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Đồng bộ khoảng cách dashboard-container như bảng Danh mục */
+        .dashboard-container {
+            margin-left: 260px !important; /* Dẩy nội dung sang phải tránh Sidebar */
+            padding: 24px 32px !important;
+            min-height: 100vh;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        /* Phân trang */
+        .sp-pagination {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 6px;
+            margin-top: 16px;
+            padding: 10px 0;
+        }
+        .sp-page-btn {
+            padding: 6px 12px;
+            border: 1px solid #d1d5db;
+            background-color: #fff;
+            color: #374151;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+        .sp-page-btn:hover:not(:disabled) {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+        .sp-page-btn.active {
+            background-color: #b4975a;
+            color: #fff;
+            border-color: #b4975a;
+        }
+        .sp-page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: #f9fafb;
+        }
+
+        /* Toast Notifications */
+        .toast-custom {
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            z-index: 1000000;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
+            font-weight: 600;
+            font-size: 15px;
+            opacity: 1;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            animation: slideInToast 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .toast-success-style {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+        .toast-error-style {
+            background-color: #fdecea;
+            color: #b3261e;
+            border: 1px solid #fad2cf;
+        }
+        @keyframes slideInToast {
+            from { transform: translateX(120%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
 
-        .coupon-status-switch {
+        /* Filter Grid 4 Cột */
+        .filter-grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            align-items: flex-start;
+        }
+        .filter-action-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px dashed #e5e7eb;
+        }
+        .filter-action-left {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .filter-action-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .btn-secondary-outline {
+            background: #ffffff !important;
+            color: #4b5563 !important;
+            border: 1px solid #d1d5db !important;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-secondary-outline:hover {
+            background: #f9fafb !important;
+            border-color: #9ca3af !important;
+            color: #1f2937 !important;
+        }
+
+        /* Toolbar Sticky Header */
+        .table-toolbar {
+            position: sticky;
+            top: 70px;
+            background: #ffffff;
+            z-index: 90;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+            margin-top: 24px;
+            border: 1px solid #e5e7eb;
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .toolbar-left-results {
+            font-size: 14px;
+            font-weight: 500;
+            color: #4b5563;
+        }
+        .toolbar-left-results span {
+            font-weight: 700;
+            color: #1f2937;
+        }
+        .category-table {
+            margin-top: 0 !important;
+            border-top-left-radius: 0 !important;
+            border-top-right-radius: 0 !important;
+        }
+
+        /* Toggle Switch Trạng Thái */
+        .status-switch {
             position: relative;
             display: inline-block;
-            width: 40px;
+            width: 44px;
             height: 22px;
-            margin: 0;
-            vertical-align: middle;
         }
-
-        .coupon-status-switch input {
+        .status-switch input {
             opacity: 0;
             width: 0;
             height: 0;
         }
-
-        .coupon-status-slider {
+        .status-slider {
             position: absolute;
             cursor: pointer;
             top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #dc3545; /* Màu đỏ khi ngưng áp dụng/tắt */
+            background-color: #94a3b8;
             transition: .3s;
             border-radius: 22px;
         }
-
-        .coupon-status-slider:before {
+        .status-slider:before {
             position: absolute;
             content: "";
             height: 16px;
@@ -63,284 +215,321 @@
             background-color: white;
             transition: .3s;
             border-radius: 50%;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .status-switch input:checked + .status-slider {
+            background-color: #b4975a;
+        }
+        .status-switch input:checked + .status-slider:before {
+            transform: translateX(22px);
         }
 
-        .coupon-status-switch input:checked + .coupon-status-slider {
-            background-color: #28a745; /* Màu xanh khi đang áp dụng/bật */
+        /* Badges */
+        .badge-type {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            background-color: #f3f4f6;
+            color: #374151;
         }
 
-        .coupon-status-switch input:checked + .coupon-status-slider:before {
-            transform: translateX(18px);
+        /* Responsive Khi Thu Gọn Sidebar Hoặc Màn Hình Nhỏ */
+        @media (max-width: 992px) {
+            .dashboard-container {
+                margin-left: 0 !important;
+                padding: 16px !important;
+            }
+            .filter-grid-4 {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
-
-        .coupon-status-switch input:disabled + .coupon-status-slider {
-            opacity: 0.5;
-            cursor: wait;
+        @media (max-width: 640px) {
+            .filter-grid-4 {
+                grid-template-columns: 1fr;
+            }
+            .filter-action-row {
+                flex-direction: column;
+                gap: 12px;
+                align-items: stretch;
+            }
+            .filter-action-right {
+                flex-direction: column;
+                gap: 8px;
+            }
+            .filter-action-right button, .filter-action-right a {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
-<body class="coupon-admin-page">
+<body>
 <%@ include file="../layout/sidebar.jsp" %>
 <div class="dashboard-container">
     <%@ include file="../layout/header.jsp" %>
 
-    <main class="coupon-page">
-        <!-- PHẦN 4: JSP nhận dữ liệu từ Servlet qua request.setAttribute -->
-        <div class="coupon-header">
-            <div>
-                <h2>Quản lý phiếu giảm giá</h2>
-                <p>Quản lý mã giảm giá đang áp dụng trên hệ thống.</p>
+    <div class="category-section">
+        <div class="category-header">
+            <h2 class="category-title">Quản lý phiếu giảm giá</h2>
+        </div>
+
+        <!-- THÔNG BÁO TOAST -->
+        <div id="toast-container"></div>
+        <c:if test="${not empty errorMessage}">
+            <div id="toast-msg" class="toast-custom toast-error-style">
+                <i class="fas fa-circle-exclamation"></i>
+                <span>${errorMessage}</span>
             </div>
-            <div class="coupon-header__actions">
-                <%-- PHAN 1: Nut xuat Excel dung exportUrl do Servlet tao kem cac tham so loc hien tai. --%>
-                <a class="coupon-btn coupon-btn--secondary" href="${exportUrl}">
-                    <i class="fas fa-file-excel"></i> Xuất Excel
+        </c:if>
+        <c:if test="${not empty successMessage}">
+            <div id="toast-msg" class="toast-custom toast-success-style">
+                <i class="fas fa-check-circle"></i>
+                <span>${successMessage}</span>
+            </div>
+        </c:if>
+
+        <!-- BỘ LỌC TÌM KIẾM -->
+        <div class="filter-section">
+            <div class="filter-header">
+                <div class="filter-title">
+                    <i class="fas fa-filter"></i>
+                    Bộ lọc tìm kiếm
+                </div>
+            </div>
+
+            <form action="${pageContext.request.contextPath}/PhieuGiamGia" method="get" id="filterForm">
+                <div class="filter-grid-4">
+                    <div class="filter-group">
+                        <label class="filter-label">Tìm theo mã hoặc tên</label>
+                        <input type="text" name="keyword" value="${keyword}" class="filter-input" placeholder="Nhập mã hoặc tên phiếu...">
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">Mã giảm giá</label>
+                        <input type="text" name="maVoucher" value="${maVoucher}" class="filter-input" placeholder="VD: VC001">
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">Tên giảm giá</label>
+                        <input type="text" name="tenVoucher" value="${tenVoucher}" class="filter-input" placeholder="Tên phiếu">
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">Loại giảm</label>
+                        <select name="loaiGiamGia" class="filter-select">
+                            <option value="">Tất cả</option>
+                            <option value="percent" <c:if test="${loaiGiamGia == 'percent'}">selected</c:if>>Giảm phần trăm</option>
+                            <option value="amount" <c:if test="${loaiGiamGia == 'amount'}">selected</c:if>>Giảm tiền</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">Trạng thái</label>
+                        <select name="trangThai" class="filter-select">
+                            <option value="">Tất cả</option>
+                            <option value="active" <c:if test="${trangThai == 'active'}">selected</c:if>>Đang áp dụng</option>
+                            <option value="upcoming" <c:if test="${trangThai == 'upcoming'}">selected</c:if>>Chưa bắt đầu</option>
+                            <option value="expired" <c:if test="${trangThai == 'expired'}">selected</c:if>>Kết thúc</option>
+                            <option value="inactive" <c:if test="${trangThai == 'inactive'}">selected</c:if>>Ngừng áp dụng</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">Từ ngày</label>
+                        <input type="date" name="tuNgay" value="${tuNgay}" class="filter-input">
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">Đến ngày</label>
+                        <input type="date" name="denNgay" value="${denNgay}" class="filter-input">
+                    </div>
+                </div>
+
+                <div class="filter-action-row">
+                    <div class="filter-action-left">
+                        <c:if test="${not empty keyword || not empty maVoucher || not empty tenVoucher || not empty loaiGiamGia || not empty trangThai || not empty tuNgay || not empty denNgay}">
+                            <a href="${pageContext.request.contextPath}/PhieuGiamGia"
+                               style="padding: 10px 20px; background: #fee2e2; color: #dc2626; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 14px;">
+                                <i class="fas fa-xmark"></i> Xóa bộ lọc nâng cao
+                            </a>
+                        </c:if>
+                    </div>
+
+                    <div class="filter-action-right">
+                        <button type="submit" class="add-new-btn" style="padding: 10px 24px;">
+                            <i class="fas fa-search"></i> Tìm kiếm
+                        </button>
+                        <a href="${pageContext.request.contextPath}/PhieuGiamGia" class="btn-secondary-outline">
+                            <i class="fas fa-rotate-left"></i> Đặt lại
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- TOOLBAR BẢNG -->
+        <div class="table-toolbar">
+            <div class="toolbar-left-results">
+                Hiển thị <span>${fn:length(items)}</span> / tổng <span>${totalRecords}</span> phiếu giảm giá
+            </div>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <a href="${exportUrl}" class="btn-secondary-outline">
+                    <i class="fas fa-file-export"></i> Xuất Excel
                 </a>
-                <%-- PHAN 1: Nut them moi goi GET /PhieuGiamGia/new de Servlet mo form them. --%>
-                <a class="coupon-btn coupon-btn--primary" href="${pageContext.request.contextPath}/PhieuGiamGia/new">
+                <a href="${pageContext.request.contextPath}/PhieuGiamGia/new" class="add-new-btn" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px;">
                     <i class="fas fa-plus"></i> Thêm mới
                 </a>
             </div>
         </div>
 
-        <%-- PHAN 5: Hien thi thong bao thanh cong duoc Servlet dua vao request. --%>
-        <c:if test="${not empty successMessage}">
-            <div class="coupon-alert coupon-alert--success">${successMessage}</div>
-        </c:if>
-        <%-- PHAN 5: Hien thi thong bao loi neu Servlet set errorMessage. --%>
-        <c:if test="${not empty errorMessage}">
-            <div class="coupon-alert coupon-alert--error">${errorMessage}</div>
-        </c:if>
+        <!-- BẢNG DỮ LIỆU -->
+        <table class="category-table">
+            <thead>
+            <tr>
+                <th>STT</th>
+                <th>Mã giảm giá</th>
+                <th>Tên giảm giá</th>
+                <th>Loại phiếu</th>
+                <th>Giá trị giảm</th>
+                <th>Đơn tối thiểu</th>
+                <th>Số lượng</th>
+                <th>Ngày bắt đầu</th>
+                <th>Ngày kết thúc</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+            </tr>
+            </thead>
+            <tbody>
+            <c:forEach var="coupon" items="${items}" varStatus="loop">
+                <tr>
+                    <td>
+                        <span class="category-id">${startIndex + loop.count}</span>
+                    </td>
+                    <td><strong style="color: #1f2937;">${coupon.maVoucher}</strong></td>
+                    <td>${coupon.tenVoucher}</td>
+                    <td>
+                        <span class="badge-type">${coupon.loaiPhieu == 1 ? 'Cá nhân' : 'Công khai'}</span>
+                    </td>
+                    <td>
+                        <strong style="color: #dc2626;">
+                            <c:choose>
+                                <c:when test="${coupon.loaiGiamGiaFilterValue == 'percent'}">
+                                    <fmt:formatNumber value="${coupon.giaTriGiam}" maxFractionDigits="0"/>%
+                                </c:when>
+                                <c:otherwise>
+                                    <fmt:formatNumber value="${coupon.giaTriGiam}" type="number" maxFractionDigits="0"/> đ
+                                </c:otherwise>
+                            </c:choose>
+                        </strong>
+                        <div style="font-size: 0.8em; color: #6b7280;">${coupon.loaiGiamGiaText}</div>
+                    </td>
+                    <td><fmt:formatNumber value="${coupon.donToiThieu}" type="number" maxFractionDigits="0"/> đ</td>
+                    <td><span style="font-weight: 600;">${coupon.soLuongDaDung == null ? 0 : coupon.soLuongDaDung}/${coupon.soLuong}</span></td>
+                    <td>${coupon.ngayBatDauText}</td>
+                    <td>${coupon.ngayKetThucText}</td>
+                    <td>
+                        <span class="category-status JS-status-text ${coupon.trangThaiCssClass == 'status-active' ? 'status-active' : 'status-inactive'}">
+                            <c:choose>
+                                <c:when test="${coupon.trangThaiCssClass == 'status-upcoming'}">Chưa diễn ra</c:when>
+                                <c:when test="${coupon.trangThaiCssClass == 'status-active'}">Đang diễn ra</c:when>
+                                <c:when test="${coupon.trangThaiCssClass == 'status-expired'}">Đã kết thúc</c:when>
+                                <c:otherwise>Ngừng hoạt động</c:otherwise>
+                            </c:choose>
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-buttons" style="align-items: center; gap: 12px;">
+                            <a href="${pageContext.request.contextPath}/PhieuGiamGia/edit?id=${coupon.id}" class="btn-icon-circle btn-view" title="Chỉnh sửa">
+                                <i class="fas fa-pen"></i>
+                            </a>
 
-        <section class="coupon-card">
-            <!-- PHẦN 1: Form lọc/tìm kiếm gửi dữ liệu bằng GET về /PhieuGiamGia -->
-            <div class="coupon-card__title">
-                <i class="fas fa-filter"></i>
-                <span>Bộ lọc tìm kiếm</span>
-            </div>
-            <form action="${pageContext.request.contextPath}/PhieuGiamGia" method="get" class="coupon-filter">
-                <label class="coupon-field coupon-field--wide">
-                    <span>Tìm theo mã hoặc tên</span>
-                    <%-- PHAN 1: name=keyword khop voi request.getParameter("keyword") trong showList(). --%>
-                    <input type="text" name="keyword" value="${keyword}" placeholder="Nhập mã hoặc tên phiếu...">
-                </label>
-                <label class="coupon-field">
-                    <span>Mã giảm giá</span>
-                    <%-- PHAN 1: name=maVoucher gui ma phieu can loc ve Servlet. --%>
-                    <input type="text" name="maVoucher" value="${maVoucher}" placeholder="VD: VC001">
-                </label>
-                <label class="coupon-field">
-                    <span>Tên giảm giá</span>
-                    <%-- PHAN 1: name=tenVoucher gui ten phieu can loc ve Servlet. --%>
-                    <input type="text" name="tenVoucher" value="${tenVoucher}" placeholder="Tên phiếu">
-                </label>
-                <label class="coupon-field">
-                    <span>Loại giảm</span>
-                    <%-- PHAN 1: loaiGiamGia nhan percent/amount de DAO loc loai giam. --%>
-                    <select name="loaiGiamGia">
-                        <option value="">Tất cả</option>
-                        <option value="percent" <c:if test="${loaiGiamGia == 'percent'}">selected</c:if>>Giảm phần trăm</option>
-                        <option value="amount" <c:if test="${loaiGiamGia == 'amount'}">selected</c:if>>Giảm tiền</option>
-                    </select>
-                </label>
-                <label class="coupon-field">
-                    <span>Trạng thái</span>
-                    <%-- PHAN 1: trangThai gui active/upcoming/expired/inactive cho Servlet loc trang thai. --%>
-                    <select name="trangThai">
-                        <option value="">Tất cả</option>
-                        <option value="active" <c:if test="${trangThai == 'active'}">selected</c:if>>Đang áp dụng</option>
-                        <option value="upcoming" <c:if test="${trangThai == 'upcoming'}">selected</c:if>>Chưa bắt đầu</option>
-                        <option value="expired" <c:if test="${trangThai == 'expired'}">selected</c:if>>Kết thúc</option>
-                        <option value="inactive" <c:if test="${trangThai == 'inactive'}">selected</c:if>>Ngừng áp dụng</option>
-                    </select>
-                </label>
-                <label class="coupon-field">
-                    <span>Từ ngày</span>
-                    <%-- PHAN 1: tuNgay la moc bat dau khoang loc ngay, Servlet parse sang LocalDate. --%>
-                    <input type="date" name="tuNgay" value="${tuNgay}">
-                </label>
-                <label class="coupon-field">
-                    <span>Đến ngày</span>
-                    <%-- PHAN 1: denNgay la moc ket thuc khoang loc ngay, Servlet parse sang LocalDate. --%>
-                    <input type="date" name="denNgay" value="${denNgay}">
-                </label>
-                <div class="coupon-filter__actions">
-                    <%-- PHAN 1: Submit form GET, Servlet showList() nhan toan bo parameter loc. --%>
-                    <button class="coupon-btn coupon-btn--primary" type="submit">
-                        <i class="fas fa-search"></i> Tìm kiếm
-                    </button>
-                    <%-- PHAN 1: Dat lai bo loc bang cach quay ve /PhieuGiamGia khong co query string. --%>
-                    <a class="coupon-btn coupon-btn--light" href="${pageContext.request.contextPath}/PhieuGiamGia">
-                        <i class="fas fa-rotate-left"></i> Đặt lại
+                            <label class="status-switch" title="Chuyển trạng thái">
+                                <input type="checkbox"
+                                       class="js-coupon-status-toggle"
+                                       data-id="${coupon.id}"
+                                    ${coupon.trangThai == 1 ? 'checked' : ''}>
+                                <span class="status-slider"></span>
+                            </label>
+                        </div>
+                    </td>
+                </tr>
+            </c:forEach>
+
+            <c:if test="${empty items}">
+                <tr>
+                    <td colspan="11" style="text-align: center; padding: 30px; color: #888;">
+                        <i class="fas fa-inbox" style="font-size: 24px; margin-bottom: 10px; display: block;"></i>
+                        Không có dữ liệu phù hợp.
+                    </td>
+                </tr>
+            </c:if>
+            </tbody>
+        </table>
+
+        <!-- PHÂN TRANG -->
+        <div class="sp-pagination">
+            <c:if test="${totalPages > 1}">
+                <c:choose>
+                    <c:when test="${currentPage > 1}">
+                        <a href="${pageUrlPrefix}${currentPage - 1}" class="sp-page-btn">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </c:when>
+                    <c:otherwise>
+                        <button class="sp-page-btn" disabled><i class="fas fa-chevron-left"></i></button>
+                    </c:otherwise>
+                </c:choose>
+
+                <c:forEach begin="1" end="${totalPages}" var="i">
+                    <a href="${pageUrlPrefix}${i}" class="sp-page-btn ${currentPage == i ? 'active' : ''}">
+                            ${i}
                     </a>
-                </div>
-            </form>
-        </section>
+                </c:forEach>
 
-        <section class="coupon-card">
-            <!-- PHẦN 4: Hiển thị danh sách items do Servlet lấy từ DAO -->
-            <div class="coupon-table-heading">
-                <div>
-                    <h3>Danh sách phiếu giảm giá</h3>
-                    <p>Tổng số bản ghi: <strong>${totalRecords}</strong></p>
-                </div>
-            </div>
+                <c:choose>
+                    <c:when test="${currentPage < totalPages}">
+                        <a href="${pageUrlPrefix}${currentPage + 1}" class="sp-page-btn">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </c:when>
+                    <c:otherwise>
+                        <button class="sp-page-btn" disabled><i class="fas fa-chevron-right"></i></button>
+                    </c:otherwise>
+                </c:choose>
+            </c:if>
+        </div>
 
-            <div class="coupon-table-wrapper">
-                <table class="coupon-table">
-                    <colgroup>
-                        <col class="coupon-col-stt">
-                        <col class="coupon-col-code">
-                        <col class="coupon-col-name">
-                        <col class="coupon-col-type">
-                        <col class="coupon-col-discount">
-                        <col class="coupon-col-money">
-                        <col class="coupon-col-quantity">
-                        <col class="coupon-col-date">
-                        <col class="coupon-col-date">
-                        <col class="coupon-col-status">
-                        <col class="coupon-col-action">
-                    </colgroup>
-                    <thead>
-                    <tr>
-                        <th>STT</th>
-                        <th>Mã giảm giá</th>
-                        <th>Tên giảm giá</th>
-                        <th>Loại phiếu</th>
-                        <th>Giá trị giảm</th>
-                        <th>Đơn hàng tối thiểu</th>
-                        <th>Số lượng</th>
-                        <th>Ngày bắt đầu</th>
-                        <th>Ngày kết thúc</th>
-                        <th>Trạng thái</th>
-                        <th>Hành động</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <%-- PHAN 4: Lap qua items do Servlet setAttribute("items", coupons). --%>
-                    <c:forEach var="coupon" items="${items}" varStatus="loop">
-                        <tr>
-                                <%-- PHAN 4: STT tinh theo startIndex de dung khi phan trang. --%>
-                            <td>${startIndex + loop.count}</td>
-                                <%-- PHAN 4: Cac dong duoi lay du lieu tu getter cua Entity PhieuGiamGia. --%>
-                            <td><strong>${coupon.maVoucher}</strong></td>
-                            <td>${coupon.tenVoucher}</td>
-                            <td>
-                                <span class="coupon-type-badge">
-                                        ${coupon.loaiPhieu == 1 ? 'Cá nhân' : 'Công khai'}
-                                </span>
-                            </td>
-                            <td>
-                                    <%-- PHAN 4: Neu loai giam la percent thi hien thi %, nguoc lai hien thi tien. --%>
-                                <c:choose>
-                                    <c:when test="${coupon.loaiGiamGiaFilterValue == 'percent'}">
-                                        <fmt:formatNumber value="${coupon.giaTriGiam}" maxFractionDigits="0"/>%
-                                    </c:when>
-                                    <c:otherwise>
-                                        <fmt:formatNumber value="${coupon.giaTriGiam}" type="number" maxFractionDigits="0"/> đ
-                                    </c:otherwise>
-                                </c:choose>
-                                <div class="coupon-small-text">${coupon.loaiGiamGiaText}</div>
-                            </td>
-                            <td><fmt:formatNumber value="${coupon.donToiThieu}" type="number" maxFractionDigits="0"/> đ</td>
-                            <td>${coupon.soLuongDaDung == null ? 0 : coupon.soLuongDaDung}/${coupon.soLuong}</td>
-                            <td>${coupon.ngayBatDauText}</td>
-                            <td>${coupon.ngayKetThucText}</td>
-                            <td>
-                                    <%-- PHAN 4: Trang thai hien thi lay tu getTrangThaiHienThi() va getTrangThaiCssClass(). --%>
-                                <span class="coupon-status ${coupon.trangThaiCssClass}">
-                                    <c:choose>
-                                        <c:when test="${coupon.trangThaiCssClass == 'status-upcoming'}">Chưa diễn ra</c:when>
-                                        <c:when test="${coupon.trangThaiCssClass == 'status-active'}">Đang diễn ra</c:when>
-                                        <c:when test="${coupon.trangThaiCssClass == 'status-expired'}">Đã kết thúc</c:when>
-                                        <c:otherwise>Ngừng hoạt động</c:otherwise>
-                                    </c:choose>
-                                </span>
-                            </td>
-                            <td>
-                                <div class="coupon-actions">
-                                        <%-- Nút sửa mở đúng dữ liệu phiếu theo ID --%>
-                                    <a class="coupon-icon-btn coupon-edit-btn"
-                                       href="${pageContext.request.contextPath}/PhieuGiamGia/edit?id=${coupon.id}"
-                                       title="Chỉnh sửa"
-                                       aria-label="Chỉnh sửa">
-                                        <svg class="coupon-edit-btn__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                            <path d="M5 16.8 15.8 6l2.2 2.2L7.2 19H5v-2.2Z"></path>
-                                            <path d="M17 4.8a1.4 1.4 0 0 1 2 0l.2.2a1.4 1.4 0 0 1 0 2L18 8.2 15.8 6 17 4.8Z"></path>
-                                        </svg>
-                                    </a>
-
-                                        <%-- Nút Switch Cập Nhật Trạng Thái Thời Gian Thực --%>
-                                    <label class="coupon-status-switch" title="Chuyển trạng thái">
-                                        <input type="checkbox"
-                                               class="js-coupon-status-toggle"
-                                               data-id="${coupon.id}"
-                                            ${coupon.trangThai == 1 ? 'checked' : ''}>
-                                        <span class="coupon-status-slider"></span>
-                                    </label>
-                                </div>
-                            </td>
-                        </tr>
-                    </c:forEach>
-                    <%-- PHAN 5: Neu DAO tra ve danh sach rong thi hien thi thong bao khong co du lieu. --%>
-                    <c:if test="${empty items}">
-                        <tr>
-                            <td colspan="11" class="coupon-empty">
-                                <i class="fas fa-inbox"></i>
-                                Không có dữ liệu phù hợp.
-                            </td>
-                        </tr>
-                    </c:if>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="coupon-pagination">
-                <!-- PHẦN 4: Phân trang dùng currentPage, totalPages và pageUrlPrefix từ Servlet -->
-                <div class="coupon-pagination__summary">
-                    Hiển thị ${fn:length(items)} / tổng ${totalRecords} bản ghi
-                </div>
-                <div class="coupon-pagination__nav">
-                    <a class="coupon-page-link ${currentPage <= 1 ? 'disabled' : ''}"
-                       href="${currentPage <= 1 ? '#' : pageUrlPrefix}${currentPage <= 1 ? '' : currentPage - 1}"
-                       aria-label="Trang trước">
-                        <i class="fas fa-chevron-left"></i>
-                    </a>
-                    <span class="coupon-page-current">Trang ${currentPage} / ${totalPages}</span>
-                    <a class="coupon-page-link ${currentPage >= totalPages ? 'disabled' : ''}"
-                       href="${currentPage >= totalPages ? '#' : pageUrlPrefix}${currentPage >= totalPages ? '' : currentPage + 1}"
-                       aria-label="Trang sau">
-                        <i class="fas fa-chevron-right"></i>
-                    </a>
-                </div>
-                <form class="coupon-pagination__size" action="${pageContext.request.contextPath}/PhieuGiamGia" method="get">
-                    <input type="hidden" name="keyword" value="${keyword}">
-                    <input type="hidden" name="maVoucher" value="${maVoucher}">
-                    <input type="hidden" name="tenVoucher" value="${tenVoucher}">
-                    <input type="hidden" name="loaiGiamGia" value="${loaiGiamGia}">
-                    <input type="hidden" name="trangThai" value="${trangThai}">
-                    <input type="hidden" name="tuNgay" value="${tuNgay}">
-                    <input type="hidden" name="denNgay" value="${denNgay}">
-                    <label>
-                        <span>Số bản ghi/trang</span>
-                        <select name="size" onchange="this.form.submit()">
-                            <option value="5" ${pageSize == 5 ? 'selected' : ''}>5</option>
-                            <option value="10" ${pageSize == 10 ? 'selected' : ''}>10</option>
-                            <option value="20" ${pageSize == 20 ? 'selected' : ''}>20</option>
-                        </select>
-                    </label>
-                </form>
-            </div>
-        </section>
-    </main>
+    </div>
 </div>
 
-<!-- JavaScript xử lý cập nhật trạng thái thời gian thực -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const couponSwitches = document.querySelectorAll('.js-coupon-status-toggle');
+    function showLiveToast(message, isSuccess) {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast-custom ${isSuccess ? 'toast-success-style' : 'toast-error-style'}`;
+        toast.innerHTML = `<i class="fas ${isSuccess ? 'fa-check-circle' : 'fa-circle-exclamation'}"></i><span>\${message}</span>`;
+        container.appendChild(toast);
 
+        setTimeout(() => {
+            toast.style.opacity = "0";
+            toast.style.transform = "translateY(-10px)";
+            setTimeout(() => toast.remove(), 500);
+        }, 2500);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const toast = document.getElementById("toast-msg");
+        if (toast) {
+            setTimeout(function () {
+                toast.style.opacity = "0";
+                toast.style.transform = "translateY(-10px)";
+                setTimeout(function () { toast.remove(); }, 500);
+            }, 3000);
+        }
+
+        const couponSwitches = document.querySelectorAll('.js-coupon-status-toggle');
         couponSwitches.forEach(switchInput => {
             switchInput.addEventListener('change', function () {
                 const couponId = this.dataset.id;
@@ -348,7 +537,6 @@
                 const newStatus = isChecked ? 1 : 0;
                 const currentSwitch = this;
 
-                // Vô hiệu hóa switch tạm thời khi đang xử lý request
                 currentSwitch.disabled = true;
 
                 const params = new URLSearchParams();
@@ -363,27 +551,24 @@
                     body: params
                 })
                     .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Cập nhật thất bại');
-                        }
+                        if (!response.ok) throw new Error('Cập nhật thất bại');
 
-                        // Cập nhật nhãn Trạng thái ở cột bên cạnh ngay lập tức
                         const row = currentSwitch.closest('tr');
-                        const statusBadge = row.querySelector('.coupon-status');
+                        const statusBadge = row.querySelector('.JS-status-text');
 
                         if (statusBadge) {
                             if (newStatus === 1) {
-                                statusBadge.className = 'coupon-status status-active';
+                                statusBadge.className = 'category-status JS-status-text status-active';
                                 statusBadge.textContent = 'Đang diễn ra';
                             } else {
-                                statusBadge.className = 'coupon-status status-inactive';
+                                statusBadge.className = 'category-status JS-status-text status-inactive';
                                 statusBadge.textContent = 'Ngừng hoạt động';
                             }
                         }
+                        showLiveToast('Cập nhật trạng thái thành công!', true);
                     })
                     .catch(error => {
-                        alert('Lỗi cập nhật trạng thái phiếu giảm giá!');
-                        // Hoàn tác công tắc về vị trí cũ nếu lỗi
+                        showLiveToast('Lỗi cập nhật trạng thái phiếu giảm giá!', false);
                         currentSwitch.checked = !isChecked;
                     })
                     .finally(() => {

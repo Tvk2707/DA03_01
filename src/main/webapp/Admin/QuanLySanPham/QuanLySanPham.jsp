@@ -489,7 +489,12 @@
                 flex-direction: column;
                 align-items: stretch;
             }
-            .filter-action-right .btn-secondary-outline {
+            .filter-action-right {
+                flex-direction: column;
+                gap: 8px;
+            }
+            .filter-action-right button,
+            .filter-action-right a {
                 width: 100%;
                 justify-content: center;
             }
@@ -630,14 +635,6 @@
 
                 <div class="filter-action-row">
                     <div class="filter-action-left">
-                        <button type="submit" class="add-new-btn" style="padding: 10px 24px;" id="mainSubmitBtn">
-                            <i class="fas fa-search"></i> Tìm kiếm
-                        </button>
-
-                        <button type="button" class="btn-secondary-outline" onclick="resetFilters()">
-                            <i class="fas fa-rotate-left"></i> Đặt lại
-                        </button>
-
                         <c:if test="${not empty searchTenSanPham || not empty searchDanhMucId || not empty searchThuongHieuId || not empty searchGiaTu || not empty searchGiaDen}">
                             <a href="${pageContext.request.contextPath}/SanPham"
                                style="padding: 10px 20px; background: #fee2e2; color: #dc2626; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 14px;">
@@ -646,10 +643,14 @@
                         </c:if>
                     </div>
 
-                    <div class="filter-action-right">
-                        <a href="${pageContext.request.contextPath}/SanPham/export" class="btn-secondary-outline">
-                            <i class="fas fa-file-export"></i> Xuất Excel
-                        </a>
+                    <div class="filter-action-right" style="display: flex; gap: 12px; align-items: center;">
+                        <button type="submit" class="add-new-btn" style="padding: 10px 24px;" id="mainSubmitBtn">
+                            <i class="fas fa-search"></i> Tìm kiếm
+                        </button>
+
+                        <button type="button" class="btn-secondary-outline" onclick="resetFilters()">
+                            <i class="fas fa-rotate-left"></i> Đặt lại
+                        </button>
                     </div>
                 </div>
             </form>
@@ -659,7 +660,11 @@
             <div class="toolbar-left-results">
                 Hiển thị <span>${fn:length(items)}</span> sản phẩm
             </div>
-            <div>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <a href="${pageContext.request.contextPath}/SanPham/export" class="btn-secondary-outline">
+                    <i class="fas fa-file-export"></i> Xuất Excel
+                </a>
+
                 <a href="${pageContext.request.contextPath}/SanPham/new" class="add-new-btn" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px;">
                     <i class="fas fa-plus"></i> Thêm mới
                 </a>

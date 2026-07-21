@@ -14,6 +14,300 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/header.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/danhmuc.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* ========================================================== */
+        /* 🛠️ SỬA LỖI CHE LAYOUT & ĐỒNG BỘ GIAO DIỆN HỆ THỐNG       */
+        /* ========================================================== */
+        body {
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
+        }
+
+        .dashboard-container {
+            margin-left: 260px !important; /* Đẩy nội dung tránh bị Sidebar che */
+            padding: 24px 32px !important;
+            min-height: 100vh;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        /* 🎨 CSS CHO KHUNG BỘ LỌC TÌM KIẾM */
+        .filter-section {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .filter-header {
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .filter-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-title i {
+            color: #b4975a;
+        }
+
+        /* Lưới lọc 3 cột cho NV */
+        .filter-grid-nv {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .filter-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #4b5563;
+        }
+
+        .filter-input,
+        .filter-select {
+            width: 100%;
+            height: 40px;
+            padding: 8px 12px;
+            font-size: 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            background-color: #ffffff;
+            color: #1f2937;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        }
+
+        .filter-input:focus,
+        .filter-select:focus {
+            border-color: #b4975a !important;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(180, 151, 90, 0.15);
+        }
+
+        /* Radio group giới tính */
+        .gender-radio-group {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            height: 40px;
+        }
+
+        .gender-radio-group label {
+            font-size: 14px;
+            color: #374151;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .gender-radio-group input[type="radio"] {
+            accent-color: #b4975a;
+            cursor: pointer;
+        }
+
+        /* Hàng chứa các nút bấm hành động trong bộ lọc */
+        .filter-action-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px dashed #e5e7eb;
+        }
+
+        .filter-action-left {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .filter-action-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Nút bấm chuẩn */
+        .add-new-btn {
+            background-color: #b4975a !important;
+            color: #ffffff !important;
+            border: none !important;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.2s ease;
+            text-decoration: none;
+        }
+
+        .add-new-btn:hover {
+            background-color: #9a8048 !important;
+        }
+
+        .btn-secondary-outline {
+            background: #ffffff !important;
+            color: #4b5563 !important;
+            border: 1px solid #d1d5db !important;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary-outline:hover {
+            background: #f9fafb !important;
+            border-color: #9ca3af !important;
+            color: #1f2937 !important;
+        }
+
+        /* Toolbar Sticky Header */
+        .table-toolbar {
+            position: sticky;
+            top: 70px;
+            background: #ffffff;
+            z-index: 90;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+            margin-top: 24px;
+            border: 1px solid #e5e7eb;
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .toolbar-left-results {
+            font-size: 14px;
+            font-weight: 500;
+            color: #4b5563;
+        }
+
+        .toolbar-left-results span {
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .category-table {
+            margin-top: 0 !important;
+            border-top-left-radius: 0 !important;
+            border-top-right-radius: 0 !important;
+            width: 100%;
+        }
+
+        /* Custom Toggle Switch */
+        .status-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 22px;
+        }
+
+        .status-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .status-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #94a3b8;
+            transition: .3s;
+            border-radius: 22px;
+        }
+
+        .status-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .status-switch input:checked + .status-slider {
+            background-color: #b4975a;
+        }
+
+        .status-switch input:checked + .status-slider:before {
+            transform: translateX(22px);
+        }
+
+        /* Toast thông báo */
+        .toast-custom {
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            z-index: 1000000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .toast-success-style {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+
+        .toast-error-style {
+            background-color: #fdecea;
+            color: #b3261e;
+            border: 1px solid #fad2cf;
+        }
+
+        /* Responsive Sidebar */
+        @media (max-width: 992px) {
+            .dashboard-container {
+                margin-left: 0 !important;
+                padding: 16px !important;
+            }
+            .filter-grid-nv {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
 <%@ include file="../layout/sidebar.jsp" %>
@@ -21,102 +315,103 @@
     <%@ include file="../layout/header.jsp" %>
 
     <div class="category-section">
+        <div class="category-header">
+            <h2 class="category-title">Quản lý nhân viên</h2>
+        </div>
 
-        <!-- Filter Section moved to top as requested -->
-        <div class="filter-top" style="margin-bottom:20px;display:flex;align-items:flex-start;gap:16px;">
-            <form action="${pageContext.request.contextPath}/NhanVien/search" method="post" id="filterForm" style="flex:1;">
-                <div style="display:flex;gap:16px;align-items:center;">
-                    <div style="flex:1;">
+        <!-- THÔNG BÁO -->
+        <c:if test="${not empty success || param.success == '1'}">
+            <div id="toast-msg" class="toast-custom toast-success-style">
+                <i class="fas fa-circle-check"></i>
+                <span><c:choose><c:when test="${not empty success}">${success}</c:when><c:otherwise>Thao tác thành công!</c:otherwise></c:choose></span>
+            </div>
+        </c:if>
+
+        <c:if test="${not empty error}">
+            <div id="toast-msg" class="toast-custom toast-error-style">
+                <i class="fas fa-circle-exclamation"></i>
+                <span>${error}</span>
+            </div>
+        </c:if>
+
+        <!-- BỘ LỌC TÌM KIẾM ĐÃ ĐƯỢC BỌC LẠI BẰNG ĐÚNG CLASS CSS -->
+        <div class="filter-section">
+            <div class="filter-header">
+                <div class="filter-title">
+                    <i class="fas fa-filter"></i>
+                    Bộ lọc tìm kiếm
+                </div>
+            </div>
+
+            <form action="${pageContext.request.contextPath}/NhanVien/search" method="post" id="filterForm">
+                <div class="filter-grid-nv">
+                    <div class="filter-group">
                         <label class="filter-label">Tìm kiếm</label>
                         <input type="text" name="hoTen" value="${param.hoTen}" class="filter-input" placeholder="Tên, mã, email...">
                     </div>
 
-                    <div style="width:260px;">
+                    <div class="filter-group">
                         <label class="filter-label">Trạng thái</label>
                         <select class="filter-select" name="trangThai">
                             <option value="">Tất cả</option>
-                            <option value="1">Đang hoạt động</option>
-                            <option value="0">Ngừng hoạt động</option>
+                            <option value="1" ${param.trangThai == '1' ? 'selected' : ''}>Đang hoạt động</option>
+                            <option value="0" ${param.trangThai == '0' ? 'selected' : ''}>Ngừng hoạt động</option>
                         </select>
                     </div>
 
-                    <div style="width:220px;">
+                    <div class="filter-group">
                         <label class="filter-label">Giới tính</label>
-                        <div style="display:flex;align-items:center;gap:12px;padding-top:6px;">
-                            <label style="font-size:13px;"><input type="radio" name="gioiTinh" value="" checked> Tất cả</label>
-                            <label style="font-size:13px;"><input type="radio" name="gioiTinh" value="1"> Nam</label>
-                            <label style="font-size:13px;"><input type="radio" name="gioiTinh" value="0"> Nữ</label>
+                        <div class="gender-radio-group">
+                            <label><input type="radio" name="gioiTinh" value="" ${empty param.gioiTinh ? 'checked' : ''}> Tất cả</label>
+                            <label><input type="radio" name="gioiTinh" value="1" ${param.gioiTinh == '1' ? 'checked' : ''}> Nam</label>
+                            <label><input type="radio" name="gioiTinh" value="0" ${param.gioiTinh == '0' ? 'checked' : ''}> Nữ</label>
                         </div>
                     </div>
+                </div>
 
-                    <div style="display:flex;align-items:flex-end;gap:12px;">
-                        <button type="submit" class="add-new-btn" style="padding:10px 18px;">
+                <div class="filter-action-row">
+                    <div class="filter-action-left">
+                        <c:if test="${not empty param.hoTen || not empty param.trangThai || not empty param.gioiTinh}">
+                            <a href="${pageContext.request.contextPath}/NhanVien"
+                               style="padding: 10px 20px; background: #fee2e2; color: #dc2626; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 14px;">
+                                <i class="fas fa-xmark"></i> Xóa bộ lọc
+                            </a>
+                        </c:if>
+                    </div>
+
+                    <!-- Nút tìm kiếm & Đặt lại bên phải -->
+                    <div class="filter-action-right">
+                        <button type="submit" class="add-new-btn" style="padding: 10px 24px;">
                             <i class="fas fa-search"></i> Tìm kiếm
                         </button>
-                        <button type="button" class="add-new-btn" style="padding:10px 18px;background-color:#f0ebe3;color:#4a4a4a;" onmouseover="this.style.backgroundColor='#e6dfd3';" onmouseout="this.style.backgroundColor='#f0ebe3';" onclick="document.getElementById('filterForm').reset(); window.location='${pageContext.request.contextPath}/NhanVien';">Xóa bộ lọc</button>
+                        <button type="button" class="btn-secondary-outline" onclick="document.getElementById('filterForm').reset(); window.location='${pageContext.request.contextPath}/NhanVien';">
+                            <i class="fas fa-rotate-left"></i> Đặt lại
+                        </button>
                     </div>
                 </div>
             </form>
-
-            <!-- action buttons removed from top-right here and placed below search -->
         </div>
 
-        <!-- Action buttons placed below the search (aligned right) -->
-        <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
-            <div style="display:flex;gap:12px;align-items:center;">
-                <a href="${pageContext.request.contextPath}/NhanVien/new" class="top-action" title="Thêm">
-                    <i class="fas fa-plus"></i>
-                </a>
-                <a href="#" class="top-action" title="Xuất">
-                    <i class="fas fa-file-export"></i>
-                </a>
-                <a href="#" class="top-action" title="In">
-                    <i class="fas fa-print"></i>
-                </a>
-                <a href="#" class="top-action" title="Làm mới" onclick="window.location='${pageContext.request.contextPath}/NhanVien'">
-                    <i class="fas fa-sync-alt"></i>
-                </a>
+        <!-- TOOLBAR BẢNG -->
+        <div class="table-toolbar">
+            <div class="toolbar-left-results">
+                Hiển thị <span>${items.size()}</span> nhân viên
             </div>
-        </div>
-
-        <div class="category-header">
-            <h2 class="category-title">Quản lý nhân viên</h2>
-            <div style="display:flex;gap:12px;align-items:center;">
-                <a href="${pageContext.request.contextPath}/NhanVien" class="btn-reset" title="Refresh" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:#f0f0f0;color:#666;cursor:pointer;transition:all 0.2s;">
-                    <i class="fas fa-redo" style="font-size:16px;"></i>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <a href="#" class="btn-secondary-outline" title="In danh sách" onclick="window.print(); return false;">
+                    <i class="fas fa-print"></i> In
+                </a>
+                <a href="#" class="btn-secondary-outline" title="Xuất Excel">
+                    <i class="fas fa-file-export"></i> Xuất Excel
+                </a>
+                <a href="${pageContext.request.contextPath}/NhanVien/new" class="add-new-btn" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px;">
+                    <i class="fas fa-plus"></i> Thêm mới
                 </a>
             </div>
         </div>
 
-        <c:if test="${not empty success || param.success == '1'}">
-            <div id="successBanner" style="background:#eaf7ed;color:#1e7e34;padding:12px 16px;border-radius:8px;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
-                <i class="fas fa-circle-check"></i>
-                <c:choose>
-                    <c:when test="${not empty success}">${success}</c:when>
-                    <c:otherwise>Thêm nhân viên thành công!</c:otherwise>
-                </c:choose>
-            </div>
-            <script>
-                setTimeout(function() {
-                    var el = document.getElementById('successBanner');
-                    if (el) {
-                        el.style.transition = 'opacity 0.4s';
-                        el.style.opacity = '0';
-                        setTimeout(function() { el.remove(); }, 400);
-                    }
-                }, 3000);
-            </script>
-        </c:if>
-
-        <c:if test="${not empty error}">
-            <div style="background:#fdecea;color:#b3261e;padding:12px 16px;border-radius:8px;margin-bottom:16px;">
-                <i class="fas fa-circle-exclamation"></i> ${error}
-            </div>
-        </c:if>
-
-        <!-- Table Section -->
-        <div class="nv-table-wrapper">
-        <table class="nv-table">
+        <!-- BẢNG DỮ LIỆU -->
+        <table class="category-table">
             <thead>
             <tr>
                 <th>STT</th>
@@ -128,61 +423,49 @@
                 <th>EMAIL</th>
                 <th>ĐỊA CHỈ</th>
                 <th>TRẠNG THÁI</th>
-                <th>HÀNH ĐỘNG</th>
+                <th>THAO TÁC</th>
             </tr>
             </thead>
             <tbody>
             <c:forEach var="nv" items="${items}" varStatus="status">
                 <tr>
-                    <td>${status.index + 1 + (currentPage - 1) * 10}</td>
-                    <td>${nv.maNhanVien}</td>
-                    <td class="truncate" title="${nv.hoTen}"><strong>${nv.hoTen}</strong></td>
-                    <td class="truncate" title="${nv.chucVu}">${nv.chucVu}</td>
+                    <td><span class="category-id">${status.index + 1 + (currentPage - 1) * 10}</span></td>
+                    <td><strong style="color: #1f2937;">${nv.maNhanVien}</strong></td>
+                    <td title="${nv.hoTen}"><strong>${nv.hoTen}</strong></td>
+                    <td title="${nv.chucVu}">${nv.chucVu}</td>
                     <td>${nv.gioiTinh == 1 ? 'Nam' : 'Nữ'}</td>
-                    <td class="truncate">
+                    <td>
                         <c:if test="${not empty nv.soDienThoai}">
-                            <i class="fas fa-phone" style="color:#999;margin-right:4px;"></i>${nv.soDienThoai}
+                            <i class="fas fa-phone" style="color:#9ca3af;margin-right:4px;font-size:12px;"></i>${nv.soDienThoai}
                         </c:if>
                     </td>
-                    <td class="truncate" title="${nv.email}">
+                    <td title="${nv.email}">
                         <c:if test="${not empty nv.email}">
-                            <i class="fas fa-envelope" style="color:#999;margin-right:4px;"></i>${nv.email}
+                            <i class="fas fa-envelope" style="color:#9ca3af;margin-right:4px;font-size:12px;"></i>${nv.email}
                         </c:if>
                     </td>
-                    <td class="truncate" title="${nv.diaChi}">${nv.diaChi}</td>
+                    <td title="${nv.diaChi}">${nv.diaChi}</td>
                     <td>
-                        <c:if test="${nv.trangThai == 1}">
-                            <span style="display:inline-block;width:12px;height:12px;background:#4caf50;border-radius:50%;margin-right:6px;vertical-align:middle;"></span><span>Đang hoạt động</span>
-                        </c:if>
-                        <c:if test="${nv.trangThai != 1}">
-                            <span style="display:inline-block;width:12px;height:12px;background:#ccc;border-radius:50%;margin-right:6px;vertical-align:middle;"></span><span>Ngừng hoạt động</span>
-                        </c:if>
+                        <span class="category-status ${nv.trangThai == 1 ? 'status-active' : 'status-inactive'}">
+                                ${nv.trangThai == 1 ? 'Đang hoạt động' : 'Ngừng hoạt động'}
+                        </span>
                     </td>
                     <td>
-                        <div style="display:flex;gap:6px;align-items:center;justify-content:flex-end;flex-wrap:nowrap;">
-                            <a href="${pageContext.request.contextPath}/NhanVien/edit?id=${nv.id}"
-                               class="nv-action-btn edit"
-                               title="Sửa"
-                               style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:#fff;color:#666;border:1px solid #e6e6e6;cursor:pointer;transition:all 0.15s;flex-shrink:0;">
-                                <i class="fas fa-edit" style="font-size:12px;"></i>
+                        <div class="action-buttons" style="align-items: center; gap: 10px;">
+                            <a href="${pageContext.request.contextPath}/NhanVien/edit?id=${nv.id}" class="btn-icon-circle btn-view" title="Chỉnh sửa">
+                                <i class="fas fa-pen"></i>
                             </a>
 
-                            <form action="${pageContext.request.contextPath}/NhanVien/delete" method="post"
-                                  style="display:inline;"
-                                  onsubmit="return confirm('Bạn có chắc chắn muốn xóa nhân viên này?');">
+                            <form action="${pageContext.request.contextPath}/NhanVien/delete" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa nhân viên này?');">
                                 <input type="hidden" name="id" value="${nv.id}">
-                                <button type="submit"
-                                        class="nv-action-btn delete"
-                                        title="Xóa"
-                                        style="border:none;background:#fff;color:#666;cursor:pointer;width:28px;height:28px;border-radius:6px;border:1px solid #e6e6e6;display:inline-flex;align-items:center;justify-content:center;transition:all 0.15s;flex-shrink:0;">
-                                    <i class="fas fa-trash-alt" style="font-size:12px;"></i>
+                                <button type="submit" class="btn-icon-circle" title="Xóa" style="border:none; cursor:pointer;">
+                                    <i class="fas fa-trash-alt" style="color:#dc2626;"></i>
                                 </button>
                             </form>
 
-                            <!-- Toggle switch (UI only) -->
-                            <label class="switch" title="Trạng thái" style="flex-shrink:0;">
+                            <label class="status-switch" title="Trạng thái">
                                 <input type="checkbox" ${nv.trangThai == 1 ? 'checked' : ''} disabled>
-                                <span class="slider"></span>
+                                <span class="status-slider"></span>
                             </label>
                         </div>
                     </td>
@@ -191,210 +474,40 @@
 
             <c:if test="${empty items}">
                 <tr>
-                    <td colspan="10" style="text-align: center; padding: 50px; color: #999;">
-                        <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 16px; display: block; color:#ddd;"></i>
-                        <strong>Không tìm thấy dữ liệu nào</strong>
+                    <td colspan="10" style="text-align: center; padding: 30px; color: #888;">
+                        <i class="fas fa-inbox" style="font-size: 24px; margin-bottom: 10px; display: block;"></i>
+                        Không tìm thấy dữ liệu nào.
                     </td>
                 </tr>
             </c:if>
             </tbody>
         </table>
-        </div>
 
-        <style>
-            .dashboard-container {
-                width: 100% !important;
-                max-width: 100% !important;
-                box-sizing: border-box;
-            }
-
-            .category-section {
-                width: 100% !important;
-                max-width: 100% !important;
-                box-sizing: border-box;
-                padding-left: 0 !important;
-                padding-right: 0 !important;
-            }
-
-            .filter-label {
-                display: block;
-                margin-bottom: 6px;
-                font-size: 13px;
-                font-weight: 600;
-                color: #4a4a4a;
-            }
-
-            .filter-input,
-            .filter-select {
-                width: 100%;
-                padding: 10px 14px;
-                border: 1px solid #ddd;
-                border-radius: 8px;
-                font-size: 14px;
-                color: #333;
-                background: #fff;
-                box-sizing: border-box;
-                transition: border-color 0.2s, box-shadow 0.2s;
-            }
-
-            .filter-input:focus,
-            .filter-select:focus {
-                outline: none;
-                border-color: #a38058;
-                box-shadow: 0 0 0 3px rgba(163, 128, 88, 0.15);
-            }
-
-            .filter-select {
-                cursor: pointer;
-                appearance: none;
-                -webkit-appearance: none;
-                background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-                background-repeat: no-repeat;
-                background-position: right 12px center;
-                background-size: 16px;
-                padding-right: 36px;
-            }
-
-            .add-new-btn {
-                display: inline-flex;
-                align-items: center;
-                gap: 8px;
-                border: none;
-                border-radius: 8px;
-                background: #a38058;
-                color: #fff;
-                font-size: 14px;
-                font-weight: 600;
-                cursor: pointer;
-                transition: background 0.2s;
-            }
-
-            .add-new-btn:hover {
-                background: #8b6744;
-            }
-
-            .nv-table-wrapper {
-                width: 100%;
-                max-width: 100%;
-                overflow-x: hidden;
-                border-radius: 8px;
-                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-                box-sizing: border-box;
-            }
-
-            .nv-table {
-                width: 100%;
-                table-layout: fixed;
-                border-collapse: collapse;
-                background: white;
-                border-radius: 8px;
-                overflow: hidden;
-            }
-
-            .nv-table thead {
-                background: #a38058;
-                color: white;
-            }
-
-            .nv-table thead th {
-                padding: 12px 8px;
-                text-align: left;
-                font-weight: 600;
-                font-size: 12px;
-                letter-spacing: 0.3px;
-                border-bottom: 2px solid #8b6744;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-
-            .nv-table tbody td {
-                padding: 12px 8px;
-                border-bottom: 1px solid #f0f0f0;
-                font-size: 13px;
-                color: #333;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-
-            .nv-table tbody td.truncate {
-                max-width: 0;
-            }
-
-            .nv-table th:nth-child(1), .nv-table td:nth-child(1) { width: 5%; }
-            .nv-table th:nth-child(2), .nv-table td:nth-child(2) { width: 8%; }
-            .nv-table th:nth-child(3), .nv-table td:nth-child(3) { width: 13%; }
-            .nv-table th:nth-child(4), .nv-table td:nth-child(4) { width: 10%; }
-            .nv-table th:nth-child(5), .nv-table td:nth-child(5) { width: 7%; }
-            .nv-table th:nth-child(6), .nv-table td:nth-child(6) { width: 11%; }
-            .nv-table th:nth-child(7), .nv-table td:nth-child(7) { width: 16%; }
-            .nv-table th:nth-child(8), .nv-table td:nth-child(8) { width: 10%; }
-            .nv-table th:nth-child(9), .nv-table td:nth-child(9) { width: 10%; }
-            .nv-table th:nth-child(10), .nv-table td:nth-child(10) { width: 10%; }
-
-            .nv-table tbody tr:hover {
-                background: #fafafa;
-            }
-
-            .nv-table tbody tr:last-child td {
-                border-bottom: none;
-            }
-
-            .nv-action-btn:hover {
-                background: #e0e0e0 !important;
-            }
-
-            .nv-action-btn.delete:hover {
-                background: #ffe0e0 !important;
-                color: #8b4513 !important;
-            }
-            /* Toggle switch style */
-            .switch { position: relative; display: inline-block; width:38px; height:22px; }
-            .switch input { opacity: 0; width: 0; height: 0; }
-            .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .2s; border-radius: 22px; }
-            .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .2s; border-radius: 50%; }
-            input:checked + .slider { background-color: #a38058; }
-            input:checked + .slider:before { transform: translateX(16px); }
-
-            /* Style for action buttons (Thêm/Xuất/In/Làm mới) */
-            .top-action {
-                display: inline-flex;
-                width: 48px;
-                height: 48px;
-                border-radius: 8px;
-                align-items: center;
-                justify-content: center;
-                background: #b8956a;
-                color: white;
-                text-decoration: none;
-                transition: background 0.2s;
-            }
-            .top-action:hover {
-                background: #a38058;
-            }
-        </style>
-
+        <!-- PHÂN TRANG -->
         <c:if test="${totalPages > 1}">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding:16px;background:#fafafa;border-radius:8px;">
-                <div style="font-size:14px;color:#666;">
-                    Hiển thị <strong>${items.size()}</strong> trong tổng cộ <strong>${totalCount}</strong> bản ghi
-                </div>
-                <div class="pagination" style="display:flex;gap:6px;align-items:center;">
-                    <c:forEach begin="1" end="${totalPages}" var="p">
-                        <a href="${pageContext.request.contextPath}/NhanVien?page=${p}"
-                           style="padding:6px 10px;border-radius:4px;border:1px solid #ddd;text-decoration:none;font-size:13px;
-                                   color:${p == currentPage ? '#fff' : '#333'};
-                                   background:${p == currentPage ? '#a38058' : '#fff'};
-                                   ${p == currentPage ? 'color:#fff;' : ''}">
+            <div class="sp-pagination">
+                <c:forEach begin="1" end="${totalPages}" var="p">
+                    <a href="${pageContext.request.contextPath}/NhanVien?page=${p}" class="sp-page-btn ${p == currentPage ? 'active' : ''}">
                             ${p}
-                        </a>
-                    </c:forEach>
-                </div>
+                    </a>
+                </c:forEach>
             </div>
         </c:if>
 
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const toast = document.getElementById("toast-msg");
+        if (toast) {
+            setTimeout(function () {
+                toast.style.opacity = "0";
+                toast.style.transform = "translateY(-10px)";
+                setTimeout(function () { toast.remove(); }, 500);
+            }, 3000);
+        }
+    });
+</script>
 </body>
 </html>
