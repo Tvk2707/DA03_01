@@ -5,6 +5,7 @@ import QuanLySanPham.dao.SanPhamChiTietDao;
 import QuanLySanPham.Utils.EntityManagerUtlis;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.LockModeType;
 import jakarta.persistence.TypedQuery;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,18 @@ public class SanPhamChiTietDaoImpl extends GenericDaoImpl<SanPhamChiTiet, Intege
 
     public SanPhamChiTietDaoImpl() {
         super(SanPhamChiTiet.class);
+    }
+    
+    @Override
+    public SanPhamChiTiet findByIdForUpdate(Integer id) {
+        EntityManager em = EntityManagerUtlis.getEntityManager();
+        try {
+            // Sử dụng PESSIMISTIC_WRITE để khóa dòng dữ liệu, ngăn chặn xung đột khi nhiều giao dịch cùng lúc
+            return em.find(SanPhamChiTiet.class, id, LockModeType.PESSIMISTIC_WRITE);
+        } finally {
+            // Lưu ý: KHÔNG đóng EntityManager ở đây nếu transaction còn tiếp diễn ở service
+            // Service sẽ chịu trách nhiệm đóng EntityManager sau khi commit/rollback
+        }
     }
 
     // --- HÀM XÓA MỀM 1 BIẾN THỂ (ĐÃ SỬA ĐỂ TRÁNH CACHE) ---

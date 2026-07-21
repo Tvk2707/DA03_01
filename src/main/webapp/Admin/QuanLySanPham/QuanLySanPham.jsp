@@ -15,7 +15,6 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/FE/Admin/css/layout.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/FE/Admin/css/sidebar.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/FE/Admin/css/header.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/FE/Admin/css/danhmuc.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/FE/Admin/css/sanpham.css?v=20260718-fullscreen">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 

@@ -15,7 +15,6 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/FE/Admin/css/layout.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/FE/Admin/css/sidebar.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/FE/Admin/css/header.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/FE/Admin/css/danhmuc.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/FE/Admin/css/sanpham.css?v=20260718-fullscreen">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -177,13 +176,51 @@
         }
         .btn-secondary-outline:hover:not(:disabled) { background: #f9fafb !important; }
 
-        /* Trạng thái disabled cho nút tải file zip */
-        .btn-secondary-outline:disabled {
+        /* Trạng thái disabled cho nút tải file QR */
+        .btn-secondary-outline:disabled, .qr-dropdown-wrapper button:disabled {
             background: #f3f4f6 !important;
             color: #9ca3af !important;
             border-color: #e5e7eb !important;
             cursor: not-allowed !important;
             opacity: 0.7;
+        }
+
+        /* Styling Dropdown Tải QR */
+        .qr-dropdown-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+        .qr-dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            margin-top: 4px;
+            background-color: #ffffff;
+            min-width: 190px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            z-index: 1050;
+            overflow: hidden;
+        }
+        .qr-dropdown-menu.show {
+            display: block;
+        }
+        .qr-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            color: #374151;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .qr-dropdown-item:hover {
+            background-color: #f3f4f6;
         }
 
         .vertical-divider {
@@ -218,6 +255,55 @@
             gap: 10px;
             font-size: 15px;
         }
+
+        .table-responsive-wrapper {
+            width: 100%;
+            overflow-x: hidden;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            margin-top: 16px;
+        }
+
+        .category-table {
+            width: 100% !important;
+            border-collapse: collapse;
+            table-layout: fixed;
+            margin: 0;
+        }
+
+        .category-table th {
+            background-color: #faf8f5;
+            color: #4b5563;
+            font-weight: 600;
+            font-size: 13px;
+            padding: 12px 8px !important;
+            text-align: left;
+            border-bottom: 1px solid #f0ece1;
+        }
+
+        .category-table td {
+            padding: 10px 8px !important;
+            vertical-align: middle;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 13px;
+            color: #374151;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .category-table th:nth-child(1), .category-table td:nth-child(1) { width: 3%; text-align: center; }
+        .category-table th:nth-child(2), .category-table td:nth-child(2) { width: 4%; text-align: center; }
+        .category-table th:nth-child(3), .category-table td:nth-child(3) { width: 7%; text-align: center; }
+        .category-table th:nth-child(4), .category-table td:nth-child(4) { width: 11%; }
+        .category-table th:nth-child(5), .category-table td:nth-child(5) { width: 9%; }
+        .category-table th:nth-child(6), .category-table td:nth-child(6) { width: 11%; }
+        .category-table th:nth-child(7), .category-table td:nth-child(7) { width: 10%; }
+        .category-table th:nth-child(8), .category-table td:nth-child(8) { width: 10%; }
+        .category-table th:nth-child(9), .category-table td:nth-child(9) { width: 7%; text-align: center; }
+        .category-table th:nth-child(10), .category-table td:nth-child(10) { width: 14%; }
+        .category-table th:nth-child(11), .category-table td:nth-child(11) { width: 14%; text-align: center; }
     </style>
 </head>
 <body>
@@ -312,9 +398,21 @@
 
                             <!-- Nhóm bên phải: Hành động xuất dữ liệu -->
                             <div style="display: flex; gap: 12px; height: 100%;">
-                                <button type="button" class="btn-secondary-outline" id="btnDownloadSelectedQR" style="color: #2e7d32 !important; border-color: #a5d6a7 !important;" disabled>
-                                    <i class="fas fa-file-archive"></i> Tải QR đã chọn (.ZIP)
-                                </button>
+                                <!-- Dropdown chọn định dạng Tải QR -->
+                                <div class="qr-dropdown-wrapper">
+                                    <button type="button" class="btn-secondary-outline" id="btnQrDropdownToggle" style="color: #2e7d32 !important; border-color: #a5d6a7 !important;" disabled>
+                                        <i class="fas fa-qrcode"></i> Tải QR đã chọn <i class="fas fa-chevron-down" style="font-size: 12px; margin-left: 4px;"></i>
+                                    </button>
+                                    <div class="qr-dropdown-menu" id="qrDropdownMenu">
+                                        <a class="qr-dropdown-item" href="javascript:void(0)" id="btnDownloadQrImage">
+                                            <i class="fas fa-file-image" style="color: #0284c7;"></i> Tải dạng Ảnh (.PNG)
+                                        </a>
+                                        <a class="qr-dropdown-item" href="javascript:void(0)" id="btnDownloadQrZip">
+                                            <i class="fas fa-file-archive" style="color: #16a34a;"></i> Tải dạng Nén (.ZIP)
+                                        </a>
+                                    </div>
+                                </div>
+
                                 <a href="${pageContext.request.contextPath}/SanPhamChiTiet/export?sanPhamId=${sanPhamId}&ma=${searchMa}&mauSacId=${searchMauSacId}&kichCoId=${searchKichCoId}&trangThai=${searchTrangThai}" class="btn-secondary-outline">
                                     <i class="fas fa-file-export"></i> Xuất Excel
                                 </a>
@@ -493,13 +591,13 @@
                 fetch('${pageContext.request.contextPath}/SanPhamChiTiet/update-status', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `id=\${variantId}&trangThai=\${statusValue}`
+                    body: `id=${variantId}&trangThai=${statusValue}`
                 })
                     .then(response => {
                         if (response.ok) {
                             if (textLabel) {
                                 textLabel.textContent = statusText;
-                                textLabel.className = `category-status JS-variant-status-text \${isChecked ? 'status-active' : 'status-inactive'}`;
+                                textLabel.className = `category-status JS-variant-status-text ${isChecked ? 'status-active' : 'status-inactive'}`;
                             }
                         } else {
                             alert("Cập nhật thất bại!");
@@ -588,7 +686,7 @@
                     const statusText = parseInt(scannedDatasetTarget.trangThai) === 1 ? "Đang kinh doanh" : "Ngừng bán";
                     const statusClass = parseInt(scannedDatasetTarget.trangThai) === 1 ? "status-active" : "status-inactive";
                     document.getElementById('scanInfoTrangThai').innerText = statusText;
-                    document.getElementById('scanInfoTrangThai').className = `category-status \${statusClass}`;
+                    document.getElementById('scanInfoTrangThai').className = `category-status ${statusClass}`;
 
                     if (scannedDatasetTarget.hinhAnh && scannedDatasetTarget.hinhAnh !== 'null') {
                         document.getElementById('scanInfoImg').src = '${pageContext.request.contextPath}/File_Anh/images/' + scannedDatasetTarget.hinhAnh;
@@ -596,7 +694,7 @@
 
                     scannedInfoModal.style.display = 'block';
                 } else {
-                    alert(`Không tìm thấy biến thể nào có mã khớp với mã QR hệ thống: \${decodedText}`);
+                    alert(`Không tìm thấy biến thể nào có mã khớp với mã QR hệ thống: ${decodedText}`);
                 }
             });
         });
@@ -615,30 +713,73 @@
         });
 
         // =========================================================================
-        // 📦 LOGIC CHECKBOX & KHỞI TẠO TRẠNG THÁI NÚT TẢI QR (.ZIP)
+        // 📦 LOGIC CHECKBOX & ĐIỀU KHIỂN NÚT TẢI QR (.PNG HOẶC .ZIP)
         // =========================================================================
         const selectAllCb = document.getElementById('selectAllVariants');
-        const btnDownloadSelectedQR = document.getElementById('btnDownloadSelectedQR');
+        const btnQrDropdownToggle = document.getElementById('btnQrDropdownToggle');
+        const qrDropdownMenu = document.getElementById('qrDropdownMenu');
 
+        // Hàm lấy tất cả các checkbox của hàng ĐANG HIỂN THỊ ở trang hiện tại
+        function getVisibleVariantCheckboxes() {
+            return Array.from(document.querySelectorAll('.product-row'))
+                .filter(row => row.style.display !== 'none')
+                .map(row => row.querySelector('.variant-checkbox'))
+                .filter(cb => cb !== null);
+        }
+
+        // Bật/tắt trạng thái Dropdown Tải QR & đồng bộ trạng thái Chọn Tất Cả
         function toggleDownloadQrButtonState() {
             const checkedBoxes = document.querySelectorAll('.variant-checkbox:checked');
             if (checkedBoxes.length > 0) {
-                btnDownloadSelectedQR.removeAttribute('disabled');
+                btnQrDropdownToggle.removeAttribute('disabled');
             } else {
-                btnDownloadSelectedQR.setAttribute('disabled', 'true');
+                btnQrDropdownToggle.setAttribute('disabled', 'true');
+                qrDropdownMenu.classList.remove('show');
             }
+            updateSelectAllCheckboxState();
         }
 
+        // Tự động kiểm tra để tích/bỏ tích ô checkbox Chọn Tất Cả ở thẻ <thead>
+        function updateSelectAllCheckboxState() {
+            if (!selectAllCb) return;
+            const visibleCheckboxes = getVisibleVariantCheckboxes();
+            if (visibleCheckboxes.length === 0) {
+                selectAllCb.checked = false;
+                return;
+            }
+            // Nếu TẤT CẢ các dòng đang hiển thị đều tích -> Ô Chọn Tất Cả tích (true), ngược lại (false)
+            const isAllChecked = visibleCheckboxes.every(cb => cb.checked);
+            selectAllCb.checked = isAllChecked;
+        }
+
+        // Toggle hiển thị menu Dropdown Tải QR
+        btnQrDropdownToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (!this.hasAttribute('disabled')) {
+                qrDropdownMenu.classList.toggle('show');
+            }
+        });
+
+        // Ẩn dropdown khi click ra ngoài
+        document.addEventListener('click', function() {
+            qrDropdownMenu.classList.remove('show');
+        });
+
+        // Sự kiện khi bấm ô "Chọn tất cả" ở đầu bảng
         if (selectAllCb) {
             selectAllCb.addEventListener('change', function() {
                 const isChecked = this.checked;
-                document.querySelectorAll('.product-row').forEach(row => {
-                    if (row.style.display !== 'none') {
-                        const cb = row.querySelector('.variant-checkbox');
-                        if (cb) cb.checked = isChecked;
-                    }
+                getVisibleVariantCheckboxes().forEach(cb => {
+                    cb.checked = isChecked;
                 });
-                toggleDownloadQrButtonState();
+
+                const checkedBoxes = document.querySelectorAll('.variant-checkbox:checked');
+                if (checkedBoxes.length > 0) {
+                    btnQrDropdownToggle.removeAttribute('disabled');
+                } else {
+                    btnQrDropdownToggle.setAttribute('disabled', 'true');
+                    qrDropdownMenu.classList.remove('show');
+                }
             });
         }
 
@@ -646,52 +787,83 @@
         document.querySelector('.category-table tbody').addEventListener('change', function(e) {
             if (e.target && e.target.classList.contains('variant-checkbox')) {
                 toggleDownloadQrButtonState();
-
-                // Đồng bộ trạng thái của checkbox "Chọn tất cả" nếu bấm bỏ chọn thủ công
-                if (!e.target.checked && selectAllCb) {
-                    selectAllCb.checked = false;
-                }
             }
         });
 
-        btnDownloadSelectedQR.addEventListener('click', function() {
-            const checkedBoxes = document.querySelectorAll('.variant-checkbox:checked');
-            if (checkedBoxes.length === 0) return;
-
-            const zip = new JSZip();
-            const folder = zip.folder("QR_Codes_San_Pham");
-            const hiddenContainer = document.getElementById('hiddenQrContainer');
-            let processedCount = 0;
-
-            checkedBoxes.forEach(cb => {
-                const row = cb.closest('tr');
-                const codeMa = row.dataset.ma;
-
+        // Hàm chung hỗ trợ tạo canvas QR Code bí mật để lấy Data URL dạng PNG
+        function generateQrBlobOrUrl(codeMa) {
+            return new Promise((resolve) => {
+                const hiddenContainer = document.getElementById('hiddenQrContainer');
                 const tempDiv = document.createElement('div');
                 hiddenContainer.appendChild(tempDiv);
 
                 new QRCode(tempDiv, {
-                    text: codeMa, width: 250, height: 250,
+                    text: codeMa, width: 300, height: 300,
                     correctLevel: QRCode.CorrectLevel.H
                 });
 
                 setTimeout(() => {
                     const canvas = tempDiv.querySelector('canvas');
+                    let dataUrl = "";
                     if (canvas) {
-                        const dataUrl = canvas.toDataURL("image/png");
-                        const base64Data = dataUrl.replace(/^data:image\/(png|jpg);base64,/, "");
-                        folder.file(`QR_\${codeMa}.png`, base64Data, { base64: true });
+                        dataUrl = canvas.toDataURL("image/png");
                     }
-
                     tempDiv.remove();
-                    processedCount++;
+                    resolve(dataUrl);
+                }, 100);
+            });
+        }
 
-                    if (processedCount === checkedBoxes.length) {
-                        zip.generateAsync({ type: "blob" }).then(function(content) {
-                            saveAs(content, "Danh_Sach_Ma_QR_BienThe.zip");
-                        });
-                    }
-                }, 150);
+        // 1️⃣ TẢI DẠNG ẢNH (.PNG)
+        document.getElementById('btnDownloadQrImage').addEventListener('click', async function() {
+            qrDropdownMenu.classList.remove('show');
+            const checkedBoxes = document.querySelectorAll('.variant-checkbox:checked');
+            if (checkedBoxes.length === 0) return;
+
+            if (checkedBoxes.length > 5) {
+                if (!confirm(`Bạn đang chọn ${checkedBoxes.length} sản phẩm. Trình duyệt sẽ tải xuống ${checkedBoxes.length} tệp ảnh lẻ. Tiếp tục?`)) {
+                    return;
+                }
+            }
+
+            for (let i = 0; i < checkedBoxes.length; i++) {
+                const row = checkedBoxes[i].closest('tr');
+                const codeMa = row.dataset.ma;
+                const dataUrl = await generateQrBlobOrUrl(codeMa);
+
+                if (dataUrl) {
+                    const a = document.createElement('a');
+                    a.href = dataUrl;
+                    a.download = `QR_${codeMa}.png`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                }
+            }
+        });
+
+        // 2️⃣ TẢI DẠNG NÉN (.ZIP)
+        document.getElementById('btnDownloadQrZip').addEventListener('click', async function() {
+            qrDropdownMenu.classList.remove('show');
+            const checkedBoxes = document.querySelectorAll('.variant-checkbox:checked');
+            if (checkedBoxes.length === 0) return;
+
+            const zip = new JSZip();
+            const folder = zip.folder("QR_Codes_San_Pham");
+
+            for (let i = 0; i < checkedBoxes.length; i++) {
+                const row = checkedBoxes[i].closest('tr');
+                const codeMa = row.dataset.ma;
+                const dataUrl = await generateQrBlobOrUrl(codeMa);
+
+                if (dataUrl) {
+                    const base64Data = dataUrl.replace(/^data:image\/(png|jpg);base64,/, "");
+                    folder.file(`QR_${codeMa}.png`, base64Data, { base64: true });
+                }
+            }
+
+            zip.generateAsync({ type: "blob" }).then(function(content) {
+                saveAs(content, "Danh_Sach_Ma_QR_BienThe.zip");
             });
         });
 
@@ -720,9 +892,11 @@
                             if (sttCell) sttCell.innerText = index + 1;
                         } else { row.style.display = "none"; }
                     });
+
+                    // Đặt lại trạng thái checkbox nút bấm khi sang trang mới
                     if(selectAllCb) selectAllCb.checked = false;
                     document.querySelectorAll('.variant-checkbox').forEach(c => c.checked = false);
-                    toggleDownloadQrButtonState(); // Đặt lại nút download khi đổi trang
+                    toggleDownloadQrButtonState();
                 }
 
                 function setupPagination() {

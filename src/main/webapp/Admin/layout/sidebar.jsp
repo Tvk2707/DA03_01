@@ -39,7 +39,7 @@
             <div class="menu-title">Kênh bán hàng</div>
             <ul class="menu-list">
                 <li class="menu-item">
-                    <a href="#" class="menu-link <%= "pos".equals(activeMenu) ? "active" : "" %>">
+                    <a href="${pageContext.request.contextPath}/ban-hang" class="menu-link <%= "pos".equals(activeMenu) ? "active" : "" %>">
                         <i class="fas fa-cash-register"></i>
                         <span>Bán tại quầy (POS)</span>
                     </a>

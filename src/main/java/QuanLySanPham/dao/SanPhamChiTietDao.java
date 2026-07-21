@@ -12,6 +12,8 @@ public interface SanPhamChiTietDao extends GenericDao<SanPhamChiTiet, Integer> {
     SanPhamChiTiet findByMauSacVaKichCo(Integer sanPhamId, Integer mauSacId, Integer kichCoId);
 
     void updateTonKho(Integer sanPhamChiTietId, Integer tonKhoMoi);
+    
+    SanPhamChiTiet findByIdForUpdate(Integer id);
 
     // --- THÊM 2 HÀM XÓA MỀM ---
 

@@ -25,6 +25,10 @@ public class HoaDon {
     @JoinColumn(name = "id_phieu_giam_gia")
     private PhieuGiamGia phieuGiamGia;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_ca")
+    private CaLamViec ca;
+
     @Column(name = "ma_hoa_don")
     private String maHoaDon;
 
@@ -72,11 +76,12 @@ public class HoaDon {
 
     public HoaDon() {}
 
-    public HoaDon(Integer id, KhachHang khachHang, NhanVien nhanVien, PhieuGiamGia phieuGiamGia, String maHoaDon, String tenNguoiNhan, String sdtNguoiNhan, LocalDateTime ngayTao, LocalDateTime ngayThanhToan, BigDecimal tongTienThanhToan, Integer trangThai, LocalDateTime ngayNhanBanDau, LocalDateTime ngayNhan, String ghiChu, String lyDoHuy, List<ChiTietHoaDon> chiTietHoaDons, List<ThanhToanHoaDon> thanhToanHoaDons, List<LichSuHoaDon> lichSuHoaDons, List<LichSuThanhToan> lichSuThanhToans) {
+    public HoaDon(Integer id, KhachHang khachHang, NhanVien nhanVien, PhieuGiamGia phieuGiamGia, CaLamViec ca, String maHoaDon, String tenNguoiNhan, String sdtNguoiNhan, LocalDateTime ngayTao, LocalDateTime ngayThanhToan, BigDecimal tongTienThanhToan, Integer trangThai, LocalDateTime ngayNhanBanDau, LocalDateTime ngayNhan, String ghiChu, String lyDoHuy, List<ChiTietHoaDon> chiTietHoaDons, List<ThanhToanHoaDon> thanhToanHoaDons, List<LichSuHoaDon> lichSuHoaDons, List<LichSuThanhToan> lichSuThanhToans) {
         this.id = id;
         this.khachHang = khachHang;
         this.nhanVien = nhanVien;
         this.phieuGiamGia = phieuGiamGia;
+        this.ca = ca;
         this.maHoaDon = maHoaDon;
         this.tenNguoiNhan = tenNguoiNhan;
         this.sdtNguoiNhan = sdtNguoiNhan;
@@ -102,6 +107,8 @@ public class HoaDon {
     public void setNhanVien(NhanVien nhanVien) { this.nhanVien = nhanVien; }
     public PhieuGiamGia getPhieuGiamGia() { return phieuGiamGia; }
     public void setPhieuGiamGia(PhieuGiamGia phieuGiamGia) { this.phieuGiamGia = phieuGiamGia; }
+    public CaLamViec getCa() { return ca; }
+    public void setCa(CaLamViec ca) { this.ca = ca; }
     public String getMaHoaDon() { return maHoaDon; }
     public void setMaHoaDon(String maHoaDon) { this.maHoaDon = maHoaDon; }
     public String getTenNguoiNhan() { return tenNguoiNhan; }

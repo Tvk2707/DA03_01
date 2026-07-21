@@ -4,6 +4,8 @@ import QuanLySanPham.Utils.EntityManagerUtlis;
 import QuanLySanPham.Entity.KhachHang;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.TypedQuery;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +23,25 @@ public class KhachHangRepository {
         } catch (Exception e) {
             e.printStackTrace();
             return new ArrayList<>();
+        } finally {
+            if (em != null) {
+                em.close();
+            }
+        }
+    }
+
+    public KhachHang findBySoDienThoai(String sdt) {
+        EntityManager em = null;
+        try {
+            em = utils.getEntityManager();
+            TypedQuery<KhachHang> query = em.createQuery("SELECT kh FROM KhachHang kh WHERE kh.soDienThoai = :sdt", KhachHang.class);
+            query.setParameter("sdt", sdt);
+            return query.getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         } finally {
             if (em != null) {
                 em.close();

@@ -1,0 +1,92 @@
+/* sales.css */
+
+/* Using variables from layout.css for consistency */
+:root {
+    --primary-color: #b8956a;
+    --primary-dark: #9a7d55;
+    --bg-color: #f5f3ef;
+    --white: #ffffff;
+    --text-dark: #4a4a4a;
+    --border-color: #e8e4dc;
+    --shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.pos-layout {
+    display: flex;
+    gap: 20px;
+    height: calc(100vh - 120px); /* Adjust based on header/footer */
+}
+
+.pos-layout .left-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--white);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+.pos-layout .right-panel {
+    width: 480px;
+    display: flex;
+    flex-direction: column;
+    background: var(--white);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+    padding: 16px;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+.product-card {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.product-card:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.product-card.highlight-flash {
+    animation: highlight-flash 600ms ease-out;
+}
+
+@keyframes highlight-flash {
+    0% { background-color: transparent; }
+    50% { background-color: rgba(184, 149, 106, 0.2); }
+    100% { background-color: transparent; }
+}
+
+#invoice-print-area {
+    display: none; /* Hidden by default, shown via JS for printing */
+}
+
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    #invoice-print-area, #invoice-print-area * {
+        visibility: visible;
+    }
+    #invoice-print-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+    .no-print {
+        display: none !important;
+    }
+}
