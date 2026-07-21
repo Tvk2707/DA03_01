@@ -1,200 +1,21 @@
-<%@ page import="QuanLySanPham.Entity.KhachHang" %>
-<%@ page import="java.util.List" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%
     request.setAttribute("pageTitle", "Quản lý khách hàng");
-    request.setAttribute("activeMenu", "khachhang");
+    request.setAttribute("activeMenu", "customer");
 %>
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý khách hàng - RIOR Admin</title>
-
-    <!-- FontAwesome từ CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- Đường dẫn bộ CSS tuyệt đối -->
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/Admin/css/layout.css">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/Admin/css/sidebar.css">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/Admin/css/header.css">
-
-    <style>
-        .customer-page .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .customer-page .page-title {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--text-dark);
-            margin-bottom: 4px;
-        }
-
-        .customer-page .page-subtitle {
-            font-size: 14px;
-            color: var(--text-light);
-        }
-
-        .customer-card {
-            background-color: var(--white);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            box-shadow: var(--shadow);
-            padding: 24px;
-            margin-bottom: 24px;
-        }
-
-        .customer-card h3 {
-            font-size: 18px;
-            color: var(--text-dark);
-            margin-bottom: 18px;
-        }
-
-        .customer-form {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-dark);
-            margin-bottom: 6px;
-        }
-
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background-color: var(--white);
-            font-size: 14px;
-            outline: none;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus {
-            border-color: var(--primary-color);
-        }
-
-        .form-actions {
-            display: flex;
-            align-items: end;
-        }
-
-        .btn-add,
-        .customer-table a {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            border: none;
-            border-radius: 8px;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .btn-add {
-            padding: 11px 18px;
-            background-color: var(--primary-color);
-            color: var(--white);
-        }
-
-        .customer-table a {
-            padding: 8px 12px;
-            border: 1px solid var(--primary-color);
-            color: var(--primary-color);
-            background-color: var(--white);
-        }
-
-        .action-links {
-            display: flex;
-            gap: 8px;
-        }
-
-        .table-wrap {
-            overflow-x: auto;
-        }
-
-        .customer-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .customer-table th {
-            text-align: left;
-            padding: 12px 14px;
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--text-light);
-            text-transform: uppercase;
-            background-color: #faf8f4;
-            border-bottom: 1px solid var(--border-color);
-            white-space: nowrap;
-        }
-
-        .customer-table td {
-            padding: 14px;
-            font-size: 14px;
-            color: var(--text-dark);
-            border-bottom: 1px solid #f5f3ef;
-            vertical-align: middle;
-            white-space: nowrap;
-        }
-
-        .customer-table tr:hover {
-            background-color: #faf8f4;
-        }
-
-        .status {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 700;
-        }
-
-        .status-active {
-            background-color: #e8f5e9;
-            color: #2e7d32;
-        }
-
-        .status-inactive {
-            background-color: #fff3e0;
-            color: #e65100;
-        }
-
-        .empty-row {
-            text-align: center;
-            color: var(--text-light);
-        }
-
-        @media (max-width: 1024px) {
-            .customer-form {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .customer-page .page-header {
-                flex-direction: column;
-            }
-
-            .customer-form {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/layout.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/sidebar.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/header.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/customer-management.css">
+    <script src="${pageContext.request.contextPath}/Admin/js/customer-management.js" defer></script>
 </head>
 <body>
 <%@ include file="../Admin/layout/sidebar.jsp" %>
@@ -202,138 +23,331 @@
 <div class="main-content">
     <%@ include file="../Admin/layout/header.jsp" %>
 
-    <div id="page-content" class="customer-page">
-        <%
-            List<KhachHang> list = (List<KhachHang>) request.getAttribute("listKhachHang");
-        %>
+    <main id="page-content" class="customer-page">
+        <c:choose>
+            <c:when test="${customerEditMode}">
+                <c:url var="customerFormAction" value="/khach-hang/sua" />
+            </c:when>
+            <c:otherwise>
+                <c:url var="customerFormAction" value="/khach-hang/add" />
+            </c:otherwise>
+        </c:choose>
+        <c:set var="customerFormMustOpen"
+               value="${customerEditMode
+                        or not empty hoTenError
+                        or not empty emailError
+                        or not empty soDienThoaiError
+                        or not empty ngaySinhError
+                        or not empty gioiTinhError}" />
 
-        <div class="page-header">
-            <div>
-                <h1 class="page-title">Quản lý khách hàng</h1>
-                <p class="page-subtitle">Thêm và theo dõi trạng thái khách hàng</p>
+        <section class="customer-section" aria-labelledby="customer-page-title">
+            <div class="customer-header">
+                <div>
+                    <h1 id="customer-page-title" class="customer-title">Quản lý khách hàng</h1>
+                    <p class="customer-subtitle">Theo dõi thông tin và trạng thái của từng khách hàng.</p>
+                </div>
             </div>
-        </div>
 
-        <div class="customer-card">
-            <h3>Thêm khách hàng</h3>
-            <form method="post" action="<%= request.getContextPath() %>/khach-hang/add" class="customer-form">
-                <div class="form-group">
-                    <label>Mã khách hàng</label>
-                    <input type="text" name="maKhachHang" required>
+            <c:if test="${not empty successMessage}">
+                <div class="customer-alert customer-alert-success" role="status">
+                    <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+                    <span><c:out value="${successMessage}" /></span>
                 </div>
-                <div class="form-group">
-                    <label>Họ tên</label>
-                    <input type="text" name="hoTen" required>
+            </c:if>
+            <c:if test="${not empty errorMessage}">
+                <div class="customer-alert customer-alert-error" role="alert">
+                    <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+                    <span><c:out value="${errorMessage}" /></span>
                 </div>
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" name="email">
-                </div>
-                <div class="form-group">
-                    <label>Số điện thoại</label>
-                    <input type="text" name="soDienThoai">
-                </div>
-                <div class="form-group">
-                    <label>Mật khẩu</label>
-                    <input type="password" name="matKhau">
-                </div>
-                <div class="form-group">
-                    <label>Ngày sinh</label>
-                    <input type="date" name="ngaySinh">
-                </div>
-                <div class="form-group">
-                    <label>Giới tính</label>
-                    <select name="gioiTinh">
-                        <option value="">-- Chọn giới tính --</option>
-                        <option value="1">Nam</option>
-                        <option value="0">Nữ</option>
-                    </select>
-                </div>
-                <div class="form-actions">
-                    <button class="btn-add" type="submit">
-                        <i class="fas fa-plus"></i>
-                        <span>Thêm</span>
+            </c:if>
+            <div id="customer-form-panel"
+                 class="customer-form-panel"
+                 data-open="${customerFormMustOpen ? 'true' : 'false'}"
+                 data-server-error="${not empty hoTenError
+                              or not empty emailError
+                              or not empty soDienThoaiError
+                              or not empty ngaySinhError
+                              or not empty gioiTinhError ? 'true' : 'false'}"
+                 data-edit-mode="${customerEditMode ? 'true' : 'false'}"
+                 data-cancel-url="${pageContext.request.contextPath}/khach-hang/hien-thi"
+            ${customerFormMustOpen ? '' : 'hidden'}>
+                <section class="customer-card customer-form-card" aria-labelledby="customer-form-title">
+                    <div class="customer-card-heading">
+                        <div>
+                            <h2 id="customer-form-title">
+                                ${customerEditMode ? 'Chỉnh sửa khách hàng' : 'Thêm khách hàng'}
+                            </h2>
+                            <p>
+                                ${customerEditMode
+                                        ? 'Cập nhật thông tin khách hàng, không thay đổi mã và trạng thái.'
+                                        : 'Nhập thông tin để tạo khách hàng mới.'}
+                            </p>
+                        </div>
+                    </div>
+
+                    <c:if test="${customerEditMode}">
+                        <div class="customer-edit-summary" aria-label="Thông tin không thể chỉnh sửa">
+                            <div class="customer-summary-item">
+                                <span class="customer-summary-label">Mã khách hàng</span>
+                                <strong><c:out value="${editKhachHang.maKhachHang}" /></strong>
+                            </div>
+                            <div class="customer-summary-item">
+                                <span class="customer-summary-label">Trạng thái</span>
+                                <c:choose>
+                                    <c:when test="${editKhachHang.trangThai == 1}">
+                                        <span class="customer-status-badge customer-status-active">Hoạt động</span>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span class="customer-status-badge customer-status-inactive">Không hoạt động</span>
+                                    </c:otherwise>
+                                </c:choose>
+                            </div>
+                        </div>
+                    </c:if>
+
+                    <form method="post"
+                          action="${customerFormAction}"
+                          class="customer-management-form"
+                          data-customer-form
+                          novalidate>
+                        <c:if test="${customerEditMode}">
+                            <input type="hidden" name="id" value="<c:out value='${editKhachHang.id}' />">
+                        </c:if>
+
+                        <div class="customer-field">
+                            <label for="customer-full-name">Họ tên <span aria-hidden="true">*</span></label>
+                            <input id="customer-full-name"
+                                   class="customer-field-control"
+                                   type="text"
+                                   name="hoTen"
+                                   value="<c:out value='${formHoTen}' />"
+                                   maxlength="250"
+                                   autocomplete="name"
+                                   required
+                                   aria-invalid="${not empty hoTenError ? 'true' : 'false'}"
+                                   aria-describedby="customer-full-name-server-error customer-full-name-client-error">
+                            <span id="customer-full-name-server-error" class="customer-field-error"><c:out value="${hoTenError}" /></span>
+                            <span id="customer-full-name-client-error" class="customer-field-error" data-customer-client-error="hoTen" role="alert" hidden></span>
+                        </div>
+
+                        <div class="customer-field">
+                            <label for="customer-email">Email</label>
+                            <input id="customer-email"
+                                   class="customer-field-control"
+                                   type="email"
+                                   name="email"
+                                   value="<c:out value='${formEmail}' />"
+                                   maxlength="150"
+                                   autocomplete="email"
+                                   aria-invalid="${not empty emailError ? 'true' : 'false'}"
+                                   aria-describedby="customer-email-server-error customer-email-client-error">
+                            <span id="customer-email-server-error" class="customer-field-error"><c:out value="${emailError}" /></span>
+                            <span id="customer-email-client-error" class="customer-field-error" data-customer-client-error="email" role="alert" hidden></span>
+                        </div>
+
+                        <div class="customer-field">
+                            <label for="customer-phone">Số điện thoại <span aria-hidden="true">*</span></label>
+                            <input id="customer-phone"
+                                   class="customer-field-control"
+                                   type="tel"
+                                   name="soDienThoai"
+                                   value="<c:out value='${formSoDienThoai}' />"
+                                   inputmode="numeric"
+                                   maxlength="10"
+                                   autocomplete="tel"
+                                   required
+                                   aria-invalid="${not empty soDienThoaiError ? 'true' : 'false'}"
+                                   aria-describedby="customer-phone-server-error customer-phone-client-error">
+                            <span id="customer-phone-server-error" class="customer-field-error"><c:out value="${soDienThoaiError}" /></span>
+                            <span id="customer-phone-client-error" class="customer-field-error" data-customer-client-error="soDienThoai" role="alert" hidden></span>
+                        </div>
+
+                        <div class="customer-field">
+                            <label for="customer-birth-date">Ngày sinh</label>
+                            <input id="customer-birth-date"
+                                   class="customer-field-control"
+                                   type="date"
+                                   name="ngaySinh"
+                                   value="<c:out value='${formNgaySinh}' />"
+                                   aria-invalid="${not empty ngaySinhError ? 'true' : 'false'}"
+                                   aria-describedby="customer-birth-date-server-error customer-birth-date-client-error">
+                            <span id="customer-birth-date-server-error" class="customer-field-error"><c:out value="${ngaySinhError}" /></span>
+                            <span id="customer-birth-date-client-error" class="customer-field-error" data-customer-client-error="ngaySinh" role="alert" hidden></span>
+                        </div>
+
+                        <div class="customer-field">
+                            <label for="customer-gender">Giới tính <span aria-hidden="true">*</span></label>
+                            <select id="customer-gender"
+                                    name="gioiTinh"
+                                    class="customer-field-control"
+                                    required
+                                    aria-invalid="${not empty gioiTinhError ? 'true' : 'false'}"
+                                    aria-describedby="customer-gender-server-error customer-gender-client-error">
+                                <option value="">-- Chọn giới tính --</option>
+                                <option value="1"
+                                ${formGioiTinh == 1 ? 'selected' : ''}>
+                                    Nam
+                                </option>
+                                <option value="0"
+                                ${formGioiTinh == 0 ? 'selected' : ''}>
+                                    Nữ
+                                </option>
+                            </select>
+                            <span id="customer-gender-server-error" class="customer-field-error"><c:out value="${gioiTinhError}" /></span>
+                            <span id="customer-gender-client-error" class="customer-field-error" data-customer-client-error="gioiTinh" role="alert" hidden></span>
+                        </div>
+
+                        <div class="customer-form-actions">
+                            <button type="submit" class="customer-primary-button">
+                                <i class="fas ${customerEditMode ? 'fa-floppy-disk' : 'fa-plus'}" aria-hidden="true"></i>
+                                <span>${customerEditMode ? 'Cập nhật' : 'Thêm'}</span>
+                            </button>
+                            <button type="button"
+                                    id="customer-close-form"
+                                    class="customer-secondary-button">
+                                Hủy
+                            </button>
+                        </div>
+                    </form>
+                </section>
+            </div>
+
+
+            <div class="customer-search-card">
+                <form class="customer-search-form" data-customer-search-form role="search">
+                    <label class="customer-visually-hidden" for="customer-search">Tìm kiếm khách hàng</label>
+                    <div class="customer-search-input-wrapper">
+                        <i class="fas fa-search customer-search-icon" aria-hidden="true"></i>
+                        <input id="customer-search"
+                               type="search"
+                               placeholder="Tìm kiếm khách hàng..."
+                               autocomplete="off"
+                               data-customer-search-input>
+                    </div>
+                    <button type="submit" class="customer-search-btn">
+                        <i class="fas fa-search" aria-hidden="true"></i>
+                        Tìm kiếm
+                    </button>
+                    <button type="button" class="customer-clear-btn" data-clear-customer-search hidden>
+                        <i class="fas fa-times" aria-hidden="true"></i>
+                        Xóa bộ lọc
+                    </button>
+                </form>
+                <div class="customer-add-form-action">
+                    <button type="button"
+                            id="customer-toggle-form"
+                            class="customer-open-form-button customer-add-new-btn"
+                            aria-expanded="${customerFormMustOpen ? 'true' : 'false'}">
+                        <i class="fas fa-plus" aria-hidden="true"></i>
+                        Thêm khách hàng
                     </button>
                 </div>
-            </form>
-        </div>
+            </div>
 
-        <div class="customer-card">
-            <h3>Danh sách khách hàng</h3>
-            <div class="table-wrap">
-                <table class="customer-table">
+            <div class="customer-management-table-wrap"
+                 tabindex="0"
+                 role="region"
+                 aria-label="Danh sách khách hàng">
+                <table class="customer-management-table">
                     <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Mã khách hàng</th>
-                        <th>Họ tên</th>
-                        <th>Email</th>
-                        <th>Số điện thoại</th>
-                        <th>Ngày sinh</th>
-                        <th>Giới tính</th>
-                        <th>Trạng thái</th>
-                        <th>Hành động</th>
+                        <th scope="col">ID</th>
+                        <th scope="col">Mã khách hàng</th>
+                        <th scope="col">Họ tên</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Số điện thoại</th>
+                        <th scope="col">Ngày sinh</th>
+                        <th scope="col">Giới tính</th>
+                        <th scope="col">Trạng thái</th>
+                        <th scope="col">Thao tác</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <%
-                        if (list != null && !list.isEmpty()) {
-                            for (KhachHang kh : list) {
-                    %>
-                    <tr>
-                        <td><%= kh.getId() %></td>
-                        <td><%= kh.getMaKhachHang() %></td>
-                        <td><%= kh.getHoTen() %></td>
-                        <td><%= kh.getEmail() == null ? "" : kh.getEmail() %></td>
-                        <td><%= kh.getSoDienThoai() == null ? "" : kh.getSoDienThoai() %></td>
-                        <td><%= kh.getNgaySinh() == null ? "" : kh.getNgaySinh() %></td>
-                        <td>
-                            <%
-                                if (Integer.valueOf(1).equals(kh.getGioiTinh())) {
-                                    out.print("Nam");
-                                } else if (Integer.valueOf(0).equals(kh.getGioiTinh())) {
-                                    out.print("Nữ");
-                                } else {
-                                    out.print("");
-                                }
-                            %>
-                        </td>
-                        <td>
-                            <%
-                                if (Integer.valueOf(1).equals(kh.getTrangThai())) {
-                            %>
-                            <span class="status status-active">Hoạt động</span>
-                            <%
-                            } else {
-                            %>
-                            <span class="status status-inactive">Ngừng hoạt động</span>
-                            <%
-                                }
-                            %>
-                        </td>
-                        <td>
-                            <div class="action-links">
-                                <!-- Đã sửa chuẩn cú pháp gộp URL sạch sẽ -->
-                                <a href="<%= request.getContextPath() %>/khach-hang/doi-trang-thai?id=<%= kh.getId() %>">Đổi trạng thái</a>
-                                <a href="<%= request.getContextPath() %>/dia-chi-khach-hang/hien-thi?idKhachHang=<%= kh.getId() %>">Địa chỉ</a>
-                            </div>
-                        </td>
-                    </tr>
-                    <%
-                        }
-                    } else {
-                    %>
-                    <tr>
-                        <td class="empty-row" colspan="9">Không có khách hàng</td>
-                    </tr>
-                    <%
-                        }
-                    %>
+                    <c:choose>
+                        <c:when test="${not empty listKhachHang}">
+                            <c:forEach var="kh" items="${listKhachHang}">
+                                <tr data-customer-search-row>
+                                    <td><span class="customer-id">#${kh.id}</span></td>
+                                    <td><span class="customer-code"><c:out value="${kh.maKhachHang}" /></span></td>
+                                    <td><span class="customer-name"><c:out value="${kh.hoTen}" /></span></td>
+                                    <td><c:out value="${empty kh.email ? '-' : kh.email}" /></td>
+                                    <td><c:out value="${empty kh.soDienThoai ? '-' : kh.soDienThoai}" /></td>
+                                    <td>
+                                        <c:choose>
+                                            <c:when test="${not empty kh.ngaySinh}"><c:out value="${kh.ngaySinh}" /></c:when>
+                                            <c:otherwise>-</c:otherwise>
+                                        </c:choose>
+                                    </td>
+                                    <td>
+                                        <c:choose>
+                                            <c:when test="${kh.gioiTinh == 1}">Nam</c:when>
+                                            <c:when test="${kh.gioiTinh == 0}">Nữ</c:when>
+                                            <c:otherwise>-</c:otherwise>
+                                        </c:choose>
+                                    </td>
+                                    <td>
+                                        <c:choose>
+                                            <c:when test="${kh.trangThai == 1}">
+                                                <span class="customer-status-badge customer-status-active">Hoạt động</span>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <span class="customer-status-badge customer-status-inactive">Không hoạt động</span>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </td>
+                                    <td>
+                                        <div class="customer-action-buttons">
+                                            <a class="customer-action-btn customer-edit-btn"
+                                               href="${pageContext.request.contextPath}/khach-hang/sua?id=${kh.id}"
+                                               title="Sửa khách hàng"
+                                               aria-label="Sửa khách hàng">
+                                                <i class="fas fa-edit" aria-hidden="true"></i>
+                                            </a>
+                                            <a class="customer-action-btn customer-address-btn"
+                                               href="${pageContext.request.contextPath}/dia-chi-khach-hang/hien-thi?idKhachHang=${kh.id}"
+                                               title="Quản lý địa chỉ"
+                                               aria-label="Quản lý địa chỉ">
+                                                <i class="fas fa-location-dot" aria-hidden="true"></i>
+                                            </a>
+                                            <form method="post"
+                                                  action="${pageContext.request.contextPath}/khach-hang/doi-trang-thai"
+                                                  class="customer-action-form"
+                                                  data-customer-status-form>
+                                                <input type="hidden" name="id" value="${kh.id}">
+                                                <button type="submit"
+                                                        class="customer-action-btn customer-toggle-btn ${kh.trangThai == 1 ? 'customer-deactivate-btn' : 'customer-activate-btn'}"
+                                                        data-current-status="${kh.trangThai}"
+                                                        title="${kh.trangThai == 1 ? 'Ngừng hoạt động' : 'Kích hoạt'}"
+                                                        aria-label="${kh.trangThai == 1 ? 'Ngừng hoạt động khách hàng' : 'Kích hoạt khách hàng'}">
+                                                    <i class="fas ${kh.trangThai == 1 ? 'fa-ban' : 'fa-circle-check'}" aria-hidden="true"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                            <tr class="customer-search-empty-row" data-customer-search-empty hidden>
+                                <td colspan="9">
+                                    <i class="fas fa-inbox" aria-hidden="true"></i>
+                                    Không tìm thấy khách hàng phù hợp.
+                                </td>
+                            </tr>
+                        </c:when>
+                        <c:otherwise>
+                            <tr>
+                                <td class="customer-empty-row" colspan="9">
+                                    <i class="fas fa-inbox" aria-hidden="true"></i>
+                                    Chưa có khách hàng nào.
+                                </td>
+                            </tr>
+                        </c:otherwise>
+                    </c:choose>
                     </tbody>
                 </table>
             </div>
-        </div>
-    </div>
+        </section>
+
+    </main>
 </div>
 </body>
 </html>

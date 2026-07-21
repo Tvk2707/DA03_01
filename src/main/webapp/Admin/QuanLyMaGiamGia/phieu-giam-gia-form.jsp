@@ -23,8 +23,10 @@
 <%@ include file="../layout/sidebar.jsp" %>
 <div class="dashboard-container">
     <%@ include file="../layout/header.jsp" %>
+    <c:set var="isEditMode" value="${formMode == 'edit'}" />
 
     <main class="coupon-page">
+        <%-- Form thêm hoặc cập nhật phiếu: nhận coupon, formMode, formAction, errors từ Servlet --%>
         <div class="coupon-header">
             <div>
                 <h2>${formMode == 'edit' ? 'Sửa phiếu giảm giá' : 'Thêm phiếu giảm giá'}</h2>
@@ -39,13 +41,18 @@
             <div class="coupon-alert coupon-alert--error">${errorMessage}</div>
         </c:if>
         <section class="coupon-card">
-            <form id="couponForm" action="${formAction}" method="post" class="coupon-form">
+            <%-- Form thêm hoặc cập nhật phiếu --%>
+            <form id="couponForm" action="${formAction}" method="post" class="coupon-form" data-mode="${formMode}">
                 <input type="hidden" name="id" value="${coupon.id}">
+                <c:if test="${not empty errors.id}">
+                    <div class="coupon-alert coupon-alert--error">${errors.id}</div>
+                </c:if>
 
                 <div class="coupon-form-grid">
                     <label class="coupon-field">
                         <span>Mã giảm giá <em>*</em></span>
-                        <input class="coupon-code-input" type="text" name="maVoucher" maxlength="8" required readonly
+                        <%-- Mã phiếu chỉ hiển thị; backend tự sinh khi thêm và giữ mã cũ khi sửa --%>
+                        <input class="coupon-code-input" type="text" maxlength="8" readonly
                                value="${coupon.maVoucher}" placeholder="VC000001">
                         <c:if test="${not empty errors.maVoucher}">
                             <small class="coupon-error">${errors.maVoucher}</small>
@@ -132,31 +139,13 @@
                         </c:if>
                     </label>
 
-                    <div class="coupon-field coupon-radio-group">
-                        <span>Loại phiếu <em>*</em></span>
-                        <label>
-                            <input type="radio" name="loaiPhieu" value="public" <c:if test="${coupon.loaiPhieuFilterValue == 'public'}">checked</c:if>>
-                            Công khai
-                        </label>
-                        <label>
-                            <input type="radio" name="loaiPhieu" value="personal" <c:if test="${coupon.loaiPhieuFilterValue == 'personal'}">checked</c:if>>
-                            Cá nhân
-                        </label>
-                        <c:if test="${not empty errors.loaiPhieu}">
-                            <small class="coupon-error">${errors.loaiPhieu}</small>
-                        </c:if>
-                    </div>
-
-                    <label class="coupon-field">
-                        <span>Trạng thái <em>*</em></span>
-                        <select name="trangThai" required>
-                            <option value="1" <c:if test="${coupon.trangThai == 1}">selected</c:if>>Bật</option>
-                            <option value="0" <c:if test="${coupon.trangThai == 0}">selected</c:if>>Ngừng áp dụng</option>
-                        </select>
-                        <c:if test="${not empty errors.trangThai}">
-                            <small class="coupon-error">${errors.trangThai}</small>
-                        </c:if>
-                    </label>
+                    <c:if test="${isEditMode}">
+                        <div class="coupon-field">
+                            <span>Trạng thái hiện tại</span>
+                            <%-- Trạng thái chỉ hiển thị; bật/tắt dùng nút POST ở danh sách --%>
+                            <span class="coupon-status ${coupon.trangThaiCssClass}">${coupon.trangThaiHienThi}</span>
+                        </div>
+                    </c:if>
                 </div>
 
                 <div class="coupon-form-actions">
@@ -175,6 +164,7 @@
 
 <script>
     (function () {
+        // PHẦN 2: JavaScript hỗ trợ định dạng tiền/phần trăm trước khi gửi form
         const form = document.getElementById('couponForm');
         const discountType = document.getElementById('discountType');
         const discountValue = document.getElementById('discountValue');
@@ -182,8 +172,10 @@
         const maxDiscountGroup = document.getElementById('maxDiscountGroup');
         const maxDiscount = document.getElementById('maxDiscount');
         const moneyInputs = document.querySelectorAll('[data-money-input]');
+        let submitted = false;
 
         function extractDigits(value) {
+            // Định dạng tiền: lấy phần số để backend nhận số VND thuần.
             const text = String(value || '').trim();
             const decimalNumber = text.match(/^(\d+)[.,](0+)$/);
             if (decimalNumber) {
@@ -193,19 +185,23 @@
         }
 
         function formatMoneyInput(input) {
+            // Định dạng tiền theo kiểu Việt Nam để người dùng dễ đọc.
             const digits = extractDigits(input.value);
             input.value = digits ? Number(digits).toLocaleString('vi-VN') : '';
         }
 
         function normalizeMoneyInput(input) {
+            // Chuyển dữ liệu tiền về dạng số trước khi submit.
             input.value = extractDigits(input.value);
         }
 
         function normalizePercentInput(input) {
+            // Giữ giá trị phần trăm là số nguyên tối đa 3 chữ số.
             input.value = extractDigits(input.value).slice(0, 3);
         }
 
         function syncDiscountFields() {
+            // Thay đổi giao diện theo loại giảm.
             const isPercent = discountType.value === 'percent';
             discountUnit.textContent = isPercent ? '%' : 'VND';
             maxDiscountGroup.style.display = isPercent ? 'flex' : 'none';
@@ -238,7 +234,22 @@
         discountType.addEventListener('change', syncDiscountFields);
         syncDiscountFields();
 
-        form.addEventListener('submit', function () {
+        form.addEventListener('submit', function (event) {
+            // Hiển thị confirm và ngăn submit hai lần.
+            if (submitted) {
+                event.preventDefault();
+                return;
+            }
+
+            const message = form.dataset.mode === 'edit'
+                ? 'Bạn có chắc muốn cập nhật phiếu giảm giá này không?'
+                : 'Bạn có chắc muốn thêm phiếu giảm giá này không?';
+            if (!window.confirm(message)) {
+                event.preventDefault();
+                return;
+            }
+
+            // Chuyển dữ liệu tiền về dạng số trước khi submit.
             if (discountType.value === 'amount') {
                 normalizeMoneyInput(discountValue);
                 maxDiscount.value = '';
@@ -254,6 +265,7 @@
             if (button) {
                 button.disabled = true;
             }
+            submitted = true;
         });
     })();
 </script>
