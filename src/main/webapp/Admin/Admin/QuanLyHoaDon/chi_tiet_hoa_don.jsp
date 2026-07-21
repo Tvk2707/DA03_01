@@ -251,7 +251,7 @@
                 </div>
 
                 <div class="invoice-video-card">
-                    <h3><i class="far fa-user"></i> Thông tin nhận hàng</h3>
+                    <h3><i class="far fa-user"></i> Thông tin người nhận</h3>
                     <div class="invoice-shipping-grid">
                         <label class="invoice-field">
                             <span>Tên người nhận</span>

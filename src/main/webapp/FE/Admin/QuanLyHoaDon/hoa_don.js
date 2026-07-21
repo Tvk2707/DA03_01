@@ -168,7 +168,7 @@
         // Gọi chức năng in của trình duyệt.
         printButton.addEventListener('click', () => {
             window.print();
-            showToast('Đã mở cửa sổ in hóa đơn');
+            showToast('In hóa đơn thành công');
         });
 
         if (new URLSearchParams(window.location.search).get('print') === '1') {
