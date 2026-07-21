@@ -57,6 +57,39 @@ public class SanPham {
     // --- THÊM THUỘC TÍNH XÓA MỀM ---
     @Column(name = "isDeleted", nullable = false)
     private Boolean isDeleted = false;
+    // -- thêm số lượng , giá min max
+    @jakarta.persistence.Transient
+    private Integer tongSoLuong;
+
+    @jakarta.persistence.Transient
+    private Double giaMin;
+
+    @jakarta.persistence.Transient
+    private Double giaMax;
+
+    public Double getGiaMax() {
+        return giaMax;
+    }
+
+    public void setGiaMax(Double giaMax) {
+        this.giaMax = giaMax;
+    }
+
+    public Double getGiaMin() {
+        return giaMin;
+    }
+
+    public void setGiaMin(Double giaMin) {
+        this.giaMin = giaMin;
+    }
+
+    public Integer getTongSoLuong() {
+        return tongSoLuong;
+    }
+
+    public void setTongSoLuong(Integer tongSoLuong) {
+        this.tongSoLuong = tongSoLuong;
+    }
     // --------------------------------
 
     @OneToMany(mappedBy = "sanPham")
@@ -66,6 +99,10 @@ public class SanPham {
     private List<HinhAnhSanPham> hinhAnhSanPhams;
 
     public SanPham() {}
+
+    public SanPham(Integer id) {
+        this.id = id;
+    }
 
     public SanPham(Integer id, DanhMuc danhMuc, ThuongHieu thuongHieu, ChatLieu chatLieu, KieuDang kieuDang, GongKinh gongKinh, TrongKinh trongKinh, String maSanPham, String tenSanPham, String moTaChiTiet, LocalDateTime ngayTao, LocalDateTime ngaySua, Integer trangThai, List<SanPhamChiTiet> sanPhamChiTiets, List<HinhAnhSanPham> hinhAnhSanPhams) {
         this.id = id;

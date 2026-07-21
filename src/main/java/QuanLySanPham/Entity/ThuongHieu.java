@@ -25,6 +25,10 @@ public class ThuongHieu {
 
     public ThuongHieu() {}
 
+    public ThuongHieu(Integer id) {
+        this.id = id;
+    }
+
     public ThuongHieu(Integer id, String maThuongHieu, String tenThuongHieu, Integer trangThai, List<SanPham> sanPhams) {
         this.id = id;
         this.maThuongHieu = maThuongHieu;

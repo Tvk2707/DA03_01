@@ -3,9 +3,11 @@ package QuanLySanPham.controller;
 import QuanLySanPham.Entity.MauSac;
 import QuanLySanPham.service.LookupService;
 import QuanLySanPham.service.impl.LookupServiceImpl;
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
-import jakarta.servlet.annotation.*;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.util.List;
@@ -19,14 +21,14 @@ import java.util.List;
         "/MauSac/delete",
 })
 public class MauSacServlet extends HttpServlet {
-    private LookupService lookupService = new LookupServiceImpl();
+    private final LookupService lookupService = new LookupServiceImpl();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String path = request.getServletPath();
         switch (path) {
             case "/MauSac":
-                ShowMauSac(request, response);
+                showMauSac(request, response);
                 break;
             case "/MauSac/new":
                 showAddMauSac(request, response);
@@ -34,7 +36,9 @@ public class MauSacServlet extends HttpServlet {
             case "/MauSac/edit":
                 showEditMauSac(request, response);
                 break;
-
+            default:
+                showMauSac(request, response);
+                break;
         }
     }
 
@@ -51,10 +55,13 @@ public class MauSacServlet extends HttpServlet {
             case "/MauSac/delete":
                 deleteMauSac(request, response);
                 break;
+            default:
+                showMauSac(request, response);
+                break;
         }
     }
 
-    private void ShowMauSac(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void showMauSac(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String keyword = request.getParameter("keyword");
         List<MauSac> items;
 
@@ -64,61 +71,100 @@ public class MauSacServlet extends HttpServlet {
         } else {
             items = lookupService.layTatCaMauSac();
         }
-        //List<MauSac> items = lookupService.layTatCaMauSac();
+
         request.setAttribute("items", items);
+        request.setAttribute("activeMenu", "product");
+        request.setAttribute("activeSubMenu", "color");
         request.getRequestDispatcher("/Admin/QuanLyBienThe/MauSac.jsp").forward(request, response);
     }
 
     private void showAddMauSac(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.setAttribute("mauSac", new MauSac());
         request.getRequestDispatcher("/Admin/QuanLyBienThe/MauSac.jsp").forward(request, response);
     }
 
     private void showEditMauSac(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        Integer id = Integer.parseInt(request.getParameter("id"));
-        MauSac mauSac = lookupService.layMauSacTheoId(id);
-        request.setAttribute("mauSac", mauSac);
-        request.getRequestDispatcher("/Admin/QuanLyBienThe/MauSac.jsp").forward(request, response);
+        try {
+            int id = Integer.parseInt(request.getParameter("id"));
+            MauSac mauSac = lookupService.layMauSacTheoId(id);
+            if (mauSac == null) {
+                response.sendRedirect(request.getContextPath() + "/MauSac");
+                return;
+            }
+            request.setAttribute("mauSac", mauSac);
+            request.getRequestDispatcher("/Admin/QuanLyBienThe/MauSac.jsp").forward(request, response);
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/MauSac");
+        }
     }
 
     private void insertMauSac(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        MauSac mauSac = getMauSacFron(request);
+        MauSac mauSac = getMauSacFromRequest(request);
         try {
             lookupService.themMauSac(mauSac);
             response.sendRedirect(request.getContextPath() + "/MauSac");
-        } catch (RuntimeException e) {
+        } catch (IllegalArgumentException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("mauSac", mauSac);
-            request.getRequestDispatcher("/Admin/QuanLyBienThe/MauSac.jsp").forward(request, response);
+            showMauSac(request, response);
         }
     }
 
     private void updateMauSac(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        MauSac mauSac = getMauSacFron(request);
-        mauSac.setId(Integer.parseInt(request.getParameter("id")));
+        MauSac mauSac = getMauSacFromRequest(request);
         try {
+            String idStr = request.getParameter("id");
+            mauSac.setId(Integer.parseInt(idStr));
             lookupService.capNhatMauSac(mauSac);
             response.sendRedirect(request.getContextPath() + "/MauSac");
-        } catch (RuntimeException e) {
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/MauSac");
+        } catch (IllegalArgumentException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("mauSac", mauSac);
-            request.getRequestDispatcher("/Admin/QuanLyBienThe/MauSac.jsp").forward(request, response);
+            showMauSac(request, response);
         }
     }
 
-    private void deleteMauSac(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        Integer id = Integer.parseInt(request.getParameter("id"));
-        lookupService.xoaMauSac(id);
-        response.sendRedirect(request.getContextPath() + "/MauSac");
+    private void deleteMauSac(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        try {
+            int id = Integer.parseInt(request.getParameter("id"));
+            lookupService.xoaMauSac(id);
+            response.sendRedirect(request.getContextPath() + "/MauSac");
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/MauSac");
+        } catch (Exception e) {
+            request.setAttribute("errorMessage", "Không thể xóa màu sắc này vì có sản phẩm đang sử dụng.");
+            showMauSac(request, response);
+        }
     }
 
-    private MauSac getMauSacFron(HttpServletRequest request) {
-        String MaMau = request.getParameter("maMau");
+    private MauSac getMauSacFromRequest(HttpServletRequest request) {
+        String maMau = request.getParameter("maMau");
         String tenMau = request.getParameter("tenMau");
-        Integer trangThai = Integer.parseInt(request.getParameter("trangThai"));
+        String trangThaiStr = request.getParameter("trangthai");
+
         MauSac mauSac = new MauSac();
-        mauSac.setMaMau(MaMau);
+        mauSac.setMaMau(maMau);
         mauSac.setTenMau(tenMau);
-        mauSac.setTrangThai(trangThai);
+
+        try {
+            if (trangThaiStr != null && !trangThaiStr.isEmpty()) {
+                mauSac.setTrangThai(Integer.parseInt(trangThaiStr));
+            }
+        } catch (NumberFormatException e) {
+            // Handle invalid status format if necessary
+        }
+        
+        String idStr = request.getParameter("id");
+        if (idStr != null && !idStr.trim().isEmpty()) {
+            try {
+                mauSac.setId(Integer.parseInt(idStr));
+            } catch (NumberFormatException e) {
+                // Ignore if ID is not a valid number
+            }
+        }
+
         return mauSac;
     }
 }

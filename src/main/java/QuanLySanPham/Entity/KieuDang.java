@@ -22,6 +22,10 @@ public class KieuDang {
 
     public KieuDang() {}
 
+    public KieuDang(Integer id) {
+        this.id = id;
+    }
+
     public KieuDang(Integer id, String tenKieuDang, Integer trangThai, List<SanPham> sanPhams) {
         this.id = id;
         this.tenKieuDang = tenKieuDang;

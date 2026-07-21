@@ -6,6 +6,7 @@ import QuanLySanPham.Utils.EntityManagerUtlis;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.TypedQuery;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SanPhamChiTietDaoImpl extends GenericDaoImpl<SanPhamChiTiet, Integer> implements SanPhamChiTietDao {
@@ -165,6 +166,56 @@ public class SanPhamChiTietDaoImpl extends GenericDaoImpl<SanPhamChiTiet, Intege
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Lỗi khi tìm kiếm chi tiết sản phẩm", e);
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public List<SanPhamChiTiet> saveAll(List<SanPhamChiTiet> danhSach) {
+        EntityManager em = EntityManagerUtlis.getEntityManager();
+        EntityTransaction transaction = em.getTransaction();
+        List<SanPhamChiTiet> result = new ArrayList<>();
+        try {
+            transaction.begin();
+            for (SanPhamChiTiet spct : danhSach) {
+                em.persist(spct);
+                result.add(spct);
+            }
+            em.flush();
+            transaction.commit();
+            return result;
+        } catch (Exception e) {
+            if (transaction != null && transaction.isActive()) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi lưu hàng loạt chi tiết sản phẩm", e);
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public List<SanPhamChiTiet> updateAll(List<SanPhamChiTiet> danhSach) {
+        EntityManager em = EntityManagerUtlis.getEntityManager();
+        EntityTransaction transaction = em.getTransaction();
+        List<SanPhamChiTiet> result = new ArrayList<>();
+        try {
+            transaction.begin();
+            for (SanPhamChiTiet spct : danhSach) {
+                SanPhamChiTiet updated = em.merge(spct);
+                result.add(updated);
+            }
+            em.flush();
+            transaction.commit();
+            return result;
+        } catch (Exception e) {
+            if (transaction != null && transaction.isActive()) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi cập nhật hàng loạt chi tiết sản phẩm", e);
         } finally {
             em.close();
         }

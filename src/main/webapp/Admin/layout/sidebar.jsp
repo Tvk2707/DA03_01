@@ -27,7 +27,7 @@
             <div class="menu-title">Trang chủ</div>
             <ul class="menu-list">
                 <li class="menu-item">
-                    <a href="../Thongke.jsp" class="menu-link <%= "dashboard".equals(activeMenu) ? "active" : "" %>">
+                    <a href="${pageContext.request.contextPath}/admin/thong-ke" class="menu-link <%= "dashboard".equals(activeMenu) ? "active" : "" %>">
                         <i class="fas fa-chart-bar"></i>
                         <span>Thống kê</span>
                     </a>
@@ -53,7 +53,7 @@
             <ul class="menu-list">
 
                 <li class="menu-item">
-                    <a href="#" class="menu-link <%= "invoice".equals(activeMenu) ? "active" : "" %>">
+                    <a href="${pageContext.request.contextPath}/admin/hoa-don" class="menu-link <%= "invoice".equals(activeMenu) ? "active" : "" %>">
                         <i class="fas fa-file-invoice"></i>
                         <span>Quản lý hoá đơn</span>
                     </a>
@@ -104,20 +104,20 @@
                 </li>
 
                 <li class="menu-item">
-                    <a href="../QuanLyMaGiamGia/quan_ly_giam_gia.jsp"
+                    <a href="${pageContext.request.contextPath}/PhieuGiamGia"
                        class="menu-link <%= "discount".equals(activeMenu) ? "active" : "" %>">
                         <i class="fas fa-tags"></i>
                         <span>Quản lý giảm giá</span>
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="#" class="menu-link <%= "customer".equals(activeMenu) ? "active" : "" %>">
+                    <a href="${pageContext.request.contextPath}/khach-hang/hien-thi" class="menu-link <%= "customer".equals(activeMenu) ? "active" : "" %>">
                         <i class="fas fa-users"></i>
                         <span>Quản lý khách hàng</span>
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="#" class="menu-link <%= "employee".equals(activeMenu) ? "active" : "" %>">
+                    <a href="${pageContext.request.contextPath}/NhanVien" class="menu-link <%= "employee".equals(activeMenu) ? "active" : "" %>">
                         <i class="fas fa-user-tie"></i>
                         <span>Quản lý nhân viên</span>
                     </a>

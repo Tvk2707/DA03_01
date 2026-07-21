@@ -70,7 +70,7 @@
                 <td class="table-cell--highlight">% 30%</td>
                 <td>18 sản phẩm</td>
                 <td>
-                    <span class="badge badge--secondary">Đã kết thúc</span>
+                    <span class="badge badge--secondary">Kết thúc</span>
                 </td>
                 <td>
                     <div class="action-buttons">

@@ -1,28 +1,22 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <header class="admin-header">
-    <!-- Left: Breadcrumb -->
     <div class="header-left">
         <button class="back-button">
             <i class="fas fa-chevron-left"></i>
         </button>
         <nav class="breadcrumb">
-            <div class="breadcrumb-item">
-                <a href="#" class="breadcrumb-link">Admin</a>
+            <div class="breadcrumb-item active" style="font-size: 16px; font-weight: 600;">
+                <span><%= request.getAttribute("pageTitle") %></span>
             </div>
-            <div class="breadcrumb-item active">
-                <span><%= request.getAttribute("pageTitle") %></span>            </div>
         </nav>
     </div>
 
-    <!-- Right: User Menu -->
     <div class="header-right">
-        <!-- Notification -->
         <button class="notification-btn">
             <i class="fas fa-bell"></i>
             <span class="notification-badge"></span>
         </button>
 
-        <!-- User Profile -->
         <div class="user-profile" id="userProfile">
             <div class="user-info">
                 <div class="user-name">Admin Tuấn</div>
@@ -30,7 +24,6 @@
             </div>
             <div class="user-avatar">AT</div>
 
-            <!-- Dropdown Menu -->
             <div class="user-dropdown" id="userDropdown">
                 <div class="dropdown-header">
                     <div class="user-name">Admin Tuấn</div>

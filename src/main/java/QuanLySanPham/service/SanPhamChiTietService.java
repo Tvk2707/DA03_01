@@ -8,27 +8,26 @@ import java.util.List;
  */
 public interface SanPhamChiTietService {
     List<SanPhamChiTiet> timKiem(Integer sanPhamId, String ma, Integer mauSacId, Integer kichCoId, Integer trangThai);
+
     /**
-     * Thêm biến thể sản phẩm mới
+     * Thêm danh sách biến thể sản phẩm mới
      */
-    SanPhamChiTiet themBienThe(SanPhamChiTiet sanPhamChiTiet);
-    
+    List<SanPhamChiTiet> themBienThe(List<SanPhamChiTiet> danhSach);
+
     /**
-     * Cập nhật biến thể sản phẩm
+     * Cập nhật danh sách biến thể sản phẩm
      */
-    SanPhamChiTiet capNhatBienThe(SanPhamChiTiet sanPhamChiTiet);
-    
+    List<SanPhamChiTiet> capNhatDanhSachBienThe(List<SanPhamChiTiet> danhSach);
+
     /**
      * Xóa biến thể sản phẩm theo ID
      */
     void xoaBienThe(Integer id);
-    
+
     /**
      * Lấy danh sách biến thể theo ID sản phẩm
      */
-    List<SanPhamChiTiet> layTheoSanPham(Integer sanPhamId);
-    SanPhamChiTiet timBienTheTheoSanPhamId(Integer sanPhamId);
-
+    List<SanPhamChiTiet> timBienTheTheoSanPhamId(Integer sanPhamId);
 
     /**
      * Cập nhật tồn kho

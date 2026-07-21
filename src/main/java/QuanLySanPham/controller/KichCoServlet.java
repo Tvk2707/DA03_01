@@ -3,9 +3,11 @@ package QuanLySanPham.controller;
 import QuanLySanPham.Entity.KichCo;
 import QuanLySanPham.service.LookupService;
 import QuanLySanPham.service.impl.LookupServiceImpl;
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
-import jakarta.servlet.annotation.*;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.util.List;
@@ -19,14 +21,14 @@ import java.util.List;
         "/KichCo/delete",
 })
 public class KichCoServlet extends HttpServlet {
-    private LookupService lookupService = new LookupServiceImpl();
+    private final LookupService lookupService = new LookupServiceImpl();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String path = request.getServletPath();
         switch (path) {
             case "/KichCo":
-                ShowKichCo(request, response);
+                showKichCo(request, response);
                 break;
             case "/KichCo/new":
                 showAddKichCo(request, response);
@@ -34,7 +36,9 @@ public class KichCoServlet extends HttpServlet {
             case "/KichCo/edit":
                 showEditKichCo(request, response);
                 break;
-
+            default:
+                showKichCo(request, response);
+                break;
         }
     }
 
@@ -51,10 +55,13 @@ public class KichCoServlet extends HttpServlet {
             case "/KichCo/delete":
                 deleteKichCo(request, response);
                 break;
+            default:
+                showKichCo(request, response);
+                break;
         }
     }
 
-    private void ShowKichCo(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private void showKichCo(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String keyword = request.getParameter("keyword");
         List<KichCo> items;
 
@@ -64,57 +71,98 @@ public class KichCoServlet extends HttpServlet {
         } else {
             items = lookupService.layTatCaKichCo();
         }
-        //List<KichCo> items = lookupService.layTatCaKichCo();
+
         request.setAttribute("items", items);
+        request.setAttribute("activeMenu", "product");
+        request.setAttribute("activeSubMenu", "size");
         request.getRequestDispatcher("/Admin/QuanLyBienThe/KichCo.jsp").forward(request, response);
     }
 
     private void showAddKichCo(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.setAttribute("kichCo", new KichCo());
         request.getRequestDispatcher("/Admin/QuanLyBienThe/KichCo.jsp").forward(request, response);
     }
 
     private void showEditKichCo(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        Integer id = Integer.parseInt(request.getParameter("id"));
-        KichCo kichCo = lookupService.layKichCoTheoId(id);
-        request.setAttribute("kichCo", kichCo);
-        request.getRequestDispatcher("/Admin/QuanLyBienThe/KichCo.jsp").forward(request, response);
+        try {
+            int id = Integer.parseInt(request.getParameter("id"));
+            KichCo kichCo = lookupService.layKichCoTheoId(id);
+            if (kichCo == null) {
+                response.sendRedirect(request.getContextPath() + "/KichCo");
+                return;
+            }
+            request.setAttribute("kichCo", kichCo);
+            request.getRequestDispatcher("/Admin/QuanLyBienThe/KichCo.jsp").forward(request, response);
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/KichCo");
+        }
     }
 
     private void insertKichCo(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        KichCo kichCo = getKichCoFron(request);
+        KichCo kichCo = getKichCoFromRequest(request);
         try {
             lookupService.themKichCo(kichCo);
             response.sendRedirect(request.getContextPath() + "/KichCo");
-        } catch (RuntimeException e) {
+        } catch (IllegalArgumentException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("kichCo", kichCo);
-            request.getRequestDispatcher("/Admin/QuanLyBienThe/KichCo.jsp").forward(request, response);
+            showKichCo(request, response);
         }
     }
 
     private void updateKichCo(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        KichCo kichCo = getKichCoFron(request);
-        kichCo.setId(Integer.parseInt(request.getParameter("id")));
+        KichCo kichCo = getKichCoFromRequest(request);
         try {
+            String idStr = request.getParameter("id");
+            kichCo.setId(Integer.parseInt(idStr));
             lookupService.capNhatKichCo(kichCo);
             response.sendRedirect(request.getContextPath() + "/KichCo");
-        } catch (RuntimeException e) {
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/KichCo");
+        } catch (IllegalArgumentException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.setAttribute("kichCo", kichCo);
-            request.getRequestDispatcher("/Admin/QuanLyBienThe/KichCo.jsp").forward(request, response);
+            showKichCo(request, response);
         }
     }
 
-    private void deleteKichCo(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        Integer id = Integer.parseInt(request.getParameter("id"));
-        lookupService.xoaKichCo(id);
-        response.sendRedirect(request.getContextPath() + "/KichCo");
+    private void deleteKichCo(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        try {
+            int id = Integer.parseInt(request.getParameter("id"));
+            lookupService.xoaKichCo(id);
+            response.sendRedirect(request.getContextPath() + "/KichCo");
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/KichCo");
+        } catch (Exception e) {
+            request.setAttribute("errorMessage", "Không thể xóa kích cỡ này vì có sản phẩm đang sử dụng.");
+            showKichCo(request, response);
+        }
     }
 
-    private KichCo getKichCoFron(HttpServletRequest request) {
+    private KichCo getKichCoFromRequest(HttpServletRequest request) {
         String tenKichCo = request.getParameter("tenKichCo");
+        String trangThaiStr = request.getParameter("trangthai");
+
         KichCo kichCo = new KichCo();
         kichCo.setTenKichCo(tenKichCo);
+
+        try {
+            if (trangThaiStr != null && !trangThaiStr.isEmpty()) {
+                kichCo.setTrangThai(Integer.parseInt(trangThaiStr));
+            }
+        } catch (NumberFormatException e) {
+            // Handle invalid status format if necessary
+        }
+        
+        String idStr = request.getParameter("id");
+        if (idStr != null && !idStr.trim().isEmpty()) {
+            try {
+                kichCo.setId(Integer.parseInt(idStr));
+            } catch (NumberFormatException e) {
+                // Ignore if ID is not a valid number
+            }
+        }
+
         return kichCo;
     }
 }

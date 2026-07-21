@@ -22,6 +22,10 @@ public class ChatLieu {
 
     public ChatLieu() {}
 
+    public ChatLieu(Integer id) {
+        this.id = id;
+    }
+
     public ChatLieu(Integer id, String tenChatLieu, Integer trangThai, List<SanPham> sanPhams) {
         this.id = id;
         this.tenChatLieu = tenChatLieu;
