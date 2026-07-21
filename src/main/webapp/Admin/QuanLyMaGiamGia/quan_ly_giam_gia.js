@@ -177,6 +177,7 @@ function fallbackCopy(text, button) {
 }
 
 function formatCurrency(amount) {
+    // Định dạng tiền VND để hiển thị trên giao diện phiếu giảm giá.
     return new Intl.NumberFormat('vi-VN', {
         style: 'currency',
         currency: 'VND'
@@ -227,6 +228,7 @@ function initCouponActionIcons() {
 }
 
 function setupBootstrapValidation(form, options) {
+    // Validate frontend chỉ hỗ trợ người dùng; backend trong Servlet vẫn là bắt buộc.
     if (!form) {
         return null;
     }
@@ -234,6 +236,7 @@ function setupBootstrapValidation(form, options) {
     var settings = options || {};
     var rules = settings.rules || {};
     var submitted = false;
+    var confirmedSubmit = false;
     var fields = form.querySelectorAll('input, select, textarea');
 
     function getUsableFields() {
@@ -378,6 +381,13 @@ function setupBootstrapValidation(form, options) {
     });
 
     form.addEventListener('submit', function(event) {
+        // Ngăn submit hai lần sau khi confirm đã đồng ý.
+        if (confirmedSubmit) {
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
+
         submitted = true;
         form.classList.add('was-validated');
 
@@ -387,10 +397,18 @@ function setupBootstrapValidation(form, options) {
             return;
         }
 
-        if (settings.confirmMessage && !window.confirm(settings.confirmMessage)) {
+        var confirmMessage = typeof settings.confirmMessage === 'function'
+            ? settings.confirmMessage(form)
+            : settings.confirmMessage;
+
+        // Hiển thị confirm trước khi thêm hoặc cập nhật phiếu.
+        if (confirmMessage && !window.confirm(confirmMessage)) {
             event.preventDefault();
             event.stopPropagation();
+            return;
         }
+
+        confirmedSubmit = true;
     });
 
     return {
@@ -500,7 +518,6 @@ function initCouponSearchAutocomplete() {
             var text = normalizeCouponSearch(
                 coupon.maPhieu + ' ' +
                 coupon.tenPhieu + ' ' +
-                coupon.loaiPhieu + ' ' +
                 coupon.giamGia + ' ' +
                 coupon.donToiThieu + ' ' +
                 coupon.soLuong + ' ' +
@@ -572,20 +589,19 @@ function readCouponsFromTable(table) {
     rows.forEach(function(row) {
         var cells = row.querySelectorAll('td');
 
-        if (cells.length < 10 || row.querySelector('[colspan]')) {
+        if (cells.length < 9 || row.querySelector('[colspan]')) {
             return;
         }
 
         result.push({
             maPhieu: cells[1].textContent.trim(),
             tenPhieu: cells[2].textContent.trim(),
-            loaiPhieu: cells[3].textContent.trim(),
-            giamGia: cells[4].textContent.trim(),
-            donToiThieu: cells[5].textContent.trim(),
-            soLuong: cells[6].textContent.trim(),
-            ngayBatDau: cells[7].textContent.trim(),
-            ngayKetThuc: cells[8].textContent.trim(),
-            trangThai: cells[9].textContent.trim()
+            giamGia: cells[3].textContent.trim(),
+            donToiThieu: cells[4].textContent.trim(),
+            soLuong: cells[5].textContent.trim(),
+            ngayBatDau: cells[6].textContent.trim(),
+            ngayKetThuc: cells[7].textContent.trim(),
+            trangThai: cells[8].textContent.trim()
         });
     });
 
@@ -614,7 +630,6 @@ function renderCouponSuggestion(coupon, index) {
         '<div class="coupon-search-suggestion__grid">',
         renderCouponMeta('Mã phiếu', coupon.maPhieu),
         renderCouponMeta('Tên phiếu', coupon.tenPhieu),
-        renderCouponMeta('Loại phiếu', coupon.loaiPhieu),
         renderCouponMeta('Giảm giá', coupon.giamGia),
         renderCouponMeta('Đơn tối thiểu', coupon.donToiThieu),
         renderCouponMeta('Số lượng', coupon.soLuong),

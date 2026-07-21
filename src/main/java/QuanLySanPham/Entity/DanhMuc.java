@@ -25,6 +25,10 @@ public class DanhMuc {
 
     public DanhMuc() {}
 
+    public DanhMuc(Integer id) {
+        this.id = id;
+    }
+
     public DanhMuc(Integer id, String maDanhMuc, String tenDanhMuc, Integer trangThai, List<SanPham> sanPhams) {
         this.id = id;
         this.maDanhMuc = maDanhMuc;

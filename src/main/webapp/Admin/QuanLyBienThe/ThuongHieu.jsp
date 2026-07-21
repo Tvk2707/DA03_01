@@ -94,26 +94,28 @@
 <div id="addCategoryModal" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-header">
-            <h3>Thêm Mới Danh Mục</h3>
+            <h3>Thêm Mới Thương Hiệu</h3>
             <span class="close-btn" onclick="closeAddModal()">&times;</span>
         </div>
         <form action="${pageContext.request.contextPath}/ThuongHieu/insert" method="post">
             <div class="modal-body">
                 <div class="form-group">
                     <label for="maThuongHieu">Mã thương hiệu</label>
-                    <input type="text" id="maThuongHieu" name="maThuongHieu" placeholder="Nhập mã thương hiệu (ví dụ: TH006)" required>
+                    <input type="text" id="maThuongHieu" name="maThuongHieu" value="${thuongHieu.maThuongHieu}" placeholder="Nhập mã thương hiệu (ví dụ: TH006)">
+                    <span class="error-message">${errors.maThuongHieu}</span>
                 </div>
 
                 <div class="form-group">
                     <label for="tenThuongHieu">Tên thương hiệu</label>
-                    <input type="text" id="tenThuongHieu" name="tenThuongHieu" placeholder="Nhập tên thương hiệu" required>
+                    <input type="text" id="tenThuongHieu" name="tenThuongHieu" value="${thuongHieu.tenThuongHieu}" placeholder="Nhập tên thương hiệu">
+                    <span class="error-message">${errors.tenThuongHieu}</span>
                 </div>
 
                 <div class="form-group">
                     <label for="trangthai">Trạng thái</label>
                     <select id="trangthai" name="trangthai">
-                        <option value="1">Hoạt động</option>
-                        <option value="0">Không hoạt động</option>
+                        <option value="1" ${thuongHieu.trangThai == 1 ? 'selected' : ''}>Hoạt động</option>
+                        <option value="0" ${thuongHieu.trangThai == 0 ? 'selected' : ''}>Không hoạt động</option>
                     </select>
                 </div>
             </div>
@@ -142,7 +144,8 @@
 
                 <div class="form-group">
                     <label for="editTenThuongHieu">Tên thương hiệu</label>
-                    <input type="text" id="editTenThuongHieu" name="tenThuongHieu" value="${thuongHieu.tenThuongHieu}" placeholder="Nhập tên thương hiệu" required>
+                    <input type="text" id="editTenThuongHieu" name="tenThuongHieu" value="${thuongHieu.tenThuongHieu}" placeholder="Nhập tên thương hiệu">
+                     <span class="error-message">${errors.tenThuongHieu}</span>
                 </div>
 
                 <div class="form-group">
@@ -162,7 +165,6 @@
 </div>
 
 <script>
-    // --- XỬ LÝ MODAL THÊM MỚI ---
     function openAddModal() {
         document.getElementById("addCategoryModal").style.display = "flex";
     }
@@ -171,15 +173,11 @@
         document.getElementById("addCategoryModal").style.display = "none";
     }
 
-    // --- XỬ LÝ MODAL SỬA ---
     function openEditModal(id, maThuongHieu, tenThuongHieu, trangThai) {
-        // Đổ dữ liệu từ hàng được click vào các ô input trong Modal Sửa
         document.getElementById("editId").value = id;
         document.getElementById("editMaThuongHieu").value = maThuongHieu;
         document.getElementById("editTenThuongHieu").value = tenThuongHieu;
         document.getElementById("editTrangThai").value = trangThai;
-
-        // Hiển thị modal sửa lên màn hình
         document.getElementById("editCategoryModal").style.display = "flex";
     }
 
@@ -187,7 +185,6 @@
         document.getElementById("editCategoryModal").style.display = "none";
     }
 
-    // --- ĐÓNG MODAL KHI CLICK RA NGOÀI VÙNG NỀN TỐI ---
     window.onclick = function(event) {
         let addModal = document.getElementById("addCategoryModal");
         let editModal = document.getElementById("editCategoryModal");
@@ -199,6 +196,17 @@
             editModal.style.display = "none";
         }
     }
+
+    <c:if test="${not empty errors}">
+        <c:choose>
+            <c:when test="${not empty thuongHieu.id}">
+                document.getElementById("editCategoryModal").style.display = "flex";
+            </c:when>
+            <c:otherwise>
+                document.getElementById("addCategoryModal").style.display = "flex";
+            </c:otherwise>
+        </c:choose>
+    </c:if>
 </script>
 </body>
 </html>

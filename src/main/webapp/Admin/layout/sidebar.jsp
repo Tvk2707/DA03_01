@@ -27,7 +27,7 @@
             <div class="menu-title">Trang chủ</div>
             <ul class="menu-list">
                 <li class="menu-item">
-                    <a href="../Thongke.jsp" class="menu-link <%= "dashboard".equals(activeMenu) ? "active" : "" %>">
+                    <a href="${pageContext.request.contextPath}/admin/thong-ke" class="menu-link <%= "dashboard".equals(activeMenu) ? "active" : "" %>">
                         <i class="fas fa-chart-bar"></i>
                         <span>Thống kê</span>
                     </a>
@@ -117,7 +117,7 @@
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="#" class="menu-link <%= "employee".equals(activeMenu) ? "active" : "" %>">
+                    <a href="${pageContext.request.contextPath}/NhanVien" class="menu-link <%= "employee".equals(activeMenu) ? "active" : "" %>">
                         <i class="fas fa-user-tie"></i>
                         <span>Quản lý nhân viên</span>
                     </a>

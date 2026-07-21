@@ -140,3 +140,4 @@ public class ChiTietHoaDonView {
         this.tongTien = tongTien;
     }
 }
+

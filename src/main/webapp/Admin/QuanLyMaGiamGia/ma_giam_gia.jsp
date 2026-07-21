@@ -2,7 +2,6 @@
 
 <div class="filters">
     <button class="filter-btn filter-btn--active" data-filter="all" type="button">Tất cả</button>
-    <button class="filter-btn" data-filter="public" type="button">Công khai</button>
 </div>
 
 <div class="coupons-grid">
@@ -14,9 +13,6 @@
                     <button class="btn-icon btn-copy" title="Sao chép" type="button">
                         <i class="far fa-copy"></i>
                     </button>
-                </div>
-                <div class="coupon-card__badges">
-                    <span class="badge badge--public">Công khai</span>
                 </div>
             </div>
             <p class="coupon-card__desc">Giảm 15% toàn bộ đơn hàng</p>
@@ -71,9 +67,6 @@
                     <button class="btn-icon btn-copy" title="Sao chép" type="button">
                         <i class="far fa-copy"></i>
                     </button>
-                </div>
-                <div class="coupon-card__badges">
-                    <span class="badge badge--public">Công khai</span>
                 </div>
             </div>
             <p class="coupon-card__desc">Giảm 500k cho đơn từ 3 triệu</p>

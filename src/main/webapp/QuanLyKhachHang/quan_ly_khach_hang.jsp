@@ -1,197 +1,294 @@
-<%@ page import="QuanLySanPham.Entity.KhachHang" %>
-<%@ page import="java.util.List" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%
     request.setAttribute("pageTitle", "Quản lý khách hàng");
-    request.setAttribute("activeMenu", "khachhang");
+    request.setAttribute("activeMenu", "customer");
 %>
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý khách hàng - RIOR Admin</title>
-
-    <!-- FontAwesome từ CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- Đường dẫn bộ CSS tuyệt đối -->
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/Admin/css/layout.css">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/Admin/css/sidebar.css">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/Admin/css/header.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/layout.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/sidebar.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/header.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/danhmuc.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/customer-management.css">
+    <script src="${pageContext.request.contextPath}/Admin/js/customer-management.js" defer></script>
 
     <style>
-        .customer-page .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 16px;
-            margin-bottom: 24px;
+        body {
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
         }
 
-        .customer-page .page-title {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--text-dark);
-            margin-bottom: 4px;
+        .main-content {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
         }
 
-        .customer-page .page-subtitle {
-            font-size: 14px;
-            color: var(--text-light);
+        .dashboard-container {
+            margin-left: 260px !important;
+            padding: 24px 32px !important;
+            min-height: 100vh;
+            box-sizing: border-box !important;
+            transition: all 0.3s ease;
         }
 
-        .customer-card {
-            background-color: var(--white);
-            border: 1px solid var(--border-color);
+        .category-section {
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+        }
+
+        .filter-section {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
             border-radius: 12px;
-            box-shadow: var(--shadow);
-            padding: 24px;
+            padding: 20px;
             margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
-        .customer-card h3 {
-            font-size: 18px;
-            color: var(--text-dark);
-            margin-bottom: 18px;
+        .filter-header {
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f3f4f6;
         }
 
-        .customer-form {
+        .filter-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-title i {
+            color: #b4975a;
+        }
+
+        .filter-grid-kh {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: 1fr;
             gap: 16px;
         }
 
-        .form-group label {
-            display: block;
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .filter-label {
             font-size: 13px;
             font-weight: 600;
-            color: var(--text-dark);
-            margin-bottom: 6px;
+            color: #4b5563;
         }
 
-        .form-group input,
-        .form-group select {
+        .filter-input, .filter-select {
             width: 100%;
-            padding: 10px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background-color: var(--white);
+            height: 40px;
+            padding: 8px 12px;
             font-size: 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            background-color: #ffffff;
+            color: #1f2937;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        }
+
+        .filter-input:focus, .filter-select:focus {
+            border-color: #b4975a !important;
             outline: none;
+            box-shadow: 0 0 0 3px rgba(180, 151, 90, 0.15);
         }
 
-        .form-group input:focus,
-        .form-group select:focus {
-            border-color: var(--primary-color);
-        }
-
-        .form-actions {
+        .filter-action-row {
             display: flex;
-            align-items: end;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px dashed #e5e7eb;
         }
 
-        .btn-add,
-        .customer-table a {
+        .filter-action-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .add-new-btn {
+            background-color: #b4975a !important;
+            color: #ffffff !important;
+            border: none !important;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            border: none;
+            transition: background-color 0.2s ease;
+            text-decoration: none;
+        }
+
+        .add-new-btn:hover {
+            background-color: #9a8048 !important;
+        }
+
+        .btn-secondary-outline {
+            background: #ffffff !important;
+            color: #4b5563 !important;
+            border: 1px solid #d1d5db !important;
+            padding: 10px 20px;
             border-radius: 8px;
             text-decoration: none;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .btn-add {
-            padding: 11px 18px;
-            background-color: var(--primary-color);
-            color: var(--white);
-        }
-
-        .customer-table a {
-            padding: 8px 12px;
-            border: 1px solid var(--primary-color);
-            color: var(--primary-color);
-            background-color: var(--white);
-        }
-
-        .action-links {
-            display: flex;
+            display: inline-flex;
+            align-items: center;
             gap: 8px;
-        }
-
-        .table-wrap {
-            overflow-x: auto;
-        }
-
-        .customer-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .customer-table th {
-            text-align: left;
-            padding: 12px 14px;
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--text-light);
-            text-transform: uppercase;
-            background-color: #faf8f4;
-            border-bottom: 1px solid var(--border-color);
-            white-space: nowrap;
-        }
-
-        .customer-table td {
-            padding: 14px;
+            font-weight: 600;
             font-size: 14px;
-            color: var(--text-dark);
-            border-bottom: 1px solid #f5f3ef;
-            vertical-align: middle;
-            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
 
-        .customer-table tr:hover {
-            background-color: #faf8f4;
+        .btn-secondary-outline:hover {
+            background: #f9fafb !important;
+            border-color: #9ca3af !important;
+            color: #1f2937 !important;
         }
 
-        .status {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 700;
+        .table-toolbar {
+            position: sticky;
+            top: 70px;
+            background: #ffffff;
+            z-index: 90;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+            margin-top: 24px;
+            border: 1px solid #e5e7eb;
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
 
-        .status-active {
+        .toolbar-left-results {
+            font-size: 14px;
+            font-weight: 500;
+            color: #4b5563;
+        }
+
+        .table-wrapper {
+            width: 100% !important;
+            max-width: 100% !important;
+            overflow-x: auto !important;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            box-sizing: border-box !important;
+        }
+
+        .category-table,
+        .customer-management-table {
+            margin-top: 0 !important;
+            border: none !important;
+            border-radius: 0 !important;
+            width: 100% !important;
+            min-width: 1000px !important;
+            table-layout: fixed !important;
+            border-collapse: collapse !important;
+        }
+
+        .category-table th,
+        .customer-management-table th {
+            padding: 12px 10px !important;
+            font-size: 13px !important;
+            white-space: nowrap !important;
+            background-color: #f9fafb !important;
+            color: #374151 !important;
+            font-weight: 700 !important;
+            border-bottom: 1px solid #e5e7eb !important;
+            text-align: left !important;
+        }
+
+        .category-table td,
+        .customer-management-table td {
+            padding: 12px 10px !important;
+            font-size: 13px !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            border-bottom: 1px solid #f3f4f6 !important;
+            color: #374151 !important;
+        }
+
+        .col-id { width: 5%; }
+        .col-code { width: 11%; }
+        .col-name { width: 16%; }
+        .col-email { width: 18%; }
+        .col-phone { width: 12%; }
+        .col-dob { width: 10%; }
+        .col-gender { width: 8%; }
+        .col-status { width: 10%; }
+        .col-action { width: 10%; }
+
+        .action-buttons {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .toast-custom {
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            z-index: 1000000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .toast-success-style {
             background-color: #e8f5e9;
             color: #2e7d32;
+            border: 1px solid #c8e6c9;
         }
 
-        .status-inactive {
-            background-color: #fff3e0;
-            color: #e65100;
+        .toast-error-style {
+            background-color: #fdecea;
+            color: #b3261e;
+            border: 1px solid #fad2cf;
         }
 
-        .empty-row {
-            text-align: center;
-            color: var(--text-light);
+        .customer-field-error {
+            color: #dc2626;
+            font-size: 12px;
+            margin-top: 4px;
+            display: block;
         }
 
-        @media (max-width: 1024px) {
-            .customer-form {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .customer-page .page-header {
-                flex-direction: column;
-            }
-
-            .customer-form {
-                grid-template-columns: 1fr;
+        @media (max-width: 992px) {
+            .dashboard-container {
+                margin-left: 0 !important;
+                padding: 16px !important;
             }
         }
     </style>
@@ -199,141 +296,338 @@
 <body>
 <%@ include file="../Admin/layout/sidebar.jsp" %>
 
-<div class="main-content">
+<div class="dashboard-container">
     <%@ include file="../Admin/layout/header.jsp" %>
 
-    <div id="page-content" class="customer-page">
-        <%
-            List<KhachHang> list = (List<KhachHang>) request.getAttribute("listKhachHang");
-        %>
+    <!-- ĐÃ THÊM CLASS customer-page ĐỂ KẾT NỐI VỚI JS -->
+    <div class="category-section customer-page">
+        <c:choose>
+            <c:when test="${customerEditMode}">
+                <c:url var="customerFormAction" value="/khach-hang/sua" />
+            </c:when>
+            <c:otherwise>
+                <c:url var="customerFormAction" value="/khach-hang/add" />
+            </c:otherwise>
+        </c:choose>
 
-        <div class="page-header">
-            <div>
-                <h1 class="page-title">Quản lý khách hàng</h1>
-                <p class="page-subtitle">Thêm và theo dõi trạng thái khách hàng</p>
-            </div>
+        <c:set var="customerFormMustOpen"
+               value="${customerEditMode
+                        or not empty hoTenError
+                        or not empty emailError
+                        or not empty soDienThoaiError
+                        or not empty ngaySinhError
+                        or not empty gioiTinhError}" />
+
+        <div class="category-header">
+            <h2 class="category-title">Quản lý khách hàng</h2>
         </div>
 
-        <div class="customer-card">
-            <h3>Thêm khách hàng</h3>
-            <form method="post" action="<%= request.getContextPath() %>/khach-hang/add" class="customer-form">
-                <div class="form-group">
-                    <label>Mã khách hàng</label>
-                    <input type="text" name="maKhachHang" required>
+        <!-- THÔNG BÁO TOAST -->
+        <div id="toast-container"></div>
+        <c:if test="${not empty successMessage}">
+            <div id="toast-msg" class="toast-custom toast-success-style">
+                <i class="fa-solid fa-circle-check"></i>
+                <span><c:out value="${successMessage}" /></span>
+            </div>
+        </c:if>
+        <c:if test="${not empty errorMessage}">
+            <div id="toast-msg" class="toast-custom toast-error-style">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span><c:out value="${errorMessage}" /></span>
+            </div>
+        </c:if>
+
+        <!-- FORM THÊM / CHỈNH SỬA KHÁCH HÀNG -->
+        <div id="customer-form-panel"
+             class="customer-form-panel"
+             data-open="${customerFormMustOpen ? 'true' : 'false'}"
+             data-server-error="${not empty hoTenError
+                          or not empty emailError
+                          or not empty soDienThoaiError
+                          or not empty ngaySinhError
+                          or not empty gioiTinhError ? 'true' : 'false'}"
+             data-edit-mode="${customerEditMode ? 'true' : 'false'}"
+             data-cancel-url="${pageContext.request.contextPath}/khach-hang/hien-thi"
+        ${customerFormMustOpen ? '' : 'hidden'}>
+            <section class="customer-card customer-form-card" aria-labelledby="customer-form-title" style="margin-bottom: 24px;">
+                <div class="customer-card-heading">
+                    <div>
+                        <h2 id="customer-form-title">
+                            ${customerEditMode ? 'Chỉnh sửa khách hàng' : 'Thêm khách hàng'}
+                        </h2>
+                        <p>
+                            ${customerEditMode
+                                    ? 'Cập nhật thông tin khách hàng, không thay đổi mã và trạng thái.'
+                                    : 'Nhập thông tin để tạo khách hàng mới.'}
+                        </p>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Họ tên</label>
-                    <input type="text" name="hoTen" required>
+
+                <c:if test="${customerEditMode}">
+                    <div class="customer-edit-summary" aria-label="Thông tin không thể chỉnh sửa">
+                        <div class="customer-summary-item">
+                            <span class="customer-summary-label">Mã khách hàng</span>
+                            <strong><c:out value="${editKhachHang.maKhachHang}" /></strong>
+                        </div>
+                        <div class="customer-summary-item">
+                            <span class="customer-summary-label">Trạng thái</span>
+                            <c:choose>
+                                <c:when test="${editKhachHang.trangThai == 1}">
+                                    <span class="category-status status-active">Hoạt động</span>
+                                </c:when>
+                                <c:otherwise>
+                                    <span class="category-status status-inactive">Không hoạt động</span>
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+                    </div>
+                </c:if>
+
+                <form method="post"
+                      action="${customerFormAction}"
+                      class="customer-management-form"
+                      data-customer-form
+                      novalidate>
+                    <c:if test="${customerEditMode}">
+                        <input type="hidden" name="id" value="<c:out value='${editKhachHang.id}' />">
+                    </c:if>
+
+                    <div class="customer-field">
+                        <label for="customer-full-name">Họ tên <span aria-hidden="true">*</span></label>
+                        <input id="customer-full-name"
+                               class="filter-input"
+                               type="text"
+                               name="hoTen"
+                               value="<c:out value='${formHoTen}' />"
+                               maxlength="250"
+                               autocomplete="name"
+                               required>
+                        <span id="customer-full-name-server-error" data-customer-client-error="hoTen" class="customer-field-error"><c:out value="${hoTenError}" /></span>
+                    </div>
+
+                    <div class="customer-field">
+                        <label for="customer-email">Email</label>
+                        <input id="customer-email"
+                               class="filter-input"
+                               type="email"
+                               name="email"
+                               value="<c:out value='${formEmail}' />"
+                               maxlength="150">
+                        <span id="customer-email-server-error" data-customer-client-error="email" class="customer-field-error"><c:out value="${emailError}" /></span>
+                    </div>
+
+                    <div class="customer-field">
+                        <label for="customer-phone">Số điện thoại <span aria-hidden="true">*</span></label>
+                        <input id="customer-phone"
+                               class="filter-input"
+                               type="tel"
+                               name="soDienThoai"
+                               value="<c:out value='${formSoDienThoai}' />"
+                               maxlength="10"
+                               required>
+                        <span id="customer-phone-server-error" data-customer-client-error="soDienThoai" class="customer-field-error"><c:out value="${soDienThoaiError}" /></span>
+                    </div>
+
+                    <div class="customer-field">
+                        <label for="customer-birth-date">Ngày sinh</label>
+                        <input id="customer-birth-date"
+                               class="filter-input"
+                               type="date"
+                               name="ngaySinh"
+                               value="<c:out value='${formNgaySinh}' />">
+                        <span id="customer-birth-date-server-error" data-customer-client-error="ngaySinh" class="customer-field-error"><c:out value="${ngaySinhError}" /></span>
+                    </div>
+
+                    <div class="customer-field">
+                        <label for="customer-gender">Giới tính <span aria-hidden="true">*</span></label>
+                        <select id="customer-gender"
+                                name="gioiTinh"
+                                class="filter-select"
+                                required>
+                            <option value="">-- Chọn giới tính --</option>
+                            <option value="1" ${formGioiTinh == 1 ? 'selected' : ''}>Nam</option>
+                            <option value="0" ${formGioiTinh == 0 ? 'selected' : ''}>Nữ</option>
+                        </select>
+                        <span id="customer-gender-server-error" data-customer-client-error="gioiTinh" class="customer-field-error"><c:out value="${gioiTinhError}" /></span>
+                    </div>
+
+                    <div class="customer-form-actions" style="margin-top: 16px; display: flex; gap: 12px;">
+                        <button type="submit" class="add-new-btn">
+                            <i class="fas ${customerEditMode ? 'fa-floppy-disk' : 'fa-plus'}"></i>
+                            <span>${customerEditMode ? 'Cập nhật' : 'Thêm'}</span>
+                        </button>
+                        <button type="button" id="customer-close-form" class="btn-secondary-outline">
+                            Hủy
+                        </button>
+                    </div>
+                </form>
+            </section>
+        </div>
+
+        <!-- BỘ LỌC TÌM KIẾM -->
+        <div class="filter-section">
+            <div class="filter-header">
+                <div class="filter-title">
+                    <i class="fas fa-filter"></i>
+                    Bộ lọc tìm kiếm
                 </div>
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" name="email">
+            </div>
+
+            <form class="customer-search-form" data-customer-search-form role="search">
+                <div class="filter-grid-kh">
+                    <div class="filter-group">
+                        <label class="filter-label" for="customer-search">Tìm kiếm khách hàng</label>
+                        <input id="customer-search"
+                               type="search"
+                               class="filter-input"
+                               placeholder="Tìm kiếm theo mã, họ tên, sđt, email..."
+                               autocomplete="off"
+                               data-customer-search-input>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Số điện thoại</label>
-                    <input type="text" name="soDienThoai">
-                </div>
-                <div class="form-group">
-                    <label>Mật khẩu</label>
-                    <input type="password" name="matKhau">
-                </div>
-                <div class="form-group">
-                    <label>Ngày sinh</label>
-                    <input type="date" name="ngaySinh">
-                </div>
-                <div class="form-group">
-                    <label>Giới tính</label>
-                    <select name="gioiTinh">
-                        <option value="">-- Chọn giới tính --</option>
-                        <option value="1">Nam</option>
-                        <option value="0">Nữ</option>
-                    </select>
-                </div>
-                <div class="form-actions">
-                    <button class="btn-add" type="submit">
-                        <i class="fas fa-plus"></i>
-                        <span>Thêm</span>
-                    </button>
+
+                <div class="filter-action-row">
+                    <div class="filter-action-left"></div>
+                    <div class="filter-action-right">
+                        <button type="submit" class="add-new-btn" style="padding: 10px 24px;">
+                            <i class="fas fa-search"></i> Tìm kiếm
+                        </button>
+                        <button type="button" class="btn-secondary-outline" data-clear-customer-search hidden>
+                            <i class="fas fa-times"></i> Xóa bộ lọc
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
 
-        <div class="customer-card">
-            <h3>Danh sách khách hàng</h3>
-            <div class="table-wrap">
-                <table class="customer-table">
-                    <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Mã khách hàng</th>
-                        <th>Họ tên</th>
-                        <th>Email</th>
-                        <th>Số điện thoại</th>
-                        <th>Ngày sinh</th>
-                        <th>Giới tính</th>
-                        <th>Trạng thái</th>
-                        <th>Hành động</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <%
-                        if (list != null && !list.isEmpty()) {
-                            for (KhachHang kh : list) {
-                    %>
-                    <tr>
-                        <td><%= kh.getId() %></td>
-                        <td><%= kh.getMaKhachHang() %></td>
-                        <td><%= kh.getHoTen() %></td>
-                        <td><%= kh.getEmail() == null ? "" : kh.getEmail() %></td>
-                        <td><%= kh.getSoDienThoai() == null ? "" : kh.getSoDienThoai() %></td>
-                        <td><%= kh.getNgaySinh() == null ? "" : kh.getNgaySinh() %></td>
-                        <td>
-                            <%
-                                if (Integer.valueOf(1).equals(kh.getGioiTinh())) {
-                                    out.print("Nam");
-                                } else if (Integer.valueOf(0).equals(kh.getGioiTinh())) {
-                                    out.print("Nữ");
-                                } else {
-                                    out.print("");
-                                }
-                            %>
-                        </td>
-                        <td>
-                            <%
-                                if (Integer.valueOf(1).equals(kh.getTrangThai())) {
-                            %>
-                            <span class="status status-active">Hoạt động</span>
-                            <%
-                            } else {
-                            %>
-                            <span class="status status-inactive">Ngừng hoạt động</span>
-                            <%
-                                }
-                            %>
-                        </td>
-                        <td>
-                            <div class="action-links">
-                                <!-- Đã sửa chuẩn cú pháp gộp URL sạch sẽ -->
-                                <a href="<%= request.getContextPath() %>/khach-hang/doi-trang-thai?id=<%= kh.getId() %>">Đổi trạng thái</a>
-                                <a href="<%= request.getContextPath() %>/dia-chi-khach-hang/hien-thi?idKhachHang=<%= kh.getId() %>">Địa chỉ</a>
-                            </div>
-                        </td>
-                    </tr>
-                    <%
-                        }
-                    } else {
-                    %>
-                    <tr>
-                        <td class="empty-row" colspan="9">Không có khách hàng</td>
-                    </tr>
-                    <%
-                        }
-                    %>
-                    </tbody>
-                </table>
+        <!-- TOOLBAR CỐ ĐỊNH -->
+        <div class="table-toolbar">
+            <div class="toolbar-left-results">
+                Danh sách khách hàng
             </div>
+            <div>
+                <button type="button"
+                        id="customer-toggle-form"
+                        class="add-new-btn customer-open-form-button"
+                        aria-expanded="${customerFormMustOpen ? 'true' : 'false'}"
+                        style="padding: 10px 20px;">
+                    <i class="fas fa-plus"></i> Thêm khách hàng
+                </button>
+            </div>
+        </div>
+
+        <!-- BẢNG DỮ LIỆU KHÁCH HÀNG -->
+        <div class="table-wrapper">
+            <table class="category-table customer-management-table">
+                <thead>
+                <tr>
+                    <th scope="col" class="col-id">ID</th>
+                    <th scope="col" class="col-code">Mã khách hàng</th>
+                    <th scope="col" class="col-name">Họ tên</th>
+                    <th scope="col" class="col-email">Email</th>
+                    <th scope="col" class="col-phone">Số điện thoại</th>
+                    <th scope="col" class="col-dob">Ngày sinh</th>
+                    <th scope="col" class="col-gender">Giới tính</th>
+                    <th scope="col" class="col-status">Trạng thái</th>
+                    <th scope="col" class="col-action">Thao tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                <c:choose>
+                    <c:when test="${not empty listKhachHang}">
+                        <c:forEach var="kh" items="${listKhachHang}">
+                            <tr data-customer-search-row>
+                                <td><span class="category-id">#${kh.id}</span></td>
+                                <td><strong style="color: #1f2937;"><c:out value="${kh.maKhachHang}" /></strong></td>
+                                <td><strong><c:out value="${kh.hoTen}" /></strong></td>
+                                <td title="${kh.email}"><c:out value="${empty kh.email ? '-' : kh.email}" /></td>
+                                <td><c:out value="${empty kh.soDienThoai ? '-' : kh.soDienThoai}" /></td>
+                                <td>
+                                    <c:choose>
+                                        <c:when test="${not empty kh.ngaySinh}"><c:out value="${kh.ngaySinh}" /></c:when>
+                                        <c:otherwise>-</c:otherwise>
+                                    </c:choose>
+                                </td>
+                                <td>
+                                    <c:choose>
+                                        <c:when test="${kh.gioiTinh == 1}">Nam</c:when>
+                                        <c:when test="${kh.gioiTinh == 0}">Nữ</c:when>
+                                        <c:otherwise>-</c:otherwise>
+                                    </c:choose>
+                                </td>
+                                <td>
+                                    <c:choose>
+                                        <c:when test="${kh.trangThai == 1}">
+                                            <span class="category-status status-active">Hoạt động</span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <span class="category-status status-inactive">Không hoạt động</span>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a class="btn-icon-circle btn-view"
+                                           href="${pageContext.request.contextPath}/khach-hang/sua?id=${kh.id}"
+                                           title="Sửa khách hàng">
+                                            <i class="fas fa-pen"></i>
+                                        </a>
+                                        <a class="btn-icon-circle"
+                                           href="${pageContext.request.contextPath}/dia-chi-khach-hang/hien-thi?idKhachHang=${kh.id}"
+                                           title="Quản lý địa chỉ"
+                                           style="background: #e0f2fe; color: #0284c7;">
+                                            <i class="fas fa-location-dot"></i>
+                                        </a>
+                                        <form method="post"
+                                              action="${pageContext.request.contextPath}/khach-hang/doi-trang-thai"
+                                              style="display: inline;"
+                                              data-customer-status-form>
+                                            <input type="hidden" name="id" value="${kh.id}">
+                                            <button type="submit"
+                                                    class="btn-icon-circle"
+                                                    data-current-status="${kh.trangThai}"
+                                                    title="${kh.trangThai == 1 ? 'Ngừng hoạt động' : 'Kích hoạt'}"
+                                                    style="border: none; cursor: pointer; background: ${kh.trangThai == 1 ? '#fee2e2' : '#dcfce7'}; color: ${kh.trangThai == 1 ? '#dc2626' : '#16a34a'};">
+                                                <i class="fas ${kh.trangThai == 1 ? 'fa-ban' : 'fa-circle-check'}"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </c:forEach>
+                        <tr class="customer-search-empty-row" data-customer-search-empty hidden>
+                            <td colspan="9" style="text-align: center; padding: 30px; color: #888;">
+                                <i class="fas fa-inbox" style="font-size: 24px; margin-bottom: 10px; display: block;"></i>
+                                Không tìm thấy khách hàng phù hợp.
+                            </td>
+                        </tr>
+                    </c:when>
+                    <c:otherwise>
+                        <tr>
+                            <td colspan="9" style="text-align: center; padding: 30px; color: #888;">
+                                <i class="fas fa-inbox" style="font-size: 24px; margin-bottom: 10px; display: block;"></i>
+                                Chưa có khách hàng nào.
+                            </td>
+                        </tr>
+                    </c:otherwise>
+                </c:choose>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const toast = document.getElementById("toast-msg");
+        if (toast) {
+            setTimeout(function () {
+                toast.style.opacity = "0";
+                toast.style.transform = "translateY(-10px)";
+                setTimeout(function () { toast.remove(); }, 500);
+            }, 3000);
+        }
+    });
+</script>
 </body>
 </html>

@@ -1,0 +1,66 @@
+/* Reset & Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-color: #b8956a;
+    --primary-dark: #9a7d55;
+    --secondary-color: #d4c4a8;
+    --bg-color: #f5f3ef;
+    --white: #ffffff;
+    --text-dark: #4a4a4a;
+    --text-light: #888888;
+    --border-color: #e8e4dc;
+    --shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-dark);
+    line-height: 1.6;
+}
+
+/* Layout Container */
+.admin-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Main Content Area */
+.main-content {
+    flex: 1;
+    margin-left: 280px;
+    background-color: var(--bg-color);
+    min-height: 100vh;
+    transition: margin-left 0.3s ease;
+}
+
+#page-content {
+    padding: 24px;
+    min-height: calc(100vh - 70px);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .main-content {
+        margin-left: 0;
+    }
+
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+}
+
+@media (max-width: 768px) {
+    #page-content {
+        padding: 16px;
+    }
+}

@@ -1,6 +1,7 @@
 <%
     request.setAttribute("pageTitle", "Biến thể sản phẩm");
-    request.setAttribute("activeSubMenu", "productt");
+    request.setAttribute("activeMenu", "product");
+    request.setAttribute("activeSubMenu", "product-detail");
 %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
@@ -11,11 +12,11 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Biến thể sản phẩm</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/layout.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/sidebar.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/header.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/danhmuc.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/Admin/css/sanpham.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/FE/Admin/css/layout.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/FE/Admin/css/sidebar.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/FE/Admin/css/header.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/FE/Admin/css/danhmuc.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/FE/Admin/css/sanpham.css?v=20260718-fullscreen">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Thư viện bổ sung phục vụ tính năng QR và Download ZIP -->
@@ -221,7 +222,7 @@
 </head>
 <body>
 <div class="admin-layout">
-    <jsp:include page="../layout/sidebar.jsp"/>
+    <jsp:include page="/Admin/layout/sidebar.jsp"/>
     <div class="main-content">
         <jsp:include page="../layout/header.jsp"/>
         <div id="page-content">
@@ -229,13 +230,39 @@
                 <div class="category-header" style="display: flex; justify-content: space-between; align-items: center;">
                     <h2 class="category-title">Biến Thể Sản Phẩm</h2>
 
-                    <button type="button" class="add-new-btn" id="btnOpenScanner" style="background-color: #2b6cb0;">
+                    <button type="button" class="add-new-btn" id="btnOpenScanner" style="background-color: #b4975a;">
                         <i class="fas fa-camera"></i> Quét QR Sản Phẩm
                     </button>
                 </div>
 
                 <div class="filter-section">
                     <form action="${pageContext.request.contextPath}/SanPhamChiTiet" method="get" id="filterForm">
+
+                        <c:if test="${not empty sessionScope.success}">
+                            <div style="background:#e6f4ea;color:#34a853;padding:12px 16px;border-radius:8px;margin-bottom:16px;">
+                                <i class="fas fa-check-circle"></i> ${sessionScope.success}
+                            </div>
+                            <c:remove var="success" scope="session"/>
+                        </c:if>
+
+                        <c:if test="${not empty sessionScope.error}">
+                            <div style="background:#fdecea;color:#b3261e;padding:12px 16px;border-radius:8px;margin-bottom:16px;">
+                                <i class="fas fa-circle-exclamation"></i> ${sessionScope.error}
+                            </div>
+                            <c:remove var="error" scope="session"/>
+                        </c:if>
+                        <c:if test="${not empty sanPhamDuocLoc}">
+                            <div style="background-color: #fdfaf6; color: #5c4d3c; padding: 14px 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e2d8c9; display: flex; justify-content: space-between; align-items: center;">
+                                <div style="font-size: 15px;">
+                                    <i class="fas fa-filter" style="margin-right: 6px; color: #b4975a;"></i>
+                                    Đang lọc biến thể thuộc sản phẩm: <strong style="font-size: 16px; color: #1f2937;">${sanPhamDuocLoc.maSanPham} - ${sanPhamDuocLoc.tenSanPham}</strong>
+                                </div>
+
+                                <a href="${pageContext.request.contextPath}/SanPhamChiTiet" style="background-color: #b4975a; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: opacity 0.2s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+                                    <i class="fas fa-th-list"></i> Hiện đầy đủ danh sách
+                                </a>
+                            </div>
+                        </c:if>
                         <input type="hidden" name="sanPhamId" value="${sanPhamId}">
                         <div class="filter-grid">
                             <div class="filter-group">

@@ -22,6 +22,10 @@ public class KichCo {
 
     public KichCo() {}
 
+    public KichCo(Integer id) {
+        this.id = id;
+    }
+
     public KichCo(Integer id, String tenKichCo, Integer trangThai, List<SanPhamChiTiet> sanPhamChiTiets) {
         this.id = id;
         this.tenKichCo = tenKichCo;

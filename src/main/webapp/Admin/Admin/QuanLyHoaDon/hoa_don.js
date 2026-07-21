@@ -157,8 +157,11 @@
             const header = ['STT', 'Mã hóa đơn', 'Nhân viên', 'Khách hàng', 'Số điện thoại', 'Loại hóa đơn', 'Tổng tiền', 'Ngày tạo', 'Trạng thái'];
             const lines = [header.join(',')];
 
-            visibleRows.forEach((row) => {
-                const cells = Array.from(row.children).slice(0, 9).map((cell) => {
+            visibleRows.forEach((row, index) => {
+                const cells = Array.from(row.children).slice(0, 9).map((cell, cellIndex) => {
+                    if (cellIndex === 0) {
+                        return String(index + 1);
+                    }
                     return '"' + cell.innerText.replace(/\s+/g, ' ').trim().replace(/"/g, '""') + '"';
                 });
                 lines.push(cells.join(','));
