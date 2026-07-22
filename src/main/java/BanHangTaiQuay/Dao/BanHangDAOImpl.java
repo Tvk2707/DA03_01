@@ -1,6 +1,7 @@
 package BanHangTaiQuay.Dao;
 
 import QuanLySanPham.Entity.ChiTietHoaDon;
+import QuanLySanPham.Entity.CaLamViec;
 import QuanLySanPham.Entity.HoaDon;
 import QuanLySanPham.Entity.LichSuHoaDon;
 import QuanLySanPham.Entity.ThanhToanHoaDon;
@@ -18,6 +19,13 @@ public class BanHangDAOImpl implements BanHangDAO {
         EntityManager em = EntityManagerUtlis.getEntityManager();
         try {
             em.getTransaction().begin();
+
+            // Đổi object CaLamViec chỉ có ID thành reference đang được quản lý bởi EntityManager.
+            if (hd.getCa() != null && hd.getCa().getId() != null) {
+                CaLamViec ca = em.getReference(CaLamViec.class, hd.getCa().getId());
+                hd.setCa(ca);
+            }
+
             em.persist(hd);
             em.getTransaction().commit();
             return hd;
@@ -75,6 +83,24 @@ public class BanHangDAOImpl implements BanHangDAO {
             TypedQuery<HoaDon> query = em.createQuery(jpql, HoaDon.class);
             query.setParameter("idNhanVien", idNhanVien);
             return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public Integer timCaDangMo(int idNhanVien) {
+        EntityManager em = EntityManagerUtlis.getEntityManager();
+        try {
+            String jpql = "SELECT c.id FROM CaLamViec c "
+                    + "WHERE c.nhanVien.id = :idNhanVien "
+                    + "AND c.thoiGianKetThuc IS NULL "
+                    + "ORDER BY c.thoiGianBatDau DESC";
+            TypedQuery<Integer> query = em.createQuery(jpql, Integer.class);
+            query.setParameter("idNhanVien", idNhanVien);
+            query.setMaxResults(1);
+            List<Integer> caDangMo = query.getResultList();
+            return caDangMo.isEmpty() ? null : caDangMo.get(0);
         } finally {
             em.close();
         }

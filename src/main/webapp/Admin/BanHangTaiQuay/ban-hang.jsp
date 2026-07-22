@@ -261,7 +261,7 @@
                     <c:forEach var="hd" items="${danhSachHoaDonCho}">
                         <div class="tab ${hd.id == idHoaDonDangTao ? 'active' : ''}" data-hoadon="${hd.id}">
                             <span class="dot"></span>
-                            Đơn #${hd.id} · ${empty hd.khachHang ? 'Khách lẻ' : hd.khachHang.soDienThoai}
+                            Đơn #${hd.id} · ${hd.maHoaDon}
 
                             <!-- Nút X để xóa hóa đơn -->
                             <button class="btn-close-tab" onclick="xoaHoaDonCho(event, ${hd.id})" title="Hủy đơn này">×</button>
@@ -291,15 +291,22 @@
                             <c:forEach var="sp" items="${danhSachSanPham}">
                                 <div class="p-card" data-spct="${sp.id}">
                                     <div class="p-thumb">
-                                        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="6.5" cy="12" r="3.2"/><circle cx="17.5" cy="12" r="3.2"/><path d="M9.7 12h4.6M3 12l-1.5-1M21 12l1.5-1"/></svg>
+                                        <c:choose>
+                                            <c:when test="${not empty sp.hinhAnh && sp.hinhAnh != 'null'}">
+                                                <img src="${pageContext.request.contextPath}/FE/Admin/hinh_anh_san_pham/${sp.hinhAnh}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 9px;" onerror="this.style.display='none';"/>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="6.5" cy="12" r="3.2"/><circle cx="17.5" cy="12" r="3.2"/><path d="M9.7 12h4.6M3 12l-1.5-1M21 12l1.5-1"/></svg>
+                                            </c:otherwise>
+                                        </c:choose>
                                     </div>
-                                    <div class="p-name">${sp.tenSp}</div>
-                                    <div class="p-meta ${sp.tonKho <= 3 ? 'stock-low' : ''}" data-tonkho>
-                                        Còn ${sp.tonKho} · ${sp.moTaBienThe}
+                                    <div class="p-name">${sp.sanPham.tenSanPham} (${sp.ma})</div>
+                                    <div class="p-meta ${sp.soLuongTon <= 3 ? 'stock-low' : ''}" data-tonkho>
+                                        Còn ${sp.soLuongTon} · ${sp.mauSac.tenMau} - ${sp.kichCo.tenKichCo}
                                     </div>
                                     <div class="p-bottom">
-                                        <div class="p-price"><fmt:formatNumber value="${sp.gia}" type="currency" currencySymbol="đ"/></div>
-                                        <div class="p-add" ${sp.tonKho <= 0 ? 'data-disabled="true"' : ''}>+</div>
+                                        <div class="p-price"><fmt:formatNumber value="${sp.giaBan}" type="currency" currencySymbol="đ"/></div>
+                                        <div class="p-add" ${sp.soLuongTon <= 0 ? 'data-disabled="true"' : ''}>+</div>
                                     </div>
                                 </div>
                             </c:forEach>
@@ -310,7 +317,7 @@
                     <div class="right-col">
                         <div class="cust-box">
                             <div class="cust-info">
-                                <c:set var="kh" value="${khachHangCuaHoaDon}"/>
+                                <c:set var="kh" value="${hoaDonDangTao.khachHang}"/>
                                 <div class="cust-avatar">
                                     <c:choose>
                                         <c:when test="${not empty kh}">${kh.hoTen.substring(0,1)}${kh.hoTen.contains(' ') ? kh.hoTen.substring(kh.hoTen.lastIndexOf(' ') + 1, kh.hoTen.lastIndexOf(' ') + 2) : ''}</c:when>
@@ -333,26 +340,26 @@
                             </div>
                         </div>
 
-                        <div class="cart-title">Giỏ hàng · <span id="cart-count">${gioHang.items.size()}</span> sản phẩm</div>
+                        <div class="cart-title">Giỏ hàng · <span id="cart-count">${empty hoaDonDangTao.chiTietHoaDons ? 0 : hoaDonDangTao.chiTietHoaDons.size()}</span> sản phẩm</div>
                         <div class="cart-list">
-                            <c:if test="${empty gioHang.items}">
+                            <c:if test="${empty hoaDonDangTao.chiTietHoaDons}">
                                 <div class="cart-empty">Chưa có sản phẩm nào trong giỏ</div>
                             </c:if>
-                            <c:forEach var="ct" items="${gioHang.items}">
-                                <div class="cart-item" data-id="${ct.idChiTiet}">
+                            <c:forEach var="ct" items="${hoaDonDangTao.chiTietHoaDons}">
+                                <div class="cart-item" data-id="${ct.id}">
                                     <div class="ci-thumb">
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="6.5" cy="12" r="3.2"/><circle cx="17.5" cy="12" r="3.2"/><path d="M9.7 12h4.6"/></svg>
                                     </div>
                                     <div class="ci-body">
-                                        <div class="ci-name">${ct.tenSp}</div>
-                                        <div class="ci-variant">${ct.bienThe}</div>
+                                        <div class="ci-name">${ct.sanPhamChiTiet.sanPham.tenSanPham}</div>
+                                        <div class="ci-variant">${ct.sanPhamChiTiet.ma}</div>
                                         <div class="ci-row">
                                             <div class="qty-stepper">
-                                                <button class="qty-minus" data-id="${ct.idChiTiet}" data-qty="${ct.soLuong}">–</button>
+                                                <button class="qty-minus" data-id="${ct.id}" data-qty="${ct.soLuong}">–</button>
                                                 <span>${ct.soLuong}</span>
-                                                <button class="qty-plus" data-id="${ct.idChiTiet}" data-qty="${ct.soLuong}" data-spct="${ct.idSpct}">+</button>
+                                                <button class="qty-plus" data-id="${ct.id}" data-qty="${ct.soLuong}" data-spct="${ct.sanPhamChiTiet.id}">+</button>
                                             </div>
-                                            <div class="ci-price"><fmt:formatNumber value="${ct.tongTienDong}" type="currency" currencySymbol="đ"/></div>
+                                            <div class="ci-price"><fmt:formatNumber value="${ct.tongTien}" type="currency" currencySymbol="đ"/></div>
                                         </div>
                                     </div>
                                 </div>
@@ -365,20 +372,20 @@
                         </div>
 
                         <div class="totals">
-                            <div class="t-row"><span>Tạm tính</span><span id="sum-tamtinh"><fmt:formatNumber value="${gioHang.tamTinh}" type="currency" currencySymbol="đ"/></span></div>
-                            <div class="t-row"><span>Giảm giá</span><span class="discount" id="sum-giamgia"><fmt:formatNumber value="${gioHang.giamGia}" type="currency" currencySymbol="đ"/></span></div>
-                            <div class="t-row grand"><span>Tổng cộng</span><span id="sum-tongcong"><fmt:formatNumber value="${gioHang.tongTien}" type="currency" currencySymbol="đ"/></span></div>
+                            <div class="t-row"><span>Tạm tính</span><span id="sum-tamtinh"><fmt:formatNumber value="${hoaDonDangTao.tongTienThanhToan}" type="currency" currencySymbol="đ"/></span></div>
+                            <div class="t-row"><span>Giảm giá</span><span class="discount" id="sum-giamgia"><fmt:formatNumber value="0" type="currency" currencySymbol="đ"/></span></div>
+                            <div class="t-row grand"><span>Tổng cộng</span><span id="sum-tongcong"><fmt:formatNumber value="${hoaDonDangTao.tongTienThanhToan}" type="currency" currencySymbol="đ"/></span></div>
                         </div>
 
                         <div class="pay-methods">
-                            <div class="pay-chip active" data-ma="TIEN_MAT">Tiền mặt</div>
-                            <div class="pay-chip" data-ma="THE_NGAN_HANG">Thẻ ngân hàng</div>
-                            <div class="pay-chip" data-ma="CHUYEN_KHOAN">Chuyển khoản</div>
+                            <div class="pay-chip active" data-ma="PTTT001">Tiền mặt</div>
+                            <div class="pay-chip" data-ma="PTTT004">Thẻ ngân hàng</div>
+                            <div class="pay-chip" data-ma="PTTT002">Chuyển khoản</div>
                         </div>
 
                         <button class="checkout-btn">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M20 7L9 18l-5-5"/></svg>
-                            Thanh toán · <span id="checkout-total"><fmt:formatNumber value="${gioHang.tongTien}" type="currency" currencySymbol="đ"/></span>
+                            Thanh toán · <span id="checkout-total"><fmt:formatNumber value="${hoaDonDangTao.tongTienThanhToan}" type="currency" currencySymbol="đ"/></span>
                         </button>
                     </div>
                 </div>
@@ -414,7 +421,7 @@
                     }
 
                     // Gọi hàm xử lý thêm sản phẩm
-                    themSanPhamBangMa(keyword, idHoaDon);
+                    timSanPham(keyword);
 
                     // Xóa trắng ô input để sẵn sàng quét mã tiếp theo
                     this.value = '';
@@ -497,6 +504,11 @@
         }
     }
 </script>
+
+<script>
+    window.idHoaDonHienTai = ${empty idHoaDonDangTao ? 'null' : idHoaDonDangTao};
+</script>
+<script src="${pageContext.request.contextPath}/assets/js/banhang.js"></script>
 
 </body>
 </html>

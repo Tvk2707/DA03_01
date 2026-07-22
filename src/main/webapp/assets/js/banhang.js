@@ -1,486 +1,318 @@
-/**
- * banhang.js — Kết nối giao diện ban-hang.jsp (theo cấu trúc pos-mockup.html) với Servlet /ban-hang, /thanh-toan
- * Include file này ở cuối <body> của ban-hang.jsp, SAU khối script khai báo:
- *     const idHoaDonHienTai = ${idHoaDonDangTao};
- */
+/* POS client: calls the servlet routes used by BanHangController. */
 
-// ============================================================
-// 0. STATE + API WRAPPER
-// ============================================================
+let idHoaDonHienTai = window.idHoaDonHienTai || null;
+let phuongThucThanhToanDangChon = 'PTTT001';
 
-let idHoaDonHienTai = window.idHoaDonHienTai || null; // JSP phải set biến này trước khi include file
-let phuongThucThanhToanDangChon = 'TIEN_MAT';
+function posContextPath() {
+    const marker = '/ban-hang';
+    const index = window.location.pathname.indexOf(marker);
+    return index >= 0 ? window.location.pathname.substring(0, index) : '';
+}
+
+class BanHangError extends Error {}
 
 const BanHangAPI = {
+    routes: {
+        taoHoaDon: ['/ban-hang/tao-hoa-don', 'POST'],
+        themSanPham: ['/ban-hang/them-san-pham', 'POST'],
+        xoaSanPham: ['/ban-hang/xoa-san-pham', 'POST'],
+        capNhatSoLuong: ['/ban-hang/cap-nhat-so-luong', 'POST'],
+        traCuuKhachHang: ['/ban-hang/tra-cuu-khach-hang', 'GET'],
+        traCuuHoacTaoKhachHang: ['/ban-hang/tra-cuu-khach-hang', 'POST'],
+        ganKhachHang: ['/ban-hang/gan-khach-hang', 'POST'],
+        apVoucher: ['/ban-hang/ap-voucher', 'POST']
+    },
+
     async goi(action, params = {}) {
-        const body = new URLSearchParams({ action, ...params });
+        const route = this.routes[action];
+        if (!route) throw new BanHangError('Tac vu POS khong hop le.');
+
+        const requestParams = { ...params };
+        if (action === 'themSanPham' && requestParams.idSpct != null) {
+            requestParams.idSanPhamChiTiet = requestParams.idSpct;
+            delete requestParams.idSpct;
+        }
+
+        const url = posContextPath() + route[0];
+        const options = { method: route[1], headers: {} };
+        let requestUrl = url;
+        if (route[1] === 'GET') {
+            requestUrl += '?' + new URLSearchParams(requestParams).toString();
+        } else {
+            options.headers['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8';
+            options.body = new URLSearchParams(requestParams);
+        }
+
         try {
-            const res = await fetch('ban-hang', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body
-            });
-            // Kiểm tra nếu backend chuyển hướng
-            if (res.redirected) {
-                window.location.href = res.url;
-                return { success: true, redirected: true };
-            }
-            const data = await res.json();
-            if (!data.success) throw new BanHangError(data.message || 'Có lỗi xảy ra');
-            return data;
+            return await this.docJson(await fetch(requestUrl, options));
         } catch (error) {
-            // Xử lý lỗi mạng hoặc JSON parse error
-            console.error('Lỗi API:', error);
-            throw new BanHangError('Không thể kết nối đến máy chủ hoặc có lỗi xử lý dữ liệu.');
+            if (error instanceof BanHangError) throw error;
+            console.error('POS API error:', error);
+            throw new BanHangError('Khong the ket noi den may chu.');
         }
     },
+
     async thanhToan(params) {
-        const res = await fetch('thanh-toan', {
+        const response = await fetch(posContextPath() + '/thanh-toan/thanh-toan', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
             body: new URLSearchParams(params)
         });
-        const data = await res.json();
-        if (!data.success) throw new BanHangError(data.message || 'Thanh toán thất bại');
+        return this.docJson(response);
+    },
+
+    async docJson(response) {
+        let data;
+        try {
+            data = await response.json();
+        } catch (error) {
+            throw new BanHangError('May chu tra ve du lieu khong hop le.');
+        }
+        if (!response.ok || data.success === false) {
+            throw new BanHangError(data.message || `Loi HTTP ${response.status}.`);
+        }
         return data;
     }
 };
 
-class BanHangError extends Error {}
-
-function formatTien(n) {
-    return new Intl.NumberFormat('vi-VN').format(n) + 'đ';
+function hienThiLoi(message) {
+    alert(message);
 }
 
-function hienThiLoi(msg) {
-    // TODO: thay bằng toast riêng nếu có — tạm dùng alert để không phụ thuộc thư viện ngoài
-    alert(msg);
-}
-
-async function withLoading(el, fn) {
-    if (!el || el.disabled) return;
-    el.disabled = true;
-    el.classList.add('is-loading');
+async function withLoading(element, callback) {
+    if (!element || element.disabled) return;
+    element.disabled = true;
+    element.classList.add('is-loading');
     try {
-        await fn();
-    } catch (err) {
-        if (err instanceof BanHangError) hienThiLoi(err.message);
-        else { hienThiLoi('Không kết nối được máy chủ, thử lại.'); console.error(err); }
+        await callback();
+    } catch (error) {
+        hienThiLoi(error instanceof BanHangError ? error.message : 'Khong the xu ly yeu cau.');
+        console.error(error);
     } finally {
-        if (el) {
-            el.disabled = false;
-            el.classList.remove('is-loading');
-        }
+        element.disabled = false;
+        element.classList.remove('is-loading');
     }
 }
 
-function debounce(fn, delay) {
-    let t;
-    return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); };
+function debounce(callback, delay) {
+    let timer;
+    return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => callback(...args), delay);
+    };
 }
 
-// ============================================================
-// 1. RENDER — GIỎ HÀNG (.cart-list bên trong .right-col)
-// ============================================================
-
-function renderGioHang(gioHang) {
-    const list = document.querySelector('.cart-list');
-    if (!list) return;
-
-    if (!gioHang.items || gioHang.items.length === 0) {
-        list.innerHTML = `<div class="cart-empty">Chưa có sản phẩm nào trong giỏ</div>`;
-    } else {
-        list.innerHTML = gioHang.items.map(it => `
-            <div class="cart-item" data-id="${it.idChiTiet}">
-                <div class="ci-thumb">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                        <circle cx="6.5" cy="12" r="3.2"/><circle cx="17.5" cy="12" r="3.2"/><path d="M9.7 12h4.6"/>
-                    </svg>
-                </div>
-                <div class="ci-body">
-                    <div class="ci-name">${escapeHtml(it.tenSp)}</div>
-                    <div class="ci-variant">${escapeHtml(it.bienThe || '')}</div>
-                    <div class="ci-row">
-                        <div class="qty-stepper">
-                            <button class="qty-minus" data-id="${it.idChiTiet}" data-qty="${it.soLuong}">–</button>
-                            <span>${it.soLuong}</span>
-                            <button class="qty-plus" data-id="${it.idChiTiet}" data-qty="${it.soLuong}" data-spct="${it.idSpct}">+</button>
-                        </div>
-                        <div class="ci-price">${formatTien(it.tongTienDong)}</div>
-                    </div>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    document.getElementById('cart-count').textContent = (gioHang.items || []).length;
-
-    const tamTinh = gioHang.tamTinh ?? gioHang.tongTien;
-    const giamGia = gioHang.giamGia ?? 0;
-    document.getElementById('sum-tamtinh').textContent = formatTien(tamTinh);
-    document.getElementById('sum-giamgia').textContent = giamGia > 0 ? '– ' + formatTien(giamGia) : formatTien(0);
-    document.getElementById('sum-tongcong').textContent = formatTien(gioHang.tongTien);
-    document.getElementById('checkout-total').textContent = formatTien(gioHang.tongTien);
+function timSanPham(keyword) {
+    return timSanPhamDebounced(keyword || '', '');
 }
-
-// ============================================================
-// 2. RENDER — KHÁCH HÀNG (.cust-box)
-// ============================================================
-
-function renderKhachHang(kh) {
-    const box = document.querySelector('.cust-box');
-    if (!box) return;
-
-    if (!kh) {
-        box.querySelector('.cust-avatar').textContent = 'KL';
-        box.querySelector('.cust-name').textContent = 'Khách lẻ';
-        box.querySelector('.cust-sub').textContent = 'Chưa gắn số điện thoại';
-        box.dataset.idKhachHang = '';
-        return;
-    }
-    const initials = (kh.hoTen || 'KH').trim().split(/\s+/).slice(-2).map(w => w[0]).join('').toUpperCase();
-    box.querySelector('.cust-avatar').textContent = initials;
-    box.querySelector('.cust-name').textContent = kh.hoTen;
-    box.querySelector('.cust-sub').textContent = kh.soDienThoai;
-    box.dataset.idKhachHang = kh.id;
-}
-
-// ============================================================
-// 3. RENDER — LƯỚI SẢN PHẨM (.product-grid)
-// ============================================================
-
-function renderLuoiSanPham(danhSach) {
-    const grid = document.querySelector('.product-grid');
-    if (!grid) return;
-
-    if (danhSach.length === 0) {
-        grid.innerHTML = `<div class="grid-empty">Không tìm thấy sản phẩm phù hợp</div>`;
-        return;
-    }
-
-    grid.innerHTML = danhSach.map(sp => `
-        <div class="p-card" data-spct="${sp.id}">
-            <div class="p-thumb">
-                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                    <circle cx="6.5" cy="12" r="3.2"/><circle cx="17.5" cy="12" r="3.2"/><path d="M9.7 12h4.6M3 12l-1.5-1M21 12l1.5-1"/>
-                </svg>
-            </div>
-            <div class="p-name">${escapeHtml(sp.tenSp)}</div>
-            <div class="p-meta ${sp.tonKho <= 3 ? 'stock-low' : ''}" data-tonkho>Còn ${sp.tonKho} · ${escapeHtml(sp.moTaBienThe || '')}</div>
-            <div class="p-bottom">
-                <div class="p-price">${formatTien(sp.gia)}</div>
-                <div class="p-add" ${sp.tonKho <= 0 ? 'data-disabled="true"' : ''}>+</div>
-            </div>
-        </div>
-    `).join('');
-}
-
-function capNhatTonKhoTrenCard(idSpct, tonMoi) {
-    const card = document.querySelector(`.p-card[data-spct="${idSpct}"]`);
-    if (!card) return;
-    const meta = card.querySelector('[data-tonkho]');
-    if (meta) {
-        meta.textContent = meta.textContent.replace(/Còn \d+/, `Còn ${tonMoi}`);
-        meta.classList.toggle('stock-low', tonMoi <= 3);
-    }
-    const addBtn = card.querySelector('.p-add');
-    if (addBtn) {
-        if (tonMoi <= 0) addBtn.setAttribute('data-disabled', 'true');
-        else addBtn.removeAttribute('data-disabled');
-    }
-}
-
-function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str ?? '';
-    return div.innerHTML;
-}
-
-// ============================================================
-// 4. LUỒNG — THÊM / SỬA / XÓA SẢN PHẨM TRONG GIỎ
-// ============================================================
-
-async function themSanPham(idSpct, btn) {
-    await withLoading(btn, async () => {
-        const data = await BanHangAPI.goi('themSanPham', { idHoaDon: idHoaDonHienTai, idSpct, soLuong: 1 });
-        if (data.redirected) return;
-        renderGioHang(data.gioHang);
-        capNhatTonKhoTrenCard(idSpct, data.tonKhoMoi);
-    });
-}
-
-async function doiSoLuong(idChiTiet, soLuongMoi, btn) {
-    await withLoading(btn, async () => {
-        const data = await BanHangAPI.goi('capNhatSoLuong', { idChiTiet, soLuongMoi });
-        if (data.redirected) return;
-        renderGioHang(data.gioHang);
-        if (data.tonKhoMoi !== undefined && data.idSpct) {
-            capNhatTonKhoTrenCard(data.idSpct, data.tonKhoMoi);
-        }
-    });
-}
-
-// ============================================================
-// 5. LUỒNG — TÌM SẢN PHẨM + LỌC DANH MỤC
-// ============================================================
 
 const timSanPhamDebounced = debounce(async (keyword, idDanhMuc) => {
-    const data = await BanHangAPI.goi('sanPhams', { keyword: keyword || '', idDanhMuc: idDanhMuc || '' });
-    if (data.redirected) return;
-    renderLuoiSanPham(data.sanPhams);
+    const query = new URLSearchParams({ keyword: keyword || '' });
+    if (idDanhMuc) query.set('idDanhMuc', idDanhMuc);
+    const response = await fetch(`${posContextPath()}/ban-hang/tim-san-pham?${query}`);
+    if (!response.ok) throw new BanHangError(`Loi HTTP ${response.status}.`);
+    const grid = document.querySelector('.product-grid');
+    if (grid) grid.innerHTML = await response.text();
 }, 300);
 
-// ============================================================
-// 6. LUỒNG — KHÁCH HÀNG
-// ============================================================
+async function themSanPham(idSpct, button) {
+    await withLoading(button, async () => {
+        await BanHangAPI.goi('themSanPham', { idHoaDon: idHoaDonHienTai, idSpct, soLuong: 1 });
+        window.location.reload();
+    });
+}
 
-const traCuuKhachHangDebounced = debounce(async (sdt) => {
-    if (sdt.length < 9) return;
-    const data = await BanHangAPI.goi('traCuuKhachHang', { soDienThoai: sdt });
-    if (data.redirected) return;
+async function doiSoLuong(idChiTiet, soLuongMoi, button) {
+    await withLoading(button, async () => {
+        await BanHangAPI.goi('capNhatSoLuong', { idChiTiet, soLuongMoi });
+        window.location.reload();
+    });
+}
+
+const traCuuKhachHangDebounced = debounce(async (soDienThoai) => {
+    if (soDienThoai.length < 9) return;
+    const data = await BanHangAPI.goi('traCuuKhachHang', { soDienThoai });
     const formMoi = document.getElementById('form-them-khach-nhanh');
     if (data.found) {
-        renderKhachHang(data.khachHang);
         formMoi?.classList.add('hidden');
+        await BanHangAPI.goi('ganKhachHang', {
+            idHoaDon: idHoaDonHienTai,
+            idKhachHang: data.khachHang.id
+        });
+        window.location.reload();
     } else {
         formMoi?.classList.remove('hidden');
-        document.getElementById('input-sdt-moi').value = sdt;
+        const input = document.getElementById('input-sdt-moi');
+        if (input) input.value = soDienThoai;
     }
 }, 400);
 
-async function themVaChonKhachHang(btn) {
-    const sdt = document.getElementById('input-sdt-moi').value.trim();
-    const hoTen = document.getElementById('input-ten-moi').value.trim();
-    if (!sdt) return hienThiLoi('Vui lòng nhập số điện thoại');
-
-    await withLoading(btn, async () => {
-        const data = await BanHangAPI.goi('themKhachHang', { idHoaDon: idHoaDonHienTai, soDienThoai: sdt, hoTen });
-        if (data.redirected) return;
-        renderKhachHang(data.khachHang);
-        document.getElementById('form-them-khach-nhanh')?.classList.add('hidden');
-        dongPanelKhachHang();
-    });
-}
-
-function moPanelKhachHang() { document.getElementById('panel-khach-hang')?.classList.remove('hidden'); }
-function dongPanelKhachHang() { document.getElementById('panel-khach-hang')?.classList.add('hidden'); }
-
-// ============================================================
-// 7. LUỒNG — VOUCHER
-// ============================================================
-
-async function apVoucher(btn) {
-    const input = document.getElementById('input-voucher');
-    const ma = input.value.trim();
-    if (!ma) return;
-    await withLoading(btn, async () => {
-        const data = await BanHangAPI.goi('apVoucher', { idHoaDon: idHoaDonHienTai, maVoucher: ma });
-        if (data.redirected) return;
-        renderGioHang(data.gioHang);
-        input.value = '';
-    });
-}
-
-// ============================================================
-// 8. LUỒNG — PHƯƠNG THỨC THANH TOÁN + THANH TOÁN
-// ============================================================
-
-function chonPhuongThucThanhToan(chipEl) {
-    document.querySelectorAll('.pay-chip').forEach(c => c.classList.remove('active'));
-    chipEl.classList.add('active');
-    phuongThucThanhToanDangChon = chipEl.dataset.ma;
-}
-
-async function xacNhanThanhToan(btn) {
-    if (!idHoaDonHienTai) return hienThiLoi('Chưa có hóa đơn đang mở');
-
-    let soTienDua = '0';
-    if (phuongThucThanhToanDangChon === 'TIEN_MAT') {
-        soTienDua = prompt('Số tiền khách đưa:');
-        if (soTienDua === null) return; // hủy
+async function themVaChonKhachHang(button) {
+    const soDienThoai = document.getElementById('input-sdt-moi')?.value.trim();
+    const hoTen = document.getElementById('input-ten-moi')?.value.trim();
+    if (!soDienThoai || !hoTen) {
+        hienThiLoi('Vui long nhap ho ten va so dien thoai.');
+        return;
     }
+    await withLoading(button, async () => {
+        const data = await BanHangAPI.goi('traCuuHoacTaoKhachHang', { soDienThoai, hoTen });
+        await BanHangAPI.goi('ganKhachHang', {
+            idHoaDon: idHoaDonHienTai,
+            idKhachHang: data.khachHang.id
+        });
+        window.location.reload();
+    });
+}
 
-    await withLoading(btn, async () => {
-        const data = await BanHangAPI.thanhToan({
+function moPanelKhachHang() {
+    document.getElementById('panel-khach-hang')?.classList.remove('hidden');
+}
+
+function dongPanelKhachHang() {
+    document.getElementById('panel-khach-hang')?.classList.add('hidden');
+}
+
+async function apVoucher(button) {
+    const input = document.getElementById('input-voucher');
+    const maVoucher = input?.value.trim();
+    if (!maVoucher) return;
+    await withLoading(button, async () => {
+        await BanHangAPI.goi('apVoucher', { idHoaDon: idHoaDonHienTai, maVoucher });
+        window.location.reload();
+    });
+}
+
+function chonPhuongThucThanhToan(element) {
+    document.querySelectorAll('.pay-chip').forEach(chip => chip.classList.remove('active'));
+    element.classList.add('active');
+    phuongThucThanhToanDangChon = element.dataset.ma;
+}
+
+function layTongTienHienThi() {
+    const text = document.getElementById('checkout-total')?.textContent || '0';
+    return text.replace(/[^\d]/g, '') || '0';
+}
+
+async function xacNhanThanhToan(button) {
+    if (!idHoaDonHienTai) {
+        hienThiLoi('Chua co hoa don dang mo.');
+        return;
+    }
+    let soTienKhachDua = layTongTienHienThi();
+    if (phuongThucThanhToanDangChon === 'PTTT001') {
+        soTienKhachDua = prompt('So tien khach dua:');
+        if (soTienKhachDua === null) return;
+    }
+    await withLoading(button, async () => {
+        await BanHangAPI.thanhToan({
             idHoaDon: idHoaDonHienTai,
             maPttt: phuongThucThanhToanDangChon,
-            soTienKhachDua: soTienDua || '0'
+            soTienKhachDua: String(soTienKhachDua).replace(/\D/g, '')
         });
-        window.location.href = data.redirectUrl;
+        window.location.reload();
     });
 }
 
-// ============================================================
-// 9. LUỒNG — TAB HÓA ĐƠN CHỜ
-// ============================================================
-
-async function chonTab(idHoaDon, tabEl) {
-    // Chuyển hướng đến trang với id hóa đơn được chọn
-    window.location.href = `ban-hang?id=${idHoaDon}`;
+function chonTab(idHoaDon) {
+    window.location.href = `${posContextPath()}/ban-hang?id=${encodeURIComponent(idHoaDon)}`;
 }
 
-async function taoHoaDonMoi(btn) {
-    await withLoading(btn, async () => {
-        // API sẽ xử lý việc tạo hóa đơn và backend sẽ tự chuyển hướng.
-        // Fetch API sẽ tự động theo dõi chuyển hướng và cập nhật window.location.
-        const data = await BanHangAPI.goi('taoHoaDon');
-        // Nếu không có chuyển hướng tự động (ví dụ: API trả về JSON), xử lý ở đây.
-        if (data && !data.redirected) {
-             // Fallback nếu backend không redirect: giả sử nó trả về id hóa đơn mới
-            if (data.newInvoiceId) {
-                window.location.href = `ban-hang?id=${data.newInvoiceId}`;
-            }
-        }
+async function taoHoaDonMoi(button) {
+    await withLoading(button, async () => {
+        await BanHangAPI.goi('taoHoaDon');
+        window.location.reload();
     });
 }
 
-
-// ============================================================
-// 10. GẮN SỰ KIỆN — EVENT DELEGATION (chạy 1 lần khi trang load)
-// ============================================================
+function xoaHoaDonCho(event, idHoaDon) {
+    event.stopPropagation();
+    if (!confirm('Ban co chac muon huy hoa don #' + idHoaDon + ' khong?')) return;
+    const params = new URLSearchParams({
+        idHoaDon,
+        lyDo: 'Thu ngan huy don cho tren man hinh POS'
+    });
+    fetch(`${posContextPath()}/ban-hang/huy-hoa-don?${params}`, { method: 'POST' })
+        .then(response => BanHangAPI.docJson(response))
+        .then(() => window.location.reload())
+        .catch(error => hienThiLoi(error.message));
+}
 
 document.addEventListener('DOMContentLoaded', () => {
+    const search = document.getElementById('search-product');
+    search?.addEventListener('input', () => {
+        const category = document.querySelector('.chip.active')?.dataset.danhmuc || '';
+        timSanPhamDebounced(search.value, category).catch(error => hienThiLoi(error.message));
+    });
 
-    // --- Ô tìm sản phẩm ---
-    const oTim = document.getElementById('search-product');
-    if (oTim) {
-        oTim.addEventListener('input', () => {
-            const idDanhMuc = document.querySelector('.chip.active')?.dataset.danhmuc || '';
-            timSanPhamDebounced(oTim.value, idDanhMuc);
-        });
-    }
+    const phone = document.getElementById('input-sdt');
+    phone?.addEventListener('input', () => {
+        traCuuKhachHangDebounced(phone.value.trim()).catch(error => hienThiLoi(error.message));
+    });
 
-    // --- Ô tra cứu SĐT khách hàng ---
-    const oSdt = document.getElementById('input-sdt');
-    if (oSdt) {
-        oSdt.addEventListener('input', () => traCuuKhachHangDebounced(oSdt.value.trim()));
-    }
-
-    // --- Nút tạo đơn hàng chính ---
-    const btnTaoDonHang = document.querySelector('.pos-btn-solid');
-    if (btnTaoDonHang) {
-        btnTaoDonHang.addEventListener('click', (e) => {
-            taoHoaDonMoi(e.currentTarget);
-        });
-    }
-
-
-    // --- Click chung toàn trang (delegation) ---
-    document.addEventListener('click', (e) => {
-
-        // Thêm sản phẩm vào giỏ
-        const addBtn = e.target.closest('.p-add');
-        if (addBtn && !addBtn.dataset.disabled) {
-            const idSpct = addBtn.closest('.p-card')?.dataset.spct;
-            if (idSpct) themSanPham(idSpct, addBtn);
+    document.addEventListener('click', event => {
+        const add = event.target.closest('.p-add');
+        if (add && add.dataset.disabled !== 'true') {
+            const idSpct = add.closest('.p-card')?.dataset.spct;
+            if (idSpct) themSanPham(idSpct, add);
             return;
         }
-
-        // Tăng số lượng
-        const plusBtn = e.target.closest('.qty-plus');
-        if (plusBtn) {
-            const idChiTiet = plusBtn.dataset.id;
-            const qtyMoi = parseInt(plusBtn.dataset.qty, 10) + 1;
-            doiSoLuong(idChiTiet, qtyMoi, plusBtn);
+        const plus = event.target.closest('.qty-plus');
+        if (plus) {
+            doiSoLuong(plus.dataset.id, Number(plus.dataset.qty) + 1, plus);
             return;
         }
-
-        // Giảm số lượng (về 0 -> backend tự xóa dòng, xem hướng dẫn tích hợp mục 3.5)
-        const minusBtn = e.target.closest('.qty-minus');
-        if (minusBtn) {
-            const idChiTiet = minusBtn.dataset.id;
-            const qtyMoi = parseInt(minusBtn.dataset.qty, 10) - 1;
-            doiSoLuong(idChiTiet, qtyMoi, minusBtn);
-            return;
-        }
-
-        // Lọc theo danh mục
-        const chip = e.target.closest('.chip');
-        if (chip) {
-            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-            chip.classList.add('active');
-            timSanPhamDebounced(oTim?.value || '', chip.dataset.danhmuc || '');
-            return;
-        }
-
-        // Đổi khách hàng
-        const linkDoiKhach = e.target.closest('.cust-box .link-btn');
-        if (linkDoiKhach) { moPanelKhachHang(); return; }
-
-        // Thêm nhanh khách hàng mới
-        const btnThemKhach = e.target.closest('.btn-them-khach');
-        if (btnThemKhach) { themVaChonKhachHang(btnThemKhach); return; }
-
-        // Áp voucher
-        const btnVoucher = e.target.closest('.voucher-apply');
-        if (btnVoucher) { apVoucher(btnVoucher); return; }
-
-        // Chọn phương thức thanh toán
-        const payChip = e.target.closest('.pay-chip');
-        if (payChip) { chonPhuongThucThanhToan(payChip); return; }
-
-        // Thanh toán
-        const checkoutBtn = e.target.closest('.checkout-btn');
-        if (checkoutBtn) { xacNhanThanhToan(checkoutBtn); return; }
-
-        // Chuyển tab hóa đơn
-        const tab = e.target.closest('.tab');
-        if (tab) {
-            // Ngăn chặn hành vi mặc định nếu có và gọi hàm chọn tab
-            e.preventDefault();
-            chonTab(tab.dataset.hoadon, tab);
-            return;
-        }
-
-        // Thêm tab hóa đơn mới
-        const tabAdd = e.target.closest('.tab-add');
-        if (tabAdd) {
-            taoHoaDonMoi(tabAdd);
-            return;
-        }
-
-        function loadSanPham(keyword = "") {
-            fetch(contextPath + "/ban-hang/tim-san-pham?keyword=" + encodeURIComponent(keyword))
-                .then(response => response.text())
-                .then(html => {
-                    document.getElementById("productContainer").innerHTML = html;
+        const minus = event.target.closest('.qty-minus');
+        if (minus) {
+            const soLuong = Number(minus.dataset.qty);
+            if (soLuong <= 1) {
+                withLoading(minus, async () => {
+                    await BanHangAPI.goi('xoaSanPham', {
+                        idHoaDon: idHoaDonHienTai,
+                        idChiTiet: minus.dataset.id
+                    });
+                    window.location.reload();
                 });
-        }
-
-        let currentHoaDon = null;
-
-        function themSanPham(card) {
-
-            if (!currentHoaDon) {
-                alert("Vui lòng chọn hóa đơn!");
-                return;
+            } else {
+                doiSoLuong(minus.dataset.id, soLuong - 1, minus);
             }
-
-            fetch(contextPath + "/ban-hang/them-san-pham", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded"
-                },
-                body: new URLSearchParams({
-                    idHoaDon: currentHoaDon,
-                    idSanPhamChiTiet: card.dataset.id,
-                    soLuong: 1
-                })
-            })
-                .then(res => res.json())
-                .then(data => {
-                    if(data.success){
-                        alert("Đã thêm sản phẩm");
-                    }else{
-                        alert(data.message);
-                    }
-                });
-
+            return;
         }
-        document.addEventListener("DOMContentLoaded", function () {
-
-            loadSanPham();
-
-        });
+        const chip = event.target.closest('.chip');
+        if (chip) {
+            document.querySelectorAll('.chip').forEach(item => item.classList.remove('active'));
+            chip.classList.add('active');
+            timSanPhamDebounced(search?.value || '', chip.dataset.danhmuc || '')
+                .catch(error => hienThiLoi(error.message));
+            return;
+        }
+        if (event.target.closest('.cust-box .link-btn')) {
+            moPanelKhachHang();
+            return;
+        }
+        const addCustomer = event.target.closest('.btn-them-khach');
+        if (addCustomer) {
+            themVaChonKhachHang(addCustomer);
+            return;
+        }
+        const voucher = event.target.closest('.voucher-apply');
+        if (voucher) {
+            apVoucher(voucher);
+            return;
+        }
+        const pay = event.target.closest('.pay-chip');
+        if (pay) {
+            chonPhuongThucThanhToan(pay);
+            return;
+        }
+        const checkout = event.target.closest('.checkout-btn');
+        if (checkout) {
+            xacNhanThanhToan(checkout);
+            return;
+        }
+        const tab = event.target.closest('.tab');
+        if (tab && !event.target.closest('.tab-close')) {
+            event.preventDefault();
+            chonTab(tab.dataset.hoadon);
+        }
     });
 });

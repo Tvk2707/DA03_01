@@ -4,6 +4,13 @@
  */
 
 // Helper function to display toast messages
+function posUrl(path) {
+    const marker = '/ban-hang';
+    const index = window.location.pathname.indexOf(marker);
+    const contextPath = index >= 0 ? window.location.pathname.substring(0, index) : '';
+    return contextPath + path;
+}
+
 function showToast(message, isSuccess = true) {
     const container = document.getElementById('toast-container') || document.body;
     const toast = document.createElement('div');
@@ -29,7 +36,7 @@ function renderCartFromServer(idHoaDon) {
  */
 async function taoHoaDon() {
     try {
-        const response = await fetch('/ban-hang/tao-hoa-don', { method: 'POST' });
+        const response = await fetch(posUrl('/ban-hang/tao-hoa-don'), { method: 'POST' });
         const data = await response.json();
         if (response.ok && data.success) {
             showToast('Đã tạo hóa đơn mới thành công!');
@@ -50,7 +57,7 @@ async function taoHoaDon() {
  */
 async function timSanPham(tuKhoa = '') {
     try {
-        const response = await fetch(`/ban-hang/tim-san-pham?keyword=${encodeURIComponent(tuKhoa)}`);
+        const response = await fetch(posUrl(`/ban-hang/tim-san-pham?keyword=${encodeURIComponent(tuKhoa)}`));
         if (!response.ok) throw new Error('Lỗi khi tải danh sách sản phẩm.');
         const html = await response.text();
         const productGridContainer = document.getElementById('product-grid-container');
@@ -69,7 +76,7 @@ async function timSanPham(tuKhoa = '') {
  */
 async function themSanPham(idHoaDon, idSpct, soLuong) {
     try {
-        const response = await fetch('/ban-hang/them-san-pham', {
+        const response = await fetch(posUrl('/ban-hang/them-san-pham'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: new URLSearchParams({ idHoaDon, idSanPhamChiTiet: idSpct, soLuong })
@@ -93,7 +100,7 @@ async function themSanPham(idHoaDon, idSpct, soLuong) {
  */
 async function xoaSanPham(idHoaDon, idChiTiet) {
     try {
-        const response = await fetch('/ban-hang/xoa-san-pham', {
+        const response = await fetch(posUrl('/ban-hang/xoa-san-pham'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: new URLSearchParams({ idHoaDon, idChiTiet })
@@ -117,7 +124,7 @@ async function xoaSanPham(idHoaDon, idChiTiet) {
  */
 async function capNhatSoLuong(idChiTiet, soLuongMoi) {
     try {
-        const response = await fetch('/ban-hang/cap-nhat-so-luong', {
+        const response = await fetch(posUrl('/ban-hang/cap-nhat-so-luong'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: new URLSearchParams({ idChiTiet, soLuongMoi })
@@ -142,7 +149,7 @@ async function capNhatSoLuong(idChiTiet, soLuongMoi) {
 async function traCuuKhachHang(sdt, hoTen = null) {
     try {
         const isCreating = hoTen !== null;
-        const response = await fetch('/ban-hang/tra-cuu-khach-hang', {
+        const response = await fetch(posUrl('/ban-hang/tra-cuu-khach-hang'), {
             method: isCreating ? 'POST' : 'GET',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: isCreating ? new URLSearchParams({ soDienThoai: sdt, hoTen: hoTen }) : null
@@ -167,7 +174,7 @@ async function traCuuKhachHang(sdt, hoTen = null) {
  */
 async function ganKhachHang(idHoaDon, idKhachHang) {
     try {
-        const response = await fetch('/ban-hang/gan-khach-hang', {
+        const response = await fetch(posUrl('/ban-hang/gan-khach-hang'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: new URLSearchParams({ idHoaDon, idKhachHang })
@@ -192,7 +199,7 @@ async function ganKhachHang(idHoaDon, idKhachHang) {
  */
 async function apVoucher(idHoaDon, maVoucher) {
     try {
-        const response = await fetch('/ban-hang/ap-voucher', {
+        const response = await fetch(posUrl('/ban-hang/ap-voucher'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: new URLSearchParams({ idHoaDon, maVoucher })
@@ -218,7 +225,7 @@ async function huyHoaDon(idHoaDon) {
     if (confirm('Bạn có chắc chắn muốn hủy hóa đơn này không? Hành động này không thể hoàn tác.')) {
         try {
             const lyDo = prompt("Nhập lý do hủy (không bắt buộc):", "");
-            const response = await fetch('/ban-hang/huy-hoa-don', {
+            const response = await fetch(posUrl('/ban-hang/huy-hoa-don'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: new URLSearchParams({ idHoaDon, lyDo: lyDo || '' })
@@ -245,7 +252,7 @@ async function huyHoaDon(idHoaDon) {
  */
 async function xacNhanThanhToan(idHoaDon, maPttt, soTienKhachDua) {
     try {
-        const response = await fetch('/thanh-toan/thanh-toan', {
+        const response = await fetch(posUrl('/thanh-toan/thanh-toan'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: new URLSearchParams({ idHoaDon, maPttt, soTienKhachDua })

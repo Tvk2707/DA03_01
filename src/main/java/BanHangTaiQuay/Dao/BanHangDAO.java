@@ -13,6 +13,7 @@ public interface BanHangDAO {
     HoaDon findHoaDonById(int id);
     long demHoaDonCho(int idNhanVien);
     List<HoaDon> layDanhSachHoaDonCho(int idNhanVien);
+    Integer timCaDangMo(int idNhanVien);
 
     ChiTietHoaDon insertChiTietHoaDon(ChiTietHoaDon ct);
     void updateChiTietHoaDon(ChiTietHoaDon ct);

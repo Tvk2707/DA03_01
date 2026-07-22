@@ -2,6 +2,10 @@ package BanHangTaiQuay.Controller;
 
 import BanHangTaiQuay.Service.BanHangService;
 import BanHangTaiQuay.Service.BanHangServiceImpl;
+import BanHangTaiQuay.Service.CaLamViecService;
+import BanHangTaiQuay.Service.CaLamViecServiceImpl;
+import BanHangTaiQuay.Model.ApVoucherRequest;
+import BanHangTaiQuay.Model.ChonKhachHangRequest;
 import QuanLySanPham.Entity.HoaDon;
 import QuanLySanPham.Entity.KhachHang;
 import QuanLySanPham.Entity.NhanVien;
@@ -32,25 +36,41 @@ import java.util.Map;
         "/ban-hang/tra-cuu-khach-hang",
         "/ban-hang/ap-voucher",
         "/ban-hang/huy-hoa-don",
-        "/ban-hang/lay-hoa-don-cho"
+        "/ban-hang/lay-hoa-don-cho",
+        "/ban-hang/gan-khach-hang"
 })
 public class BanHangController extends HttpServlet {
 
     private final BanHangService banHangService = new BanHangServiceImpl();
+    private final CaLamViecService caLamViecService = new CaLamViecServiceImpl();
     private final SanPhamChiTietService sanPhamChiTietService = new SanPhamChiTietServiceImpl();
     private final Gson gson = new Gson();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        req.setCharacterEncoding("UTF-8");
         String action = req.getServletPath();
 
         if (action == null || action.equals("/ban-hang")) {
             HttpSession session = req.getSession();
-            NhanVien nhanVien = (NhanVien) session.getAttribute("nhanVienDangNhap");
-            if (nhanVien != null) {
-                List<HoaDon> danhSachHoaDonCho = banHangService.layDanhSachHoaDonCho(nhanVien.getId());
-                req.setAttribute("danhSachHoaDonCho", danhSachHoaDonCho);
+            Integer idNhanVien = layIdNhanVien(session);
+            List<HoaDon> danhSachHoaDonCho = idNhanVien == null
+                    ? List.of()
+                    : banHangService.layDanhSachHoaDonCho(idNhanVien);
+            req.setAttribute("danhSachHoaDonCho", danhSachHoaDonCho);
+
+            Integer idHoaDonDangTao = parseOptionalPositiveInt(req.getParameter("id"));
+            if (idHoaDonDangTao == null && !danhSachHoaDonCho.isEmpty()) {
+                idHoaDonDangTao = danhSachHoaDonCho.get(0).getId();
             }
+            HoaDon hoaDonDangTao = idHoaDonDangTao == null
+                    ? null
+                    : banHangService.layHoaDonTheoId(idHoaDonDangTao);
+            req.setAttribute("idHoaDonDangTao", idHoaDonDangTao);
+            req.setAttribute("hoaDonDangTao", hoaDonDangTao);
+            req.setAttribute("danhSachSanPham",
+                    sanPhamChiTietService.timKiem(null, null, null, null, 1));
+            req.setAttribute("danhSachDanhMuc", List.of());
             req.getRequestDispatcher("/Admin/BanHangTaiQuay/ban-hang.jsp").forward(req, resp);
             return;
         }
@@ -70,6 +90,7 @@ public class BanHangController extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        req.setCharacterEncoding("UTF-8");
         String path = req.getServletPath();
         switch (path) {
             case "/ban-hang/tao-hoa-don":
@@ -93,6 +114,9 @@ public class BanHangController extends HttpServlet {
             case "/ban-hang/huy-hoa-don":
                 huyHoaDon(req, resp);
                 break;
+            case "/ban-hang/gan-khach-hang":
+                ganKhachHang(req, resp);
+                break;
         }
     }
 
@@ -104,12 +128,17 @@ public class BanHangController extends HttpServlet {
 
         try {
             HttpSession session = req.getSession();
-            Integer idNhanVien = (Integer) session.getAttribute("idNhanVien");
-            Integer idCa = (Integer) session.getAttribute("idCa");
+            Integer idNhanVien = layIdNhanVien(session);
+            Integer idCa = idNhanVien == null ? null : caLamViecService.layCaDangMo(idNhanVien);
 
-            if (idNhanVien == null || idCa == null) {
-                throw new IllegalStateException("Nhân viên hoặc ca làm việc chưa được thiết lập.");
+            if (idNhanVien == null) {
+                throw new IllegalStateException("Nhân viên chưa đăng nhập.");
             }
+            if (idCa == null) {
+                session.removeAttribute("idCa");
+                throw new IllegalStateException("Chưa có ca làm việc đang mở cho nhân viên này.");
+            }
+            session.setAttribute("idCa", idCa);
 
             HoaDon hoaDon = banHangService.taoHoaDonMoi(idNhanVien, idCa);
             response.put("success", true);
@@ -208,12 +237,16 @@ public class BanHangController extends HttpServlet {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            String soDienThoai = req.getParameter("soDienThoai");
-            String hoTen = createIfNotFound ? req.getParameter("hoTen") : null;
+            ChonKhachHangRequest request = new ChonKhachHangRequest();
+            request.setSoDienThoai(requireText(req, "soDienThoai"));
+            request.setHoTen(createIfNotFound ? optionalText(req, "hoTen") : null);
 
-            KhachHang khachHang = banHangService.traCuuHoacTaoKhachHang(soDienThoai, hoTen);
+            KhachHang khachHang = createIfNotFound
+                    ? banHangService.traCuuHoacTaoKhachHang(request.getSoDienThoai(), request.getHoTen())
+                    : banHangService.traCuuKhachHang(request.getSoDienThoai());
             response.put("success", true);
-            response.put("khachHang", khachHang);
+            response.put("khachHang", khachHang == null ? null : toKhachHangData(khachHang));
+            response.put("found", khachHang != null);
 
         } catch (IllegalStateException | IllegalArgumentException e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -232,10 +265,11 @@ public class BanHangController extends HttpServlet {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            int idHoaDon = Integer.parseInt(req.getParameter("idHoaDon"));
-            String maVoucher = req.getParameter("maVoucher");
+            ApVoucherRequest request = new ApVoucherRequest();
+            request.setIdHoaDon(requirePositiveInt(req, "idHoaDon"));
+            request.setMaVoucher(requireText(req, "maVoucher"));
 
-            banHangService.apDungVoucher(idHoaDon, maVoucher);
+            banHangService.apDungVoucher(request.getIdHoaDon(), request.getMaVoucher());
             response.put("success", true);
         } catch (IllegalStateException | IllegalArgumentException e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -255,8 +289,11 @@ public class BanHangController extends HttpServlet {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            int idHoaDon = Integer.parseInt(req.getParameter("idHoaDon"));
-            String lyDo = req.getParameter("lyDo");
+            int idHoaDon = requirePositiveInt(req, "idHoaDon");
+            String lyDo = optionalText(req, "lyDo");
+            if (lyDo == null || lyDo.isEmpty()) {
+                lyDo = "Không nêu lý do";
+            }
 
             banHangService.huyHoaDon(idHoaDon, lyDo);
             response.put("success", true);
@@ -278,7 +315,7 @@ public class BanHangController extends HttpServlet {
 
         try {
             HttpSession session = req.getSession();
-            Integer idNhanVien = (Integer) session.getAttribute("idNhanVien");
+            Integer idNhanVien = layIdNhanVien(session);
 
             if (idNhanVien == null) {
                 throw new IllegalStateException("Nhân viên chưa đăng nhập.");
@@ -286,7 +323,7 @@ public class BanHangController extends HttpServlet {
 
             List<HoaDon> hoaDons = banHangService.layDanhSachHoaDonCho(idNhanVien);
             response.put("success", true);
-            response.put("hoaDons", hoaDons);
+            response.put("hoaDons", hoaDons.stream().map(this::toHoaDonData).toList());
 
         } catch (IllegalStateException e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -296,5 +333,100 @@ public class BanHangController extends HttpServlet {
 
         out.print(gson.toJson(response));
         out.flush();
+    }
+
+    private void ganKhachHang(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        resp.setContentType("application/json");
+        resp.setCharacterEncoding("UTF-8");
+        PrintWriter out = resp.getWriter();
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            int idHoaDon = requirePositiveInt(req, "idHoaDon");
+            int idKhachHang = requirePositiveInt(req, "idKhachHang");
+            banHangService.ganKhachHang(idHoaDon, idKhachHang);
+            response.put("success", true);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.put("success", false);
+            response.put("message", e.getMessage());
+        }
+
+        out.print(gson.toJson(response));
+        out.flush();
+    }
+
+    private Integer layIdNhanVien(HttpSession session) {
+        Object idNhanVien = session.getAttribute("idNhanVien");
+        if (idNhanVien instanceof Number) {
+            return ((Number) idNhanVien).intValue();
+        }
+
+        Object nhanVienDangNhap = session.getAttribute("nhanVienDangNhap");
+        if (nhanVienDangNhap instanceof NhanVien) {
+            Integer id = ((NhanVien) nhanVienDangNhap).getId();
+            if (id != null) {
+                session.setAttribute("idNhanVien", id);
+                return id;
+            }
+        }
+        return null;
+    }
+
+    private int requirePositiveInt(HttpServletRequest req, String parameterName) {
+        String value = requireText(req, parameterName);
+        try {
+            int parsedValue = Integer.parseInt(value);
+            if (parsedValue <= 0) {
+                throw new IllegalArgumentException(parameterName + " phải lớn hơn 0.");
+            }
+            return parsedValue;
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(parameterName + " phải là số nguyên hợp lệ.");
+        }
+    }
+
+    private Integer parseOptionalPositiveInt(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            int parsed = Integer.parseInt(value.trim());
+            return parsed > 0 ? parsed : null;
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private String requireText(HttpServletRequest req, String parameterName) {
+        String value = req.getParameter(parameterName);
+        if (value == null || value.trim().isEmpty()) {
+            throw new IllegalArgumentException("Thiếu tham số: " + parameterName + ".");
+        }
+        return value.trim();
+    }
+
+    private String optionalText(HttpServletRequest req, String parameterName) {
+        String value = req.getParameter(parameterName);
+        return value == null ? null : value.trim();
+    }
+
+    private Map<String, Object> toKhachHangData(KhachHang khachHang) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("id", khachHang.getId());
+        data.put("hoTen", khachHang.getHoTen());
+        data.put("soDienThoai", khachHang.getSoDienThoai());
+        data.put("email", khachHang.getEmail());
+        return data;
+    }
+
+    private Map<String, Object> toHoaDonData(HoaDon hoaDon) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("id", hoaDon.getId());
+        data.put("maHoaDon", hoaDon.getMaHoaDon());
+        data.put("tongTienThanhToan", hoaDon.getTongTienThanhToan());
+        data.put("trangThai", hoaDon.getTrangThai());
+        data.put("ngayTao", hoaDon.getNgayTao() == null ? null : hoaDon.getNgayTao().toString());
+        return data;
     }
 }
