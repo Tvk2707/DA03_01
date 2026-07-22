@@ -44,6 +44,10 @@ public class LoginServlet extends HttpServlet {
             // Đăng nhập thành công -> Tạo Session mới
             HttpSession session = request.getSession(true);
             session.setAttribute(SESSION_KEY, nv);
+            session.setAttribute("idNhanVien", nv.getId());
+
+// Lưu ID ca làm việc (Tạm thời set cứng là 1 để code chạy được, sau này nếu có bảng Ca Làm Việc thì bạn lấy động sau)
+            session.setAttribute("idCa", 1);
 
             // Điều hướng người dùng tới trang đích phù hợp với vai trò
             redirectSauDangNhap(request, response, nv);

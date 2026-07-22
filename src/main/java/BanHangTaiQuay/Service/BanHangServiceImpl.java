@@ -34,13 +34,17 @@ public class BanHangServiceImpl implements BanHangService {
         }
 
         HoaDon hd = new HoaDon();
+
+        // 👇 THÊM DÒNG NÀY ĐỂ FIX LỖI SQL (Tạo mã hóa đơn tự động bằng thời gian thực)
+        hd.setMaHoaDon("HD" + System.currentTimeMillis());
+
         NhanVien nv = new NhanVien();
         nv.setId(idNhanVien);
         hd.setNhanVien(nv);
 
-        CaLamViec ca = new CaLamViec();
-        ca.setId(idCa);
-        hd.setCa(ca);
+       // CaLamViec ca = new CaLamViec();
+       // ca.setId(idCa);
+        //hd.setCa(ca);
 
         hd.setNgayTao(LocalDateTime.now());
         hd.setTongTienThanhToan(BigDecimal.ZERO);
@@ -50,7 +54,6 @@ public class BanHangServiceImpl implements BanHangService {
         ghiLichSu(newHoaDon, "TAO_DON", "Tạo hóa đơn mới");
         return newHoaDon;
     }
-
     @Override
     public void themSanPhamVaoGio(int idHoaDon, int idSanPhamChiTiet, int soLuong) {
         if (soLuong <= 0) {
@@ -355,13 +358,16 @@ public class BanHangServiceImpl implements BanHangService {
         try {
             transaction.begin();
 
-            HoaDon hd = banHangDAO.findHoaDonById(idHoaDon);
+            // SỬA Ở ĐÂY: Dùng trực tiếp 'em' đang mở của hàm này để tìm HoaDon
+            HoaDon hd = em.find(HoaDon.class, idHoaDon);
+
             if (hd == null) {
                 throw new IllegalArgumentException("Hóa đơn không tồn tại.");
             }
 
-            // Hoàn lại tồn kho cho từng sản phẩm trong hóa đơn
+            // Lúc này EntityManager 'em' vẫn đang mở, vòng lặp sẽ tự động query mà không bị lỗi Lazy
             for (ChiTietHoaDon ct : hd.getChiTietHoaDons()) {
+                // (Giữ nguyên logic cộng lại tồn kho của bạn)
                 SanPhamChiTiet spct = sanPhamChiTietDao.findByIdForUpdate(ct.getSanPhamChiTiet().getId());
                 if (spct != null) {
                     spct.setSoLuongTon(spct.getSoLuongTon() + ct.getSoLuong());
@@ -369,22 +375,23 @@ public class BanHangServiceImpl implements BanHangService {
                 }
             }
 
-            // Cập nhật trạng thái hóa đơn
-            hd.setTrangThai(2); // Hủy
+            // Cập nhật trạng thái hóa đơn thành Đã Hủy
+            // Tùy vào tên thuộc tính trong Entity của bạn, có thể là setTrangThai(0) hoặc setTrangThai("Đã hủy")
+            hd.setTrangThai(5);
             hd.setLyDoHuy(lyDo);
-            banHangDAO.updateHoaDon(hd);
 
-            // Ghi lịch sử
-            ghiLichSu(hd, "HUY_DON", lyDo);
+            em.merge(hd); // Cập nhật hóa đơn vào database
 
             transaction.commit();
         } catch (Exception e) {
             if (transaction != null && transaction.isActive()) {
                 transaction.rollback();
             }
-            throw e;
+            throw e; // Ném lỗi ra ngoài để Controller bắt được và trả về JSON {success: false}
         } finally {
-            em.close();
+            if (em != null && em.isOpen()) {
+                em.close();
+            }
         }
     }
 

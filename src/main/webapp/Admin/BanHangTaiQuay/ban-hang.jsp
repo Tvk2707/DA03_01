@@ -1,106 +1,502 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: Admin
-  Date: 7/20/2024
-  Time: 10:00 AM
-  To change this template use File | Settings | File Templates.
---%>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-
 <%
-    request.setAttribute("pageTitle", "Bán hàng tại quầy");
+    // Setup các thuộc tính cho layout chung
+    request.setAttribute("pageTitle", "Bán hàng tại quầy (POS)");
     request.setAttribute("activeMenu", "pos");
 %>
-
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bán Hàng Tại Quầy</title>
+    <title>Bán hàng tại quầy — RIOR</title>
+
+    <!-- KẾ THỪA CSS DÙNG CHUNG CỦA HỆ THỐNG -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/FE/Admin/css/layout.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/FE/Admin/css/sidebar.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/FE/Admin/css/header.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/sales.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/FE/Admin/css/danhmuc.css">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Font đặc thù của giao diện POS -->
+
+    <style>
+        /* ========================================================== */
+        /* CSS FIX LỖI GIAO DIỆN BỊ SIDEBAR VÀ HEADER ĐÈ LÊN          */
+        /* ========================================================== */
+        .main-content-wrapper {
+            /* Đã xóa margin-left vì class category-section bên ngoài đã tự động lùi lề rồi */
+            padding-top: 0px; /* Đẩy nội dung xuống dưới Header */
+            width: 100%;       /* Chiếm toàn bộ không gian còn lại để POS không bị bóp nghẹt */
+            position: relative;
+            z-index: 1; /* Giữ nội dung luôn nằm dưới Header khi cuộn trang */
+        }
+
+        /* ========================================================== */
+        /* CSS ĐẶC THÙ RIÊNG CỦA TRANG POS (Không ảnh hưởng layout chung) */
+        /* ========================================================== */
+        :root {
+            --bg: #F7F4EE;
+            --panel: #FFFFFF;
+            --brown-900: #4A3B27;
+            --brown-700: #6B5738;
+            --brown-600: #8B6B43;
+            --brown-500: #9C7C4E;
+            --gold-bg: #F3EBDA;
+            --line: #E9E3D7;
+            --text-main: #3A332A;
+            --text-sub: #8B8478;
+            --amber-bg: #FDF3D9; --amber-text: #B9891B;
+            --blue-bg: #E7EEFC; --blue-text: #3B5FCE;
+            --green-bg: #E4F5EA; --green-text: #2E9A5A;
+            --red-bg: #FCE7E7; --red-text: #D65454;
+            --radius: 14px;
+        }
+
+        .hidden { display: none; }
+
+        .pos-wrapper {
+            background: var(--bg);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            min-height: calc(100vh - 75px); /* Bù trừ chiều cao khớp với padding-top ở trên */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pos-wrapper svg { display: block; }
+
+        /* Page header */
+        .page-head { padding: 26px 28px 0; }
+        .page-head-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; flex-wrap: wrap;}
+        .page-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--brown-900); margin: 0;}
+        .page-sub { color: var(--text-sub); font-size: 14px; margin-top: 4px;}
+        .head-btns { display: flex; gap: 10px; }
+        .pos-btn {
+            border-radius: 10px; padding: 10px 18px; font-size: 13.5px; font-weight: 600;
+            border: 1px solid transparent; cursor: pointer; display: flex; align-items: center; gap: 8px;
+        }
+        .pos-btn-outline { background: #fff; border-color: var(--brown-500); color: var(--brown-700); }
+        .pos-btn-solid { background: var(--brown-600); color: #fff; }
+        .pos-btn-solid:hover { background: var(--brown-700); }
+
+        .badge-limit {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: var(--gold-bg); color: var(--brown-700); font-size: 12px; font-weight: 600;
+            padding: 5px 10px; border-radius: 20px; margin-top: 10px;
+        }
+
+        /* Invoice tabs */
+        .tabs { display: flex; gap: 8px; padding: 18px 28px 0; }
+        .tab {
+            padding: 9px 16px; border-radius: 10px 10px 0 0; font-size: 13px; font-weight: 600;
+            background: #EFE9DC; color: var(--text-sub); cursor: pointer; display: flex; align-items: center; gap: 8px;
+        }
+        .tab.active { background: var(--panel); color: var(--brown-700); border: 1px solid var(--line); border-bottom: 1px solid var(--panel); }
+        .tab .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--amber-text); }
+        .tab-add {
+            width: 34px; height: 34px; border-radius: 10px; background: transparent; border: 1px dashed var(--brown-500);
+            color: var(--brown-600); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px;
+        }
+
+        /* Body layout */
+        .pos-layout { display: flex; gap: 20px; padding: 0 28px 28px; flex: 1; min-height: 0; }
+        .left-col { flex: 1; min-width: 0; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
+        .right-col { width: 360px; flex-shrink: 0; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; }
+
+        .find-row { display: flex; gap: 10px; }
+        .find-input {
+            flex: 1; display: flex; align-items: center; gap: 10px;
+            background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 11px 14px;
+            color: var(--text-sub); font-size: 13.5px;
+        }
+        #search-product { width: 100%; border: none; background: transparent; outline: none; }
+        .qr-btn {
+            display: flex; align-items: center; gap: 8px; padding: 11px 16px; border-radius: 10px;
+            background: var(--brown-900); color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;
+        }
+
+        .chip-row { display: flex; gap: 8px; margin: 16px 0 18px; flex-wrap: wrap; }
+        .chip { padding: 7px 14px; border-radius: 20px; font-size: 12.5px; font-weight: 600; background: var(--bg); color: var(--text-sub); border: 1px solid var(--line); cursor: pointer;}
+        .chip.active { background: var(--brown-600); color: #fff; border-color: var(--brown-600); }
+
+        .product-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+        .p-card {
+            border: 1px solid var(--line); border-radius: 12px; padding: 12px; cursor: pointer;
+            transition: box-shadow .15s ease; background: var(--panel);
+        }
+        .p-card:hover { box-shadow: 0 4px 14px rgba(74,59,39,.08); border-color: var(--brown-500); }
+        .p-thumb {
+            height: 92px; border-radius: 9px; background: var(--gold-bg);
+            display: flex; align-items: center; justify-content: center; margin-bottom: 10px; color: var(--brown-600);
+        }
+        .p-name { font-size: 13px; font-weight: 600; line-height: 1.3; margin-bottom: 4px; }
+        .p-meta { font-size: 11px; color: var(--text-sub); margin-bottom: 8px;}
+        .p-bottom { display: flex; align-items: center; justify-content: space-between; }
+        .p-price { font-size: 13.5px; font-weight: 700; color: var(--brown-700); }
+        .p-add {
+            width: 26px; height: 26px; border-radius: 8px; background: var(--gold-bg); color: var(--brown-700);
+            display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; cursor: pointer;
+        }
+        .p-add[data-disabled="true"] { background: #eee; color: #aaa; cursor: not-allowed; }
+        .stock-low { color: var(--red-text); }
+
+        /* Right column - cart */
+        .cust-box {
+            display: flex; align-items: center; justify-content: space-between;
+            background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 11px 13px; margin-bottom: 16px; position: relative;
+        }
+        .cust-info { display: flex; align-items: center; gap: 10px; }
+        .cust-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold-bg); color: var(--brown-700); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700;}
+        .cust-name { font-size: 13px; font-weight: 600; }
+        .cust-sub { font-size: 11px; color: var(--text-sub); }
+        .link-btn { font-size: 12px; color: var(--brown-600); font-weight: 600; cursor: pointer; }
+
+        #panel-khach-hang {
+            position: absolute; top: 100%; right: 0; width: 280px; background: #fff;
+            border: 1px solid var(--line); border-radius: 10px; padding: 12px;
+            box-shadow: 0 6px 20px rgba(0,0,0,.1); z-index: 10;
+        }
+        #panel-khach-hang input { width: 100%; border: 1px solid var(--line); background: var(--bg); padding: 8px 10px; border-radius: 8px; font-size: 13px; }
+        #form-them-khach-nhanh { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); display: flex; flex-direction: column; gap: 8px; }
+        .btn-them-khach { background: var(--brown-600); color: #fff; border: none; border-radius: 8px; padding: 8px; font-size: 12px; font-weight: 600; cursor: pointer; }
+
+
+        .cart-title { font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--text-sub); margin-bottom: 10px;}
+        .cart-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; margin-bottom: 14px; padding-right: 2px;}
+        .cart-empty { text-align: center; font-size: 13px; color: var(--text-sub); padding: 40px 0; }
+        .cart-item { display: flex; gap: 10px; align-items: flex-start; }
+        .ci-thumb { width: 44px; height: 44px; border-radius: 8px; background: var(--gold-bg); flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--brown-600);}
+        .ci-body { flex: 1; min-width: 0; }
+        .ci-name { font-size: 12.5px; font-weight: 600; margin-bottom: 2px; }
+        .ci-variant { font-size: 11px; color: var(--text-sub); margin-bottom: 6px;}
+        .ci-row { display: flex; align-items: center; justify-content: space-between; }
+        .qty-stepper { display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 3px 8px;}
+        .qty-stepper span { font-size: 12px; font-weight: 600; width: 14px; text-align: center;}
+        .qty-stepper button { border: none; background: none; color: var(--brown-700); font-weight: 700; cursor: pointer; font-size: 13px; width: 16px;}
+        .ci-price { font-size: 12.5px; font-weight: 700; color: var(--brown-700);}
+        .ci-remove { color: var(--red-text); font-size: 11px; cursor: pointer; margin-left: 8px;}
+
+        .voucher-row { display: flex; gap: 8px; margin-bottom: 14px; }
+        #input-voucher { flex: 1; border: 1px dashed var(--brown-500); border-radius: 9px; padding: 9px 12px; font-size: 12.5px; color: var(--text-sub); background: var(--bg); outline: none;}
+        .voucher-apply { background: var(--gold-bg); color: var(--brown-700); border: none; border-radius: 9px; padding: 0 14px; font-size: 12px; font-weight: 700; cursor: pointer;}
+
+        .totals { border-top: 1px dashed var(--line); padding-top: 12px; margin-bottom: 14px; }
+        .t-row { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--text-sub); margin-bottom: 7px;}
+        .t-row.grand { color: var(--text-main); font-size: 16px; font-weight: 700; margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--line);}
+        .t-row.grand span:last-child { color: var(--brown-700); }
+        .t-row .discount { color: var(--green-text); }
+
+        .pay-methods { display: flex; gap: 8px; margin-bottom: 14px; }
+        .pay-chip { flex: 1; text-align: center; padding: 10px 4px; border-radius: 9px; border: 1px solid var(--line); font-size: 11.5px; font-weight: 600; color: var(--text-sub); cursor: pointer;}
+        .pay-chip.active { background: var(--brown-900); color: #fff; border-color: var(--brown-900);}
+
+        .checkout-btn {
+            background: var(--brown-600); color: #fff; border: none; border-radius: 11px; padding: 14px; width: 100%;
+            font-size: 14.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .checkout-btn:hover { background: var(--brown-700); }
+        /* Nút X đóng tab */
+        .btn-close-tab {
+            margin-left: 5px;
+            background: transparent;
+            border: none;
+            font-size: 16px;
+            line-height: 1;
+            color: var(--text-sub);
+            cursor: pointer;
+            border-radius: 4px;
+            padding: 2px 6px;
+            transition: all 0.2s ease;
+        }
+        .btn-close-tab:hover {
+            color: var(--red-text);
+            background-color: var(--red-bg);
+        }
+    </style>
 </head>
 <body>
-<div class="admin-layout">
-    <jsp:include page="/Admin/layout/sidebar.jsp"/>
-    <div class="main-content">
-        <jsp:include page="/Admin/layout/header.jsp"/>
-        <div class="page-content" style="padding: 20px;">
-            <div class="pos-layout">
-                <div class="left-panel">
-                    <div class="filter-section" style="margin-bottom: 16px;">
-                        <input type="text" class="filter-input" placeholder="Tìm kiếm sản phẩm..." oninput="timSanPham(this.value)">
-                    </div>
-                    <div id="product-grid-container" class="product-grid">
-                        <%-- Product cards will be loaded here via JS --%>
+
+<!-- NHÚNG SIDEBAR CHUNG -->
+<%@include file="/Admin/layout/sidebar.jsp" %>
+
+<div class="dashboard-container">
+
+    <!-- NHÚNG HEADER CHUNG -->
+    <%@include file="/Admin/layout/header.jsp" %>
+    <div class="category-section">
+
+        <!-- ĐÃ BỔ SUNG CLASS NÀY ĐỂ FIX LỖI ĐÈ GIAO DIỆN -->
+        <div class="main-content-wrapper">
+
+            <!-- GIAO DIỆN BÁN HÀNG TẠI QUẦY (Được bọc trong pos-wrapper) -->
+            <div class="pos-wrapper">
+                <div class="page-head">
+                    <div class="page-head-row">
+                        <div>
+                            <h1 class="page-title">Bán hàng tại quầy</h1>
+                            <div class="page-sub">Tạo hóa đơn, thêm sản phẩm và thanh toán trực tiếp cho khách</div>
+                            <div class="badge-limit">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+                                ${danhSachHoaDonCho.size()}/10 hóa đơn chờ
+                            </div>
+                        </div>
+                        <div class="head-btns">
+                            <button class="pos-btn pos-btn-outline">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h4v4H4zM16 4h4v4h-4zM4 16h4v4H4z"/><path d="M14 14h2v2h-2zM18 14h2v6h-4v-2M14 18h2v2h-2z"/></svg>
+                                Quét QR
+                            </button>
+                            <button class="pos-btn pos-btn-solid">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                                Tạo đơn hàng
+                            </button>
+                        </div>
                     </div>
                 </div>
-                <div class="right-panel">
-                    <div class="cart-header">
-                        <h3 style="margin: 0;">Hóa đơn #<span id="currentInvoiceId"></span></h3>
-                        <button onclick="huyHoaDon(currentInvoiceId)">Hủy</button>
+
+                <div class="tabs">
+                    <c:forEach var="hd" items="${danhSachHoaDonCho}">
+                        <div class="tab ${hd.id == idHoaDonDangTao ? 'active' : ''}" data-hoadon="${hd.id}">
+                            <span class="dot"></span>
+                            Đơn #${hd.id} · ${empty hd.khachHang ? 'Khách lẻ' : hd.khachHang.soDienThoai}
+
+                            <!-- Nút X để xóa hóa đơn -->
+                            <button class="btn-close-tab" onclick="xoaHoaDonCho(event, ${hd.id})" title="Hủy đơn này">×</button>
+                        </div>
+                    </c:forEach>
+                    <div class="tab-add">+</div>
+                </div>
+
+                <div class="pos-layout">
+                    <!-- LEFT: product search / grid -->
+                    <div class="left-col">
+                        <div class="find-row">
+                            <div class="find-input">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+                                <input type="text" id="search-product" placeholder="Tìm sản phẩm theo tên, mã SKU...">
+                            </div>
+                        </div>
+
+                        <div class="chip-row">
+                            <div class="chip active" data-danhmuc="">Tất cả</div>
+                            <c:forEach var="dm" items="${danhSachDanhMuc}">
+                                <div class="chip" data-danhmuc="${dm.id}">${dm.ten}</div>
+                            </c:forEach>
+                        </div>
+
+                        <div class="product-grid">
+                            <c:forEach var="sp" items="${danhSachSanPham}">
+                                <div class="p-card" data-spct="${sp.id}">
+                                    <div class="p-thumb">
+                                        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="6.5" cy="12" r="3.2"/><circle cx="17.5" cy="12" r="3.2"/><path d="M9.7 12h4.6M3 12l-1.5-1M21 12l1.5-1"/></svg>
+                                    </div>
+                                    <div class="p-name">${sp.tenSp}</div>
+                                    <div class="p-meta ${sp.tonKho <= 3 ? 'stock-low' : ''}" data-tonkho>
+                                        Còn ${sp.tonKho} · ${sp.moTaBienThe}
+                                    </div>
+                                    <div class="p-bottom">
+                                        <div class="p-price"><fmt:formatNumber value="${sp.gia}" type="currency" currencySymbol="đ"/></div>
+                                        <div class="p-add" ${sp.tonKho <= 0 ? 'data-disabled="true"' : ''}>+</div>
+                                    </div>
+                                </div>
+                            </c:forEach>
+                        </div>
                     </div>
-                    <div id="cart-items-container" class="cart-items">
-                        <%-- Cart items will be rendered here --%>
-                    </div>
-                    <div class="cart-footer">
-                        <div class="summary-row">
-                            <span>Khách hàng:</span>
-                            <button onclick="document.getElementById('customerModal').style.display='block'">Chọn</button>
+
+                    <!-- RIGHT: cart -->
+                    <div class="right-col">
+                        <div class="cust-box">
+                            <div class="cust-info">
+                                <c:set var="kh" value="${khachHangCuaHoaDon}"/>
+                                <div class="cust-avatar">
+                                    <c:choose>
+                                        <c:when test="${not empty kh}">${kh.hoTen.substring(0,1)}${kh.hoTen.contains(' ') ? kh.hoTen.substring(kh.hoTen.lastIndexOf(' ') + 1, kh.hoTen.lastIndexOf(' ') + 2) : ''}</c:when>
+                                        <c:otherwise>KL</c:otherwise>
+                                    </c:choose>
+                                </div>
+                                <div>
+                                    <div class="cust-name">${not empty kh ? kh.hoTen : 'Khách lẻ'}</div>
+                                    <div class="cust-sub">${not empty kh ? kh.soDienThoai : 'Chưa gắn số điện thoại'}</div>
+                                </div>
+                            </div>
+                            <div class="link-btn">Đổi</div>
+                            <div id="panel-khach-hang" class="hidden">
+                                <input type="text" id="input-sdt" placeholder="Nhập số điện thoại khách hàng" />
+                                <div id="form-them-khach-nhanh" class="hidden">
+                                    <input type="text" id="input-sdt-moi" placeholder="Số điện thoại" />
+                                    <input type="text" id="input-ten-moi" placeholder="Họ tên" />
+                                    <button type="button" class="btn-them-khach">Thêm &amp; chọn</button>
+                                </div>
+                            </div>
                         </div>
-                        <div class="summary-row">
-                            <span>Voucher:</span>
-                            <input type="text" id="voucherInput" placeholder="Nhập mã voucher">
-                            <button onclick="apVoucher(currentInvoiceId, document.getElementById('voucherInput').value)">Áp dụng</button>
+
+                        <div class="cart-title">Giỏ hàng · <span id="cart-count">${gioHang.items.size()}</span> sản phẩm</div>
+                        <div class="cart-list">
+                            <c:if test="${empty gioHang.items}">
+                                <div class="cart-empty">Chưa có sản phẩm nào trong giỏ</div>
+                            </c:if>
+                            <c:forEach var="ct" items="${gioHang.items}">
+                                <div class="cart-item" data-id="${ct.idChiTiet}">
+                                    <div class="ci-thumb">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="6.5" cy="12" r="3.2"/><circle cx="17.5" cy="12" r="3.2"/><path d="M9.7 12h4.6"/></svg>
+                                    </div>
+                                    <div class="ci-body">
+                                        <div class="ci-name">${ct.tenSp}</div>
+                                        <div class="ci-variant">${ct.bienThe}</div>
+                                        <div class="ci-row">
+                                            <div class="qty-stepper">
+                                                <button class="qty-minus" data-id="${ct.idChiTiet}" data-qty="${ct.soLuong}">–</button>
+                                                <span>${ct.soLuong}</span>
+                                                <button class="qty-plus" data-id="${ct.idChiTiet}" data-qty="${ct.soLuong}" data-spct="${ct.idSpct}">+</button>
+                                            </div>
+                                            <div class="ci-price"><fmt:formatNumber value="${ct.tongTienDong}" type="currency" currencySymbol="đ"/></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </c:forEach>
                         </div>
-                        <div class="summary-row">
-                            <span>Tạm tính</span>
-                            <span id="subtotalAmount">0 đ</span>
+
+                        <div class="voucher-row">
+                            <input type="text" id="input-voucher" placeholder="Nhập mã giảm giá...">
+                            <button class="voucher-apply">Áp dụng</button>
                         </div>
-                        <div class="summary-row">
-                            <span>Giảm giá</span>
-                            <span id="discountAmount">0 đ</span>
+
+                        <div class="totals">
+                            <div class="t-row"><span>Tạm tính</span><span id="sum-tamtinh"><fmt:formatNumber value="${gioHang.tamTinh}" type="currency" currencySymbol="đ"/></span></div>
+                            <div class="t-row"><span>Giảm giá</span><span class="discount" id="sum-giamgia"><fmt:formatNumber value="${gioHang.giamGia}" type="currency" currencySymbol="đ"/></span></div>
+                            <div class="t-row grand"><span>Tổng cộng</span><span id="sum-tongcong"><fmt:formatNumber value="${gioHang.tongTien}" type="currency" currencySymbol="đ"/></span></div>
                         </div>
-                        <div class="summary-row" style="font-weight: 700; font-size: 18px;">
-                            <span>Tổng cộng</span>
-                            <span id="totalAmount">0 đ</span>
+
+                        <div class="pay-methods">
+                            <div class="pay-chip active" data-ma="TIEN_MAT">Tiền mặt</div>
+                            <div class="pay-chip" data-ma="THE_NGAN_HANG">Thẻ ngân hàng</div>
+                            <div class="pay-chip" data-ma="CHUYEN_KHOAN">Chuyển khoản</div>
                         </div>
-                        <button class="checkout-btn" onclick="document.getElementById('paymentModal').style.display='block'">Thanh toán</button>
+
+                        <button class="checkout-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M20 7L9 18l-5-5"/></svg>
+                            Thanh toán · <span id="checkout-total"><fmt:formatNumber value="${gioHang.tongTien}" type="currency" currencySymbol="đ"/></span>
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </div><!-- Kết thúc main-content-wrapper -->
 </div>
 
-<jsp:include page="chon-khach-hang.jsp"/>
-<jsp:include page="xac-nhan-thanh-toan.jsp"/>
-<div id="invoice-print-area"></div>
-<div id="toast-container"></div>
+<%-- Form ẩn để tạo hóa đơn mới --%>
+<form id="form-tao-hoa-don" action="ban-hang" method="post" class="hidden">
+    <input type="hidden" name="action" value="taoHoaDon" />
+</form>
 
-<script src="${pageContext.request.contextPath}/assets/js/ban-hang.js"></script>
 <script>
-    let currentInvoiceId = null;
+    // Bắt sự kiện trên ô input tìm kiếm/quét mã
+    const searchInput = document.getElementById('search-product');
 
-    document.addEventListener('DOMContentLoaded', async () => {
-        const hoaDonCho = await layHoaDonCho(); // Assuming this function is in ban-hang.js
-        if (hoaDonCho && hoaDonCho.length > 0) {
-            // Logic to render tabs for waiting invoices
-        } else {
-            const newInvoice = await taoHoaDon();
-            if (newInvoice) {
-                currentInvoiceId = newInvoice.id;
-                document.getElementById('currentInvoiceId').innerText = newInvoice.maHoaDon;
+    if (searchInput) {
+        searchInput.addEventListener('keypress', function(e) {
+            // Máy quét QR luôn tự động gửi phím Enter sau khi quét xong
+            if (e.key === 'Enter') {
+                e.preventDefault(); // Ngăn chặn form tự reload mặc định nếu có
+
+                const keyword = this.value.trim();
+                if (keyword) {
+                    // Lấy ID hóa đơn đang được chọn (active) để biết thêm sản phẩm vào đơn nào
+                    const activeTab = document.querySelector('.tab.active');
+                    const idHoaDon = activeTab ? activeTab.getAttribute('data-hoadon') : '';
+
+                    if (!idHoaDon) {
+                        alert("Vui lòng chọn hoặc tạo một hóa đơn trước khi quét sản phẩm!");
+                        return;
+                    }
+
+                    // Gọi hàm xử lý thêm sản phẩm
+                    themSanPhamBangMa(keyword, idHoaDon);
+
+                    // Xóa trắng ô input để sẵn sàng quét mã tiếp theo
+                    this.value = '';
+                }
             }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnTaoDon = document.querySelector('.pos-btn-solid');
+        const btnTabAdd = document.querySelector('.tab-add');
+
+        // Dùng trực tiếp JSP EL để lấy đường dẫn chuẩn xác 100%
+        const apiUrl = '${pageContext.request.contextPath}/ban-hang/tao-hoa-don';
+
+        function xuLyTaoDonHang(e) {
+            e.preventDefault();
+
+            console.log("Đang gọi API tới URL: ", apiUrl); // In ra để kiểm tra
+
+            // --- Sửa trong hàm xuLyTaoDonHang (Tạo đơn) hoặc xoaHoaDonCho (Xóa đơn) ---
+            fetch(apiUrl, { method: 'POST' })
+                .then(async (response) => {
+                    // LUÔN LUÔN đọc dữ liệu JSON trả về (kể cả khi bị lỗi 400)
+                    const data = await response.json();
+
+                    if (!response.ok || !data.success) {
+                        // Ném câu thông báo thật từ Backend ra (data.message)
+                        throw new Error(data.message || 'Lỗi HTTP: ' + response.status);
+                    }
+
+                    // Nếu thành công thì tải lại trang
+                    window.location.reload();
+                })
+                .catch(error => {
+                    console.error('Chi tiết lỗi:', error);
+                    // Hiển thị trực tiếp lý do bị lỗi lên màn hình (Ví dụ: "Hóa đơn không tồn tại")
+                    alert('Lỗi hệ thống: ' + error.message);
+                });
         }
-        timSanPham(''); // Initial product load
+
+        // Gắn sự kiện
+        if (btnTaoDon) btnTaoDon.addEventListener('click', xuLyTaoDonHang);
+        if (btnTabAdd) btnTabAdd.addEventListener('click', xuLyTaoDonHang);
     });
+
+    // Hàm xử lý xóa/hủy hóa đơn chờ
+    function xoaHoaDonCho(event, idHoaDon) {
+        // 1. Ngăn chặn sự kiện click lan truyền ra thẻ tab bên ngoài
+        event.stopPropagation();
+
+        // 2. Hỏi xác nhận
+        if (confirm('Bạn có chắc chắn muốn hủy Đơn #' + idHoaDon + ' không?')) {
+
+            // 3. Tạo dữ liệu gửi đi (khớp với req.getParameter trong Java)
+            const params = new URLSearchParams();
+            params.append('idHoaDon', idHoaDon);
+            params.append('lyDo', 'Thu ngân hủy đơn chờ trên màn hình POS'); // Truyền lý do mặc định
+
+            const apiHuyDonUrl = '${pageContext.request.contextPath}/ban-hang/huy-hoa-don?' + params.toString();
+
+            fetch(apiHuyDonUrl, { method: 'POST' })
+                .then(async (response) => {
+                    if (!response.ok) {
+                        throw new Error('Lỗi HTTP: ' + response.status);
+                    }
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // Tải lại trang để làm mới giao diện
+                        window.location.reload();
+                    } else {
+                        alert('Hủy đơn thất bại: ' + (data.message || 'Lỗi từ hệ thống'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Lỗi khi hủy đơn:', error);
+                    alert('Không thể kết nối đến máy chủ! Kiểm tra Console để xem chi tiết.');
+                });
+        }
+    }
 </script>
+
 </body>
 </html>

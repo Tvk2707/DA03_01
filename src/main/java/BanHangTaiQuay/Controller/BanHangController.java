@@ -113,7 +113,7 @@ public class BanHangController extends HttpServlet {
 
             HoaDon hoaDon = banHangService.taoHoaDonMoi(idNhanVien, idCa);
             response.put("success", true);
-            response.put("hoaDon", hoaDon);
+            //response.put("hoaDon", hoaDon);
         } catch (IllegalStateException | IllegalArgumentException e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.put("success", false);
