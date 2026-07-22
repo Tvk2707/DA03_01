@@ -153,13 +153,23 @@
         .cust-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold-bg); color: var(--brown-700); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700;}
         .cust-name { font-size: 13px; font-weight: 600; }
         .cust-sub { font-size: 11px; color: var(--text-sub); }
-        .link-btn { font-size: 12px; color: var(--brown-600); font-weight: 600; cursor: pointer; }
+        .cust-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+        .link-btn {
+            padding: 0; border: 0; background: transparent; color: var(--brown-600);
+            font: inherit; font-size: 12px; font-weight: 600; cursor: pointer;
+        }
+        .link-btn:hover { color: var(--brown-900); text-decoration: underline; }
+        .link-btn--guest { color: var(--green-text); }
+        .customer-current { color: var(--green-text); font-size: 12px; font-weight: 700; }
 
         #panel-khach-hang {
             position: absolute; top: 100%; right: 0; width: 280px; background: #fff;
             border: 1px solid var(--line); border-radius: 10px; padding: 12px;
             box-shadow: 0 6px 20px rgba(0,0,0,.1); z-index: 10;
         }
+        .customer-panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; color: var(--text-main); font-size: 12px; font-weight: 700; }
+        .customer-panel-close { border: 0; background: transparent; color: var(--text-sub); font-size: 20px; line-height: 1; cursor: pointer; padding: 0 2px; }
+        .customer-panel-close:hover { color: var(--red-text); }
         #panel-khach-hang input { width: 100%; border: 1px solid var(--line); background: var(--bg); padding: 8px 10px; border-radius: 8px; font-size: 13px; }
         #form-them-khach-nhanh { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); display: flex; flex-direction: column; gap: 8px; }
         .btn-them-khach { background: var(--brown-600); color: #fff; border: none; border-radius: 8px; padding: 8px; font-size: 12px; font-weight: 600; cursor: pointer; }
@@ -193,6 +203,13 @@
         .pay-methods { display: flex; gap: 8px; margin-bottom: 14px; }
         .pay-chip { flex: 1; text-align: center; padding: 10px 4px; border-radius: 9px; border: 1px solid var(--line); font-size: 11.5px; font-weight: 600; color: var(--text-sub); cursor: pointer;}
         .pay-chip.active { background: var(--brown-900); color: #fff; border-color: var(--brown-900);}
+        .cash-payment-panel { margin-top: -5px; margin-bottom: 14px; padding: 11px; border: 1px solid var(--line); border-radius: 9px; background: #fffaf4; }
+        .cash-payment-panel[hidden] { display: none; }
+        .cash-payment-panel label { display: block; margin-bottom: 6px; font-size: 11px; color: var(--text-sub); }
+        .cash-payment-panel input { width: 100%; box-sizing: border-box; padding: 9px 10px; border: 1px solid var(--line); border-radius: 7px; font-size: 13px; }
+        .cash-change-row { display: flex; justify-content: space-between; margin-top: 9px; font-size: 12px; }
+        .cash-change-row strong { color: var(--brown-900); }
+        .cash-payment-error { margin: 7px 0 0; color: #b42318; font-size: 11px; }
 
         .checkout-btn {
             background: var(--brown-600); color: #fff; border: none; border-radius: 11px; padding: 14px; width: 100%;
@@ -216,6 +233,69 @@
             color: var(--red-text);
             background-color: var(--red-bg);
         }
+
+        .transfer-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(25, 20, 16, .5);
+        }
+        .transfer-modal.hidden { display: none; }
+        .transfer-modal__dialog {
+            width: min(430px, 100%);
+            background: #fff;
+            border-radius: 16px;
+            padding: 22px;
+            box-shadow: 0 20px 60px rgba(25, 20, 16, .25);
+        }
+        .transfer-modal__header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .transfer-modal__header h2 { margin: 0; font-size: 18px; color: var(--text-main); }
+        .transfer-modal__close { border: 0; background: transparent; font-size: 24px; cursor: pointer; color: var(--text-sub); }
+        .transfer-modal__qr { text-align: center; padding: 8px 0 14px; }
+        .transfer-modal__qr img { width: 230px; height: 230px; object-fit: contain; border: 1px solid var(--line); border-radius: 10px; }
+        .transfer-modal__hint { margin: 0 0 14px; color: var(--text-sub); font-size: 12px; line-height: 1.5; }
+        .transfer-modal__field { display: block; margin-bottom: 14px; color: var(--text-main); font-size: 12px; font-weight: 600; }
+        .transfer-modal__field input { width: 100%; box-sizing: border-box; margin-top: 6px; border: 1px solid var(--line); border-radius: 8px; padding: 10px; font-size: 13px; }
+        .transfer-modal__actions { display: flex; gap: 8px; justify-content: flex-end; }
+        .transfer-modal__actions button { border: 0; border-radius: 8px; padding: 10px 14px; cursor: pointer; font-weight: 600; }
+        .transfer-modal__cancel { background: #f3f0ed; color: var(--text-main); }
+        .transfer-modal__confirm { background: var(--brown-600); color: #fff; }
+
+        .product-qr-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 1100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(25, 20, 16, .5);
+        }
+        .product-qr-modal.hidden { display: none; }
+        .product-qr-modal__dialog {
+            width: min(470px, 100%);
+            background: #fff;
+            border-radius: 16px;
+            padding: 22px;
+            box-shadow: 0 20px 60px rgba(25, 20, 16, .25);
+        }
+        .product-qr-modal__header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+        .product-qr-modal__header h2 { margin: 0; font-size: 18px; color: var(--text-main); }
+        .product-qr-modal__close { border: 0; background: transparent; font-size: 24px; cursor: pointer; color: var(--text-sub); }
+        .product-qr-modal__hint { margin: 8px 0 14px; color: var(--text-sub); font-size: 12px; line-height: 1.5; }
+        #product-qr-reader { min-height: 220px; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: #111; }
+        #product-qr-status { min-height: 18px; margin: 10px 0 0; color: var(--text-sub); font-size: 12px; }
+        .product-qr-manual { display: flex; gap: 8px; margin-top: 12px; }
+        .product-qr-manual input { flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; font-size: 13px; }
+        .product-qr-manual button, .product-qr-modal__actions button { border: 0; border-radius: 8px; padding: 9px 12px; cursor: pointer; font-weight: 600; }
+        .product-qr-manual button { background: var(--brown-600); color: #fff; }
+        .product-qr-modal__actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+        .product-qr-modal__actions button { background: #f3f0ed; color: var(--text-main); }
+        .product-qr-modal__actions #restart-product-qr { background: var(--gold-bg); color: var(--brown-700); }
     </style>
 </head>
 <body>
@@ -245,7 +325,7 @@
                             </div>
                         </div>
                         <div class="head-btns">
-                            <button class="pos-btn pos-btn-outline">
+                            <button type="button" class="pos-btn pos-btn-outline" id="open-product-qr">
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h4v4H4zM16 4h4v4h-4zM4 16h4v4H4z"/><path d="M14 14h2v2h-2zM18 14h2v6h-4v-2M14 18h2v2h-2z"/></svg>
                                 Quét QR
                             </button>
@@ -283,7 +363,7 @@
                         <div class="chip-row">
                             <div class="chip active" data-danhmuc="">Tất cả</div>
                             <c:forEach var="dm" items="${danhSachDanhMuc}">
-                                <div class="chip" data-danhmuc="${dm.id}">${dm.ten}</div>
+                                <div class="chip" data-danhmuc="${dm.id}">${dm.tenDanhMuc}</div>
                             </c:forEach>
                         </div>
 
@@ -329,8 +409,22 @@
                                     <div class="cust-sub">${not empty kh ? kh.soDienThoai : 'Chưa gắn số điện thoại'}</div>
                                 </div>
                             </div>
-                            <div class="link-btn">Đổi</div>
+                            <div class="cust-actions">
+                                <button type="button" class="link-btn" data-customer-open aria-expanded="false">Đổi</button>
+                                <c:choose>
+                                    <c:when test="${not empty kh}">
+                                        <button type="button" class="link-btn link-btn--guest" data-customer-guest>Khách lẻ</button>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span class="customer-current">Khách lẻ</span>
+                                    </c:otherwise>
+                                </c:choose>
+                            </div>
                             <div id="panel-khach-hang" class="hidden">
+                                <div class="customer-panel-head">
+                                    <span>Chọn khách hàng</span>
+                                    <button type="button" class="customer-panel-close" data-customer-close aria-label="Đóng">&times;</button>
+                                </div>
                                 <input type="text" id="input-sdt" placeholder="Nhập số điện thoại khách hàng" />
                                 <div id="form-them-khach-nhanh" class="hidden">
                                     <input type="text" id="input-sdt-moi" placeholder="Số điện thoại" />
@@ -367,14 +461,20 @@
                         </div>
 
                         <div class="voucher-row">
-                            <input type="text" id="input-voucher" placeholder="Nhập mã giảm giá...">
-                            <button class="voucher-apply">Áp dụng</button>
+                            <input type="text" id="input-voucher" placeholder="Nhập mã voucher..." autocomplete="off">
+                            <button type="button" class="voucher-apply">Áp dụng</button>
                         </div>
 
+                        <c:set var="tamTinhHoaDon" value="${0}"/>
+                        <c:forEach var="ct" items="${hoaDonDangTao.chiTietHoaDons}">
+                            <c:set var="tamTinhHoaDon" value="${tamTinhHoaDon + (ct.donGia * ct.soLuong)}"/>
+                        </c:forEach>
+                        <c:set var="tongThanhToanHienTai" value="${empty hoaDonDangTao.tongTienThanhToan ? 0 : hoaDonDangTao.tongTienThanhToan}"/>
+                        <c:set var="giamGiaHienTai" value="${tamTinhHoaDon > tongThanhToanHienTai ? tamTinhHoaDon - tongThanhToanHienTai : 0}"/>
                         <div class="totals">
-                            <div class="t-row"><span>Tạm tính</span><span id="sum-tamtinh"><fmt:formatNumber value="${hoaDonDangTao.tongTienThanhToan}" type="currency" currencySymbol="đ"/></span></div>
-                            <div class="t-row"><span>Giảm giá</span><span class="discount" id="sum-giamgia"><fmt:formatNumber value="0" type="currency" currencySymbol="đ"/></span></div>
-                            <div class="t-row grand"><span>Tổng cộng</span><span id="sum-tongcong"><fmt:formatNumber value="${hoaDonDangTao.tongTienThanhToan}" type="currency" currencySymbol="đ"/></span></div>
+                            <div class="t-row"><span>Tạm tính</span><span id="sum-tamtinh"><fmt:formatNumber value="${tamTinhHoaDon}" type="currency" currencySymbol="đ"/></span></div>
+                            <div class="t-row"><span>Giảm giá</span><span class="discount" id="sum-giamgia"><fmt:formatNumber value="${giamGiaHienTai}" type="currency" currencySymbol="đ"/></span></div>
+                            <div class="t-row grand"><span>Tổng cộng</span><span id="sum-tongcong"><fmt:formatNumber value="${tongThanhToanHienTai}" type="currency" currencySymbol="đ"/></span></div>
                         </div>
 
                         <div class="pay-methods">
@@ -383,15 +483,73 @@
                             <div class="pay-chip" data-ma="PTTT002">Chuyển khoản</div>
                         </div>
 
+                        <div class="cash-payment-panel" id="cash-payment-panel">
+                            <label for="cash-amount">Khách đưa (VNĐ)</label>
+                            <input id="cash-amount" type="text" inputmode="numeric"
+                                   autocomplete="off" placeholder="Nhập số tiền khách đưa">
+                            <div class="cash-change-row">
+                                <span>Tiền thối lại</span>
+                                <strong id="cash-change">0 đ</strong>
+                            </div>
+                            <p id="cash-payment-error" class="cash-payment-error" hidden></p>
+                        </div>
+
                         <button class="checkout-btn">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M20 7L9 18l-5-5"/></svg>
-                            Thanh toán · <span id="checkout-total"><fmt:formatNumber value="${hoaDonDangTao.tongTienThanhToan}" type="currency" currencySymbol="đ"/></span>
+                            Thanh toán · <span id="checkout-total"><fmt:formatNumber value="${tongThanhToanHienTai}" type="currency" currencySymbol="đ"/></span>
                         </button>
                     </div>
                 </div>
             </div>
         </div>
     </div><!-- Kết thúc main-content-wrapper -->
+</div>
+
+<div id="transfer-payment-modal" class="transfer-modal hidden" aria-hidden="true">
+    <section class="transfer-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="transfer-payment-title">
+        <div class="transfer-modal__header">
+            <h2 id="transfer-payment-title">Thanh toán chuyển khoản / QR</h2>
+            <button type="button" class="transfer-modal__close" id="close-transfer-payment" aria-label="Đóng">&times;</button>
+        </div>
+        <p class="transfer-modal__hint">
+            Khách quét mã QR, hoàn tất chuyển khoản rồi nhập mã giao dịch ngân hàng để xác nhận.
+        </p>
+        <div class="transfer-modal__qr">
+            <img id="transfer-payment-qr" alt="Mã QR thanh toán hóa đơn">
+        </div>
+        <label class="transfer-modal__field" for="transfer-transaction-code">
+            Mã giao dịch ngân hàng <span aria-hidden="true">*</span>
+            <input id="transfer-transaction-code" type="text" maxlength="100" autocomplete="off" placeholder="Ví dụ: FT260722123456">
+        </label>
+        <label class="transfer-modal__field" for="transfer-payment-note">
+            Ghi chú
+            <input id="transfer-payment-note" type="text" maxlength="255" value="Thanh toán bằng QR/chuyển khoản">
+        </label>
+        <div class="transfer-modal__actions">
+            <button type="button" class="transfer-modal__cancel" id="cancel-transfer-payment">Để sau</button>
+            <button type="button" class="transfer-modal__confirm" id="confirm-transfer-payment">Đã nhận tiền</button>
+        </div>
+    </section>
+</div>
+
+<div id="product-qr-modal" class="product-qr-modal hidden" aria-hidden="true">
+    <section class="product-qr-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="product-qr-title">
+        <div class="product-qr-modal__header">
+            <h2 id="product-qr-title">Quét QR sản phẩm</h2>
+            <button type="button" class="product-qr-modal__close" id="close-product-qr" aria-label="Đóng">&times;</button>
+        </div>
+        <p class="product-qr-modal__hint">Đưa mã QR của biến thể sản phẩm vào khung quét. Sản phẩm tìm thấy sẽ được thêm vào hóa đơn đang chọn.</p>
+        <div id="product-qr-reader"></div>
+        <p id="product-qr-status" role="status">Đang chờ camera hoặc mã QR.</p>
+        <div class="product-qr-manual">
+            <input id="product-qr-code" type="text" autocomplete="off" placeholder="Nhập mã QR thủ công nếu không dùng camera">
+            <button type="button" id="submit-product-qr">Thêm sản phẩm</button>
+        </div>
+        <div class="product-qr-modal__actions">
+            <button type="button" id="restart-product-qr">Quét lại</button>
+            <button type="button" id="cancel-product-qr">Đóng</button>
+        </div>
+    </section>
 </div>
 
 <%-- Form ẩn để tạo hóa đơn mới --%>
@@ -508,6 +666,7 @@
 <script>
     window.idHoaDonHienTai = ${empty idHoaDonDangTao ? 'null' : idHoaDonDangTao};
 </script>
+<script src="https://unpkg.com/html5-qrcode"></script>
 <script src="${pageContext.request.contextPath}/assets/js/banhang.js"></script>
 
 </body>

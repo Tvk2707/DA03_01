@@ -20,7 +20,6 @@ import java.util.Map;
  * Legacy implementation kept for source compatibility.
  * The active payment route is handled by BanHangController.
  */
-@WebServlet("/thanh-toan/thanh-toan")
 public class ThanhToanServlet extends HttpServlet {
 
     private final BanHangService banHangService = new BanHangServiceImpl();
@@ -43,11 +42,15 @@ public class ThanhToanServlet extends HttpServlet {
             request.setIdHoaDon(requirePositiveInt(req, "idHoaDon"));
             request.setMaPttt(requireText(req, "maPttt"));
             request.setSoTienKhachDua(requirePositiveAmount(req, "soTienKhachDua"));
+            request.setMaGiaoDich(optionalText(req, "maGiaoDich"));
+            request.setGhiChu(optionalText(req, "ghiChu"));
 
             banHangService.xacNhanThanhToan(
                     request.getIdHoaDon(),
                     request.getMaPttt(),
-                    request.getSoTienKhachDua());
+                    request.getSoTienKhachDua(),
+                    request.getMaGiaoDich(),
+                    request.getGhiChu());
             response.put("success", true);
             response.put("message", "Thanh toán hóa đơn thành công!");
 
@@ -91,6 +94,14 @@ public class ThanhToanServlet extends HttpServlet {
         String value = req.getParameter(parameterName);
         if (value == null || value.trim().isEmpty()) {
             throw new IllegalArgumentException("Thiếu tham số: " + parameterName + ".");
+        }
+        return value.trim();
+    }
+
+    private String optionalText(HttpServletRequest req, String parameterName) {
+        String value = req.getParameter(parameterName);
+        if (value == null || value.trim().isEmpty()) {
+            return null;
         }
         return value.trim();
     }

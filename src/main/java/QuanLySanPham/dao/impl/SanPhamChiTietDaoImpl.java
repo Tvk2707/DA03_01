@@ -140,12 +140,21 @@ public class SanPhamChiTietDaoImpl extends GenericDaoImpl<SanPhamChiTiet, Intege
     @Override
     public List<SanPhamChiTiet> timKiem(Integer sanPhamId, String ma, Integer mauSacId,
                                         Integer kichCoId, Integer trangThai) {
+        return timKiemNoiBo(sanPhamId, ma, mauSacId, kichCoId, trangThai, null);
+    }
+
+    @Override
+    public List<SanPhamChiTiet> timKiemTheoDanhMuc(String ma, Integer danhMucId, Integer trangThai) {
+        return timKiemNoiBo(null, ma, null, null, trangThai, danhMucId);
+    }
+
+    private List<SanPhamChiTiet> timKiemNoiBo(Integer sanPhamId, String ma, Integer mauSacId,
+                                               Integer kichCoId, Integer trangThai, Integer danhMucId) {
         EntityManager em = EntityManagerUtlis.getEntityManager();
         try {
-            // ✅ BẮT BUỘC: Phải LEFT JOIN FETCH s.sanPham để JSP lấy được temp.sanPham.id
             StringBuilder jpql = new StringBuilder(
                     "SELECT s FROM SanPhamChiTiet s " +
-                            "LEFT JOIN FETCH s.sanPham " +          // <-- THÊM DÒNG NÀY
+                            "LEFT JOIN FETCH s.sanPham sp " +
                             "LEFT JOIN FETCH s.mauSac " +
                             "LEFT JOIN FETCH s.kichCo " +
                             "WHERE s.isDeleted = false"
@@ -166,6 +175,9 @@ public class SanPhamChiTietDaoImpl extends GenericDaoImpl<SanPhamChiTiet, Intege
             if (trangThai != null) {
                 jpql.append(" AND s.trangThai = :trangThai");
             }
+            if (danhMucId != null) {
+                jpql.append(" AND sp.danhMuc.id = :danhMucId");
+            }
 
             TypedQuery<SanPhamChiTiet> query = em.createQuery(jpql.toString(), SanPhamChiTiet.class);
 
@@ -174,6 +186,7 @@ public class SanPhamChiTietDaoImpl extends GenericDaoImpl<SanPhamChiTiet, Intege
             if (mauSacId != null) query.setParameter("mauSacId", mauSacId);
             if (kichCoId != null) query.setParameter("kichCoId", kichCoId);
             if (trangThai != null) query.setParameter("trangThai", trangThai);
+            if (danhMucId != null) query.setParameter("danhMucId", danhMucId);
 
             return query.getResultList();
         } catch (Exception e) {

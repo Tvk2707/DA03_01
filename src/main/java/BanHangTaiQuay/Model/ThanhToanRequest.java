@@ -6,6 +6,8 @@ public class ThanhToanRequest {
     private int idHoaDon;
     private String maPttt;
     private BigDecimal soTienKhachDua;
+    private String maGiaoDich;
+    private String ghiChu;
 
     public int getIdHoaDon() {
         return idHoaDon;
@@ -29,5 +31,21 @@ public class ThanhToanRequest {
 
     public void setSoTienKhachDua(BigDecimal soTienKhachDua) {
         this.soTienKhachDua = soTienKhachDua;
+    }
+
+    public String getMaGiaoDich() {
+        return maGiaoDich;
+    }
+
+    public void setMaGiaoDich(String maGiaoDich) {
+        this.maGiaoDich = maGiaoDich;
+    }
+
+    public String getGhiChu() {
+        return ghiChu;
+    }
+
+    public void setGhiChu(String ghiChu) {
+        this.ghiChu = ghiChu;
     }
 }

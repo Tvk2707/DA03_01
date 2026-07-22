@@ -9,6 +9,8 @@ import java.util.List;
 public interface SanPhamChiTietService {
     List<SanPhamChiTiet> timKiem(Integer sanPhamId, String ma, Integer mauSacId, Integer kichCoId, Integer trangThai);
 
+    List<SanPhamChiTiet> timKiemTheoDanhMuc(String ma, Integer danhMucId, Integer trangThai);
+
     /**
      * Thêm danh sách biến thể sản phẩm mới
      */

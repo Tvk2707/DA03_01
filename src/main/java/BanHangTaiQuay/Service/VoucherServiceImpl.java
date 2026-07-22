@@ -89,6 +89,54 @@ public class VoucherServiceImpl implements VoucherService {
         }
     }
 
+    @Override
+    public void hoanVoucherKhiHuy(EntityManager em, HoaDon hoaDon) {
+        if (em == null || hoaDon == null || hoaDon.getPhieuGiamGia() == null) {
+            return;
+        }
+
+        PhieuGiamGia voucher = em.find(
+                PhieuGiamGia.class,
+                hoaDon.getPhieuGiamGia().getId(),
+                LockModeType.PESSIMISTIC_WRITE
+        );
+        if (voucher != null) {
+            int soLuongDaDung = voucher.getSoLuongDaDung() == null ? 0 : voucher.getSoLuongDaDung();
+            voucher.setSoLuongDaDung(Math.max(0, soLuongDaDung - 1));
+        }
+
+        if (hoaDon.getKhachHang() != null && hoaDon.getKhachHang().getId() != null && voucher != null) {
+            KhachHangPhieuGiamGia lienKet = em.createQuery(
+                            "SELECT k FROM KhachHangPhieuGiamGia k "
+                                    + "WHERE k.khachHang.id = :idKhachHang "
+                                    + "AND k.phieuGiamGia.id = :idVoucher "
+                                    + "AND k.ngaySuDung IS NOT NULL",
+                            KhachHangPhieuGiamGia.class)
+                    .setParameter("idKhachHang", hoaDon.getKhachHang().getId())
+                    .setParameter("idVoucher", voucher.getId())
+                    .setLockMode(LockModeType.PESSIMISTIC_WRITE)
+                    .setMaxResults(1)
+                    .getResultStream()
+                    .findFirst()
+                    .orElse(null);
+            if (lienKet != null) {
+                lienKet.setNgaySuDung(null);
+                lienKet.setTrangThai(1);
+            }
+        }
+
+        for (ChiTietHoaDon chiTiet : hoaDon.getChiTietHoaDons()) {
+            BigDecimal donGiaGoc = chiTiet.getDonGia();
+            int soLuong = chiTiet.getSoLuong() == null ? 0 : chiTiet.getSoLuong();
+            if (donGiaGoc != null) {
+                chiTiet.setGiaBanRa(donGiaGoc);
+                chiTiet.setTongTien(donGiaGoc.multiply(BigDecimal.valueOf(soLuong)));
+            }
+        }
+        hoaDon.setPhieuGiamGia(null);
+        capNhatTongTien(hoaDon);
+    }
+
     private void kiemTraVoucher(PhieuGiamGia voucher, HoaDon hoaDon) {
         if (voucher == null) {
             throw new IllegalArgumentException("Mã voucher không hợp lệ.");

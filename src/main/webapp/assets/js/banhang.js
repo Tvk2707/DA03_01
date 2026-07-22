@@ -15,12 +15,15 @@ const BanHangAPI = {
     routes: {
         taoHoaDon: ['/ban-hang/tao-hoa-don', 'POST'],
         themSanPham: ['/ban-hang/them-san-pham', 'POST'],
+        quetQr: ['/ban-hang/quet-qr', 'GET'],
         xoaSanPham: ['/ban-hang/xoa-san-pham', 'POST'],
         capNhatSoLuong: ['/ban-hang/cap-nhat-so-luong', 'POST'],
         traCuuKhachHang: ['/ban-hang/tra-cuu-khach-hang', 'GET'],
         traCuuHoacTaoKhachHang: ['/ban-hang/tra-cuu-khach-hang', 'POST'],
         ganKhachHang: ['/ban-hang/gan-khach-hang', 'POST'],
-        apVoucher: ['/ban-hang/ap-voucher', 'POST']
+        chonKhachLe: ['/ban-hang/chon-khach-le', 'POST'],
+        apVoucher: ['/ban-hang/ap-voucher', 'POST'],
+        thanhToan: ['/thanh-toan/thanh-toan', 'POST']
     },
 
     async goi(action, params = {}) {
@@ -53,12 +56,7 @@ const BanHangAPI = {
     },
 
     async thanhToan(params) {
-        const response = await fetch(posContextPath() + '/thanh-toan/thanh-toan', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-            body: new URLSearchParams(params)
-        });
-        return this.docJson(response);
+        return this.goi('thanhToan', params);
     },
 
     async docJson(response) {
@@ -103,7 +101,8 @@ function debounce(callback, delay) {
 }
 
 function timSanPham(keyword) {
-    return timSanPhamDebounced(keyword || '', '');
+    const category = document.querySelector('.chip.active')?.dataset.danhmuc || '';
+    return timSanPhamDebounced(keyword || '', category);
 }
 
 const timSanPhamDebounced = debounce(async (keyword, idDanhMuc) => {
@@ -164,20 +163,137 @@ async function themVaChonKhachHang(button) {
     });
 }
 
+let productQrScanner = null;
+let productQrLastCode = '';
+
+function capNhatTrangThaiQr(message) {
+    const status = document.getElementById('product-qr-status');
+    if (status) status.textContent = message;
+}
+
+async function dungQuetQr() {
+    if (!productQrScanner) return;
+    try {
+        await productQrScanner.stop();
+        await productQrScanner.clear();
+    } catch (error) {
+        console.warn('Không thể dừng camera QR:', error);
+    } finally {
+        productQrScanner = null;
+    }
+}
+
+async function themSanPhamTuMaQr(ma) {
+    const maQr = String(ma || '').trim();
+    if (!maQr) {
+        hienThiLoi('Mã QR sản phẩm không được để trống.');
+        return;
+    }
+    if (!idHoaDonHienTai) {
+        hienThiLoi('Vui lòng tạo hoặc chọn hóa đơn trước khi quét sản phẩm.');
+        return;
+    }
+
+    capNhatTrangThaiQr('Đang tìm sản phẩm...');
+    const data = await BanHangAPI.goi('quetQr', { ma: maQr });
+    await BanHangAPI.goi('themSanPham', {
+        idHoaDon: idHoaDonHienTai,
+        idSpct: data.idSanPhamChiTiet,
+        soLuong: 1
+    });
+    await dungQuetQr();
+    window.location.reload();
+}
+
+async function moQuetQr() {
+    const modal = document.getElementById('product-qr-modal');
+    if (!modal) return;
+    if (!idHoaDonHienTai) {
+        hienThiLoi('Vui lòng tạo hoặc chọn hóa đơn trước khi quét sản phẩm.');
+        return;
+    }
+
+    productQrLastCode = '';
+    modal.classList.remove('hidden');
+    modal.setAttribute('aria-hidden', 'false');
+    capNhatTrangThaiQr('Đang chờ camera hoặc mã QR.');
+
+    if (typeof Html5Qrcode === 'undefined') {
+        capNhatTrangThaiQr('Camera QR chưa tải được. Bạn có thể nhập mã thủ công.');
+        return;
+    }
+
+    await dungQuetQr();
+    productQrScanner = new Html5Qrcode('product-qr-reader');
+    try {
+        await productQrScanner.start(
+            { facingMode: 'environment' },
+            { fps: 10, qrbox: { width: 220, height: 220 } },
+            async decodedText => {
+                if (productQrLastCode) return;
+                productQrLastCode = decodedText;
+                await dungQuetQr();
+                try {
+                    await themSanPhamTuMaQr(decodedText);
+                } catch (error) {
+                    productQrLastCode = '';
+                    capNhatTrangThaiQr(error.message || 'Không thể thêm sản phẩm từ mã QR.');
+                }
+            },
+            () => {}
+        );
+    } catch (error) {
+        await dungQuetQr();
+        capNhatTrangThaiQr('Không mở được camera. Bạn có thể nhập mã thủ công.');
+    }
+}
+
+async function dongQuetQr() {
+    await dungQuetQr();
+    const modal = document.getElementById('product-qr-modal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.setAttribute('aria-hidden', 'true');
+}
+
+async function chonKhachLe(button) {
+    await withLoading(button, async () => {
+        await BanHangAPI.goi('chonKhachLe', { idHoaDon: idHoaDonHienTai });
+        window.location.reload();
+    });
+}
+
 function moPanelKhachHang() {
-    document.getElementById('panel-khach-hang')?.classList.remove('hidden');
+    const panel = document.getElementById('panel-khach-hang');
+    const trigger = document.querySelector('[data-customer-open]');
+    if (!panel) return;
+
+    if (!panel.classList.contains('hidden')) {
+        dongPanelKhachHang();
+        return;
+    }
+
+    panel.classList.remove('hidden');
+    trigger?.setAttribute('aria-expanded', 'true');
+    document.getElementById('input-sdt')?.focus();
 }
 
 function dongPanelKhachHang() {
     document.getElementById('panel-khach-hang')?.classList.add('hidden');
+    document.querySelector('[data-customer-open]')?.setAttribute('aria-expanded', 'false');
 }
 
 async function apVoucher(button) {
     const input = document.getElementById('input-voucher');
     const maVoucher = input?.value.trim();
-    if (!maVoucher) return;
+    if (!maVoucher) {
+        hienThiLoi('Vui lòng nhập mã voucher.');
+        input?.focus();
+        return;
+    }
     await withLoading(button, async () => {
         await BanHangAPI.goi('apVoucher', { idHoaDon: idHoaDonHienTai, maVoucher });
+        alert('Áp dụng voucher thành công.');
         window.location.reload();
     });
 }
@@ -186,6 +302,7 @@ function chonPhuongThucThanhToan(element) {
     document.querySelectorAll('.pay-chip').forEach(chip => chip.classList.remove('active'));
     element.classList.add('active');
     phuongThucThanhToanDangChon = element.dataset.ma;
+    capNhatTienMat();
 }
 
 function layTongTienHienThi() {
@@ -193,22 +310,126 @@ function layTongTienHienThi() {
     return text.replace(/[^\d]/g, '') || '0';
 }
 
+function parseSoTien(value) {
+    const digits = String(value ?? '').replace(/[^\d]/g, '');
+    return digits ? Number(digits) : 0;
+}
+
+function dinhDangTien(value) {
+    return new Intl.NumberFormat('vi-VN').format(Math.max(0, value || 0)) + ' đ';
+}
+
+function capNhatTienMat() {
+    const panel = document.getElementById('cash-payment-panel');
+    const input = document.getElementById('cash-amount');
+    const change = document.getElementById('cash-change');
+    const error = document.getElementById('cash-payment-error');
+    if (!panel || !input || !change || !error) return;
+
+    const laTienMat = phuongThucThanhToanDangChon === 'PTTT001';
+    panel.hidden = !laTienMat;
+    if (!laTienMat) return;
+
+    const tongTien = parseSoTien(layTongTienHienThi());
+    const tienKhachDua = parseSoTien(input.value);
+    const tienThoi = tienKhachDua - tongTien;
+    change.textContent = dinhDangTien(tienThoi > 0 ? tienThoi : 0);
+
+    if (!tienKhachDua) {
+        error.hidden = true;
+        return;
+    }
+    error.textContent = tienThoi < 0 ? 'Số tiền khách đưa chưa đủ.' : '';
+    error.hidden = tienThoi >= 0;
+}
+
+function laThanhToanChuyenKhoan() {
+    return ['PTTT002', 'PTTT004', 'CK', 'THE'].includes(phuongThucThanhToanDangChon);
+}
+
+function moModalThanhToanChuyenKhoan() {
+    const modal = document.getElementById('transfer-payment-modal');
+    const qrImage = document.getElementById('transfer-payment-qr');
+    const transactionInput = document.getElementById('transfer-transaction-code');
+    if (!modal || !qrImage || !transactionInput) {
+        throw new BanHangError('Không tải được màn hình thanh toán chuyển khoản.');
+    }
+
+    const amount = layTongTienHienThi();
+    const qrContent = `THANH TOAN HOA DON ${idHoaDonHienTai} SO TIEN ${amount} VND`;
+    qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(qrContent)}`;
+    transactionInput.value = '';
+    modal.classList.remove('hidden');
+    modal.setAttribute('aria-hidden', 'false');
+    transactionInput.focus();
+}
+
+function dongModalThanhToanChuyenKhoan() {
+    const modal = document.getElementById('transfer-payment-modal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.setAttribute('aria-hidden', 'true');
+}
+
+async function xacNhanThanhToanChuyenKhoan(button) {
+    const maGiaoDich = document.getElementById('transfer-transaction-code')?.value.trim();
+    const ghiChu = document.getElementById('transfer-payment-note')?.value.trim();
+    if (!maGiaoDich) {
+        hienThiLoi('Vui lòng nhập mã giao dịch ngân hàng sau khi kiểm tra đã nhận tiền.');
+        return;
+    }
+
+    await withLoading(button, async () => {
+        await BanHangAPI.thanhToan({
+            idHoaDon: idHoaDonHienTai,
+            maPttt: phuongThucThanhToanDangChon,
+            soTienKhachDua: layTongTienHienThi(),
+            maGiaoDich,
+            ghiChu
+        });
+        window.location.reload();
+    });
+}
+
 async function xacNhanThanhToan(button) {
     if (!idHoaDonHienTai) {
         hienThiLoi('Chua co hoa don dang mo.');
         return;
     }
-    let soTienKhachDua = layTongTienHienThi();
+
+    if (laThanhToanChuyenKhoan()) {
+        try {
+            moModalThanhToanChuyenKhoan();
+        } catch (error) {
+            hienThiLoi(error instanceof BanHangError ? error.message : 'Không thể mở thanh toán QR.');
+        }
+        return;
+    }
+
+    const tongTien = parseSoTien(layTongTienHienThi());
+    let soTienKhachDua = tongTien;
     if (phuongThucThanhToanDangChon === 'PTTT001') {
-        soTienKhachDua = prompt('So tien khach dua:');
-        if (soTienKhachDua === null) return;
+        soTienKhachDua = parseSoTien(document.getElementById('cash-amount')?.value);
+        if (!soTienKhachDua) {
+            hienThiLoi('Vui lòng nhập số tiền khách đưa.');
+            document.getElementById('cash-amount')?.focus();
+            return;
+        }
+        if (soTienKhachDua < tongTien) {
+            hienThiLoi('Số tiền khách đưa chưa đủ.');
+            return;
+        }
     }
     await withLoading(button, async () => {
-        await BanHangAPI.thanhToan({
+        const data = await BanHangAPI.thanhToan({
             idHoaDon: idHoaDonHienTai,
             maPttt: phuongThucThanhToanDangChon,
-            soTienKhachDua: String(soTienKhachDua).replace(/\D/g, '')
+            soTienKhachDua: String(soTienKhachDua)
         });
+        if (phuongThucThanhToanDangChon === 'PTTT001') {
+            alert('Thanh toán tiền mặt thành công. Tiền thối lại: '
+                + dinhDangTien(data.tienThoi || 0));
+        }
         window.location.reload();
     });
 }
@@ -249,7 +470,29 @@ document.addEventListener('DOMContentLoaded', () => {
         traCuuKhachHangDebounced(phone.value.trim()).catch(error => hienThiLoi(error.message));
     });
 
+    const voucherInput = document.getElementById('input-voucher');
+    const voucherButton = document.querySelector('.voucher-apply');
+    voucherInput?.addEventListener('keydown', event => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            apVoucher(voucherButton);
+        }
+    });
+
+    const cashInput = document.getElementById('cash-amount');
+    cashInput?.addEventListener('input', () => {
+        const value = parseSoTien(cashInput.value);
+        cashInput.value = value ? new Intl.NumberFormat('vi-VN').format(value) : '';
+        capNhatTienMat();
+    });
+    capNhatTienMat();
+
     document.addEventListener('click', event => {
+        const customerPanel = document.getElementById('panel-khach-hang');
+        if (customerPanel && !customerPanel.classList.contains('hidden') && !event.target.closest('.cust-box')) {
+            dongPanelKhachHang();
+        }
+
         const add = event.target.closest('.p-add');
         if (add && add.dataset.disabled !== 'true') {
             const idSpct = add.closest('.p-card')?.dataset.spct;
@@ -285,8 +528,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 .catch(error => hienThiLoi(error.message));
             return;
         }
-        if (event.target.closest('.cust-box .link-btn')) {
+        const guestCustomer = event.target.closest('[data-customer-guest]');
+        if (guestCustomer) {
+            chonKhachLe(guestCustomer);
+            return;
+        }
+        if (event.target.closest('[data-customer-open]')) {
             moPanelKhachHang();
+            return;
+        }
+        if (event.target.closest('[data-customer-close]')) {
+            dongPanelKhachHang();
             return;
         }
         const addCustomer = event.target.closest('.btn-them-khach');
@@ -310,9 +562,46 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         const tab = event.target.closest('.tab');
-        if (tab && !event.target.closest('.tab-close')) {
+        if (tab && !event.target.closest('.btn-close-tab')) {
             event.preventDefault();
             chonTab(tab.dataset.hoadon);
+        }
+    });
+
+    document.getElementById('close-transfer-payment')?.addEventListener('click', dongModalThanhToanChuyenKhoan);
+    document.getElementById('cancel-transfer-payment')?.addEventListener('click', dongModalThanhToanChuyenKhoan);
+    document.getElementById('confirm-transfer-payment')?.addEventListener('click', event => {
+        xacNhanThanhToanChuyenKhoan(event.currentTarget).catch(error => hienThiLoi(error.message));
+    });
+    document.getElementById('transfer-payment-modal')?.addEventListener('click', event => {
+        if (event.target.id === 'transfer-payment-modal') dongModalThanhToanChuyenKhoan();
+    });
+
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') {
+            dongPanelKhachHang();
+            dongModalThanhToanChuyenKhoan();
+        }
+    });
+
+    const openQr = document.getElementById('open-product-qr');
+    const closeQr = document.getElementById('close-product-qr');
+    const cancelQr = document.getElementById('cancel-product-qr');
+    const restartQr = document.getElementById('restart-product-qr');
+    const submitQr = document.getElementById('submit-product-qr');
+    const qrInput = document.getElementById('product-qr-code');
+
+    openQr?.addEventListener('click', () => moQuetQr().catch(error => hienThiLoi(error.message)));
+    closeQr?.addEventListener('click', () => dongQuetQr());
+    cancelQr?.addEventListener('click', () => dongQuetQr());
+    restartQr?.addEventListener('click', () => moQuetQr().catch(error => hienThiLoi(error.message)));
+    submitQr?.addEventListener('click', () => {
+        themSanPhamTuMaQr(qrInput?.value).catch(error => capNhatTrangThaiQr(error.message));
+    });
+    qrInput?.addEventListener('keydown', event => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            themSanPhamTuMaQr(qrInput.value).catch(error => capNhatTrangThaiQr(error.message));
         }
     });
 });

@@ -143,6 +143,11 @@ public class SanPhamChiTietServiceImpl implements SanPhamChiTietService {
         return sanPhamChiTietDao.timKiem(sanPhamId, ma, mauSacId, kichCoId, trangThai);
     }
 
+    @Override
+    public List<SanPhamChiTiet> timKiemTheoDanhMuc(String ma, Integer danhMucId, Integer trangThai) {
+        return sanPhamChiTietDao.timKiemTheoDanhMuc(ma, danhMucId, trangThai);
+    }
+
     private void validateSanPhamChiTiet(SanPhamChiTiet sanPhamChiTiet, boolean isUpdate) {
         if (sanPhamChiTiet == null) {
             throw new RuntimeException("Biến thể sản phẩm không được để trống");

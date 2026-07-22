@@ -5,7 +5,10 @@
             <i class="fas fa-chevron-left"></i>
         </button>
         <nav class="breadcrumb">
-            <div class="breadcrumb-item active" style="font-size: 16px; font-weight: 600;">
+            <div class="breadcrumb-item">
+                <a href="#" class="breadcrumb-link">Admin</a>
+            </div>
+            <div class="breadcrumb-item active">
                 <span><%= request.getAttribute("pageTitle") %></span>
             </div>
         </nav>

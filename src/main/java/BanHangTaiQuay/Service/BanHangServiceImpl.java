@@ -315,6 +315,37 @@ public class BanHangServiceImpl implements BanHangService {
     }
 
     @Override
+    public void chonKhachLe(int idHoaDon) {
+        if (idHoaDon <= 0) {
+            throw new IllegalArgumentException("ID hóa đơn không hợp lệ.");
+        }
+
+        EntityManager em = EntityManagerUtlis.getEntityManager();
+        EntityTransaction transaction = em.getTransaction();
+        try {
+            transaction.begin();
+            HoaDon hd = em.find(HoaDon.class, idHoaDon, LockModeType.PESSIMISTIC_WRITE);
+            if (hd == null) {
+                throw new IllegalArgumentException("Hóa đơn không tồn tại.");
+            }
+            if (hd.getTrangThai() == null || hd.getTrangThai() != 0) {
+                throw new IllegalStateException("Chỉ được chọn khách lẻ cho hóa đơn đang chờ thanh toán.");
+            }
+
+            hd.setKhachHang(null);
+            ghiLichSu(em, hd, "CHON_KHACH_LE", "Chuyển hóa đơn sang khách lẻ");
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
     public void apDungVoucher(int idHoaDon, String maVoucher) {
         voucherService.apDungVoucher(idHoaDon, maVoucher);
         /*
@@ -370,6 +401,30 @@ public class BanHangServiceImpl implements BanHangService {
 
     @Override
     public void xacNhanThanhToan(int idHoaDon, String maPttt, BigDecimal soTienKhachDua) {
+        xacNhanThanhToan(idHoaDon, maPttt, soTienKhachDua, null, null);
+    }
+
+    @Override
+    public void xacNhanThanhToan(int idHoaDon, String maPttt, BigDecimal soTienKhachDua,
+                                 String maGiaoDich, String ghiChu) {
+        if (idHoaDon <= 0) {
+            throw new IllegalArgumentException("ID hóa đơn không hợp lệ.");
+        }
+        if (maPttt == null || maPttt.trim().isEmpty()) {
+            throw new IllegalArgumentException("Phương thức thanh toán không được để trống.");
+        }
+        if (soTienKhachDua == null || soTienKhachDua.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Số tiền thanh toán phải lớn hơn 0.");
+        }
+
+        String maPtttChuanHoa = "TM".equalsIgnoreCase(maPttt.trim())
+                ? "PTTT001"
+                : maPttt.trim().toUpperCase();
+        boolean thanhToanKhongTienMat = !"PTTT001".equals(maPtttChuanHoa);
+            if (thanhToanKhongTienMat && (maGiaoDich == null || maGiaoDich.trim().isEmpty())) {
+                throw new IllegalArgumentException("Thanh toán chuyển khoản/QR phải có mã giao dịch.");
+            }
+
         EntityManager em = EntityManagerUtlis.getEntityManager();
         EntityTransaction transaction = em.getTransaction();
         try {
@@ -389,21 +444,31 @@ public class BanHangServiceImpl implements BanHangService {
             if (hd.getChiTietHoaDons() == null || hd.getChiTietHoaDons().isEmpty()) {
                 throw new IllegalStateException("Hóa đơn chưa có sản phẩm.");
             }
-            if (soTienKhachDua == null || soTienKhachDua.compareTo(BigDecimal.ZERO) <= 0) {
-                throw new IllegalArgumentException("Số tiền khách đưa phải lớn hơn 0.");
-            }
-
             BigDecimal tongTien = hd.getTongTienThanhToan() == null
                     ? BigDecimal.ZERO
                     : hd.getTongTienThanhToan();
-            if (soTienKhachDua.compareTo(tongTien) < 0) {
+            if (thanhToanKhongTienMat && soTienKhachDua.compareTo(tongTien) != 0) {
+                throw new IllegalArgumentException("Số tiền chuyển khoản phải đúng bằng tổng tiền hóa đơn.");
+            }
+            if (!thanhToanKhongTienMat && soTienKhachDua.compareTo(tongTien) < 0) {
                 throw new IllegalArgumentException("Số tiền khách đưa chưa đủ.");
+            }
+
+            if (thanhToanKhongTienMat) {
+                Long soLanTrungMa = em.createQuery(
+                                "SELECT COUNT(t) FROM ThanhToanHoaDon t WHERE t.maGiaoDich = :maGiaoDich",
+                                Long.class)
+                        .setParameter("maGiaoDich", maGiaoDich.trim())
+                        .getSingleResult();
+                if (soLanTrungMa != null && soLanTrungMa > 0) {
+                    throw new IllegalStateException("Mã giao dịch đã được sử dụng cho hóa đơn khác.");
+                }
             }
 
             HinhThucThanhToan pttt = em.createQuery(
                             "SELECT p FROM HinhThucThanhToan p WHERE p.maPttt = :maPttt",
                             HinhThucThanhToan.class)
-                    .setParameter("maPttt", maPttt)
+                    .setParameter("maPttt", maPtttChuanHoa)
                     .setMaxResults(1)
                     .getResultStream()
                     .findFirst()
@@ -419,7 +484,16 @@ public class BanHangServiceImpl implements BanHangService {
             ThanhToanHoaDon tt = new ThanhToanHoaDon();
             tt.setHoaDon(hd);
             tt.setHinhThucThanhToan(pttt);
-            tt.setSoTien(soTienKhachDua);
+            // Doanh thu/thanh toán ghi nhận đúng số tiền của hóa đơn, không cộng tiền thối.
+            tt.setSoTien(tongTien);
+            tt.setMaGiaoDich(normalizeText(maGiaoDich));
+            String ghiChuThanhToan = normalizeText(ghiChu);
+            if (!thanhToanKhongTienMat && ghiChuThanhToan == null) {
+                BigDecimal tienThoi = soTienKhachDua.subtract(tongTien);
+                ghiChuThanhToan = "Tiền mặt tại quầy; Khách đưa: " + soTienKhachDua
+                        + "; Tiền thối: " + tienThoi;
+            }
+            tt.setGhiChu(ghiChuThanhToan);
             tt.setThoiGian(LocalDateTime.now());
             tt.setTrangThai(1);
             em.persist(tt);
@@ -485,6 +559,8 @@ public class BanHangServiceImpl implements BanHangService {
                 }
             }
 
+            voucherService.hoanVoucherKhiHuy(em, hd);
+
             hd.setTrangThai(5);
             hd.setLyDoHuy(lyDo);
             ghiLichSu(em, hd, "HUY_DON", "Hủy hóa đơn: " + lyDo);
@@ -518,6 +594,14 @@ public class BanHangServiceImpl implements BanHangService {
         } finally {
             em.close();
         }
+    }
+
+    private String normalizeText(String value) {
+        if (value == null) {
+            return null;
+        }
+        String normalized = value.trim();
+        return normalized.isEmpty() ? null : normalized;
     }
 
     private void ghiLichSu(HoaDon hd, String hanhDong, String ghiChu) {

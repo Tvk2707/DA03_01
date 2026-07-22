@@ -48,6 +48,8 @@ class DtoContractTest {
         paymentRequest.setIdHoaDon(10);
         paymentRequest.setMaPttt("TM");
         paymentRequest.setSoTienKhachDua(new BigDecimal("100000"));
+        paymentRequest.setMaGiaoDich("FT260722123456");
+        paymentRequest.setGhiChu("Thanh toán bằng QR");
 
         assertEquals(3, quantityRequest.getIdChiTiet());
         assertEquals(4, quantityRequest.getSoLuongMoi());
@@ -58,5 +60,7 @@ class DtoContractTest {
         assertEquals("TEST10", voucherRequest.getMaVoucher());
         assertEquals("TM", paymentRequest.getMaPttt());
         assertEquals(new BigDecimal("100000"), paymentRequest.getSoTienKhachDua());
+        assertEquals("FT260722123456", paymentRequest.getMaGiaoDich());
+        assertEquals("Thanh toán bằng QR", paymentRequest.getGhiChu());
     }
 }
