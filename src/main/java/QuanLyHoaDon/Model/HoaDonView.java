@@ -17,6 +17,9 @@ public class HoaDonView {
     private String tenNhanVien;
     private String maNhanVien;
     private String tenKhachHang;
+    private String maKhachHang;
+    private String soDienThoaiKhachHang;
+    private String emailKhachHang;
     private String maVoucher;
     private String tenVoucher;
 
@@ -114,6 +117,30 @@ public class HoaDonView {
 
     public void setTenKhachHang(String tenKhachHang) {
         this.tenKhachHang = tenKhachHang;
+    }
+
+    public String getMaKhachHang() {
+        return maKhachHang;
+    }
+
+    public void setMaKhachHang(String maKhachHang) {
+        this.maKhachHang = maKhachHang;
+    }
+
+    public String getSoDienThoaiKhachHang() {
+        return soDienThoaiKhachHang;
+    }
+
+    public void setSoDienThoaiKhachHang(String soDienThoaiKhachHang) {
+        this.soDienThoaiKhachHang = soDienThoaiKhachHang;
+    }
+
+    public String getEmailKhachHang() {
+        return emailKhachHang;
+    }
+
+    public void setEmailKhachHang(String emailKhachHang) {
+        this.emailKhachHang = emailKhachHang;
     }
 
     public String getMaVoucher() {

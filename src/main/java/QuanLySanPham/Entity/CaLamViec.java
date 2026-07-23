@@ -15,7 +15,7 @@ public class CaLamViec {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "nhan_vien_id")
+    @JoinColumn(name = "id_nhan_vien")
     private NhanVien nhanVien;
 
     @Column(name = "thoi_gian_bat_dau")

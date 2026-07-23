@@ -71,15 +71,8 @@ class BanHangServiceValidationTest {
     }
 
     @Test
-    void thanhToanChuyenKhoanBatBuocCoMaGiaoDich() {
-        assertThrows(IllegalArgumentException.class, () -> service.xacNhanThanhToan(
-                1, "PTTT002", new BigDecimal("100000"), "", "Thanh toán QR"));
-    }
-
-    @Test
-    void thanhToanKhongChoPhepSoTienKhongDuong() {
-        assertThrows(IllegalArgumentException.class, () -> service.xacNhanThanhToan(
-                1, "PTTT002", BigDecimal.ZERO, "FT123", null));
+    void khongChoPhepGoVoucherVoiHoaDonKhongHopLe() {
+        assertThrows(IllegalArgumentException.class, () -> service.goVoucher(0));
     }
 
     private static final class FakeBanHangDAO implements BanHangDAO {

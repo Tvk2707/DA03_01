@@ -8,13 +8,6 @@ import QuanLyHoaDon.Model.NhanVienView;
 import QuanLyHoaDon.Model.ThanhToanHoaDonView;
 import QuanLySanPham.jdbc.DatabaseConnectionManager;
 
-import QuanLyHoaDon.Model.ChiTietHoaDonView;
-import QuanLyHoaDon.Model.HoaDonView;
-import QuanLyHoaDon.Model.LichSuHoaDonView;
-import QuanLyHoaDon.Model.LichSuThanhToanView;
-import QuanLyHoaDon.Model.ThanhToanHoaDonView;
-import QuanLySanPham.jdbc.DatabaseConnectionManager;
-
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -35,7 +28,9 @@ public class HoaDonDAO {
     public List<HoaDonView> findAll() throws SQLException {
         String sql = "SELECT hd.id, hd.ma_hoa_don, hd.ten_nguoi_nhan, hd.sdt_nguoi_nhan, "
                 + "hd.id_nhan_vien, hd.tong_tien_thanh_toan, hd.trang_thai, hd.ngay_tao, hd.ghi_chu, "
-                + "nv.ho_ten AS ten_nhan_vien, nv.ma_nhan_vien AS ma_nhan_vien, kh.ho_ten AS ten_khach_hang, "
+                + "nv.ho_ten AS ten_nhan_vien, nv.ma_nhan_vien AS ma_nhan_vien, "
+                + "kh.ho_ten AS ten_khach_hang, kh.ma_khach_hang, "
+                + "kh.so_dien_thoai AS sdt_khach_hang, kh.email AS email_khach_hang, "
                 + "pgg.ma_voucher, pgg.ten_voucher "
                 + "FROM hoa_don hd "
                 + "LEFT JOIN nhan_vien nv ON hd.id_nhan_vien = nv.id "
@@ -61,7 +56,9 @@ public class HoaDonDAO {
     public HoaDonView findById(int id) throws SQLException {
         String sql = "SELECT hd.id, hd.ma_hoa_don, hd.ten_nguoi_nhan, hd.sdt_nguoi_nhan, "
                 + "hd.id_nhan_vien, hd.tong_tien_thanh_toan, hd.trang_thai, hd.ngay_tao, hd.ghi_chu, "
-                + "nv.ho_ten AS ten_nhan_vien, nv.ma_nhan_vien AS ma_nhan_vien, kh.ho_ten AS ten_khach_hang, "
+                + "nv.ho_ten AS ten_nhan_vien, nv.ma_nhan_vien AS ma_nhan_vien, "
+                + "kh.ho_ten AS ten_khach_hang, kh.ma_khach_hang, "
+                + "kh.so_dien_thoai AS sdt_khach_hang, kh.email AS email_khach_hang, "
                 + "pgg.ma_voucher, pgg.ten_voucher "
                 + "FROM hoa_don hd "
                 + "LEFT JOIN nhan_vien nv ON hd.id_nhan_vien = nv.id "
@@ -89,7 +86,7 @@ public class HoaDonDAO {
                 + "hdg.hinh_dang, "
                 + "kqk.kieu_quai AS kieu_quai_kinh, "
                 + "tk.loai_trong, ms.ten_mau, kc.ten_kich_co, "
-                + "COALESCE(NULLIF(spct.hinh_anh, ''), ha.url_anh) AS hinh_anh_san_pham, "
+                + "spct.hinh_anh AS hinh_anh_bien_the, ha.url_anh AS hinh_anh_san_pham, "
                 + "cthd.so_luong, cthd.don_gia, cthd.tong_tien "
                 + "FROM chi_tiet_hoa_don cthd "
                 + "LEFT JOIN san_pham_chi_tiet spct ON cthd.id_san_pham_chi_tiet = spct.id "
@@ -129,7 +126,13 @@ public class HoaDonDAO {
                     detail.setLoaiTrong(resultSet.getString("loai_trong"));
                     detail.setMauSac(resultSet.getString("ten_mau"));
                     detail.setKichCo(resultSet.getString("ten_kich_co"));
-                    detail.setHinhAnhSanPham(resultSet.getString("hinh_anh_san_pham"));
+                    String anhBienThe = normalizeImagePath(
+                            resultSet.getString("hinh_anh_bien_the"),
+                            "File_Anh/images");
+                    String anhSanPham = normalizeImagePath(
+                            resultSet.getString("hinh_anh_san_pham"),
+                            "FE/Admin/hinh_anh_san_pham");
+                    detail.setHinhAnhSanPham(anhBienThe == null ? anhSanPham : anhBienThe);
                     detail.setSoLuong(resultSet.getInt("so_luong"));
                     detail.setDonGia(resultSet.getBigDecimal("don_gia"));
                     detail.setTongTien(resultSet.getBigDecimal("tong_tien"));
@@ -175,13 +178,20 @@ public class HoaDonDAO {
     // READ: lấy lịch sử thanh toán từ bảng lich_su_thanh_toan.
     public List<LichSuThanhToanView> findPaymentHistoryByHoaDonId(int hoaDonId) throws SQLException {
         String sql = "SELECT so_tien, phuong_thuc_thanh_toan, trang_thai_thanh_toan, ngay_thanh_toan, ghi_chu "
-                + "FROM lich_su_thanh_toan "
-                + "WHERE id_hoa_don = ? "
-                + "ORDER BY ngay_thanh_toan DESC, id DESC";
+                + "FROM lich_su_thanh_toan WHERE id_hoa_don = ? "
+                + "UNION ALL "
+                + "SELECT tt.so_tien, COALESCE(ht.ten_pttt, N'Không xác định'), "
+                + "tt.trang_thai, tt.thoi_gian, tt.ghi_chu "
+                + "FROM thanh_toan_hoa_don tt "
+                + "LEFT JOIN hinh_thuc_thanh_toan ht ON tt.id_pttt = ht.id "
+                + "WHERE tt.id_hoa_don = ? "
+                + "AND NOT EXISTS (SELECT 1 FROM lich_su_thanh_toan ls WHERE ls.id_hoa_don = tt.id_hoa_don) "
+                + "ORDER BY ngay_thanh_toan DESC";
 
         try (Connection connection = connectionManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, hoaDonId);
+            statement.setInt(2, hoaDonId);
 
             try (ResultSet resultSet = statement.executeQuery()) {
                 List<LichSuThanhToanView> history = new ArrayList<>();
@@ -277,6 +287,9 @@ public class HoaDonDAO {
         hoaDon.setTenNhanVien(resultSet.getString("ten_nhan_vien"));
         hoaDon.setMaNhanVien(resultSet.getString("ma_nhan_vien"));
         hoaDon.setTenKhachHang(resultSet.getString("ten_khach_hang"));
+        hoaDon.setMaKhachHang(resultSet.getString("ma_khach_hang"));
+        hoaDon.setSoDienThoaiKhachHang(resultSet.getString("sdt_khach_hang"));
+        hoaDon.setEmailKhachHang(resultSet.getString("email_khach_hang"));
         hoaDon.setMaVoucher(resultSet.getString("ma_voucher"));
         hoaDon.setTenVoucher(resultSet.getString("ten_voucher"));
 
@@ -285,5 +298,38 @@ public class HoaDonDAO {
 
     private BigDecimal defaultMoney(BigDecimal value) {
         return value == null ? BigDecimal.ZERO : value;
+    }
+
+    private String normalizeImagePath(String value, String defaultDirectory) {
+        if (value == null || value.trim().isEmpty()) {
+            return null;
+        }
+
+        String path = value.trim().replace('\\', '/');
+        if (path.startsWith("http://") || path.startsWith("https://")) {
+            return path;
+        }
+
+        while (path.startsWith("/")) {
+            path = path.substring(1);
+        }
+
+        int uploadedImageIndex = path.indexOf("File_Anh/images/");
+        if (uploadedImageIndex >= 0) {
+            return path.substring(uploadedImageIndex);
+        }
+
+        int productImageIndex = path.indexOf("hinh_anh_san_pham/");
+        if (productImageIndex >= 0) {
+            return "FE/Admin/" + path.substring(productImageIndex);
+        }
+
+        if (path.startsWith("FE/") || path.startsWith("File_Anh/")) {
+            return path;
+        }
+
+        int lastSlash = path.lastIndexOf('/');
+        String fileName = lastSlash >= 0 ? path.substring(lastSlash + 1) : path;
+        return defaultDirectory + "/" + fileName;
     }
 }

@@ -12,7 +12,6 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,7 +40,7 @@ public class ThanhToanServlet extends HttpServlet {
             ThanhToanRequest request = new ThanhToanRequest();
             request.setIdHoaDon(requirePositiveInt(req, "idHoaDon"));
             request.setMaPttt(requireText(req, "maPttt"));
-            request.setSoTienKhachDua(requirePositiveAmount(req, "soTienKhachDua"));
+            request.setSoTienKhachDua(null);
             request.setMaGiaoDich(optionalText(req, "maGiaoDich"));
             request.setGhiChu(optionalText(req, "ghiChu"));
 
@@ -74,19 +73,6 @@ public class ThanhToanServlet extends HttpServlet {
             return parsedValue;
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException(parameterName + " phải là số nguyên hợp lệ.");
-        }
-    }
-
-    private BigDecimal requirePositiveAmount(HttpServletRequest req, String parameterName) {
-        String value = requireText(req, parameterName);
-        try {
-            BigDecimal amount = new BigDecimal(value);
-            if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-                throw new IllegalArgumentException(parameterName + " phải lớn hơn 0.");
-            }
-            return amount;
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(parameterName + " phải là số tiền hợp lệ.");
         }
     }
 

@@ -1,5 +1,6 @@
 package QuanLySanPham.dao.impl;
 
+import QuanLySanPham.Entity.HinhAnhSanPham;
 import QuanLySanPham.Entity.SanPhamChiTiet;
 import QuanLySanPham.dao.SanPhamChiTietDao;
 import QuanLySanPham.Utils.EntityManagerUtlis;
@@ -8,7 +9,11 @@ import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.TypedQuery;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class SanPhamChiTietDaoImpl extends GenericDaoImpl<SanPhamChiTiet, Integer> implements SanPhamChiTietDao {
 
@@ -82,7 +87,9 @@ public class SanPhamChiTietDaoImpl extends GenericDaoImpl<SanPhamChiTiet, Intege
             String jpql = "SELECT s FROM SanPhamChiTiet s WHERE s.sanPham.id = :sanPhamId AND s.isDeleted = false";
             TypedQuery<SanPhamChiTiet> query = em.createQuery(jpql, SanPhamChiTiet.class);
             query.setParameter("sanPhamId", sanPhamId);
-            return query.getResultList();
+            List<SanPhamChiTiet> results = query.getResultList();
+            ganAnhHienThi(em, results);
+            return results;
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Lỗi khi lấy chi tiết sản phẩm theo ID", e);
@@ -155,16 +162,22 @@ public class SanPhamChiTietDaoImpl extends GenericDaoImpl<SanPhamChiTiet, Intege
             StringBuilder jpql = new StringBuilder(
                     "SELECT s FROM SanPhamChiTiet s " +
                             "LEFT JOIN FETCH s.sanPham sp " +
+                            "LEFT JOIN FETCH sp.thuongHieu th " +
                             "LEFT JOIN FETCH s.mauSac " +
                             "LEFT JOIN FETCH s.kichCo " +
-                            "WHERE s.isDeleted = false"
+                            "WHERE s.isDeleted = false " +
+                            "AND (sp.isDeleted = false OR sp.isDeleted IS NULL)"
             );
 
             if (sanPhamId != null) {
                 jpql.append(" AND s.sanPham.id = :sanPhamId");
             }
             if (ma != null && !ma.trim().isEmpty()) {
-                jpql.append(" AND LOWER(s.ma) LIKE :ma");
+                jpql.append(" AND (LOWER(s.ma) LIKE :ma"
+                        + " OR LOWER(sp.maSanPham) LIKE :ma"
+                        + " OR LOWER(sp.tenSanPham) LIKE :ma"
+                        + " OR LOWER(th.maThuongHieu) LIKE :ma"
+                        + " OR LOWER(th.tenThuongHieu) LIKE :ma)");
             }
             if (mauSacId != null) {
                 jpql.append(" AND s.mauSac.id = :mauSacId");
@@ -173,7 +186,10 @@ public class SanPhamChiTietDaoImpl extends GenericDaoImpl<SanPhamChiTiet, Intege
                 jpql.append(" AND s.kichCo.id = :kichCoId");
             }
             if (trangThai != null) {
-                jpql.append(" AND s.trangThai = :trangThai");
+                jpql.append(" AND s.trangThai = :trangThai AND sp.trangThai = :trangThai");
+                if (trangThai == 1) {
+                    jpql.append(" AND s.soLuongTon > 0");
+                }
             }
             if (danhMucId != null) {
                 jpql.append(" AND sp.danhMuc.id = :danhMucId");
@@ -188,13 +204,85 @@ public class SanPhamChiTietDaoImpl extends GenericDaoImpl<SanPhamChiTiet, Intege
             if (trangThai != null) query.setParameter("trangThai", trangThai);
             if (danhMucId != null) query.setParameter("danhMucId", danhMucId);
 
-            return query.getResultList();
+            List<SanPhamChiTiet> results = query.getResultList();
+            ganAnhHienThi(em, results);
+            return results;
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Lỗi khi tìm kiếm chi tiết sản phẩm", e);
         } finally {
             em.close();
         }
+    }
+
+    private void ganAnhHienThi(EntityManager em, List<SanPhamChiTiet> sanPhamChiTiets) {
+        if (sanPhamChiTiets == null || sanPhamChiTiets.isEmpty()) {
+            return;
+        }
+
+        Set<Integer> sanPhamIdsCanLayAnh = new HashSet<>();
+        for (SanPhamChiTiet spct : sanPhamChiTiets) {
+            if (spct == null) {
+                continue;
+            }
+            String anhBienThe = chuanHoaAnh(spct.getHinhAnh(), "File_Anh/images");
+            if (anhBienThe != null) {
+                spct.setHinhAnhHienThi(anhBienThe);
+                continue;
+            }
+            if (spct.getSanPham() != null && spct.getSanPham().getId() != null) {
+                sanPhamIdsCanLayAnh.add(spct.getSanPham().getId());
+            }
+        }
+
+        if (sanPhamIdsCanLayAnh.isEmpty()) {
+            return;
+        }
+
+        List<HinhAnhSanPham> hinhAnhs = em.createQuery(
+                        "SELECT ha FROM HinhAnhSanPham ha "
+                                + "WHERE ha.sanPham.id IN :sanPhamIds "
+                                + "ORDER BY ha.sanPham.id, ha.isAnhChinh DESC, ha.id ASC",
+                        HinhAnhSanPham.class)
+                .setParameter("sanPhamIds", sanPhamIdsCanLayAnh)
+                .getResultList();
+        Map<Integer, String> anhTheoSanPham = new LinkedHashMap<>();
+        for (HinhAnhSanPham hinhAnh : hinhAnhs) {
+            if (hinhAnh.getSanPham() == null || hinhAnh.getSanPham().getId() == null) {
+                continue;
+            }
+            String urlAnh = chuanHoaAnh(hinhAnh.getUrlAnh(), "FE/Admin/hinh_anh_san_pham");
+            if (urlAnh != null) {
+                anhTheoSanPham.putIfAbsent(hinhAnh.getSanPham().getId(), urlAnh);
+            }
+        }
+
+        for (SanPhamChiTiet spct : sanPhamChiTiets) {
+            if (spct.getHinhAnhHienThi() == null
+                    && spct.getSanPham() != null
+                    && spct.getSanPham().getId() != null) {
+                spct.setHinhAnhHienThi(anhTheoSanPham.get(spct.getSanPham().getId()));
+            }
+        }
+    }
+
+    private String chuanHoaAnh(String hinhAnh, String thuMucMacDinh) {
+        if (hinhAnh == null) {
+            return null;
+        }
+        String trimmed = hinhAnh.trim().replace("\\", "/");
+        if (trimmed.isEmpty() || "null".equalsIgnoreCase(trimmed)) {
+            return null;
+        }
+        int fileAnhIndex = trimmed.lastIndexOf("File_Anh/images/");
+        if (fileAnhIndex >= 0) {
+            return trimmed.substring(fileAnhIndex);
+        }
+        int hinhAnhIndex = trimmed.lastIndexOf("hinh_anh_san_pham/");
+        if (hinhAnhIndex >= 0) {
+            return "FE/Admin/" + trimmed.substring(hinhAnhIndex);
+        }
+        return thuMucMacDinh + "/" + trimmed;
     }
 
     @Override

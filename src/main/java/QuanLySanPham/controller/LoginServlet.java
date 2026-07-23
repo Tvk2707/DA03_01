@@ -11,6 +11,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import QuanLySanPham.Utils.EmailService;
 
 @WebServlet(name = "LoginServlet", value = {"/Login"})
 public class LoginServlet extends HttpServlet {
@@ -44,10 +46,15 @@ public class LoginServlet extends HttpServlet {
             // Đăng nhập thành công -> Tạo Session mới
             HttpSession session = request.getSession(true);
             session.setAttribute(SESSION_KEY, nv);
-            session.setAttribute("idNhanVien", nv.getId());
 
-// Lưu ID ca làm việc (Tạm thời set cứng là 1 để code chạy được, sau này nếu có bảng Ca Làm Việc thì bạn lấy động sau)
-            session.setAttribute("idCa", 1);
+            EmailService.sendEmail(
+                    nv.getEmail(),
+                    "Thông báo đăng nhập",
+                    "Xin chào " + nv.getHoTen()
+                            + "<br>Tài khoản của bạn vừa đăng nhập thành công."
+                            + "<br>Thời gian: " + LocalDateTime.now()
+                            + "<br>Vai trò: " + (nv.isQuanLy() ? "Quản lý" : "Nhân viên")
+            );
 
             // Điều hướng người dùng tới trang đích phù hợp với vai trò
             redirectSauDangNhap(request, response, nv);

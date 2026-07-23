@@ -63,6 +63,7 @@ public class HoaDon {
     private String lyDoHuy;
 
     @OneToMany(mappedBy = "hoaDon")
+    @OrderBy("id ASC")
     private List<ChiTietHoaDon> chiTietHoaDons;
 
     @OneToMany(mappedBy = "hoaDon")
