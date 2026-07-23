@@ -49,6 +49,30 @@ public class KhachHangRepository {
         }
     }
 
+    public List<KhachHang> timKiemTheoTenHoacSoDienThoai(String tuKhoa) {
+        EntityManager em = null;
+        try {
+            em = utils.getEntityManager();
+            return em.createQuery(
+                            "SELECT kh FROM KhachHang kh "
+                                    + "WHERE (kh.trangThai IS NULL OR kh.trangThai = 1) "
+                                    + "AND (LOWER(kh.hoTen) LIKE LOWER(:tuKhoa) "
+                                    + "OR kh.soDienThoai LIKE :tuKhoa) "
+                                    + "ORDER BY kh.hoTen ASC",
+                            KhachHang.class)
+                    .setParameter("tuKhoa", "%" + tuKhoa + "%")
+                    .setMaxResults(10)
+                    .getResultList();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        } finally {
+            if (em != null) {
+                em.close();
+            }
+        }
+    }
+
     public void add(KhachHang khachHang) {
         EntityManager em = null;
         EntityTransaction tran = null;

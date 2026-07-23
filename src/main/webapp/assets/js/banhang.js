@@ -21,10 +21,12 @@ const BanHangAPI = {
     routes: {
         taoHoaDon: ['/ban-hang/tao-hoa-don', 'POST'],
         themSanPham: ['/ban-hang/them-san-pham', 'POST'],
+        themNhieuSanPham: ['/ban-hang/them-nhieu-san-pham', 'POST'],
         quetQr: ['/ban-hang/quet-qr', 'GET'],
         xoaSanPham: ['/ban-hang/xoa-san-pham', 'POST'],
         capNhatSoLuong: ['/ban-hang/cap-nhat-so-luong', 'POST'],
         traCuuKhachHang: ['/ban-hang/tra-cuu-khach-hang', 'GET'],
+        timKhachHang: ['/ban-hang/tim-khach-hang', 'GET'],
         traCuuHoacTaoKhachHang: ['/ban-hang/tra-cuu-khach-hang', 'POST'],
         ganKhachHang: ['/ban-hang/gan-khach-hang', 'POST'],
         chonKhachLe: ['/ban-hang/chon-khach-le', 'POST'],
@@ -139,7 +141,7 @@ function datLichTaiLaiGioHang() {
         if (!dangXuLyThemSanPham && hangDoiThemSanPham.length === 0) {
             window.location.reload();
         }
-    }, 700);
+    }, 800);
 }
 
 async function xuLyHangDoiThemSanPham() {
@@ -149,21 +151,35 @@ async function xuLyHangDoiThemSanPham() {
 
     try {
         while (hangDoiThemSanPham.length > 0) {
-            const item = hangDoiThemSanPham.shift();
+            const luotThem = hangDoiThemSanPham.splice(0);
+            const soLuongTheoSanPham = new Map();
+            luotThem.forEach(item => {
+                soLuongTheoSanPham.set(
+                    String(item.idSpct),
+                    (soLuongTheoSanPham.get(String(item.idSpct)) || 0) + 1
+                );
+            });
+
+            const danhSachSanPham = Array.from(soLuongTheoSanPham.entries())
+                .map(([idSpct, soLuong]) => ({
+                    idSanPhamChiTiet: Number(idSpct),
+                    soLuong
+                }));
             try {
-                await BanHangAPI.goi('themSanPham', {
+                await BanHangAPI.goi('themNhieuSanPham', {
                     idHoaDon: idHoaDonHienTai,
-                    idSpct: item.idSpct,
-                    soLuong: 1
+                    danhSachSanPham: JSON.stringify(danhSachSanPham)
                 });
-                soSanPhamThemThanhCong++;
+                soSanPhamThemThanhCong += luotThem.length;
             } catch (error) {
                 hienThiLoi(error instanceof BanHangError
                     ? error.message
                     : 'Khong the them san pham vao hoa don.');
             } finally {
-                item.button?.classList.remove('is-loading');
-                item.button?.removeAttribute('data-add-pending');
+                luotThem.forEach(item => {
+                    item.button?.classList.remove('is-loading');
+                    item.button?.removeAttribute('data-add-pending');
+                });
             }
         }
     } finally {
@@ -183,18 +199,97 @@ function themSanPham(idSpct, button) {
     button?.classList.add('is-loading');
     button?.setAttribute('data-add-pending', 'true');
 
+    // Gom các lần bấm gần nhau thành một request thêm sản phẩm theo lô.
     clearTimeout(timerXuLyThemSanPham);
     timerXuLyThemSanPham = setTimeout(() => {
         xuLyHangDoiThemSanPham().catch(error => {
             console.error('POS add product queue error:', error);
         });
-    }, 350);
+    }, 250);
 }
 
 async function doiSoLuong(idChiTiet, soLuongMoi, button) {
     if (!idHoaDonHienTai) return;
     await withLoading(button, async () => {
         await BanHangAPI.goi('capNhatSoLuong', { idChiTiet, soLuongMoi });
+        window.location.reload();
+    });
+}
+
+function hienThiKetQuaKhachHang(khachHangs) {
+    const danhSach = document.getElementById('danh-sach-khach-hang');
+    if (!danhSach) return;
+    danhSach.replaceChildren();
+
+    khachHangs.forEach(khachHang => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'customer-result';
+        button.dataset.customerResult = 'true';
+        button.dataset.customerId = String(khachHang.id);
+
+        const name = document.createElement('strong');
+        name.className = 'customer-result-name';
+        name.textContent = khachHang.hoTen || 'Chua co ten';
+        const phone = document.createElement('span');
+        phone.className = 'customer-result-phone';
+        phone.textContent = khachHang.soDienThoai || 'Chua co so dien thoai';
+        button.append(name, phone);
+        danhSach.appendChild(button);
+    });
+}
+
+function chuyenTabKhachHang(view) {
+    document.querySelectorAll('[data-customer-tab]').forEach(tab => {
+        const active = tab.dataset.customerTab === view;
+        tab.classList.toggle('active', active);
+        tab.setAttribute('aria-selected', String(active));
+    });
+    document.querySelectorAll('[data-customer-view]').forEach(panel => {
+        panel.classList.toggle('hidden', panel.dataset.customerView !== view);
+    });
+    if (view === 'select') {
+        document.getElementById('input-tim-khach-hang')?.focus();
+    } else {
+        document.getElementById('input-sdt-moi')?.focus();
+    }
+}
+
+const timKhachHangDebounced = debounce(async (tuKhoa) => {
+    const danhSach = document.getElementById('danh-sach-khach-hang');
+    const emptyMessage = document.getElementById('customer-search-empty');
+    if (danhSach) danhSach.replaceChildren();
+    emptyMessage?.classList.add('hidden');
+
+    if (tuKhoa.length < 2) return;
+    if (!idHoaDonHienTai) {
+        hienThiLoi('Vui long tao hoac chon hoa don truoc khi chon khach hang.');
+        return;
+    }
+
+    const data = await BanHangAPI.goi('timKhachHang', { tuKhoa });
+    const khachHangs = data.khachHangs || [];
+    hienThiKetQuaKhachHang(khachHangs);
+    if (khachHangs.length === 0) {
+        emptyMessage?.classList.remove('hidden');
+        const isPhone = /^\d+$/.test(tuKhoa);
+        const phoneInput = document.getElementById('input-sdt-moi');
+        const nameInput = document.getElementById('input-ten-moi');
+        if (isPhone && phoneInput) phoneInput.value = tuKhoa;
+        if (!isPhone && nameInput) nameInput.value = tuKhoa;
+    }
+}, 400);
+
+async function chonKhachHangTheoKetQua(button) {
+    if (!idHoaDonHienTai) {
+        hienThiLoi('Vui long tao hoac chon hoa don truoc khi chon khach hang.');
+        return;
+    }
+    await withLoading(button, async () => {
+        await BanHangAPI.goi('ganKhachHang', {
+            idHoaDon: idHoaDonHienTai,
+            idKhachHang: button.dataset.customerId
+        });
         window.location.reload();
     });
 }
@@ -206,18 +301,16 @@ const traCuuKhachHangDebounced = debounce(async (soDienThoai) => {
         return;
     }
     const data = await BanHangAPI.goi('traCuuKhachHang', { soDienThoai });
-    const formMoi = document.getElementById('form-them-khach-nhanh');
     if (data.found) {
-        formMoi?.classList.add('hidden');
         await BanHangAPI.goi('ganKhachHang', {
             idHoaDon: idHoaDonHienTai,
             idKhachHang: data.khachHang.id
         });
         window.location.reload();
     } else {
-        formMoi?.classList.remove('hidden');
         const input = document.getElementById('input-sdt-moi');
         if (input) input.value = soDienThoai;
+        chuyenTabKhachHang('add');
     }
 }, 400);
 
@@ -336,7 +429,13 @@ async function dongQuetQr() {
 }
 
 async function chonKhachLe(button) {
-    if (!idHoaDonHienTai) return;
+    if (!idHoaDonHienTai) {
+        hienThiLoi('Vui lòng tạo hoặc chọn hóa đơn trước khi chọn khách lẻ.');
+        return;
+    }
+    if (!window.confirm('Chuyển hóa đơn này sang khách lẻ? Thông tin khách hàng hiện tại sẽ được bỏ khỏi hóa đơn.')) {
+        return;
+    }
     await withLoading(button, async () => {
         await BanHangAPI.goi('chonKhachLe', { idHoaDon: idHoaDonHienTai });
         window.location.reload();
@@ -347,6 +446,10 @@ function moPanelKhachHang() {
     const panel = document.getElementById('panel-khach-hang');
     const trigger = document.querySelector('[data-customer-open]');
     if (!panel) return;
+    if (!idHoaDonHienTai) {
+        hienThiLoi('Vui lòng tạo hoặc chọn hóa đơn trước khi chọn khách hàng.');
+        return;
+    }
 
     if (!panel.classList.contains('hidden')) {
         dongPanelKhachHang();
@@ -355,7 +458,7 @@ function moPanelKhachHang() {
 
     panel.classList.remove('hidden');
     trigger?.setAttribute('aria-expanded', 'true');
-    document.getElementById('input-sdt')?.focus();
+    chuyenTabKhachHang('select');
 }
 
 function dongPanelKhachHang() {
@@ -386,7 +489,6 @@ function chonPhuongThucThanhToan(element) {
     document.querySelectorAll('.pay-chip').forEach(chip => chip.classList.remove('active'));
     element.classList.add('active');
     phuongThucThanhToanDangChon = element.dataset.ma;
-    capNhatTienMat();
 }
 
 function layTongTienHienThi() {
@@ -397,34 +499,6 @@ function layTongTienHienThi() {
 function parseSoTien(value) {
     const digits = String(value ?? '').replace(/[^\d]/g, '');
     return digits ? Number(digits) : 0;
-}
-
-function dinhDangTien(value) {
-    return new Intl.NumberFormat('vi-VN').format(Math.max(0, value || 0)) + ' đ';
-}
-
-function capNhatTienMat() {
-    const panel = document.getElementById('cash-payment-panel');
-    const input = document.getElementById('cash-amount');
-    const change = document.getElementById('cash-change');
-    const error = document.getElementById('cash-payment-error');
-    if (!panel || !input || !change || !error) return;
-
-    const laTienMat = phuongThucThanhToanDangChon === 'PTTT001';
-    panel.hidden = !laTienMat;
-    if (!laTienMat) return;
-
-    const tongTien = parseSoTien(layTongTienHienThi());
-    const tienKhachDua = parseSoTien(input.value);
-    const tienThoi = tienKhachDua - tongTien;
-    change.textContent = dinhDangTien(tienThoi > 0 ? tienThoi : 0);
-
-    if (!tienKhachDua) {
-        error.hidden = true;
-        return;
-    }
-    error.textContent = tienThoi < 0 ? 'Số tiền khách đưa chưa đủ.' : '';
-    error.hidden = tienThoi >= 0;
 }
 
 function laThanhToanChuyenKhoan() {
@@ -513,33 +587,14 @@ async function xacNhanThanhToan(button) {
         return;
     }
 
-    const tongTien = parseSoTien(layTongTienHienThi());
-    let soTienKhachDua = tongTien;
-    if (phuongThucThanhToanDangChon === 'PTTT001') {
-        soTienKhachDua = parseSoTien(document.getElementById('cash-amount')?.value);
-        if (!soTienKhachDua) {
-            hienThiLoi('Vui lòng nhập số tiền khách đưa.');
-            document.getElementById('cash-amount')?.focus();
-            return;
-        }
-        if (soTienKhachDua < tongTien) {
-            hienThiLoi('Số tiền khách đưa chưa đủ.');
-            return;
-        }
-    }
+    // Mặc định tiền mặt: khách thanh toán đúng tổng hóa đơn, không cần nhập tiền đưa.
+    const soTienKhachDua = parseSoTien(layTongTienHienThi());
     await withLoading(button, async () => {
         const data = await BanHangAPI.thanhToan({
             idHoaDon: idHoaDonHienTai,
             maPttt: phuongThucThanhToanDangChon,
             soTienKhachDua: String(soTienKhachDua)
         });
-        if (phuongThucThanhToanDangChon === 'PTTT001') {
-            alert('Thanh toán tiền mặt thành công. Tiền thối lại: '
-                + dinhDangTien(data.tienThoi || 0)
-                + '. Đang mở chi tiết hóa đơn để xem và in.');
-            window.location.assign(data.detailUrl || duongDanChiTietHoaDon(data.idHoaDon || idHoaDonHienTai));
-            return;
-        }
         sauThanhToanThanhCong(data);
     });
 }
@@ -587,9 +642,13 @@ document.addEventListener('DOMContentLoaded', () => {
         timSanPhamDebounced(search.value, category).catch(error => hienThiLoi(error.message));
     });
 
-    const phone = document.getElementById('input-sdt');
-    phone?.addEventListener('input', () => {
-        traCuuKhachHangDebounced(phone.value.trim()).catch(error => hienThiLoi(error.message));
+    const customerSearch = document.getElementById('input-tim-khach-hang');
+    customerSearch?.addEventListener('input', () => {
+        timKhachHangDebounced(customerSearch.value.trim()).catch(error => hienThiLoi(error.message));
+    });
+
+    document.querySelectorAll('[data-customer-tab]').forEach(tab => {
+        tab.addEventListener('click', () => chuyenTabKhachHang(tab.dataset.customerTab));
     });
 
     const voucherInput = document.getElementById('input-voucher');
@@ -600,14 +659,6 @@ document.addEventListener('DOMContentLoaded', () => {
             apVoucher(voucherButton);
         }
     });
-
-    const cashInput = document.getElementById('cash-amount');
-    cashInput?.addEventListener('input', () => {
-        const value = parseSoTien(cashInput.value);
-        cashInput.value = value ? new Intl.NumberFormat('vi-VN').format(value) : '';
-        capNhatTienMat();
-    });
-    capNhatTienMat();
 
     const createInvoiceButton = document.getElementById('create-invoice-button');
     const addInvoiceTab = document.querySelector('.tab-add');
@@ -669,6 +720,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const guestCustomer = event.target.closest('[data-customer-guest]');
         if (guestCustomer) {
             chonKhachLe(guestCustomer);
+            return;
+        }
+        const customerResult = event.target.closest('[data-customer-result]');
+        if (customerResult) {
+            chonKhachHangTheoKetQua(customerResult).catch(error => hienThiLoi(error.message));
             return;
         }
         if (event.target.closest('[data-customer-open]')) {

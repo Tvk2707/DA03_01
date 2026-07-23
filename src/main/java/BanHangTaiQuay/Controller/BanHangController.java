@@ -21,6 +21,7 @@ import QuanLySanPham.service.impl.SanPhamChiTietServiceImpl;
 import QuanLyNhanVien.service.NhanVienService;
 import QuanLyNhanVien.service.impl.NhanVienServiceImpl;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -33,6 +34,7 @@ import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -43,9 +45,11 @@ import java.util.Map;
         "/ban-hang/tim-san-pham",
         "/ban-hang/quet-qr",
         "/ban-hang/them-san-pham",
+        "/ban-hang/them-nhieu-san-pham",
         "/ban-hang/xoa-san-pham",
         "/ban-hang/cap-nhat-so-luong",
         "/ban-hang/tra-cuu-khach-hang",
+        "/ban-hang/tim-khach-hang",
         "/ban-hang/ap-voucher",
         "/ban-hang/huy-hoa-don",
         "/ban-hang/lay-hoa-don-cho",
@@ -108,6 +112,9 @@ public class BanHangController extends HttpServlet {
             case "/ban-hang/tra-cuu-khach-hang":
                 traCuuKhachHang(req, resp, false);
                 break;
+            case "/ban-hang/tim-khach-hang":
+                timKhachHang(req, resp);
+                break;
             case "/ban-hang/lay-hoa-don-cho":
                 layHoaDonCho(req, resp);
                 break;
@@ -124,6 +131,9 @@ public class BanHangController extends HttpServlet {
                 break;
             case "/ban-hang/them-san-pham":
                 themSanPham(req, resp);
+                break;
+            case "/ban-hang/them-nhieu-san-pham":
+                themNhieuSanPham(req, resp);
                 break;
             case "/ban-hang/xoa-san-pham":
                 xoaSanPham(req, resp);
@@ -328,6 +338,76 @@ public class BanHangController extends HttpServlet {
             response.put("khachHang", khachHang == null ? null : toKhachHangData(khachHang));
             response.put("found", khachHang != null);
 
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.put("success", false);
+            response.put("message", e.getMessage());
+        }
+
+        out.print(gson.toJson(response));
+        out.flush();
+    }
+
+    private void themNhieuSanPham(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        resp.setContentType("application/json");
+        resp.setCharacterEncoding("UTF-8");
+        PrintWriter out = resp.getWriter();
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            int idHoaDon = requirePositiveInt(req, "idHoaDon");
+            String rawItems = requireText(req, "danhSachSanPham");
+            List<ThemSanPhamRequest> items = gson.fromJson(
+                    rawItems,
+                    new TypeToken<List<ThemSanPhamRequest>>() { }.getType()
+            );
+            if (items == null || items.isEmpty()) {
+                throw new IllegalArgumentException("Danh sách sản phẩm không được để trống.");
+            }
+
+            Map<Integer, Integer> sanPhamSoLuong = new LinkedHashMap<>();
+            for (ThemSanPhamRequest item : items) {
+                if (item == null) {
+                    throw new IllegalArgumentException("Thông tin sản phẩm không hợp lệ.");
+                }
+                sanPhamSoLuong.merge(
+                        item.getIdSanPhamChiTiet(),
+                        item.getSoLuong(),
+                        Integer::sum
+                );
+            }
+
+            banHangService.themNhieuSanPhamVaoGio(idHoaDon, sanPhamSoLuong);
+            response.put("success", true);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.put("success", false);
+            response.put("message", e.getMessage());
+        } catch (RuntimeException e) {
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.put("success", false);
+            response.put("message", thongBaoLoi(e));
+            getServletContext().log("Lỗi khi thêm nhiều sản phẩm vào hóa đơn POS.", e);
+        }
+
+        out.print(gson.toJson(response));
+        out.flush();
+    }
+
+    private void timKhachHang(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        resp.setContentType("application/json");
+        resp.setCharacterEncoding("UTF-8");
+        PrintWriter out = resp.getWriter();
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            String tuKhoa = optionalText(req, "tuKhoa");
+            List<Map<String, Object>> khachHangs = banHangService.timKhachHangTheoTuKhoa(tuKhoa)
+                    .stream()
+                    .map(this::toKhachHangData)
+                    .toList();
+            response.put("success", true);
+            response.put("khachHangs", khachHangs);
         } catch (IllegalStateException | IllegalArgumentException e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.put("success", false);

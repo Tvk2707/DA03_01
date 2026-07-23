@@ -29,6 +29,17 @@ public class SanPhamChiTietServiceImpl implements SanPhamChiTietService {
     }
 
     @Override
+    public List<SanPhamChiTiet> timTheoIds(List<Integer> ids) {
+        if (ids == null || ids.isEmpty()) {
+            throw new IllegalArgumentException("Danh sách biến thể sản phẩm không được để trống.");
+        }
+        if (ids.stream().anyMatch(id -> id == null || id <= 0)) {
+            throw new IllegalArgumentException("ID biến thể sản phẩm không hợp lệ.");
+        }
+        return sanPhamChiTietDao.findByIds(ids);
+    }
+
+    @Override
     public List<SanPhamChiTiet> themBienThe(List<SanPhamChiTiet> danhSach) {
         if (danhSach == null || danhSach.isEmpty()) {
             throw new RuntimeException("Danh sách biến thể không được để trống.");

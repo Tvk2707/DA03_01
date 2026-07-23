@@ -8,6 +8,7 @@ import java.util.List;
  */
 public interface SanPhamChiTietService {
     SanPhamChiTiet timTheoId(Integer id);
+    List<SanPhamChiTiet> timTheoIds(List<Integer> ids);
     List<SanPhamChiTiet> timKiem(Integer sanPhamId, String ma, Integer mauSacId, Integer kichCoId, Integer trangThai);
 
     List<SanPhamChiTiet> timKiemTheoDanhMuc(String ma, Integer danhMucId, Integer trangThai);

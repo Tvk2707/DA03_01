@@ -12,7 +12,10 @@ import jakarta.persistence.LockModeType;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class BanHangServiceImpl implements BanHangService {
 
@@ -49,7 +52,7 @@ public class BanHangServiceImpl implements BanHangService {
         HoaDon hd = new HoaDon();
 
         // 👇 THÊM DÒNG NÀY ĐỂ FIX LỖI SQL (Tạo mã hóa đơn tự động bằng thời gian thực)
-        hd.setMaHoaDon("HD" + System.currentTimeMillis());
+        // Mã hóa đơn được sinh tuần tự trong BanHangDAOImpl khi lưu vào database.
 
         NhanVien nv = new NhanVien();
         nv.setId(idNhanVien);
@@ -154,6 +157,128 @@ public class BanHangServiceImpl implements BanHangService {
                 transaction.rollback();
             }
             throw e; // Re-throw the exception to be handled by the controller
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public void themNhieuSanPhamVaoGio(int idHoaDon, Map<Integer, Integer> sanPhamSoLuong) {
+        validatePositiveId(idHoaDon, "ID hóa đơn");
+        if (sanPhamSoLuong == null || sanPhamSoLuong.isEmpty()) {
+            throw new IllegalArgumentException("Danh sách sản phẩm không được để trống.");
+        }
+
+        Map<Integer, Integer> danhSachHopLe = new LinkedHashMap<>();
+        for (Map.Entry<Integer, Integer> entry : sanPhamSoLuong.entrySet()) {
+            if (entry.getKey() == null) {
+                throw new IllegalArgumentException("ID sản phẩm chi tiết không hợp lệ.");
+            }
+            validatePositiveId(entry.getKey(), "ID sản phẩm chi tiết");
+            if (entry.getValue() == null || entry.getValue() <= 0) {
+                throw new IllegalArgumentException("Số lượng sản phẩm phải lớn hơn 0.");
+            }
+            danhSachHopLe.merge(entry.getKey(), entry.getValue(), Integer::sum);
+        }
+
+        List<SanPhamChiTiet> sanPhamTuModule = sanPhamChiTietService
+                .timTheoIds(new ArrayList<>(danhSachHopLe.keySet()));
+        Map<Integer, SanPhamChiTiet> sanPhamModuleTheoId = new LinkedHashMap<>();
+        for (SanPhamChiTiet spct : sanPhamTuModule) {
+            sanPhamModuleTheoId.put(spct.getId(), spct);
+        }
+        for (Integer idSanPhamChiTiet : danhSachHopLe.keySet()) {
+            SanPhamChiTiet spct = sanPhamModuleTheoId.get(idSanPhamChiTiet);
+            if (spct == null) {
+                throw new IllegalArgumentException("Sản phẩm không tồn tại.");
+            }
+            if (spct.getTrangThai() != null && spct.getTrangThai() != 1) {
+                throw new IllegalStateException("Sản phẩm đã ngừng kinh doanh.");
+            }
+        }
+
+        EntityManager em = EntityManagerUtlis.getEntityManager();
+        EntityTransaction transaction = em.getTransaction();
+        try {
+            transaction.begin();
+
+            Map<Integer, SanPhamChiTiet> sanPhamDaKhoa = new LinkedHashMap<>();
+            for (Map.Entry<Integer, Integer> entry : danhSachHopLe.entrySet()) {
+                SanPhamChiTiet spct = em.find(
+                        SanPhamChiTiet.class,
+                        entry.getKey(),
+                        LockModeType.PESSIMISTIC_WRITE
+                );
+                if (spct == null || Boolean.TRUE.equals(spct.getIsDeleted())) {
+                    throw new IllegalArgumentException("Sản phẩm không tồn tại.");
+                }
+                if (spct.getTrangThai() != null && spct.getTrangThai() != 1) {
+                    throw new IllegalStateException("Sản phẩm đã ngừng kinh doanh.");
+                }
+                int tonKho = spct.getSoLuongTon() == null ? 0 : spct.getSoLuongTon();
+                if (entry.getValue() > tonKho) {
+                    throw new IllegalStateException("Không đủ tồn kho cho sản phẩm " + entry.getKey()
+                            + ", còn lại: " + tonKho);
+                }
+                sanPhamDaKhoa.put(entry.getKey(), spct);
+            }
+
+            HoaDon hd = findHoaDonWithDetails(em, idHoaDon, true);
+            if (hd == null) {
+                throw new IllegalArgumentException("Hóa đơn không tồn tại.");
+            }
+            if (!laHoaDonDangChoThanhToan(hd)) {
+                throw new IllegalStateException("Chỉ được thêm sản phẩm vào hóa đơn đang chờ thanh toán.");
+            }
+            if (hd.getChiTietHoaDons() == null) {
+                hd.setChiTietHoaDons(new java.util.ArrayList<>());
+            }
+
+            for (Map.Entry<Integer, Integer> entry : danhSachHopLe.entrySet()) {
+                Integer idSanPhamChiTiet = entry.getKey();
+                int soLuong = entry.getValue();
+                SanPhamChiTiet spct = sanPhamDaKhoa.get(idSanPhamChiTiet);
+                ChiTietHoaDon chiTiet = hd.getChiTietHoaDons().stream()
+                        .filter(ct -> ct.getSanPhamChiTiet() != null
+                                && idSanPhamChiTiet.equals(ct.getSanPhamChiTiet().getId()))
+                        .findFirst()
+                        .orElse(null);
+
+                if (spct.getGiaBan() == null && (chiTiet == null || chiTiet.getDonGia() == null)) {
+                    throw new IllegalStateException("Sản phẩm chưa có giá bán.");
+                }
+
+                if (chiTiet == null) {
+                    chiTiet = new ChiTietHoaDon();
+                    chiTiet.setHoaDon(hd);
+                    chiTiet.setSanPhamChiTiet(spct);
+                    chiTiet.setSoLuong(soLuong);
+                    chiTiet.setDonGia(spct.getGiaBan());
+                    chiTiet.setGiaBanRa(spct.getGiaBan());
+                    chiTiet.setTongTien(chiTiet.getDonGia().multiply(BigDecimal.valueOf(soLuong)));
+                    hd.getChiTietHoaDons().add(chiTiet);
+                    em.persist(chiTiet);
+                } else {
+                    if (chiTiet.getDonGia() == null) {
+                        chiTiet.setDonGia(spct.getGiaBan());
+                        chiTiet.setGiaBanRa(spct.getGiaBan());
+                    }
+                    int soLuongMoi = (chiTiet.getSoLuong() == null ? 0 : chiTiet.getSoLuong()) + soLuong;
+                    chiTiet.setSoLuong(soLuongMoi);
+                    chiTiet.setTongTien(chiTiet.getDonGia().multiply(BigDecimal.valueOf(soLuongMoi)));
+                }
+
+                int tonKho = spct.getSoLuongTon() == null ? 0 : spct.getSoLuongTon();
+                spct.setSoLuongTon(tonKho - soLuong);
+            }
+
+            capNhatTongTien(hd);
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw e;
         } finally {
             em.close();
         }
@@ -312,6 +437,11 @@ public class BanHangServiceImpl implements BanHangService {
     }
 
     @Override
+    public List<KhachHang> timKhachHangTheoTuKhoa(String tuKhoa) {
+        return khachHangService.timKhachHangTheoTuKhoa(tuKhoa);
+    }
+
+    @Override
     public KhachHang traCuuHoacTaoKhachHang(String soDienThoai, String hoTen) {
         return khachHangService.traCuuHoacTaoKhachHang(soDienThoai, hoTen);
         /*
@@ -341,13 +471,16 @@ public class BanHangServiceImpl implements BanHangService {
             if (hd == null) {
                 throw new IllegalArgumentException("Hóa đơn không tồn tại.");
             }
-            if (hd.getTrangThai() == null || hd.getTrangThai() != 0) {
+            if (!laHoaDonDangChoThanhToan(hd)) {
                 throw new IllegalStateException("Chỉ được gắn khách hàng cho hóa đơn đang chờ thanh toán.");
             }
 
             KhachHang kh = em.find(KhachHang.class, idKhachHang);
             if (kh == null) {
                 throw new IllegalArgumentException("Khách hàng không tồn tại.");
+            }
+            if (kh.getTrangThai() != null && kh.getTrangThai() != 1) {
+                throw new IllegalStateException("Khách hàng đã ngừng hoạt động.");
             }
             hd.setKhachHang(kh);
             ghiLichSu(em, hd, "GAN_KHACH_HANG", "Gán khách hàng vào đơn");
@@ -376,12 +509,15 @@ public class BanHangServiceImpl implements BanHangService {
             if (hd == null) {
                 throw new IllegalArgumentException("Hóa đơn không tồn tại.");
             }
-            if (hd.getTrangThai() == null || hd.getTrangThai() != 0) {
+            if (!laHoaDonDangChoThanhToan(hd)) {
                 throw new IllegalStateException("Chỉ được chọn khách lẻ cho hóa đơn đang chờ thanh toán.");
             }
 
+            boolean daGanKhachHang = hd.getKhachHang() != null;
             hd.setKhachHang(null);
-            ghiLichSu(em, hd, "CHON_KHACH_LE", "Chuyển hóa đơn sang khách lẻ");
+            if (daGanKhachHang) {
+                ghiLichSu(em, hd, "CHON_KHACH_LE", "Chuyển hóa đơn sang khách lẻ");
+            }
             transaction.commit();
         } catch (Exception e) {
             if (transaction.isActive()) {
@@ -704,8 +840,7 @@ public class BanHangServiceImpl implements BanHangService {
                                 + "LEFT JOIN FETCH h.khachHang "
                                 + "WHERE h.id = :idHoaDon",
                         HoaDon.class)
-                .setParameter("idHoaDon", idHoaDon)
-                .setMaxResults(1);
+                .setParameter("idHoaDon", idHoaDon);
         if (lock) {
             query.setLockMode(LockModeType.PESSIMISTIC_WRITE);
         }

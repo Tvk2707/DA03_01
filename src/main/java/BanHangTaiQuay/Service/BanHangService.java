@@ -5,13 +5,16 @@ import QuanLySanPham.Entity.KhachHang;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 public interface BanHangService {
     HoaDon taoHoaDonMoi(Integer idNhanVien, Integer idCa);
     void themSanPhamVaoGio(int idHoaDon, int idSanPhamChiTiet, int soLuong);
+    void themNhieuSanPhamVaoGio(int idHoaDon, Map<Integer, Integer> sanPhamSoLuong);
     void xoaSanPhamKhoiGio(int idHoaDon, int idChiTiet);
     void capNhatSoLuong(int idChiTiet, int soLuongMoi);
     KhachHang traCuuKhachHang(String soDienThoai);
+    List<KhachHang> timKhachHangTheoTuKhoa(String tuKhoa);
     KhachHang traCuuHoacTaoKhachHang(String soDienThoai, String hoTen);
     void ganKhachHang(int idHoaDon, int idKhachHang);
     void chonKhachLe(int idHoaDon);

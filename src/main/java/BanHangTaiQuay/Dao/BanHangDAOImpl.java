@@ -24,6 +24,8 @@ public class BanHangDAOImpl implements BanHangDAO {
         try {
             em.getTransaction().begin();
 
+            // Sinh mã tuần tự trong cùng transaction để tránh trùng khi có nhiều quầy tạo đơn.
+            hd.setMaHoaDon(sinhMaHoaDonTiepTheo(em));
             ganReferenceHoaDon(em, hd);
 
             em.persist(hd);
@@ -251,5 +253,17 @@ public class BanHangDAOImpl implements BanHangDAO {
         if (ct.getSanPhamChiTiet() != null && ct.getSanPhamChiTiet().getId() != null) {
             ct.setSanPhamChiTiet(em.getReference(SanPhamChiTiet.class, ct.getSanPhamChiTiet().getId()));
         }
+    }
+
+    private String sinhMaHoaDonTiepTheo(EntityManager em) {
+        String sql = "SELECT ISNULL(MAX(TRY_CONVERT(INT, SUBSTRING(ma_hoa_don, 3, LEN(ma_hoa_don)))), 0) "
+                + "FROM hoa_don WITH (UPDLOCK, HOLDLOCK) "
+                + "WHERE ma_hoa_don LIKE 'HD%' "
+                + "AND LEN(ma_hoa_don) > 2 "
+                + "AND LEN(ma_hoa_don) <= 8 "
+                + "AND SUBSTRING(ma_hoa_don, 3, LEN(ma_hoa_don)) NOT LIKE '%[^0-9]%'";
+        Number soLonNhat = (Number) em.createNativeQuery(sql).getSingleResult();
+        long soTiepTheo = soLonNhat == null ? 1L : soLonNhat.longValue() + 1L;
+        return "HD" + String.format("%03d", soTiepTheo);
     }
 }

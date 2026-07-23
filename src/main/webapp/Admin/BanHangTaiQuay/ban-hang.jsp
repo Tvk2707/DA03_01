@@ -118,7 +118,7 @@
         /* Body layout */
         .pos-layout { display: flex; gap: 20px; padding: 0 28px 28px; flex: 1; min-height: 0; }
         .left-col { flex: 1; min-width: 0; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
-        .right-col { width: 360px; flex-shrink: 0; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; }
+        .right-col { width: 360px; min-height: 0; flex-shrink: 0; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; }
 
         .find-row { display: flex; gap: 10px; }
         .find-input {
@@ -164,6 +164,7 @@
         }
         .cust-info { display: flex; align-items: center; gap: 10px; }
         .cust-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold-bg); color: var(--brown-700); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700;}
+        .cust-box[data-customer-state="guest"] .cust-avatar { background: var(--green-bg); color: var(--green-text); }
         .cust-name { font-size: 13px; font-weight: 600; }
         .cust-sub { font-size: 11px; color: var(--text-sub); }
         .cust-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
@@ -183,15 +184,26 @@
         .customer-panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; color: var(--text-main); font-size: 12px; font-weight: 700; }
         .customer-panel-close { border: 0; background: transparent; color: var(--text-sub); font-size: 20px; line-height: 1; cursor: pointer; padding: 0 2px; }
         .customer-panel-close:hover { color: var(--red-text); }
+        .customer-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 3px; margin-bottom: 10px; background: var(--gold-bg); border-radius: 9px; }
+        .customer-tab { border: 0; border-radius: 7px; padding: 8px 6px; background: transparent; color: var(--text-sub); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+        .customer-tab.active { background: #fff; color: var(--brown-700); box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+        .customer-view.hidden { display: none; }
         #panel-khach-hang input { width: 100%; border: 1px solid var(--line); background: var(--bg); padding: 8px 10px; border-radius: 8px; font-size: 13px; }
-        #form-them-khach-nhanh { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); display: flex; flex-direction: column; gap: 8px; }
+        .customer-results { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; max-height: 150px; overflow-y: auto; }
+        .customer-result { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; width: 100%; border: 1px solid var(--line); border-radius: 8px; background: #fff; padding: 8px 10px; text-align: left; cursor: pointer; }
+        .customer-result:hover { border-color: var(--brown-600); background: var(--gold-bg); }
+        .customer-result-name { color: var(--text-main); font-size: 12px; }
+        .customer-result-phone { color: var(--text-sub); font-size: 11px; }
+        .customer-results:empty { display: none; }
+        .customer-search-empty { margin: 10px 0 0; color: var(--text-sub); font-size: 11px; text-align: center; }
+        .customer-add-form { display: flex; flex-direction: column; gap: 8px; }
         .btn-them-khach { background: var(--brown-600); color: #fff; border: none; border-radius: 8px; padding: 8px; font-size: 12px; font-weight: 600; cursor: pointer; }
 
 
         .cart-title { font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--text-sub); margin-bottom: 10px;}
-        .cart-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; margin-bottom: 14px; padding-right: 2px;}
+        .cart-list { flex: 1 1 auto; min-height: 0; max-height: 420px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; margin-bottom: 14px; padding: 0 2px 0 0;}
         .cart-empty { text-align: center; font-size: 13px; color: var(--text-sub); padding: 40px 0; }
-        .cart-item { display: flex; gap: 10px; align-items: flex-start; }
+        .cart-item { flex: 0 0 auto; display: flex; gap: 10px; align-items: flex-start; }
         .ci-thumb { width: 44px; height: 44px; border-radius: 8px; background: var(--gold-bg); flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--brown-600); overflow: hidden;}
         .ci-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; display: block; }
         .ci-body { flex: 1; min-width: 0; }
@@ -219,14 +231,6 @@
         .pay-methods { display: flex; gap: 8px; margin-bottom: 14px; }
         .pay-chip { flex: 1; text-align: center; padding: 10px 4px; border-radius: 9px; border: 1px solid var(--line); font-size: 11.5px; font-weight: 600; color: var(--text-sub); cursor: pointer;}
         .pay-chip.active { background: var(--brown-900); color: #fff; border-color: var(--brown-900);}
-        .cash-payment-panel { margin-top: -5px; margin-bottom: 14px; padding: 11px; border: 1px solid var(--line); border-radius: 9px; background: #fffaf4; }
-        .cash-payment-panel[hidden] { display: none; }
-        .cash-payment-panel label { display: block; margin-bottom: 6px; font-size: 11px; color: var(--text-sub); }
-        .cash-payment-panel input { width: 100%; box-sizing: border-box; padding: 9px 10px; border: 1px solid var(--line); border-radius: 7px; font-size: 13px; }
-        .cash-change-row { display: flex; justify-content: space-between; margin-top: 9px; font-size: 12px; }
-        .cash-change-row strong { color: var(--brown-900); }
-        .cash-payment-error { margin: 7px 0 0; color: #b42318; font-size: 11px; }
-
         .checkout-btn {
             background: var(--brown-600); color: #fff; border: none; border-radius: 11px; padding: 14px; width: 100%;
             font-size: 14.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
@@ -371,7 +375,7 @@
                     <c:forEach var="hd" items="${danhSachHoaDonCho}">
                         <div class="tab ${hd.id == idHoaDonDangTao ? 'active' : ''}" data-hoadon="${hd.id}">
                             <span class="dot"></span>
-                            Đơn #${hd.id} · ${hd.maHoaDon}
+                            Hóa đơn ${hd.maHoaDon}
 
                             <!-- Nút X để xóa hóa đơn -->
                             <button class="btn-close-tab" onclick="xoaHoaDonCho(event, ${hd.id})" title="Hủy đơn này">×</button>
@@ -440,7 +444,7 @@
 
                     <!-- RIGHT: cart -->
                     <div class="right-col">
-                        <div class="cust-box">
+                        <div class="cust-box" data-customer-state="${empty hoaDonDangTao.khachHang ? 'guest' : 'identified'}">
                             <div class="cust-info">
                                 <c:set var="kh" value="${hoaDonDangTao.khachHang}"/>
                                 <div class="cust-avatar">
@@ -451,11 +455,11 @@
                                 </div>
                                 <div>
                                     <div class="cust-name">${not empty kh ? kh.hoTen : 'Khách lẻ'}</div>
-                                    <div class="cust-sub">${not empty kh ? kh.soDienThoai : 'Chưa gắn số điện thoại'}</div>
+                                    <div class="cust-sub">${not empty kh ? kh.soDienThoai : 'Không lưu thông tin khách hàng'}</div>
                                 </div>
                             </div>
                             <div class="cust-actions">
-                                <button type="button" class="link-btn" data-customer-open aria-expanded="false">Đổi</button>
+                                <button type="button" class="link-btn" data-customer-open aria-expanded="false">${not empty kh ? 'Đổi khách' : 'Chọn khách'}</button>
                                 <c:choose>
                                     <c:when test="${not empty kh}">
                                         <button type="button" class="link-btn link-btn--guest" data-customer-guest>Khách lẻ</button>
@@ -467,14 +471,24 @@
                             </div>
                             <div id="panel-khach-hang" class="hidden">
                                 <div class="customer-panel-head">
-                                    <span>Chọn khách hàng</span>
+                                    <span>Khách hàng</span>
                                     <button type="button" class="customer-panel-close" data-customer-close aria-label="Đóng">&times;</button>
                                 </div>
-                                <input type="text" id="input-sdt" placeholder="Nhập số điện thoại khách hàng" />
-                                <div id="form-them-khach-nhanh" class="hidden">
-                                    <input type="text" id="input-sdt-moi" placeholder="Số điện thoại" />
-                                    <input type="text" id="input-ten-moi" placeholder="Họ tên" />
-                                    <button type="button" class="btn-them-khach">Thêm &amp; chọn</button>
+                                <div class="customer-tabs" role="tablist" aria-label="Thao tác khách hàng">
+                                    <button type="button" class="customer-tab active" data-customer-tab="select" role="tab">Chọn khách</button>
+                                    <button type="button" class="customer-tab" data-customer-tab="add" role="tab">Thêm khách</button>
+                                </div>
+                                <div class="customer-view" data-customer-view="select" role="tabpanel">
+                                    <input type="search" id="input-tim-khach-hang" placeholder="Nhập tên hoặc số điện thoại khách hàng" autocomplete="off" />
+                                    <div id="danh-sach-khach-hang" class="customer-results" aria-live="polite"></div>
+                                    <p id="customer-search-empty" class="customer-search-empty hidden">Không tìm thấy khách hàng.</p>
+                                </div>
+                                <div class="customer-view hidden" data-customer-view="add" role="tabpanel">
+                                    <div class="customer-add-form">
+                                        <input type="text" id="input-sdt-moi" placeholder="Số điện thoại" />
+                                        <input type="text" id="input-ten-moi" placeholder="Họ tên" />
+                                        <button type="button" class="btn-them-khach">Thêm &amp; chọn</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -542,20 +556,9 @@
                             <div class="pay-chip" data-ma="PTTT002">Chuyển khoản</div>
                         </div>
 
-                        <div class="cash-payment-panel" id="cash-payment-panel">
-                            <label for="cash-amount">Khách đưa (VNĐ)</label>
-                            <input id="cash-amount" type="text" inputmode="numeric"
-                                   autocomplete="off" placeholder="Nhập số tiền khách đưa">
-                            <div class="cash-change-row">
-                                <span>Tiền thối lại</span>
-                                <strong id="cash-change">0 đ</strong>
-                            </div>
-                            <p id="cash-payment-error" class="cash-payment-error" hidden></p>
-                        </div>
-
                         <button type="button" class="checkout-btn" ${empty idHoaDonDangTao ? 'disabled' : ''}>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M20 7L9 18l-5-5"/></svg>
-                            Thanh toán · <span id="checkout-total"><fmt:formatNumber value="${tongThanhToanHienTai}" type="currency" currencySymbol="đ"/></span>
+                            Nhận thanh toán · <span id="checkout-total"><fmt:formatNumber value="${tongThanhToanHienTai}" type="currency" currencySymbol="đ"/></span>
                         </button>
                     </div>
                 </div>
@@ -620,7 +623,7 @@
     window.idHoaDonHienTai = ${empty idHoaDonDangTao ? 'null' : idHoaDonDangTao};
 </script>
 <script src="https://unpkg.com/html5-qrcode"></script>
-<script src="${pageContext.request.contextPath}/assets/js/banhang.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/banhang.js?v=20260723-bulk-fast"></script>
 
 </body>
 </html>

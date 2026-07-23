@@ -92,6 +92,23 @@ public class SanPhamChiTietDaoImpl extends GenericDaoImpl<SanPhamChiTiet, Intege
     }
 
     @Override
+    public List<SanPhamChiTiet> findByIds(List<Integer> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return new ArrayList<>();
+        }
+        EntityManager em = EntityManagerUtlis.getEntityManager();
+        try {
+            return em.createQuery(
+                            "SELECT s FROM SanPhamChiTiet s WHERE s.id IN :ids AND s.isDeleted = false",
+                            SanPhamChiTiet.class)
+                    .setParameter("ids", ids)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
     public SanPhamChiTiet findByMauSacVaKichCo(Integer sanPhamId, Integer mauSacId, Integer kichCoId) {
         EntityManager em = EntityManagerUtlis.getEntityManager();
         try {
