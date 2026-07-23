@@ -17,6 +17,18 @@ public class SanPhamChiTietServiceImpl implements SanPhamChiTietService {
     private final SanPhamChiTietDao sanPhamChiTietDao = new SanPhamChiTietDaoImpl();
 
     @Override
+    public SanPhamChiTiet timTheoId(Integer id) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("ID biến thể sản phẩm không hợp lệ.");
+        }
+        SanPhamChiTiet sanPhamChiTiet = sanPhamChiTietDao.findById(id);
+        if (sanPhamChiTiet != null && Boolean.TRUE.equals(sanPhamChiTiet.getIsDeleted())) {
+            return null;
+        }
+        return sanPhamChiTiet;
+    }
+
+    @Override
     public List<SanPhamChiTiet> themBienThe(List<SanPhamChiTiet> danhSach) {
         if (danhSach == null || danhSach.isEmpty()) {
             throw new RuntimeException("Danh sách biến thể không được để trống.");

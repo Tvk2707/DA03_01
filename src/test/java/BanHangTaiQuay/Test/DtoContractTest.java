@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class DtoContractTest {
 
@@ -57,6 +58,11 @@ class DtoContractTest {
         assertEquals("Khách hàng test", customerRequest.getHoTen());
         assertEquals(1, invoiceRequest.getIdNhanVien());
         assertEquals(2, invoiceRequest.getIdCa());
+
+        invoiceRequest.setIdNhanVien(null);
+        invoiceRequest.setIdCa(null);
+        assertNull(invoiceRequest.getIdNhanVien());
+        assertNull(invoiceRequest.getIdCa());
         assertEquals("TEST10", voucherRequest.getMaVoucher());
         assertEquals("TM", paymentRequest.getMaPttt());
         assertEquals(new BigDecimal("100000"), paymentRequest.getSoTienKhachDua());

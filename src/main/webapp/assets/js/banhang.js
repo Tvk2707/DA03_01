@@ -9,6 +9,12 @@ function posContextPath() {
     return index >= 0 ? window.location.pathname.substring(0, index) : '';
 }
 
+function duongDanChiTietHoaDon(idHoaDon, inHoaDon = false) {
+    const query = new URLSearchParams({ id: String(idHoaDon) });
+    if (inHoaDon) query.set('print', '1');
+    return `${posContextPath()}/admin/hoa-don/chi-tiet?${query}`;
+}
+
 class BanHangError extends Error {}
 
 const BanHangAPI = {
@@ -96,7 +102,15 @@ function debounce(callback, delay) {
     let timer;
     return (...args) => {
         clearTimeout(timer);
-        timer = setTimeout(() => callback(...args), delay);
+        return new Promise((resolve, reject) => {
+            timer = setTimeout(async () => {
+                try {
+                    resolve(await callback(...args));
+                } catch (error) {
+                    reject(error);
+                }
+            }, delay);
+        });
     };
 }
 
@@ -114,14 +128,71 @@ const timSanPhamDebounced = debounce(async (keyword, idDanhMuc) => {
     if (grid) grid.innerHTML = await response.text();
 }, 300);
 
-async function themSanPham(idSpct, button) {
-    await withLoading(button, async () => {
-        await BanHangAPI.goi('themSanPham', { idHoaDon: idHoaDonHienTai, idSpct, soLuong: 1 });
-        window.location.reload();
-    });
+let hangDoiThemSanPham = [];
+let timerXuLyThemSanPham = null;
+let timerTaiLaiGioHang = null;
+let dangXuLyThemSanPham = false;
+
+function datLichTaiLaiGioHang() {
+    clearTimeout(timerTaiLaiGioHang);
+    timerTaiLaiGioHang = setTimeout(() => {
+        if (!dangXuLyThemSanPham && hangDoiThemSanPham.length === 0) {
+            window.location.reload();
+        }
+    }, 700);
+}
+
+async function xuLyHangDoiThemSanPham() {
+    if (dangXuLyThemSanPham) return;
+    dangXuLyThemSanPham = true;
+    let soSanPhamThemThanhCong = 0;
+
+    try {
+        while (hangDoiThemSanPham.length > 0) {
+            const item = hangDoiThemSanPham.shift();
+            try {
+                await BanHangAPI.goi('themSanPham', {
+                    idHoaDon: idHoaDonHienTai,
+                    idSpct: item.idSpct,
+                    soLuong: 1
+                });
+                soSanPhamThemThanhCong++;
+            } catch (error) {
+                hienThiLoi(error instanceof BanHangError
+                    ? error.message
+                    : 'Khong the them san pham vao hoa don.');
+            } finally {
+                item.button?.classList.remove('is-loading');
+                item.button?.removeAttribute('data-add-pending');
+            }
+        }
+    } finally {
+        dangXuLyThemSanPham = false;
+        if (soSanPhamThemThanhCong > 0) datLichTaiLaiGioHang();
+    }
+}
+
+function themSanPham(idSpct, button) {
+    if (!idHoaDonHienTai) {
+        hienThiLoi('Vui lòng tạo hoặc chọn hóa đơn trước khi thêm sản phẩm.');
+        return;
+    }
+    // Cho phép chọn nhiều sản phẩm trước khi đồng bộ lại giao diện.
+    clearTimeout(timerTaiLaiGioHang);
+    hangDoiThemSanPham.push({ idSpct, button });
+    button?.classList.add('is-loading');
+    button?.setAttribute('data-add-pending', 'true');
+
+    clearTimeout(timerXuLyThemSanPham);
+    timerXuLyThemSanPham = setTimeout(() => {
+        xuLyHangDoiThemSanPham().catch(error => {
+            console.error('POS add product queue error:', error);
+        });
+    }, 350);
 }
 
 async function doiSoLuong(idChiTiet, soLuongMoi, button) {
+    if (!idHoaDonHienTai) return;
     await withLoading(button, async () => {
         await BanHangAPI.goi('capNhatSoLuong', { idChiTiet, soLuongMoi });
         window.location.reload();
@@ -130,6 +201,10 @@ async function doiSoLuong(idChiTiet, soLuongMoi, button) {
 
 const traCuuKhachHangDebounced = debounce(async (soDienThoai) => {
     if (soDienThoai.length < 9) return;
+    if (!idHoaDonHienTai) {
+        hienThiLoi('Vui lòng tạo hoặc chọn hóa đơn trước khi chọn khách hàng.');
+        return;
+    }
     const data = await BanHangAPI.goi('traCuuKhachHang', { soDienThoai });
     const formMoi = document.getElementById('form-them-khach-nhanh');
     if (data.found) {
@@ -147,6 +222,10 @@ const traCuuKhachHangDebounced = debounce(async (soDienThoai) => {
 }, 400);
 
 async function themVaChonKhachHang(button) {
+    if (!idHoaDonHienTai) {
+        hienThiLoi('Vui lòng tạo hoặc chọn hóa đơn trước khi chọn khách hàng.');
+        return;
+    }
     const soDienThoai = document.getElementById('input-sdt-moi')?.value.trim();
     const hoTen = document.getElementById('input-ten-moi')?.value.trim();
     if (!soDienThoai || !hoTen) {
@@ -257,6 +336,7 @@ async function dongQuetQr() {
 }
 
 async function chonKhachLe(button) {
+    if (!idHoaDonHienTai) return;
     await withLoading(button, async () => {
         await BanHangAPI.goi('chonKhachLe', { idHoaDon: idHoaDonHienTai });
         window.location.reload();
@@ -284,6 +364,10 @@ function dongPanelKhachHang() {
 }
 
 async function apVoucher(button) {
+    if (!idHoaDonHienTai) {
+        hienThiLoi('Vui lòng tạo hoặc chọn hóa đơn trước khi áp dụng voucher.');
+        return;
+    }
     const input = document.getElementById('input-voucher');
     const maVoucher = input?.value.trim();
     if (!maVoucher) {
@@ -350,14 +434,31 @@ function laThanhToanChuyenKhoan() {
 function moModalThanhToanChuyenKhoan() {
     const modal = document.getElementById('transfer-payment-modal');
     const qrImage = document.getElementById('transfer-payment-qr');
+    const qrWrap = document.getElementById('transfer-payment-qr-wrap');
+    const title = document.getElementById('transfer-payment-title');
+    const hint = modal?.querySelector('.transfer-modal__hint');
     const transactionInput = document.getElementById('transfer-transaction-code');
     if (!modal || !qrImage || !transactionInput) {
         throw new BanHangError('Không tải được màn hình thanh toán chuyển khoản.');
     }
 
+    const laThe = phuongThucThanhToanDangChon === 'PTTT004';
     const amount = layTongTienHienThi();
-    const qrContent = `THANH TOAN HOA DON ${idHoaDonHienTai} SO TIEN ${amount} VND`;
-    qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(qrContent)}`;
+    if (laThe) {
+        title.textContent = 'Thanh toán thẻ ngân hàng';
+        hint.textContent = 'Khách thanh toán trên máy POS, sau đó nhập mã giao dịch để xác nhận.';
+        qrWrap.hidden = true;
+        transactionInput.placeholder = 'Ví dụ: POS260722123456';
+        document.getElementById('transfer-payment-note').value = 'Thanh toán bằng thẻ ngân hàng';
+    } else {
+        title.textContent = 'Thanh toán chuyển khoản / QR';
+        hint.textContent = 'Khách quét mã QR, hoàn tất chuyển khoản rồi nhập mã giao dịch ngân hàng để xác nhận.';
+        const qrContent = `THANH TOAN HOA DON ${idHoaDonHienTai} SO TIEN ${amount} VND`;
+        qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(qrContent)}`;
+        qrWrap.hidden = false;
+        transactionInput.placeholder = 'Ví dụ: FT260722123456';
+        document.getElementById('transfer-payment-note').value = 'Thanh toán bằng QR/chuyển khoản';
+    }
     transactionInput.value = '';
     modal.classList.remove('hidden');
     modal.setAttribute('aria-hidden', 'false');
@@ -380,15 +481,21 @@ async function xacNhanThanhToanChuyenKhoan(button) {
     }
 
     await withLoading(button, async () => {
-        await BanHangAPI.thanhToan({
+        const data = await BanHangAPI.thanhToan({
             idHoaDon: idHoaDonHienTai,
             maPttt: phuongThucThanhToanDangChon,
             soTienKhachDua: layTongTienHienThi(),
             maGiaoDich,
             ghiChu
         });
-        window.location.reload();
+        sauThanhToanThanhCong(data);
     });
+}
+
+function sauThanhToanThanhCong(data) {
+    const detailUrl = data.detailUrl || duongDanChiTietHoaDon(data.idHoaDon || idHoaDonHienTai);
+    alert('Thanh toán thành công. Đang mở chi tiết hóa đơn để xem và in.');
+    window.location.assign(detailUrl);
 }
 
 async function xacNhanThanhToan(button) {
@@ -428,9 +535,12 @@ async function xacNhanThanhToan(button) {
         });
         if (phuongThucThanhToanDangChon === 'PTTT001') {
             alert('Thanh toán tiền mặt thành công. Tiền thối lại: '
-                + dinhDangTien(data.tienThoi || 0));
+                + dinhDangTien(data.tienThoi || 0)
+                + '. Đang mở chi tiết hóa đơn để xem và in.');
+            window.location.assign(data.detailUrl || duongDanChiTietHoaDon(data.idHoaDon || idHoaDonHienTai));
+            return;
         }
-        window.location.reload();
+        sauThanhToanThanhCong(data);
     });
 }
 
@@ -460,6 +570,18 @@ function xoaHoaDonCho(event, idHoaDon) {
 
 document.addEventListener('DOMContentLoaded', () => {
     const search = document.getElementById('search-product');
+    search?.addEventListener('keydown', event => {
+        if (event.key !== 'Enter') return;
+        event.preventDefault();
+        if (!idHoaDonHienTai) {
+            hienThiLoi('Vui lòng tạo hoặc chọn hóa đơn trước khi quét sản phẩm.');
+            return;
+        }
+        const keyword = search.value.trim();
+        if (!keyword) return;
+        timSanPham(keyword).catch(error => hienThiLoi(error.message));
+        search.value = '';
+    });
     search?.addEventListener('input', () => {
         const category = document.querySelector('.chip.active')?.dataset.danhmuc || '';
         timSanPhamDebounced(search.value, category).catch(error => hienThiLoi(error.message));
@@ -487,6 +609,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     capNhatTienMat();
 
+    const createInvoiceButton = document.getElementById('create-invoice-button');
+    const addInvoiceTab = document.querySelector('.tab-add');
+    createInvoiceButton?.addEventListener('click', () => taoHoaDonMoi(createInvoiceButton));
+    addInvoiceTab?.addEventListener('click', () => taoHoaDonMoi(addInvoiceTab));
+
     document.addEventListener('click', event => {
         const customerPanel = document.getElementById('panel-khach-hang');
         if (customerPanel && !customerPanel.classList.contains('hidden') && !event.target.closest('.cust-box')) {
@@ -497,6 +624,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (add && add.dataset.disabled !== 'true') {
             const idSpct = add.closest('.p-card')?.dataset.spct;
             if (idSpct) themSanPham(idSpct, add);
+            return;
+        }
+        const remove = event.target.closest('.ci-remove');
+        if (remove) {
+            withLoading(remove, async () => {
+                await BanHangAPI.goi('xoaSanPham', {
+                    idHoaDon: idHoaDonHienTai,
+                    idChiTiet: remove.dataset.id
+                });
+                window.location.reload();
+            });
             return;
         }
         const plus = event.target.closest('.qty-plus');

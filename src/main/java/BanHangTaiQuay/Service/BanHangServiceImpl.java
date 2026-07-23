@@ -3,6 +3,8 @@ package BanHangTaiQuay.Service;
 import BanHangTaiQuay.Dao.BanHangDAO;
 import BanHangTaiQuay.Dao.BanHangDAOImpl;
 import QuanLySanPham.Entity.*;
+import QuanLySanPham.service.SanPhamChiTietService;
+import QuanLySanPham.service.impl.SanPhamChiTietServiceImpl;
 import QuanLySanPham.Utils.EntityManagerUtlis;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
@@ -14,16 +16,29 @@ import java.util.List;
 
 public class BanHangServiceImpl implements BanHangService {
 
-    private final BanHangDAO banHangDAO = new BanHangDAOImpl();
+    private final BanHangDAO banHangDAO;
     private final KhachHangService khachHangService = new KhachHangServiceImpl();
     private final VoucherService voucherService = new VoucherServiceImpl();
+    private final SanPhamChiTietService sanPhamChiTietService = new SanPhamChiTietServiceImpl();
+
+    public BanHangServiceImpl() {
+        this(new BanHangDAOImpl());
+    }
+
+    // Cho phép kiểm thử các quy tắc nghiệp vụ mà không cần mở kết nối database.
+    public BanHangServiceImpl(BanHangDAO banHangDAO) {
+        if (banHangDAO == null) {
+            throw new IllegalArgumentException("DAO bán hàng không được để trống.");
+        }
+        this.banHangDAO = banHangDAO;
+    }
 
     @Override
-    public HoaDon taoHoaDonMoi(int idNhanVien, int idCa) {
-        if (idNhanVien <= 0) {
+    public HoaDon taoHoaDonMoi(Integer idNhanVien, Integer idCa) {
+        if (idNhanVien == null || idNhanVien <= 0) {
             throw new IllegalArgumentException("Nhân viên không hợp lệ.");
         }
-        if (idCa <= 0) {
+        if (idCa == null || idCa <= 0) {
             throw new IllegalArgumentException("Ca làm việc không hợp lệ.");
         }
 
@@ -55,8 +70,19 @@ public class BanHangServiceImpl implements BanHangService {
     }
     @Override
     public void themSanPhamVaoGio(int idHoaDon, int idSanPhamChiTiet, int soLuong) {
+        validatePositiveId(idHoaDon, "ID hóa đơn");
+        validatePositiveId(idSanPhamChiTiet, "ID sản phẩm chi tiết");
         if (soLuong <= 0) {
             throw new IllegalArgumentException("Số lượng phải lớn hơn 0");
+        }
+
+        // Lấy sản phẩm qua module QuanLySanPham trước khi cập nhật giỏ hàng.
+        SanPhamChiTiet sanPhamTuModule = sanPhamChiTietService.timTheoId(idSanPhamChiTiet);
+        if (sanPhamTuModule == null) {
+            throw new IllegalArgumentException("Sản phẩm không tồn tại.");
+        }
+        if (sanPhamTuModule.getTrangThai() != null && sanPhamTuModule.getTrangThai() != 1) {
+            throw new IllegalStateException("Sản phẩm đã ngừng kinh doanh.");
         }
 
         EntityManager em = EntityManagerUtlis.getEntityManager();
@@ -66,7 +92,7 @@ public class BanHangServiceImpl implements BanHangService {
 
             SanPhamChiTiet spct = em.find(SanPhamChiTiet.class, idSanPhamChiTiet, LockModeType.PESSIMISTIC_WRITE);
 
-            if (spct == null) {
+            if (spct == null || Boolean.TRUE.equals(spct.getIsDeleted())) {
                 throw new IllegalArgumentException("Sản phẩm không tồn tại.");
             }
 
@@ -79,11 +105,11 @@ public class BanHangServiceImpl implements BanHangService {
                 throw new IllegalStateException("Không đủ tồn kho, còn lại: " + tonKho);
             }
 
-            HoaDon hd = findHoaDonWithDetails(em, idHoaDon);
+            HoaDon hd = findHoaDonWithDetails(em, idHoaDon, true);
             if (hd == null) {
                 throw new IllegalArgumentException("Hóa đơn không tồn tại.");
             }
-            if (hd.getTrangThai() == null || hd.getTrangThai() != 0) {
+            if (!laHoaDonDangChoThanhToan(hd)) {
                 throw new IllegalStateException("Chỉ được thêm sản phẩm vào hóa đơn đang chờ thanh toán.");
             }
 
@@ -95,6 +121,13 @@ public class BanHangServiceImpl implements BanHangService {
 
             if (chiTiet != null) {
                 int soLuongMoi = (chiTiet.getSoLuong() == null ? 0 : chiTiet.getSoLuong()) + soLuong;
+                if (chiTiet.getDonGia() == null) {
+                    if (spct.getGiaBan() == null) {
+                        throw new IllegalStateException("Sản phẩm chưa có giá bán.");
+                    }
+                    chiTiet.setDonGia(spct.getGiaBan());
+                    chiTiet.setGiaBanRa(spct.getGiaBan());
+                }
                 chiTiet.setSoLuong(soLuongMoi);
                 chiTiet.setTongTien(chiTiet.getDonGia().multiply(new BigDecimal(soLuongMoi)));
             } else {
@@ -128,16 +161,18 @@ public class BanHangServiceImpl implements BanHangService {
 
     @Override
     public void xoaSanPhamKhoiGio(int idHoaDon, int idChiTiet) {
+        validatePositiveId(idHoaDon, "ID hóa đơn");
+        validatePositiveId(idChiTiet, "ID chi tiết hóa đơn");
         EntityManager em = EntityManagerUtlis.getEntityManager();
         EntityTransaction transaction = em.getTransaction();
         try {
             transaction.begin();
 
-            HoaDon hd = findHoaDonWithDetails(em, idHoaDon);
+            HoaDon hd = findHoaDonWithDetails(em, idHoaDon, true);
             if (hd == null) {
                 throw new IllegalArgumentException("Hóa đơn không tồn tại.");
             }
-            if (hd.getTrangThai() == null || hd.getTrangThai() != 0) {
+            if (!laHoaDonDangChoThanhToan(hd)) {
                 throw new IllegalStateException("Chỉ được xóa sản phẩm khỏi hóa đơn đang chờ thanh toán.");
             }
             ChiTietHoaDon chiTiet = hd.getChiTietHoaDons().stream()
@@ -148,6 +183,9 @@ public class BanHangServiceImpl implements BanHangService {
                 throw new IllegalArgumentException("Chi tiết hóa đơn không hợp lệ.");
             }
 
+            if (chiTiet.getSanPhamChiTiet() == null || chiTiet.getSanPhamChiTiet().getId() == null) {
+                throw new IllegalStateException("Chi tiết hóa đơn chưa liên kết sản phẩm.");
+            }
             SanPhamChiTiet spct = em.find(
                     SanPhamChiTiet.class,
                     chiTiet.getSanPhamChiTiet().getId(),
@@ -176,6 +214,7 @@ public class BanHangServiceImpl implements BanHangService {
 
     @Override
     public void capNhatSoLuong(int idChiTiet, int soLuongMoi) {
+        validatePositiveId(idChiTiet, "ID chi tiết hóa đơn");
         if (soLuongMoi <= 0) {
             throw new IllegalArgumentException("Số lượng mới không được âm.");
         }
@@ -189,7 +228,10 @@ public class BanHangServiceImpl implements BanHangService {
             if (chiTietCu == null || chiTietCu.getHoaDon() == null) {
                 throw new IllegalArgumentException("Chi tiết hóa đơn không tồn tại.");
             }
-            HoaDon hd = findHoaDonWithDetails(em, chiTietCu.getHoaDon().getId());
+            HoaDon hd = findHoaDonWithDetails(em, chiTietCu.getHoaDon().getId(), true);
+            if (hd == null) {
+                throw new IllegalArgumentException("Hóa đơn không tồn tại.");
+            }
             ChiTietHoaDon chiTiet = hd.getChiTietHoaDons().stream()
                     .filter(ct -> Integer.valueOf(idChiTiet).equals(ct.getId()))
                     .findFirst()
@@ -198,7 +240,7 @@ public class BanHangServiceImpl implements BanHangService {
                 throw new IllegalArgumentException("Chi tiết hóa đơn không tồn tại.");
             }
 
-            if (hd.getTrangThai() == null || hd.getTrangThai() != 0) {
+            if (!laHoaDonDangChoThanhToan(hd)) {
                 throw new IllegalStateException("Chỉ được sửa hóa đơn đang chờ thanh toán.");
             }
 
@@ -206,6 +248,9 @@ public class BanHangServiceImpl implements BanHangService {
             int chenhLech = soLuongMoi - soLuongCu;
 
             if (chenhLech != 0) {
+                if (chiTiet.getSanPhamChiTiet() == null || chiTiet.getSanPhamChiTiet().getId() == null) {
+                    throw new IllegalStateException("Chi tiết hóa đơn chưa liên kết sản phẩm.");
+                }
                 SanPhamChiTiet spct = em.find(
                         SanPhamChiTiet.class,
                         chiTiet.getSanPhamChiTiet().getId(),
@@ -227,6 +272,9 @@ public class BanHangServiceImpl implements BanHangService {
                 }
 
                 chiTiet.setSoLuong(soLuongMoi);
+                if (chiTiet.getDonGia() == null) {
+                    throw new IllegalStateException("Chi tiết hóa đơn chưa có đơn giá.");
+                }
                 chiTiet.setTongTien(chiTiet.getDonGia().multiply(new BigDecimal(soLuongMoi)));
                 capNhatTongTien(hd);
             }
@@ -604,6 +652,12 @@ public class BanHangServiceImpl implements BanHangService {
         return normalized.isEmpty() ? null : normalized;
     }
 
+    private void validatePositiveId(int value, String fieldName) {
+        if (value <= 0) {
+            throw new IllegalArgumentException(fieldName + " phải lớn hơn 0.");
+        }
+    }
+
     private void ghiLichSu(HoaDon hd, String hanhDong, String ghiChu) {
         LichSuHoaDon ls = new LichSuHoaDon();
         ls.setHoaDon(hd);
@@ -636,7 +690,11 @@ public class BanHangServiceImpl implements BanHangService {
     }
 
     private HoaDon findHoaDonWithDetails(EntityManager em, int idHoaDon) {
-        return em.createQuery(
+        return findHoaDonWithDetails(em, idHoaDon, false);
+    }
+
+    private HoaDon findHoaDonWithDetails(EntityManager em, int idHoaDon, boolean lock) {
+        var query = em.createQuery(
                         "SELECT DISTINCT h FROM HoaDon h "
                                 + "LEFT JOIN FETCH h.chiTietHoaDons ct "
                                 + "LEFT JOIN FETCH ct.sanPhamChiTiet "
@@ -647,9 +705,20 @@ public class BanHangServiceImpl implements BanHangService {
                                 + "WHERE h.id = :idHoaDon",
                         HoaDon.class)
                 .setParameter("idHoaDon", idHoaDon)
-                .setMaxResults(1)
-                .getResultStream()
+                .setMaxResults(1);
+        if (lock) {
+            query.setLockMode(LockModeType.PESSIMISTIC_WRITE);
+        }
+        return query.getResultStream()
                 .findFirst()
                 .orElse(null);
+    }
+
+    // Dữ liệu cũ dùng 1, POS mới tạo đơn dùng 0 cho trạng thái đang chờ.
+    private boolean laHoaDonDangChoThanhToan(HoaDon hoaDon) {
+        if (hoaDon == null || hoaDon.getTrangThai() == null) {
+            return false;
+        }
+        return hoaDon.getTrangThai() == 0 || hoaDon.getTrangThai() == 1;
     }
 }

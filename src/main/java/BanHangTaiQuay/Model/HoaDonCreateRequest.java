@@ -1,22 +1,22 @@
 package BanHangTaiQuay.Model;
 
 public class HoaDonCreateRequest {
-    private int idNhanVien;
-    private int idCa;
+    private Integer idNhanVien;
+    private Integer idCa;
 
-    public int getIdNhanVien() {
+    public Integer getIdNhanVien() {
         return idNhanVien;
     }
 
-    public void setIdNhanVien(int idNhanVien) {
+    public void setIdNhanVien(Integer idNhanVien) {
         this.idNhanVien = idNhanVien;
     }
 
-    public int getIdCa() {
+    public Integer getIdCa() {
         return idCa;
     }
 
-    public void setIdCa(int idCa) {
+    public void setIdCa(Integer idCa) {
         this.idCa = idCa;
     }
 }

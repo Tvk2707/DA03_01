@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public interface BanHangService {
-    HoaDon taoHoaDonMoi(int idNhanVien, int idCa);
+    HoaDon taoHoaDonMoi(Integer idNhanVien, Integer idCa);
     void themSanPhamVaoGio(int idHoaDon, int idSanPhamChiTiet, int soLuong);
     void xoaSanPhamKhoiGio(int idHoaDon, int idChiTiet);
     void capNhatSoLuong(int idChiTiet, int soLuongMoi);

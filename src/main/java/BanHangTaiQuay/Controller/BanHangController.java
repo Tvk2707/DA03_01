@@ -6,7 +6,10 @@ import BanHangTaiQuay.Service.CaLamViecService;
 import BanHangTaiQuay.Service.CaLamViecServiceImpl;
 import BanHangTaiQuay.Model.ApVoucherRequest;
 import BanHangTaiQuay.Model.ChonKhachHangRequest;
+import BanHangTaiQuay.Model.CapNhatSoLuongRequest;
+import BanHangTaiQuay.Model.HoaDonCreateRequest;
 import BanHangTaiQuay.Model.ThanhToanRequest;
+import BanHangTaiQuay.Model.ThemSanPhamRequest;
 import QuanLySanPham.Entity.HoaDon;
 import QuanLySanPham.Entity.KhachHang;
 import QuanLySanPham.Entity.NhanVien;
@@ -15,6 +18,8 @@ import QuanLySanPham.service.SanPhamChiTietService;
 import QuanLySanPham.service.LookupService;
 import QuanLySanPham.service.impl.LookupServiceImpl;
 import QuanLySanPham.service.impl.SanPhamChiTietServiceImpl;
+import QuanLyNhanVien.service.NhanVienService;
+import QuanLyNhanVien.service.impl.NhanVienServiceImpl;
 import com.google.gson.Gson;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -29,6 +34,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @WebServlet({
@@ -53,6 +59,7 @@ public class BanHangController extends HttpServlet {
     private final CaLamViecService caLamViecService = new CaLamViecServiceImpl();
     private final SanPhamChiTietService sanPhamChiTietService = new SanPhamChiTietServiceImpl();
     private final LookupService lookupService = new LookupServiceImpl();
+    private final NhanVienService nhanVienService = new NhanVienServiceImpl();
     private final Gson gson = new Gson();
 
     @Override
@@ -66,15 +73,20 @@ public class BanHangController extends HttpServlet {
             List<HoaDon> danhSachHoaDonCho = idNhanVien == null
                     ? List.of()
                     : banHangService.layDanhSachHoaDonCho(idNhanVien);
-            req.setAttribute("danhSachHoaDonCho", danhSachHoaDonCho);
-
             Integer idHoaDonDangTao = parseOptionalPositiveInt(req.getParameter("id"));
+            if (idHoaDonDangTao == null && idNhanVien == null) {
+                idHoaDonDangTao = parseSessionInvoiceId(session);
+            }
             if (idHoaDonDangTao == null && !danhSachHoaDonCho.isEmpty()) {
                 idHoaDonDangTao = danhSachHoaDonCho.get(0).getId();
             }
             HoaDon hoaDonDangTao = idHoaDonDangTao == null
                     ? null
                     : banHangService.layHoaDonTheoId(idHoaDonDangTao);
+            if (idNhanVien == null && hoaDonDangTao != null && hoaDonDangTao.getTrangThai() == 0) {
+                danhSachHoaDonCho = List.of(hoaDonDangTao);
+            }
+            req.setAttribute("danhSachHoaDonCho", danhSachHoaDonCho);
             req.setAttribute("idHoaDonDangTao", idHoaDonDangTao);
             req.setAttribute("hoaDonDangTao", hoaDonDangTao);
             req.setAttribute("danhSachSanPham",
@@ -149,20 +161,20 @@ public class BanHangController extends HttpServlet {
         try {
             HttpSession session = req.getSession();
             Integer idNhanVien = layIdNhanVien(session);
-            Integer idCa = idNhanVien == null ? null : caLamViecService.layCaDangMo(idNhanVien);
+            Integer idCa = idNhanVien == null ? null : caLamViecService.layHoacTaoCaDangMo(idNhanVien);
 
-            if (idNhanVien == null) {
-                throw new IllegalStateException("Nhân viên chưa đăng nhập.");
+            if (idCa != null) {
+                session.setAttribute("idCa", idCa);
             }
-            if (idCa == null) {
-                session.removeAttribute("idCa");
-                throw new IllegalStateException("Chưa có ca làm việc đang mở cho nhân viên này.");
-            }
-            session.setAttribute("idCa", idCa);
 
-            HoaDon hoaDon = banHangService.taoHoaDonMoi(idNhanVien, idCa);
+            HoaDonCreateRequest request = new HoaDonCreateRequest();
+            request.setIdNhanVien(idNhanVien);
+            request.setIdCa(idCa);
+            HoaDon hoaDon = banHangService.taoHoaDonMoi(request.getIdNhanVien(), request.getIdCa());
+            session.setAttribute("idHoaDonDangTao", hoaDon.getId());
             response.put("success", true);
-            //response.put("hoaDon", hoaDon);
+            response.put("idHoaDon", hoaDon.getId());
+            response.put("maHoaDon", hoaDon.getMaHoaDon());
         } catch (IllegalStateException | IllegalArgumentException e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.put("success", false);
@@ -174,9 +186,21 @@ public class BanHangController extends HttpServlet {
     }
 
     private void timSanPham(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String keyword = req.getParameter("keyword");
+        String keyword = optionalText(req, "keyword");
         Integer idDanhMuc = parseOptionalPositiveInt(req.getParameter("idDanhMuc"));
-        List<SanPhamChiTiet> sanPhams = sanPhamChiTietService.timKiemTheoDanhMuc(keyword, idDanhMuc, 1);
+        List<SanPhamChiTiet> sanPhams = sanPhamChiTietService
+                .timKiemTheoDanhMuc(null, idDanhMuc, 1);
+
+        if (keyword != null) {
+            String tuKhoa = keyword.toLowerCase(Locale.ROOT);
+            sanPhams = sanPhams.stream()
+                    .filter(item -> (item.getMa() != null
+                            && item.getMa().toLowerCase(Locale.ROOT).contains(tuKhoa))
+                            || (item.getSanPham() != null
+                            && item.getSanPham().getTenSanPham() != null
+                            && item.getSanPham().getTenSanPham().toLowerCase(Locale.ROOT).contains(tuKhoa)))
+                    .toList();
+        }
         req.setAttribute("sanPhams", sanPhams);
         req.getRequestDispatcher("/Admin/BanHangTaiQuay/_product-grid.jsp").forward(req, resp);
     }
@@ -188,7 +212,7 @@ public class BanHangController extends HttpServlet {
 
         try {
             String ma = requireText(req, "ma");
-            SanPhamChiTiet sanPham = sanPhamChiTietService.timKiemTheoDanhMuc(ma, null, 1).stream()
+            SanPhamChiTiet sanPham = sanPhamChiTietService.timKiem(null, ma, null, null, 1).stream()
                     .filter(item -> item.getMa() != null && item.getMa().equalsIgnoreCase(ma))
                     .findFirst()
                     .orElse(null);
@@ -216,17 +240,23 @@ public class BanHangController extends HttpServlet {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            int idHoaDon = Integer.parseInt(req.getParameter("idHoaDon"));
-            int idSanPhamChiTiet = Integer.parseInt(req.getParameter("idSanPhamChiTiet"));
-            int soLuong = Integer.parseInt(req.getParameter("soLuong"));
+            ThemSanPhamRequest request = new ThemSanPhamRequest();
+            request.setIdHoaDon(requirePositiveInt(req, "idHoaDon"));
+            request.setIdSanPhamChiTiet(requirePositiveInt(req, "idSanPhamChiTiet"));
+            request.setSoLuong(requirePositiveInt(req, "soLuong"));
 
-            banHangService.themSanPhamVaoGio(idHoaDon, idSanPhamChiTiet, soLuong);
+            banHangService.themSanPhamVaoGio(
+                    request.getIdHoaDon(), request.getIdSanPhamChiTiet(), request.getSoLuong());
             response.put("success", true);
         } catch (IllegalStateException | IllegalArgumentException e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.put("success", false);
             response.put("message", e.getMessage());
-
+        } catch (RuntimeException e) {
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.put("success", false);
+            response.put("message", thongBaoLoi(e));
+            getServletContext().log("Lỗi khi thêm sản phẩm vào hóa đơn POS.", e);
         }
 
         out.print(gson.toJson(response));
@@ -240,8 +270,8 @@ public class BanHangController extends HttpServlet {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            int idHoaDon = Integer.parseInt(req.getParameter("idHoaDon"));
-            int idChiTiet = Integer.parseInt(req.getParameter("idChiTiet"));
+            int idHoaDon = requirePositiveInt(req, "idHoaDon");
+            int idChiTiet = requirePositiveInt(req, "idChiTiet");
 
             banHangService.xoaSanPhamKhoiGio(idHoaDon, idChiTiet);
             response.put("success", true);
@@ -263,10 +293,11 @@ public class BanHangController extends HttpServlet {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            int idChiTiet = Integer.parseInt(req.getParameter("idChiTiet"));
-            int soLuongMoi = Integer.parseInt(req.getParameter("soLuongMoi"));
+            CapNhatSoLuongRequest request = new CapNhatSoLuongRequest();
+            request.setIdChiTiet(requirePositiveInt(req, "idChiTiet"));
+            request.setSoLuongMoi(requirePositiveInt(req, "soLuongMoi"));
 
-            banHangService.capNhatSoLuong(idChiTiet, soLuongMoi);
+            banHangService.capNhatSoLuong(request.getIdChiTiet(), request.getSoLuongMoi());
             response.put("success", true);
         } catch (IllegalStateException | IllegalArgumentException e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -345,6 +376,7 @@ public class BanHangController extends HttpServlet {
             }
 
             banHangService.huyHoaDon(idHoaDon, lyDo);
+            xoaSessionInvoiceNeuTrung(req.getSession(), idHoaDon);
             response.put("success", true);
         } catch (IllegalStateException | IllegalArgumentException e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -366,11 +398,14 @@ public class BanHangController extends HttpServlet {
             HttpSession session = req.getSession();
             Integer idNhanVien = layIdNhanVien(session);
 
+            List<HoaDon> hoaDons;
             if (idNhanVien == null) {
-                throw new IllegalStateException("Nhân viên chưa đăng nhập.");
+                Integer idHoaDon = parseSessionInvoiceId(session);
+                HoaDon hoaDon = idHoaDon == null ? null : banHangService.layHoaDonTheoId(idHoaDon);
+                hoaDons = hoaDon == null || hoaDon.getTrangThai() != 0 ? List.of() : List.of(hoaDon);
+            } else {
+                hoaDons = banHangService.layDanhSachHoaDonCho(idNhanVien);
             }
-
-            List<HoaDon> hoaDons = banHangService.layDanhSachHoaDonCho(idNhanVien);
             response.put("success", true);
             response.put("hoaDons", hoaDons.stream().map(this::toHoaDonData).toList());
 
@@ -454,9 +489,16 @@ public class BanHangController extends HttpServlet {
                     request.getSoTienKhachDua(),
                     request.getMaGiaoDich(),
                     request.getGhiChu());
+            xoaSessionInvoiceNeuTrung(req.getSession(), request.getIdHoaDon());
 
             response.put("success", true);
             response.put("message", "Thanh toán thành công.");
+            response.put("idHoaDon", request.getIdHoaDon());
+            response.put("maHoaDon", hoaDon.getMaHoaDon());
+            response.put("detailUrl", req.getContextPath()
+                    + "/admin/hoa-don/chi-tiet?id=" + request.getIdHoaDon());
+            response.put("printUrl", req.getContextPath()
+                    + "/admin/hoa-don/chi-tiet?id=" + request.getIdHoaDon() + "&print=1");
             response.put("soTienThanhToan", tongTien);
             if ("PTTT001".equals(request.getMaPttt())) {
                 response.put("tienThoi", request.getSoTienKhachDua()
@@ -486,7 +528,37 @@ public class BanHangController extends HttpServlet {
                 return id;
             }
         }
+
+        // POS không yêu cầu đăng nhập: lấy nhân viên đang hoạt động từ database.
+        NhanVien nhanVienMacDinh = nhanVienService.layTatCa().stream()
+                .filter(nhanVien -> nhanVien != null
+                        && nhanVien.getId() != null
+                        && nhanVien.getId() > 0
+                        && (nhanVien.getTrangThai() == null || nhanVien.getTrangThai() == 1))
+                .findFirst()
+                .orElse(null);
+        if (nhanVienMacDinh != null) {
+            session.setAttribute("idNhanVien", nhanVienMacDinh.getId());
+            session.setAttribute("nhanVienDangNhap", nhanVienMacDinh);
+            return nhanVienMacDinh.getId();
+        }
         return null;
+    }
+
+    private Integer parseSessionInvoiceId(HttpSession session) {
+        Object value = session.getAttribute("idHoaDonDangTao");
+        if (value instanceof Number) {
+            int id = ((Number) value).intValue();
+            return id > 0 ? id : null;
+        }
+        return parseOptionalPositiveInt(value == null ? null : value.toString());
+    }
+
+    private void xoaSessionInvoiceNeuTrung(HttpSession session, int idHoaDon) {
+        Integer idHoaDonDangTao = parseSessionInvoiceId(session);
+        if (idHoaDonDangTao != null && idHoaDonDangTao == idHoaDon) {
+            session.removeAttribute("idHoaDonDangTao");
+        }
     }
 
     private int requirePositiveInt(HttpServletRequest req, String parameterName) {
@@ -528,6 +600,16 @@ public class BanHangController extends HttpServlet {
             return null;
         }
         return value.trim();
+    }
+
+    private String thongBaoLoi(RuntimeException exception) {
+        Throwable cause = exception;
+        while (cause.getCause() != null && cause.getCause() != cause) {
+            cause = cause.getCause();
+        }
+        return cause.getMessage() == null || cause.getMessage().isBlank()
+                ? "Không thể thêm sản phẩm. Vui lòng kiểm tra log Tomcat."
+                : cause.getMessage();
     }
 
     private BigDecimal requirePositiveAmount(HttpServletRequest req, String parameterName) {

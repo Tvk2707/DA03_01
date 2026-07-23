@@ -82,6 +82,19 @@
         .pos-btn-outline { background: #fff; border-color: var(--brown-500); color: var(--brown-700); }
         .pos-btn-solid { background: var(--brown-600); color: #fff; }
         .pos-btn-solid:hover { background: var(--brown-700); }
+        .pos-btn:disabled { opacity: .55; cursor: not-allowed; }
+        .pos-order-meta {
+            display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+            margin: 14px 28px 0; padding: 12px 14px; background: var(--panel);
+            border: 1px solid var(--line); border-radius: 10px; color: var(--text-sub); font-size: 12px;
+        }
+        .pos-order-meta__item { display: inline-flex; align-items: center; gap: 6px; }
+        .pos-order-meta__item strong { color: var(--text-main); }
+        .pos-order-meta__item--type strong { color: var(--brown-700); }
+        .pos-order-meta__status {
+            margin-left: auto; padding: 5px 9px; border-radius: 999px;
+            background: var(--amber-bg); color: var(--amber-text); font-weight: 700;
+        }
 
         .badge-limit {
             display: inline-flex; align-items: center; gap: 6px;
@@ -179,7 +192,8 @@
         .cart-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; margin-bottom: 14px; padding-right: 2px;}
         .cart-empty { text-align: center; font-size: 13px; color: var(--text-sub); padding: 40px 0; }
         .cart-item { display: flex; gap: 10px; align-items: flex-start; }
-        .ci-thumb { width: 44px; height: 44px; border-radius: 8px; background: var(--gold-bg); flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--brown-600);}
+        .ci-thumb { width: 44px; height: 44px; border-radius: 8px; background: var(--gold-bg); flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--brown-600); overflow: hidden;}
+        .ci-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; display: block; }
         .ci-body { flex: 1; min-width: 0; }
         .ci-name { font-size: 12.5px; font-weight: 600; margin-bottom: 2px; }
         .ci-variant { font-size: 11px; color: var(--text-sub); margin-bottom: 6px;}
@@ -188,7 +202,9 @@
         .qty-stepper span { font-size: 12px; font-weight: 600; width: 14px; text-align: center;}
         .qty-stepper button { border: none; background: none; color: var(--brown-700); font-weight: 700; cursor: pointer; font-size: 13px; width: 16px;}
         .ci-price { font-size: 12.5px; font-weight: 700; color: var(--brown-700);}
-        .ci-remove { color: var(--red-text); font-size: 11px; cursor: pointer; margin-left: 8px;}
+        .ci-actions { display: flex; align-items: center; gap: 8px; }
+        .ci-remove { border: 0; background: transparent; color: var(--red-text); font-size: 11px; cursor: pointer; padding: 3px 5px; }
+        .ci-remove:hover { background: var(--red-bg); border-radius: 5px; }
 
         .voucher-row { display: flex; gap: 8px; margin-bottom: 14px; }
         #input-voucher { flex: 1; border: 1px dashed var(--brown-500); border-radius: 9px; padding: 9px 12px; font-size: 12.5px; color: var(--text-sub); background: var(--bg); outline: none;}
@@ -329,9 +345,23 @@
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h4v4H4zM16 4h4v4h-4zM4 16h4v4H4z"/><path d="M14 14h2v2h-2zM18 14h2v6h-4v-2M14 18h2v2h-2z"/></svg>
                                 Quét QR
                             </button>
-                            <button class="pos-btn pos-btn-solid">
+                            <c:if test="${not empty idHoaDonDangTao}">
+                                <a class="pos-btn pos-btn-outline" target="_blank" rel="noopener"
+                                   href="${pageContext.request.contextPath}/admin/hoa-don/chi-tiet?id=${idHoaDonDangTao}"
+                                   title="Xem chi tiết hóa đơn">
+                                    <i class="fas fa-eye" aria-hidden="true"></i>
+                                    Chi tiết
+                                </a>
+                                <a class="pos-btn pos-btn-outline" target="_blank" rel="noopener"
+                                   href="${pageContext.request.contextPath}/admin/hoa-don/chi-tiet?id=${idHoaDonDangTao}&amp;print=1"
+                                   title="In hóa đơn">
+                                    <i class="fas fa-print" aria-hidden="true"></i>
+                                    In hóa đơn
+                                </a>
+                            </c:if>
+                            <button type="button" class="pos-btn pos-btn-solid" id="create-invoice-button">
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-                                Tạo đơn hàng
+                                Tạo hóa đơn
                             </button>
                         </div>
                     </div>
@@ -349,6 +379,20 @@
                     </c:forEach>
                     <div class="tab-add">+</div>
                 </div>
+
+                <c:if test="${not empty hoaDonDangTao}">
+                    <div class="pos-order-meta" aria-label="Thông tin đơn đang xử lý">
+                        <span class="pos-order-meta__item">
+                            <span>Hóa đơn:</span>
+                            <strong>${hoaDonDangTao.maHoaDon}</strong>
+                        </span>
+                        <span class="pos-order-meta__item pos-order-meta__item--type">
+                            <span>Loại đơn:</span>
+                            <strong>Tại quầy</strong>
+                        </span>
+                        <span class="pos-order-meta__status">Chờ thanh toán</span>
+                    </div>
+                </c:if>
 
                 <div class="pos-layout">
                     <!-- LEFT: product search / grid -->
@@ -386,7 +430,8 @@
                                     </div>
                                     <div class="p-bottom">
                                         <div class="p-price"><fmt:formatNumber value="${sp.giaBan}" type="currency" currencySymbol="đ"/></div>
-                                        <div class="p-add" ${sp.soLuongTon <= 0 ? 'data-disabled="true"' : ''}>+</div>
+                                        <div class="p-add" ${empty idHoaDonDangTao || hoaDonDangTao.trangThai == 3 || hoaDonDangTao.trangThai == 5 || sp.soLuongTon <= 0 ? 'data-disabled="true"' : ''}
+                                             title="${empty idHoaDonDangTao ? 'Tạo hóa đơn trước' : 'Thêm vào giỏ'}">+</div>
                                     </div>
                                 </div>
                             </c:forEach>
@@ -442,7 +487,17 @@
                             <c:forEach var="ct" items="${hoaDonDangTao.chiTietHoaDons}">
                                 <div class="cart-item" data-id="${ct.id}">
                                     <div class="ci-thumb">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="6.5" cy="12" r="3.2"/><circle cx="17.5" cy="12" r="3.2"/><path d="M9.7 12h4.6"/></svg>
+                                        <c:choose>
+                                            <c:when test="${not empty ct.sanPhamChiTiet.hinhAnh && ct.sanPhamChiTiet.hinhAnh != 'null'}">
+                                                <img src="${pageContext.request.contextPath}/FE/Admin/hinh_anh_san_pham/${ct.sanPhamChiTiet.hinhAnh}"
+                                                     alt="${ct.sanPhamChiTiet.sanPham.tenSanPham}"
+                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"/>
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" style="display:none"><circle cx="6.5" cy="12" r="3.2"/><circle cx="17.5" cy="12" r="3.2"/><path d="M9.7 12h4.6"/></svg>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="6.5" cy="12" r="3.2"/><circle cx="17.5" cy="12" r="3.2"/><path d="M9.7 12h4.6"/></svg>
+                                            </c:otherwise>
+                                        </c:choose>
                                     </div>
                                     <div class="ci-body">
                                         <div class="ci-name">${ct.sanPhamChiTiet.sanPham.tenSanPham}</div>
@@ -453,7 +508,11 @@
                                                 <span>${ct.soLuong}</span>
                                                 <button class="qty-plus" data-id="${ct.id}" data-qty="${ct.soLuong}" data-spct="${ct.sanPhamChiTiet.id}">+</button>
                                             </div>
-                                            <div class="ci-price"><fmt:formatNumber value="${ct.tongTien}" type="currency" currencySymbol="đ"/></div>
+                                            <div class="ci-actions">
+                                                <div class="ci-price"><fmt:formatNumber value="${ct.tongTien}" type="currency" currencySymbol="đ"/></div>
+                                                <button type="button" class="ci-remove" data-id="${ct.id}"
+                                                        title="Xóa sản phẩm" aria-label="Xóa sản phẩm">Xóa</button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -494,7 +553,7 @@
                             <p id="cash-payment-error" class="cash-payment-error" hidden></p>
                         </div>
 
-                        <button class="checkout-btn">
+                        <button type="button" class="checkout-btn" ${empty idHoaDonDangTao ? 'disabled' : ''}>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M20 7L9 18l-5-5"/></svg>
                             Thanh toán · <span id="checkout-total"><fmt:formatNumber value="${tongThanhToanHienTai}" type="currency" currencySymbol="đ"/></span>
                         </button>
@@ -514,7 +573,7 @@
         <p class="transfer-modal__hint">
             Khách quét mã QR, hoàn tất chuyển khoản rồi nhập mã giao dịch ngân hàng để xác nhận.
         </p>
-        <div class="transfer-modal__qr">
+        <div class="transfer-modal__qr" id="transfer-payment-qr-wrap">
             <img id="transfer-payment-qr" alt="Mã QR thanh toán hóa đơn">
         </div>
         <label class="transfer-modal__field" for="transfer-transaction-code">
@@ -556,112 +615,6 @@
 <form id="form-tao-hoa-don" action="ban-hang" method="post" class="hidden">
     <input type="hidden" name="action" value="taoHoaDon" />
 </form>
-
-<script>
-    // Bắt sự kiện trên ô input tìm kiếm/quét mã
-    const searchInput = document.getElementById('search-product');
-
-    if (searchInput) {
-        searchInput.addEventListener('keypress', function(e) {
-            // Máy quét QR luôn tự động gửi phím Enter sau khi quét xong
-            if (e.key === 'Enter') {
-                e.preventDefault(); // Ngăn chặn form tự reload mặc định nếu có
-
-                const keyword = this.value.trim();
-                if (keyword) {
-                    // Lấy ID hóa đơn đang được chọn (active) để biết thêm sản phẩm vào đơn nào
-                    const activeTab = document.querySelector('.tab.active');
-                    const idHoaDon = activeTab ? activeTab.getAttribute('data-hoadon') : '';
-
-                    if (!idHoaDon) {
-                        alert("Vui lòng chọn hoặc tạo một hóa đơn trước khi quét sản phẩm!");
-                        return;
-                    }
-
-                    // Gọi hàm xử lý thêm sản phẩm
-                    timSanPham(keyword);
-
-                    // Xóa trắng ô input để sẵn sàng quét mã tiếp theo
-                    this.value = '';
-                }
-            }
-        });
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const btnTaoDon = document.querySelector('.pos-btn-solid');
-        const btnTabAdd = document.querySelector('.tab-add');
-
-        // Dùng trực tiếp JSP EL để lấy đường dẫn chuẩn xác 100%
-        const apiUrl = '${pageContext.request.contextPath}/ban-hang/tao-hoa-don';
-
-        function xuLyTaoDonHang(e) {
-            e.preventDefault();
-
-            console.log("Đang gọi API tới URL: ", apiUrl); // In ra để kiểm tra
-
-            // --- Sửa trong hàm xuLyTaoDonHang (Tạo đơn) hoặc xoaHoaDonCho (Xóa đơn) ---
-            fetch(apiUrl, { method: 'POST' })
-                .then(async (response) => {
-                    // LUÔN LUÔN đọc dữ liệu JSON trả về (kể cả khi bị lỗi 400)
-                    const data = await response.json();
-
-                    if (!response.ok || !data.success) {
-                        // Ném câu thông báo thật từ Backend ra (data.message)
-                        throw new Error(data.message || 'Lỗi HTTP: ' + response.status);
-                    }
-
-                    // Nếu thành công thì tải lại trang
-                    window.location.reload();
-                })
-                .catch(error => {
-                    console.error('Chi tiết lỗi:', error);
-                    // Hiển thị trực tiếp lý do bị lỗi lên màn hình (Ví dụ: "Hóa đơn không tồn tại")
-                    alert('Lỗi hệ thống: ' + error.message);
-                });
-        }
-
-        // Gắn sự kiện
-        if (btnTaoDon) btnTaoDon.addEventListener('click', xuLyTaoDonHang);
-        if (btnTabAdd) btnTabAdd.addEventListener('click', xuLyTaoDonHang);
-    });
-
-    // Hàm xử lý xóa/hủy hóa đơn chờ
-    function xoaHoaDonCho(event, idHoaDon) {
-        // 1. Ngăn chặn sự kiện click lan truyền ra thẻ tab bên ngoài
-        event.stopPropagation();
-
-        // 2. Hỏi xác nhận
-        if (confirm('Bạn có chắc chắn muốn hủy Đơn #' + idHoaDon + ' không?')) {
-
-            // 3. Tạo dữ liệu gửi đi (khớp với req.getParameter trong Java)
-            const params = new URLSearchParams();
-            params.append('idHoaDon', idHoaDon);
-            params.append('lyDo', 'Thu ngân hủy đơn chờ trên màn hình POS'); // Truyền lý do mặc định
-
-            const apiHuyDonUrl = '${pageContext.request.contextPath}/ban-hang/huy-hoa-don?' + params.toString();
-
-            fetch(apiHuyDonUrl, { method: 'POST' })
-                .then(async (response) => {
-                    if (!response.ok) {
-                        throw new Error('Lỗi HTTP: ' + response.status);
-                    }
-                    const data = await response.json();
-
-                    if (data.success) {
-                        // Tải lại trang để làm mới giao diện
-                        window.location.reload();
-                    } else {
-                        alert('Hủy đơn thất bại: ' + (data.message || 'Lỗi từ hệ thống'));
-                    }
-                })
-                .catch(error => {
-                    console.error('Lỗi khi hủy đơn:', error);
-                    alert('Không thể kết nối đến máy chủ! Kiểm tra Console để xem chi tiết.');
-                });
-        }
-    }
-</script>
 
 <script>
     window.idHoaDonHienTai = ${empty idHoaDonDangTao ? 'null' : idHoaDonDangTao};
