@@ -11,6 +11,7 @@ import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.LockModeType;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -455,6 +456,15 @@ public class BanHangServiceImpl implements BanHangService {
         }
         return kh;
         */
+    }
+
+    @Override
+    public KhachHang traCuuHoacTaoKhachHang(String soDienThoai, String hoTen,
+                                             String email, LocalDate ngaySinh,
+                                             Integer gioiTinh, String matKhau) {
+        return khachHangService.traCuuHoacTaoKhachHang(
+                soDienThoai, hoTen, email, ngaySinh, gioiTinh, matKhau
+        );
     }
 
     @Override

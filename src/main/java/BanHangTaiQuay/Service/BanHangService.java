@@ -4,6 +4,7 @@ import QuanLySanPham.Entity.HoaDon;
 import QuanLySanPham.Entity.KhachHang;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -16,6 +17,9 @@ public interface BanHangService {
     KhachHang traCuuKhachHang(String soDienThoai);
     List<KhachHang> timKhachHangTheoTuKhoa(String tuKhoa);
     KhachHang traCuuHoacTaoKhachHang(String soDienThoai, String hoTen);
+    KhachHang traCuuHoacTaoKhachHang(String soDienThoai, String hoTen,
+                                      String email, LocalDate ngaySinh,
+                                      Integer gioiTinh, String matKhau);
     void ganKhachHang(int idHoaDon, int idKhachHang);
     void chonKhachLe(int idHoaDon);
     void apDungVoucher(int idHoaDon, String maVoucher);

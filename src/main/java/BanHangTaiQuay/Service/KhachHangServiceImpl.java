@@ -3,6 +3,7 @@ package BanHangTaiQuay.Service;
 import QuanLyKhachHang.repository.KhachHangRepository;
 import QuanLySanPham.Entity.KhachHang;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public class KhachHangServiceImpl implements KhachHangService {
@@ -27,12 +28,17 @@ public class KhachHangServiceImpl implements KhachHangService {
 
     @Override
     public KhachHang traCuuHoacTaoKhachHang(String soDienThoai, String hoTen) {
-        if (soDienThoai == null || soDienThoai.trim().isEmpty()) {
-            throw new IllegalArgumentException("Số điện thoại khách hàng không được để trống.");
-        }
+        return traCuuHoacTaoKhachHang(soDienThoai, hoTen, null, null, null, null);
+    }
 
-        String soDienThoaiDaChuanHoa = soDienThoai.trim();
-        KhachHang khachHang = khachHangRepository.findBySoDienThoai(soDienThoaiDaChuanHoa);
+    @Override
+    public KhachHang traCuuHoacTaoKhachHang(String soDienThoai, String hoTen,
+                                             String email, LocalDate ngaySinh,
+                                             Integer gioiTinh, String matKhau) {
+        String soDienThoaiDaChuanHoa = lamSach(soDienThoai);
+        KhachHang khachHang = soDienThoaiDaChuanHoa == null
+                ? null
+                : khachHangRepository.findBySoDienThoai(soDienThoaiDaChuanHoa);
         if (khachHang != null) {
             return khachHang;
         }
@@ -40,9 +46,11 @@ public class KhachHangServiceImpl implements KhachHangService {
         KhachHang khachHangMoi = new KhachHang();
         khachHangMoi.setMaKhachHang(sinhMaKhachHangTiepTheo());
         khachHangMoi.setSoDienThoai(soDienThoaiDaChuanHoa);
-        khachHangMoi.setHoTen(hoTen == null || hoTen.trim().isEmpty()
-                ? "Khách lẻ"
-                : hoTen.trim());
+        khachHangMoi.setHoTen(lamSach(hoTen) == null ? "Khách lẻ" : lamSach(hoTen));
+        khachHangMoi.setEmail(lamSach(email));
+        khachHangMoi.setMatKhau(lamSach(matKhau));
+        khachHangMoi.setNgaySinh(ngaySinh);
+        khachHangMoi.setGioiTinh(gioiTinh);
         khachHangMoi.setTrangThai(1);
         khachHangRepository.add(khachHangMoi);
 
@@ -50,6 +58,10 @@ public class KhachHangServiceImpl implements KhachHangService {
             throw new IllegalStateException("Không thể lưu khách hàng vào database.");
         }
         return khachHangMoi;
+    }
+
+    private String lamSach(String value) {
+        return value == null || value.trim().isEmpty() ? null : value.trim();
     }
 
     private String sinhMaKhachHangTiepTheo() {

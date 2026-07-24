@@ -34,7 +34,6 @@
             <p>Chọn phương thức thanh toán:</p>
             <button class="payment-method-btn" data-method="TM" onclick="xacNhanThanhToan(currentInvoiceId, 'TM', parseCurrency(document.getElementById('customerCashInput').value))">Tiền mặt</button>
             <button class="payment-method-btn" data-method="CK" onclick="xacNhanThanhToan(currentInvoiceId, 'CK', parseCurrency(document.getElementById('customerCashInput').value))">Chuyển khoản</button>
-            <button class="payment-method-btn" data-method="THE" onclick="xacNhanThanhToan(currentInvoiceId, 'THE', parseCurrency(document.getElementById('customerCashInput').value))">Thẻ</button>
         </div>
 
         <div class="form-actions">

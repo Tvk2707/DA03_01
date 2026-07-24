@@ -179,7 +179,7 @@
         #panel-khach-hang {
             position: absolute; top: 100%; right: 0; width: 280px; background: #fff;
             border: 1px solid var(--line); border-radius: 10px; padding: 12px;
-            box-shadow: 0 6px 20px rgba(0,0,0,.1); z-index: 10;
+            box-shadow: 0 6px 20px rgba(0,0,0,.1); z-index: 10; max-height: 440px; overflow-y: auto;
         }
         .customer-panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; color: var(--text-main); font-size: 12px; font-weight: 700; }
         .customer-panel-close { border: 0; background: transparent; color: var(--text-sub); font-size: 20px; line-height: 1; cursor: pointer; padding: 0 2px; }
@@ -188,7 +188,12 @@
         .customer-tab { border: 0; border-radius: 7px; padding: 8px 6px; background: transparent; color: var(--text-sub); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
         .customer-tab.active { background: #fff; color: var(--brown-700); box-shadow: 0 1px 4px rgba(0,0,0,.08); }
         .customer-view.hidden { display: none; }
-        #panel-khach-hang input { width: 100%; border: 1px solid var(--line); background: var(--bg); padding: 8px 10px; border-radius: 8px; font-size: 13px; }
+        #panel-khach-hang input, #panel-khach-hang select { width: 100%; border: 1px solid var(--line); background: var(--bg); padding: 8px 10px; border-radius: 8px; font: inherit; font-size: 13px; color: var(--text-main); }
+        #panel-khach-hang input:focus, #panel-khach-hang select:focus { outline: 2px solid rgba(147, 107, 63, .18); border-color: var(--brown-600); }
+        #panel-khach-hang input::placeholder { color: var(--text-sub); }
+        .customer-search-action { width: 100%; margin-top: 8px; border: 0; border-radius: 8px; padding: 8px 10px; background: var(--brown-600); color: #fff; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+        .customer-search-action:hover { background: var(--brown-700); }
+        .customer-search-action:disabled { opacity: .65; cursor: wait; }
         .customer-results { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; max-height: 150px; overflow-y: auto; }
         .customer-result { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; width: 100%; border: 1px solid var(--line); border-radius: 8px; background: #fff; padding: 8px 10px; text-align: left; cursor: pointer; }
         .customer-result:hover { border-color: var(--brown-600); background: var(--gold-bg); }
@@ -480,14 +485,23 @@
                                 </div>
                                 <div class="customer-view" data-customer-view="select" role="tabpanel">
                                     <input type="search" id="input-tim-khach-hang" placeholder="Nhập tên hoặc số điện thoại khách hàng" autocomplete="off" />
+                                    <button type="button" id="btn-tim-khach-hang" class="customer-search-action">Tìm kiếm</button>
                                     <div id="danh-sach-khach-hang" class="customer-results" aria-live="polite"></div>
                                     <p id="customer-search-empty" class="customer-search-empty hidden">Không tìm thấy khách hàng.</p>
                                 </div>
                                 <div class="customer-view hidden" data-customer-view="add" role="tabpanel">
                                     <div class="customer-add-form">
-                                        <input type="text" id="input-sdt-moi" placeholder="Số điện thoại" />
-                                        <input type="text" id="input-ten-moi" placeholder="Họ tên" />
-                                        <button type="button" class="btn-them-khach">Thêm &amp; chọn</button>
+                                        <input type="text" id="input-sdt-moi" placeholder="Số điện thoại (không bắt buộc)" autocomplete="tel" />
+                                        <input type="text" id="input-ten-moi" placeholder="Họ tên (không bắt buộc)" autocomplete="name" />
+                                        <input type="email" id="input-email-moi" placeholder="Email (không bắt buộc)" autocomplete="email" />
+                                        <input type="date" id="input-ngay-sinh-moi" aria-label="Ngày sinh (không bắt buộc)" />
+                                        <select id="input-gioi-tinh-moi" aria-label="Giới tính (không bắt buộc)">
+                                            <option value="">Giới tính (không bắt buộc)</option>
+                                            <option value="1">Nam</option>
+                                            <option value="0">Nữ</option>
+                                        </select>
+                                        <input type="password" id="input-mat-khau-moi" placeholder="Mật khẩu (không bắt buộc)" autocomplete="new-password" />
+                                        <button type="button" class="btn-them-khach">Thêm khách hàng</button>
                                     </div>
                                 </div>
                             </div>
@@ -552,7 +566,6 @@
 
                         <div class="pay-methods">
                             <div class="pay-chip active" data-ma="PTTT001">Tiền mặt</div>
-                            <div class="pay-chip" data-ma="PTTT004">Thẻ ngân hàng</div>
                             <div class="pay-chip" data-ma="PTTT002">Chuyển khoản</div>
                         </div>
 
@@ -623,7 +636,7 @@
     window.idHoaDonHienTai = ${empty idHoaDonDangTao ? 'null' : idHoaDonDangTao};
 </script>
 <script src="https://unpkg.com/html5-qrcode"></script>
-<script src="${pageContext.request.contextPath}/assets/js/banhang.js?v=20260723-bulk-fast"></script>
+<script src="${pageContext.request.contextPath}/assets/js/banhang.js?v=20260724-customer-fields"></script>
 
 </body>
 </html>

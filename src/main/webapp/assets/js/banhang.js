@@ -280,6 +280,17 @@ const timKhachHangDebounced = debounce(async (tuKhoa) => {
     }
 }, 400);
 
+function timKhachHangBangNut(button) {
+    const input = document.getElementById('input-tim-khach-hang');
+    const tuKhoa = input?.value.trim() || '';
+    if (tuKhoa.length < 2) {
+        hienThiLoi('Vui lòng nhập ít nhất 2 ký tự hoặc số điện thoại để tìm khách hàng.');
+        input?.focus();
+        return;
+    }
+    withLoading(button, () => timKhachHangDebounced(tuKhoa));
+}
+
 async function chonKhachHangTheoKetQua(button) {
     if (!idHoaDonHienTai) {
         hienThiLoi('Vui long tao hoac chon hoa don truoc khi chon khach hang.');
@@ -319,14 +330,22 @@ async function themVaChonKhachHang(button) {
         hienThiLoi('Vui lòng tạo hoặc chọn hóa đơn trước khi chọn khách hàng.');
         return;
     }
-    const soDienThoai = document.getElementById('input-sdt-moi')?.value.trim();
-    const hoTen = document.getElementById('input-ten-moi')?.value.trim();
-    if (!soDienThoai || !hoTen) {
-        hienThiLoi('Vui long nhap ho ten va so dien thoai.');
-        return;
-    }
+    const giaTri = id => document.getElementById(id)?.value.trim() || '';
+    const soDienThoai = giaTri('input-sdt-moi');
+    const hoTen = giaTri('input-ten-moi');
+    const email = giaTri('input-email-moi');
+    const ngaySinh = giaTri('input-ngay-sinh-moi');
+    const gioiTinh = giaTri('input-gioi-tinh-moi');
+    const matKhau = giaTri('input-mat-khau-moi');
     await withLoading(button, async () => {
-        const data = await BanHangAPI.goi('traCuuHoacTaoKhachHang', { soDienThoai, hoTen });
+        const data = await BanHangAPI.goi('traCuuHoacTaoKhachHang', {
+            soDienThoai,
+            hoTen,
+            email,
+            ngaySinh,
+            gioiTinh,
+            matKhau
+        });
         await BanHangAPI.goi('ganKhachHang', {
             idHoaDon: idHoaDonHienTai,
             idKhachHang: data.khachHang.id
@@ -502,7 +521,7 @@ function parseSoTien(value) {
 }
 
 function laThanhToanChuyenKhoan() {
-    return ['PTTT002', 'PTTT004', 'CK', 'THE'].includes(phuongThucThanhToanDangChon);
+    return ['PTTT002', 'CK'].includes(phuongThucThanhToanDangChon);
 }
 
 function moModalThanhToanChuyenKhoan() {
@@ -516,23 +535,14 @@ function moModalThanhToanChuyenKhoan() {
         throw new BanHangError('Không tải được màn hình thanh toán chuyển khoản.');
     }
 
-    const laThe = phuongThucThanhToanDangChon === 'PTTT004';
     const amount = layTongTienHienThi();
-    if (laThe) {
-        title.textContent = 'Thanh toán thẻ ngân hàng';
-        hint.textContent = 'Khách thanh toán trên máy POS, sau đó nhập mã giao dịch để xác nhận.';
-        qrWrap.hidden = true;
-        transactionInput.placeholder = 'Ví dụ: POS260722123456';
-        document.getElementById('transfer-payment-note').value = 'Thanh toán bằng thẻ ngân hàng';
-    } else {
-        title.textContent = 'Thanh toán chuyển khoản / QR';
-        hint.textContent = 'Khách quét mã QR, hoàn tất chuyển khoản rồi nhập mã giao dịch ngân hàng để xác nhận.';
-        const qrContent = `THANH TOAN HOA DON ${idHoaDonHienTai} SO TIEN ${amount} VND`;
-        qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(qrContent)}`;
-        qrWrap.hidden = false;
-        transactionInput.placeholder = 'Ví dụ: FT260722123456';
-        document.getElementById('transfer-payment-note').value = 'Thanh toán bằng QR/chuyển khoản';
-    }
+    title.textContent = 'Thanh toán chuyển khoản / QR';
+    hint.textContent = 'Khách quét mã QR, hoàn tất chuyển khoản rồi nhập mã giao dịch ngân hàng để xác nhận.';
+    const qrContent = `THANH TOAN HOA DON ${idHoaDonHienTai} SO TIEN ${amount} VND`;
+    qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(qrContent)}`;
+    qrWrap.hidden = false;
+    transactionInput.placeholder = 'Ví dụ: FT260722123456';
+    document.getElementById('transfer-payment-note').value = 'Thanh toán bằng QR/chuyển khoản';
     transactionInput.value = '';
     modal.classList.remove('hidden');
     modal.setAttribute('aria-hidden', 'false');
@@ -645,6 +655,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const customerSearch = document.getElementById('input-tim-khach-hang');
     customerSearch?.addEventListener('input', () => {
         timKhachHangDebounced(customerSearch.value.trim()).catch(error => hienThiLoi(error.message));
+    });
+    const customerSearchButton = document.getElementById('btn-tim-khach-hang');
+    customerSearchButton?.addEventListener('click', () => timKhachHangBangNut(customerSearchButton));
+    customerSearch?.addEventListener('keydown', event => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            timKhachHangBangNut(customerSearchButton);
+        }
     });
 
     document.querySelectorAll('[data-customer-tab]').forEach(tab => {

@@ -33,6 +33,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -328,12 +330,28 @@ public class BanHangController extends HttpServlet {
 
         try {
             ChonKhachHangRequest request = new ChonKhachHangRequest();
-            request.setSoDienThoai(requireText(req, "soDienThoai"));
+            request.setSoDienThoai(createIfNotFound
+                    ? optionalText(req, "soDienThoai")
+                    : requireText(req, "soDienThoai"));
             request.setHoTen(createIfNotFound ? optionalText(req, "hoTen") : null);
 
-            KhachHang khachHang = createIfNotFound
-                    ? banHangService.traCuuHoacTaoKhachHang(request.getSoDienThoai(), request.getHoTen())
-                    : banHangService.traCuuKhachHang(request.getSoDienThoai());
+            KhachHang khachHang;
+            if (createIfNotFound) {
+                request.setEmail(optionalText(req, "email"));
+                request.setMatKhau(optionalText(req, "matKhau"));
+                request.setNgaySinh(optionalText(req, "ngaySinh"));
+                request.setGioiTinh(parseOptionalGioiTinh(optionalText(req, "gioiTinh")));
+                khachHang = banHangService.traCuuHoacTaoKhachHang(
+                        request.getSoDienThoai(),
+                        request.getHoTen(),
+                        request.getEmail(),
+                        parseOptionalNgaySinh(request.getNgaySinh()),
+                        request.getGioiTinh(),
+                        request.getMatKhau()
+                );
+            } else {
+                khachHang = banHangService.traCuuKhachHang(request.getSoDienThoai());
+            }
             response.put("success", true);
             response.put("khachHang", khachHang == null ? null : toKhachHangData(khachHang));
             response.put("found", khachHang != null);
@@ -666,6 +684,32 @@ public class BanHangController extends HttpServlet {
         }
     }
 
+    private Integer parseOptionalGioiTinh(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            int parsed = Integer.parseInt(value.trim());
+            if (parsed != 0 && parsed != 1) {
+                throw new IllegalArgumentException("Giới tính không hợp lệ.");
+            }
+            return parsed;
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Giới tính không hợp lệ.");
+        }
+    }
+
+    private LocalDate parseOptionalNgaySinh(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            return LocalDate.parse(value.trim());
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("Ngày sinh không hợp lệ.");
+        }
+    }
+
     private String requireText(HttpServletRequest req, String parameterName) {
         String value = req.getParameter(parameterName);
         if (value == null || value.trim().isEmpty()) {
@@ -708,9 +752,12 @@ public class BanHangController extends HttpServlet {
     private Map<String, Object> toKhachHangData(KhachHang khachHang) {
         Map<String, Object> data = new HashMap<>();
         data.put("id", khachHang.getId());
+        data.put("maKhachHang", khachHang.getMaKhachHang());
         data.put("hoTen", khachHang.getHoTen());
         data.put("soDienThoai", khachHang.getSoDienThoai());
         data.put("email", khachHang.getEmail());
+        data.put("ngaySinh", khachHang.getNgaySinh());
+        data.put("gioiTinh", khachHang.getGioiTinh());
         return data;
     }
 
