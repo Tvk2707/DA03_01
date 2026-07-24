@@ -135,7 +135,7 @@
                 </a>
             </li>
             <li class="bottom-item">
-                <a href="#" class="bottom-link logout">
+                <a href="${pageContext.request.contextPath}/Logout" class="bottom-link logout">
                     <i class="fas fa-sign-out-alt"></i>
                     <span>Đăng xuất</span>
                 </a>
