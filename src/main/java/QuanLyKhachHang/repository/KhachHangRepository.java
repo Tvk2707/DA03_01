@@ -57,6 +57,7 @@ public class KhachHangRepository {
                             "SELECT kh FROM KhachHang kh "
                                     + "WHERE (kh.trangThai IS NULL OR kh.trangThai = 1) "
                                     + "AND (LOWER(kh.hoTen) LIKE LOWER(:tuKhoa) "
+                                    + "OR LOWER(kh.maKhachHang) LIKE LOWER(:tuKhoa) "
                                     + "OR kh.soDienThoai LIKE :tuKhoa) "
                                     + "ORDER BY kh.hoTen ASC",
                             KhachHang.class)

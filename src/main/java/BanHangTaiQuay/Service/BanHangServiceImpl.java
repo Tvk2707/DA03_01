@@ -692,6 +692,19 @@ public class BanHangServiceImpl implements BanHangService {
             tt.setTrangThai(1);
             em.persist(tt);
 
+            // Đồng bộ lịch sử để màn hình chi tiết hóa đơn hiển thị giao dịch POS.
+            LichSuThanhToan lichSuThanhToan = new LichSuThanhToan();
+            lichSuThanhToan.setHoaDon(hd);
+            lichSuThanhToan.setSoTien(tongTien);
+            lichSuThanhToan.setPhuongThucThanhToan(
+                    normalizeText(pttt.getTenPttt()) == null
+                            ? maPtttChuanHoa
+                            : pttt.getTenPttt().trim());
+            lichSuThanhToan.setTrangThaiThanhToan(1);
+            lichSuThanhToan.setNgayThanhToan(LocalDateTime.now());
+            lichSuThanhToan.setGhiChu(ghiChuThanhToan);
+            em.persist(lichSuThanhToan);
+
             // Cập nhật trạng thái hóa đơn
             hd.setTrangThai(3);
             hd.setNgayThanhToan(LocalDateTime.now());

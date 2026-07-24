@@ -168,6 +168,14 @@
         .cust-name { font-size: 13px; font-weight: 600; }
         .cust-sub { font-size: 11px; color: var(--text-sub); }
         .cust-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+        .cust-icon-btn, .cust-add-btn {
+            border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px;
+            background: #fff; color: var(--brown-700); font: inherit; font-size: 12px;
+            font-weight: 600; cursor: pointer;
+        }
+        .cust-icon-btn:hover, .cust-add-btn:hover { border-color: var(--brown-600); background: var(--gold-bg); }
+        .cust-add-btn { background: var(--brown-600); border-color: var(--brown-600); color: #fff; }
+        .cust-add-btn:hover { background: var(--brown-700); border-color: var(--brown-700); }
         .link-btn {
             padding: 0; border: 0; background: transparent; color: var(--brown-600);
             font: inherit; font-size: 12px; font-weight: 600; cursor: pointer;
@@ -175,7 +183,6 @@
         .link-btn:hover { color: var(--brown-900); text-decoration: underline; }
         .link-btn--guest { color: var(--green-text); }
         .customer-current { color: var(--green-text); font-size: 12px; font-weight: 700; }
-
         #panel-khach-hang {
             position: absolute; top: 100%; right: 0; width: 280px; background: #fff;
             border: 1px solid var(--line); border-radius: 10px; padding: 12px;
@@ -184,10 +191,6 @@
         .customer-panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; color: var(--text-main); font-size: 12px; font-weight: 700; }
         .customer-panel-close { border: 0; background: transparent; color: var(--text-sub); font-size: 20px; line-height: 1; cursor: pointer; padding: 0 2px; }
         .customer-panel-close:hover { color: var(--red-text); }
-        .customer-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 3px; margin-bottom: 10px; background: var(--gold-bg); border-radius: 9px; }
-        .customer-tab { border: 0; border-radius: 7px; padding: 8px 6px; background: transparent; color: var(--text-sub); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
-        .customer-tab.active { background: #fff; color: var(--brown-700); box-shadow: 0 1px 4px rgba(0,0,0,.08); }
-        .customer-view.hidden { display: none; }
         #panel-khach-hang input, #panel-khach-hang select { width: 100%; border: 1px solid var(--line); background: var(--bg); padding: 8px 10px; border-radius: 8px; font: inherit; font-size: 13px; color: var(--text-main); }
         #panel-khach-hang input:focus, #panel-khach-hang select:focus { outline: 2px solid rgba(147, 107, 63, .18); border-color: var(--brown-600); }
         #panel-khach-hang input::placeholder { color: var(--text-sub); }
@@ -201,8 +204,20 @@
         .customer-result-phone { color: var(--text-sub); font-size: 11px; }
         .customer-results:empty { display: none; }
         .customer-search-empty { margin: 10px 0 0; color: var(--text-sub); font-size: 11px; text-align: center; }
-        .customer-add-form { display: flex; flex-direction: column; gap: 8px; }
-        .btn-them-khach { background: var(--brown-600); color: #fff; border: none; border-radius: 8px; padding: 8px; font-size: 12px; font-weight: 600; cursor: pointer; }
+        .customer-create-modal .transfer-modal__dialog { width: min(440px, 100%); }
+        .customer-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .customer-form-field { display: flex; flex-direction: column; gap: 5px; color: var(--text-main); font-size: 12px; font-weight: 600; }
+        .customer-form-field input, .customer-form-field select {
+            width: 100%; box-sizing: border-box; border: 1px solid var(--line); border-radius: 8px;
+            background: var(--bg); color: var(--text-main); padding: 9px 10px; font: inherit; font-size: 13px;
+        }
+        .customer-form-field input:focus, .customer-form-field select:focus { outline: 2px solid rgba(147, 107, 63, .18); border-color: var(--brown-600); }
+        .customer-form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+        .customer-form-actions button { border: 0; border-radius: 8px; padding: 10px 14px; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+        .customer-form-cancel { background: #f3f0ed; color: var(--text-main); }
+        .customer-form-submit { background: var(--brown-600); color: #fff; }
+        .customer-form-submit:hover { background: var(--brown-700); }
+        @media (max-width: 520px) { .customer-form-grid { grid-template-columns: 1fr; } }
 
 
         .cart-title { font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--text-sub); margin-bottom: 10px;}
@@ -289,6 +304,14 @@
         .transfer-modal__actions button { border: 0; border-radius: 8px; padding: 10px 14px; cursor: pointer; font-weight: 600; }
         .transfer-modal__cancel { background: #f3f0ed; color: var(--text-main); }
         .transfer-modal__confirm { background: var(--brown-600); color: #fff; }
+        .payment-success { text-align: center; padding: 10px 0 18px; }
+        .payment-success__icon {
+            width: 46px; height: 46px; margin: 0 auto 10px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--green-bg); color: var(--green-text); font-size: 24px; font-weight: 700;
+        }
+        .payment-success__message { margin: 0 0 6px; color: var(--text-main); font-size: 14px; font-weight: 700; }
+        .payment-success__hint { margin: 0; color: var(--text-sub); font-size: 12px; }
 
         .product-qr-modal {
             position: fixed;
@@ -464,46 +487,59 @@
                                 </div>
                             </div>
                             <div class="cust-actions">
-                                <button type="button" class="link-btn" data-customer-open aria-expanded="false">${not empty kh ? 'Đổi khách' : 'Chọn khách'}</button>
-                                <c:choose>
-                                    <c:when test="${not empty kh}">
-                                        <button type="button" class="link-btn link-btn--guest" data-customer-guest>Khách lẻ</button>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <span class="customer-current">Khách lẻ</span>
-                                    </c:otherwise>
-                                </c:choose>
+                                <button type="button" class="cust-icon-btn" data-customer-open aria-expanded="false">${not empty kh ? 'Đổi khách' : 'Tìm khách'}</button>
+                                <button type="button" class="cust-add-btn" data-customer-create-open>Thêm mới</button>
                             </div>
                             <div id="panel-khach-hang" class="hidden">
                                 <div class="customer-panel-head">
-                                    <span>Khách hàng</span>
+                                    <span>Chọn khách hàng</span>
                                     <button type="button" class="customer-panel-close" data-customer-close aria-label="Đóng">&times;</button>
                                 </div>
-                                <div class="customer-tabs" role="tablist" aria-label="Thao tác khách hàng">
-                                    <button type="button" class="customer-tab active" data-customer-tab="select" role="tab">Chọn khách</button>
-                                    <button type="button" class="customer-tab" data-customer-tab="add" role="tab">Thêm khách</button>
-                                </div>
-                                <div class="customer-view" data-customer-view="select" role="tabpanel">
-                                    <input type="search" id="input-tim-khach-hang" placeholder="Nhập tên hoặc số điện thoại khách hàng" autocomplete="off" />
-                                    <button type="button" id="btn-tim-khach-hang" class="customer-search-action">Tìm kiếm</button>
-                                    <div id="danh-sach-khach-hang" class="customer-results" aria-live="polite"></div>
-                                    <p id="customer-search-empty" class="customer-search-empty hidden">Không tìm thấy khách hàng.</p>
-                                </div>
-                                <div class="customer-view hidden" data-customer-view="add" role="tabpanel">
-                                    <div class="customer-add-form">
-                                        <input type="text" id="input-sdt-moi" placeholder="Số điện thoại (không bắt buộc)" autocomplete="tel" />
-                                        <input type="text" id="input-ten-moi" placeholder="Họ tên (không bắt buộc)" autocomplete="name" />
-                                        <input type="email" id="input-email-moi" placeholder="Email (không bắt buộc)" autocomplete="email" />
-                                        <input type="date" id="input-ngay-sinh-moi" aria-label="Ngày sinh (không bắt buộc)" />
-                                        <select id="input-gioi-tinh-moi" aria-label="Giới tính (không bắt buộc)">
-                                            <option value="">Giới tính (không bắt buộc)</option>
-                                            <option value="1">Nam</option>
-                                            <option value="0">Nữ</option>
-                                        </select>
-                                        <input type="password" id="input-mat-khau-moi" placeholder="Mật khẩu (không bắt buộc)" autocomplete="new-password" />
-                                        <button type="button" class="btn-them-khach">Thêm khách hàng</button>
+                                <input type="search" id="input-tim-khach-hang" placeholder="Số điện thoại, mã hoặc tên khách hàng" autocomplete="off" />
+                                <button type="button" id="btn-tim-khach-hang" class="customer-search-action">Tìm kiếm</button>
+                                <div id="danh-sach-khach-hang" class="customer-results" aria-live="polite"></div>
+                                <p id="customer-search-empty" class="customer-search-empty hidden">Không tìm thấy khách hàng.</p>
+                            </div>
+                            <div id="customer-create-modal" class="transfer-modal customer-create-modal hidden" aria-hidden="true">
+                                <section class="transfer-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="customer-create-title">
+                                    <div class="transfer-modal__header">
+                                        <h2 id="customer-create-title">Thêm khách hàng</h2>
+                                        <button type="button" class="transfer-modal__close" id="close-customer-create" aria-label="Đóng">&times;</button>
                                     </div>
-                                </div>
+                                    <p class="transfer-modal__hint">Nhập thông tin để tạo khách hàng mới.</p>
+                                    <form id="customer-create-form" autocomplete="off">
+                                        <div class="customer-form-grid">
+                                            <label class="customer-form-field">
+                                                <span>Họ tên</span>
+                                                <input type="text" id="input-ten-moi" required autocomplete="name" />
+                                            </label>
+                                            <label class="customer-form-field">
+                                                <span>Email</span>
+                                                <input type="email" id="input-email-moi" autocomplete="email" />
+                                            </label>
+                                            <label class="customer-form-field">
+                                                <span>Số điện thoại</span>
+                                                <input type="tel" id="input-sdt-moi" required autocomplete="tel" />
+                                            </label>
+                                            <label class="customer-form-field">
+                                                <span>Ngày sinh</span>
+                                                <input type="date" id="input-ngay-sinh-moi" />
+                                            </label>
+                                            <label class="customer-form-field">
+                                                <span>Giới tính</span>
+                                                <select id="input-gioi-tinh-moi">
+                                                    <option value="">Không chọn</option>
+                                                    <option value="1">Nam</option>
+                                                    <option value="0">Nữ</option>
+                                                </select>
+                                            </label>
+                                        </div>
+                                        <div class="customer-form-actions">
+                                            <button type="button" class="customer-form-cancel" id="cancel-customer-create">Hủy</button>
+                                            <button type="submit" class="customer-form-submit">Thêm khách hàng</button>
+                                        </div>
+                                    </form>
+                                </section>
                             </div>
                         </div>
 
@@ -603,6 +639,23 @@
         <div class="transfer-modal__actions">
             <button type="button" class="transfer-modal__cancel" id="cancel-transfer-payment">Để sau</button>
             <button type="button" class="transfer-modal__confirm" id="confirm-transfer-payment">Đã nhận tiền</button>
+        </div>
+    </section>
+</div>
+
+<div id="payment-success-modal" class="transfer-modal hidden" aria-hidden="true">
+    <section class="transfer-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="payment-success-title">
+        <div class="transfer-modal__header">
+            <h2 id="payment-success-title">Thanh toán thành công</h2>
+        </div>
+        <div class="payment-success">
+            <div class="payment-success__icon" aria-hidden="true">✓</div>
+            <p class="payment-success__message" id="payment-success-message">Hóa đơn đã được thanh toán thành công.</p>
+            <p class="payment-success__hint">Bạn có muốn in hóa đơn cho khách không?</p>
+        </div>
+        <div class="transfer-modal__actions">
+            <button type="button" class="transfer-modal__cancel" id="skip-print-invoice">Không in</button>
+            <button type="button" class="transfer-modal__confirm" id="print-paid-invoice">In hóa đơn</button>
         </div>
     </section>
 </div>

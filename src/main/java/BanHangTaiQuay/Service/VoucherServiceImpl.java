@@ -67,11 +67,14 @@ public class VoucherServiceImpl implements VoucherService {
             hoaDon.setPhieuGiamGia(voucher);
             for (ChiTietHoaDon chiTiet : chiTietHoaDons) {
                 BigDecimal donGiaGoc = chiTiet.getDonGia();
-                BigDecimal giaSauGiam = tinhGiaSauGiam(donGiaGoc, voucher);
+                if (donGiaGoc == null) {
+                    throw new IllegalStateException("Chi tiết hóa đơn chưa có đơn giá.");
+                }
                 int soLuong = chiTiet.getSoLuong() == null ? 0 : chiTiet.getSoLuong();
 
-                chiTiet.setGiaBanRa(giaSauGiam);
-                chiTiet.setTongTien(giaSauGiam.multiply(BigDecimal.valueOf(soLuong)));
+                // Giữ nguyên giá sản phẩm; voucher chỉ tác động lên tổng hóa đơn.
+                chiTiet.setGiaBanRa(donGiaGoc);
+                chiTiet.setTongTien(donGiaGoc.multiply(BigDecimal.valueOf(soLuong)));
             }
 
             voucher.setSoLuongDaDung((voucher.getSoLuongDaDung() == null ? 0 : voucher.getSoLuongDaDung()) + 1);
@@ -221,9 +224,13 @@ public class VoucherServiceImpl implements VoucherService {
         }
     }
 
-    private BigDecimal tinhGiaSauGiam(BigDecimal donGiaGoc, PhieuGiamGia voucher) {
+    static BigDecimal tinhGiaSauGiam(BigDecimal donGiaGoc, PhieuGiamGia voucher) {
         if (donGiaGoc == null) {
             throw new IllegalStateException("Chi tiết hóa đơn chưa có đơn giá.");
+        }
+
+        if (voucher == null) {
+            return donGiaGoc;
         }
 
         String loaiGiamGia = Normalizer.normalize(voucher.getLoaiGiamGia(), Normalizer.Form.NFD)
@@ -249,13 +256,19 @@ public class VoucherServiceImpl implements VoucherService {
     }
 
     private void capNhatTongTien(HoaDon hoaDon) {
-        BigDecimal tongTien = BigDecimal.ZERO;
+        BigDecimal tongTienGoc = BigDecimal.ZERO;
         for (ChiTietHoaDon chiTiet : hoaDon.getChiTietHoaDons()) {
-            if (chiTiet.getTongTien() != null) {
-                tongTien = tongTien.add(chiTiet.getTongTien());
+            if (chiTiet.getDonGia() != null) {
+                int soLuong = chiTiet.getSoLuong() == null ? 0 : chiTiet.getSoLuong();
+                BigDecimal tongTienChiTiet = chiTiet.getDonGia().multiply(BigDecimal.valueOf(soLuong));
+                chiTiet.setGiaBanRa(chiTiet.getDonGia());
+                chiTiet.setTongTien(tongTienChiTiet);
+                tongTienGoc = tongTienGoc.add(tongTienChiTiet);
+            } else if (chiTiet.getTongTien() != null) {
+                tongTienGoc = tongTienGoc.add(chiTiet.getTongTien());
             }
         }
-        hoaDon.setTongTienThanhToan(tongTien);
+        hoaDon.setTongTienThanhToan(tinhGiaSauGiam(tongTienGoc, hoaDon.getPhieuGiamGia()));
     }
 
     private void ghiLichSu(EntityManager em, HoaDon hoaDon, String hanhDong, String ghiChu) {

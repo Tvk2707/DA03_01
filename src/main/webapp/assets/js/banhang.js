@@ -2,6 +2,7 @@
 
 let idHoaDonHienTai = window.idHoaDonHienTai || null;
 let phuongThucThanhToanDangChon = 'PTTT001';
+let duongDanInHoaDonSauThanhToan = null;
 
 function posContextPath() {
     const marker = '/ban-hang';
@@ -239,22 +240,6 @@ function hienThiKetQuaKhachHang(khachHangs) {
     });
 }
 
-function chuyenTabKhachHang(view) {
-    document.querySelectorAll('[data-customer-tab]').forEach(tab => {
-        const active = tab.dataset.customerTab === view;
-        tab.classList.toggle('active', active);
-        tab.setAttribute('aria-selected', String(active));
-    });
-    document.querySelectorAll('[data-customer-view]').forEach(panel => {
-        panel.classList.toggle('hidden', panel.dataset.customerView !== view);
-    });
-    if (view === 'select') {
-        document.getElementById('input-tim-khach-hang')?.focus();
-    } else {
-        document.getElementById('input-sdt-moi')?.focus();
-    }
-}
-
 const timKhachHangDebounced = debounce(async (tuKhoa) => {
     const danhSach = document.getElementById('danh-sach-khach-hang');
     const emptyMessage = document.getElementById('customer-search-empty');
@@ -321,7 +306,7 @@ const traCuuKhachHangDebounced = debounce(async (soDienThoai) => {
     } else {
         const input = document.getElementById('input-sdt-moi');
         if (input) input.value = soDienThoai;
-        chuyenTabKhachHang('add');
+        moModalThemKhachHang();
     }
 }, 400);
 
@@ -336,15 +321,13 @@ async function themVaChonKhachHang(button) {
     const email = giaTri('input-email-moi');
     const ngaySinh = giaTri('input-ngay-sinh-moi');
     const gioiTinh = giaTri('input-gioi-tinh-moi');
-    const matKhau = giaTri('input-mat-khau-moi');
     await withLoading(button, async () => {
         const data = await BanHangAPI.goi('traCuuHoacTaoKhachHang', {
             soDienThoai,
             hoTen,
             email,
             ngaySinh,
-            gioiTinh,
-            matKhau
+            gioiTinh
         });
         await BanHangAPI.goi('ganKhachHang', {
             idHoaDon: idHoaDonHienTai,
@@ -477,12 +460,32 @@ function moPanelKhachHang() {
 
     panel.classList.remove('hidden');
     trigger?.setAttribute('aria-expanded', 'true');
-    chuyenTabKhachHang('select');
+    document.getElementById('input-tim-khach-hang')?.focus();
 }
 
 function dongPanelKhachHang() {
     document.getElementById('panel-khach-hang')?.classList.add('hidden');
     document.querySelector('[data-customer-open]')?.setAttribute('aria-expanded', 'false');
+}
+
+function moModalThemKhachHang() {
+    if (!idHoaDonHienTai) {
+        hienThiLoi('Vui lòng tạo hoặc chọn hóa đơn trước khi thêm khách hàng.');
+        return;
+    }
+    dongPanelKhachHang();
+    const modal = document.getElementById('customer-create-modal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    modal.setAttribute('aria-hidden', 'false');
+    document.getElementById('input-ten-moi')?.focus();
+}
+
+function dongModalThemKhachHang() {
+    const modal = document.getElementById('customer-create-modal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.setAttribute('aria-hidden', 'true');
 }
 
 async function apVoucher(button) {
@@ -577,9 +580,31 @@ async function xacNhanThanhToanChuyenKhoan(button) {
 }
 
 function sauThanhToanThanhCong(data) {
-    const detailUrl = data.detailUrl || duongDanChiTietHoaDon(data.idHoaDon || idHoaDonHienTai);
-    alert('Thanh toán thành công. Đang mở chi tiết hóa đơn để xem và in.');
-    window.location.assign(detailUrl);
+    const modal = document.getElementById('payment-success-modal');
+    if (!modal) {
+        window.location.assign(data.detailUrl || duongDanChiTietHoaDon(data.idHoaDon || idHoaDonHienTai));
+        return;
+    }
+
+    const idHoaDonDaThanhToan = data.idHoaDon || idHoaDonHienTai;
+    duongDanInHoaDonSauThanhToan = data.printUrl
+        || duongDanChiTietHoaDon(idHoaDonDaThanhToan, true);
+    const message = document.getElementById('payment-success-message');
+    if (message && data.maHoaDon) {
+        message.textContent = `Hóa đơn ${data.maHoaDon} đã được thanh toán thành công.`;
+    }
+    dongModalThanhToanChuyenKhoan();
+    modal.classList.remove('hidden');
+    modal.setAttribute('aria-hidden', 'false');
+    document.getElementById('print-paid-invoice')?.focus();
+}
+
+function quayLaiBanHangSauThanhToan() {
+    window.location.assign(`${posContextPath()}/ban-hang`);
+}
+
+function inHoaDonSauThanhToan() {
+    window.location.assign(duongDanInHoaDonSauThanhToan || `${posContextPath()}/ban-hang`);
 }
 
 async function xacNhanThanhToan(button) {
@@ -622,7 +647,7 @@ async function taoHoaDonMoi(button) {
 
 function xoaHoaDonCho(event, idHoaDon) {
     event.stopPropagation();
-    if (!confirm('Ban co chac muon huy hoa don #' + idHoaDon + ' khong?')) return;
+    if (!confirm('Bạn có chắc muốn hủy hóa đơn này không?')) return;
     const params = new URLSearchParams({
         idHoaDon,
         lyDo: 'Thu ngan huy don cho tren man hinh POS'
@@ -663,10 +688,6 @@ document.addEventListener('DOMContentLoaded', () => {
             event.preventDefault();
             timKhachHangBangNut(customerSearchButton);
         }
-    });
-
-    document.querySelectorAll('[data-customer-tab]').forEach(tab => {
-        tab.addEventListener('click', () => chuyenTabKhachHang(tab.dataset.customerTab));
     });
 
     const voucherInput = document.getElementById('input-voucher');
@@ -749,13 +770,12 @@ document.addEventListener('DOMContentLoaded', () => {
             moPanelKhachHang();
             return;
         }
-        if (event.target.closest('[data-customer-close]')) {
-            dongPanelKhachHang();
+        if (event.target.closest('[data-customer-create-open]')) {
+            moModalThemKhachHang();
             return;
         }
-        const addCustomer = event.target.closest('.btn-them-khach');
-        if (addCustomer) {
-            themVaChonKhachHang(addCustomer);
+        if (event.target.closest('[data-customer-close]')) {
+            dongPanelKhachHang();
             return;
         }
         const voucher = event.target.closest('.voucher-apply');
@@ -788,10 +808,30 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('transfer-payment-modal')?.addEventListener('click', event => {
         if (event.target.id === 'transfer-payment-modal') dongModalThanhToanChuyenKhoan();
     });
-
+    document.getElementById('skip-print-invoice')?.addEventListener('click', quayLaiBanHangSauThanhToan);
+    document.getElementById('print-paid-invoice')?.addEventListener('click', inHoaDonSauThanhToan);
+    document.getElementById('payment-success-modal')?.addEventListener('click', event => {
+        if (event.target.id === 'payment-success-modal') quayLaiBanHangSauThanhToan();
+    });
+    document.getElementById('close-customer-create')?.addEventListener('click', dongModalThemKhachHang);
+    document.getElementById('cancel-customer-create')?.addEventListener('click', dongModalThemKhachHang);
+    document.getElementById('customer-create-modal')?.addEventListener('click', event => {
+        if (event.target.id === 'customer-create-modal') dongModalThemKhachHang();
+    });
+    document.getElementById('customer-create-form')?.addEventListener('submit', event => {
+        event.preventDefault();
+        const submitButton = event.currentTarget.querySelector('.customer-form-submit');
+        themVaChonKhachHang(submitButton).catch(error => hienThiLoi(error.message));
+    });
     document.addEventListener('keydown', event => {
         if (event.key === 'Escape') {
+            const paymentSuccessModal = document.getElementById('payment-success-modal');
+            if (paymentSuccessModal && !paymentSuccessModal.classList.contains('hidden')) {
+                quayLaiBanHangSauThanhToan();
+                return;
+            }
             dongPanelKhachHang();
+            dongModalThemKhachHang();
             dongModalThanhToanChuyenKhoan();
         }
     });
