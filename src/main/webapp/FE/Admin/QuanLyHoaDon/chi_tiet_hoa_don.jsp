@@ -47,15 +47,52 @@
     DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     int productCount = 0;
     BigDecimal paidTotal = BigDecimal.ZERO;
+    BigDecimal invoiceSubtotal = BigDecimal.ZERO;
 
     // Tính tổng số sản phẩm trong hóa đơn.
     for (ChiTietHoaDonView detail : chiTietList) {
-        productCount += detail.getSoLuong() == null ? 0 : detail.getSoLuong();
+        int quantity = detail.getSoLuong() == null ? 0 : detail.getSoLuong();
+        BigDecimal unitPrice = detail.getDonGia() == null ? BigDecimal.ZERO : detail.getDonGia();
+        productCount += quantity;
+        invoiceSubtotal = invoiceSubtotal.add(unitPrice.multiply(BigDecimal.valueOf(quantity)));
     }
 
     // Tính tổng tiền đã thanh toán.
     for (ThanhToanHoaDonView payment : paymentList) {
         paidTotal = paidTotal.add(payment.getSoTien() == null ? BigDecimal.ZERO : payment.getSoTien());
+    }
+    BigDecimal invoiceTotal = hoaDon.getTongTienThanhToan() == null
+            ? BigDecimal.ZERO : hoaDon.getTongTienThanhToan();
+    BigDecimal invoiceDiscount = invoiceSubtotal.subtract(invoiceTotal);
+    if (invoiceDiscount.signum() < 0) {
+        invoiceDiscount = BigDecimal.ZERO;
+    }
+    BigDecimal amountDue = invoiceTotal.subtract(paidTotal);
+    if (amountDue.signum() < 0) {
+        amountDue = BigDecimal.ZERO;
+    }
+    boolean isPaid = hoaDon.getTrangThai() != null && hoaDon.getTrangThai() == 3;
+    boolean isCancelled = hoaDon.getTrangThai() != null && hoaDon.getTrangThai() == 5;
+    String customerName = text(hoaDon.getTenKhachHang());
+    if ("-".equals(customerName)) {
+        customerName = text(hoaDon.getTenNguoiNhan());
+    }
+    if ("-".equals(customerName)) {
+        customerName = "Khách lẻ";
+    }
+    String customerPhone = text(hoaDon.getSoDienThoaiKhachHang());
+    if ("-".equals(customerPhone)) {
+        customerPhone = text(hoaDon.getSoDienThoai());
+    }
+    String employeeDisplay = text(hoaDon.getTenNhanVien());
+    if (!"-".equals(employeeDisplay) && !"-".equals(text(hoaDon.getMaNhanVien()))) {
+        employeeDisplay += " (" + hoaDon.getMaNhanVien() + ")";
+    } else if ("-".equals(employeeDisplay)) {
+        employeeDisplay = text(hoaDon.getMaNhanVien());
+    }
+    String voucherDisplay = text(hoaDon.getMaVoucher());
+    if (!"-".equals(voucherDisplay) && !"-".equals(text(hoaDon.getTenVoucher()))) {
+        voucherDisplay += " - " + hoaDon.getTenVoucher();
     }
     String qrContent = "Hóa đơn: " + text(hoaDon.getMaHoaDon())
             + " | Tổng tiền: " + moneyFormat.format(hoaDon.getTongTienThanhToan()) + " đ"
@@ -98,7 +135,7 @@
             return normalizedImage;
         }
 
-        if (normalizedImage.startsWith("FE/")) {
+        if (normalizedImage.startsWith("FE/") || normalizedImage.startsWith("File_Anh/")) {
             return contextPath + "/" + normalizedImage;
         }
 
@@ -333,7 +370,9 @@
                                     <% if (firstImageUrl.isEmpty()) { %>
                                     <span class="invoice-thumb"><i class="fas fa-glasses"></i></span>
                                     <% } else { %>
-                                    <img class="invoice-thumb" src="<%= firstImageUrl %>" alt="<%= text(detail.getTenSanPham()) %>">
+                                    <img class="invoice-thumb" src="<%= firstImageUrl %>" alt="<%= text(detail.getTenSanPham()) %>"
+                                         onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex'">
+                                    <span class="invoice-thumb" style="display:none"><i class="fas fa-glasses"></i></span>
                                     <% } %>
                                 </td>
                                 <td>
@@ -358,15 +397,15 @@
                     <div class="invoice-shipping-grid">
                         <label class="invoice-field">
                             <span>Tên người nhận</span>
-                            <input type="text" value="<%= text(hoaDon.getTenNguoiNhan()) %>" readonly>
+                            <input type="text" value="<%= customerName %>" readonly>
                         </label>
                         <label class="invoice-field">
                             <span>SĐT người nhận</span>
-                            <input type="text" value="<%= text(hoaDon.getSoDienThoai()) %>" readonly>
+                            <input type="text" value="<%= customerPhone %>" readonly>
                         </label>
                         <label class="invoice-field">
                             <span>Nhân viên bán hàng</span>
-                            <input type="text" value="<%= text(hoaDon.getMaNhanVien()) %>" readonly>
+                            <input type="text" value="<%= employeeDisplay %>" readonly>
                         </label>
                         <label class="invoice-field">
                             <span>Loại hóa đơn</span>
@@ -389,19 +428,25 @@
                 <div class="invoice-total-lines">
                     <div class="invoice-total-line">
                         <span>Tạm tính</span>
-                        <strong><%= moneyFormat.format(hoaDon.getTongTienThanhToan()) %> đ</strong>
+                        <strong><%= moneyFormat.format(invoiceSubtotal) %> đ</strong>
                     </div>
                     <div class="invoice-total-line">
                         <span>Phí vận chuyển</span>
                         <strong>0 đ</strong>
                     </div>
+                    <% if (!"-".equals(voucherDisplay)) { %>
+                    <div class="invoice-total-line">
+                        <span>Voucher</span>
+                        <strong><%= voucherDisplay %></strong>
+                    </div>
+                    <% } %>
                     <div class="invoice-total-line">
                         <span>Giảm giá</span>
-                        <strong>0 đ</strong>
+                        <strong><%= moneyFormat.format(invoiceDiscount) %> đ</strong>
                     </div>
                     <div class="invoice-total-line invoice-total-line--final">
                         <span>Tổng phải trả</span>
-                        <strong><%= moneyFormat.format(hoaDon.getTongTienThanhToan()) %> đ</strong>
+                        <strong><%= moneyFormat.format(invoiceTotal) %> đ</strong>
                     </div>
                     <div class="invoice-total-line">
                         <span>Khách thanh toán</span>
@@ -409,30 +454,37 @@
                     </div>
                     <div class="invoice-total-line">
                         <span>Phải thu</span>
-                        <strong><%= moneyFormat.format(hoaDon.getTongTienThanhToan().subtract(paidTotal)) %> đ</strong>
+                        <strong><%= moneyFormat.format(amountDue) %> đ</strong>
                     </div>
                 </div>
+                <% if (isPaid) { %>
+                <div class="invoice-payment-option">
+                    <span>Trạng thái</span>
+                    <strong>Đã thanh toán đủ</strong>
+                </div>
+                <% } else { %>
                 <form method="post" action="<%= request.getContextPath() %>/admin/hoa-don">
                     <input type="hidden" name="action" value="changeStatus">
                     <input type="hidden" name="id" value="<%= hoaDon.getId() %>">
                     <input type="hidden" name="trangThai" value="3">
                     <input type="hidden" name="ghiChu" value="Thanh toán tiền mặt từ màn hình hóa đơn">
-                    <button class="invoice-pay-btn" type="submit" <%= hoaDon.getTrangThai() != null && hoaDon.getTrangThai() == 5 ? "disabled" : "" %>>
+                    <button class="invoice-pay-btn" type="submit" <%= isCancelled ? "disabled" : "" %>>
                         <i class="fas fa-money-bill-wave"></i>
                         Thanh toán tiền mặt
                     </button>
                 </form>
-                <button class="invoice-pay-btn invoice-pay-btn--qr" type="button" data-open-modal="qrPaymentModal" <%= hoaDon.getTrangThai() != null && hoaDon.getTrangThai() == 5 ? "disabled" : "" %>>
+                <button class="invoice-pay-btn invoice-pay-btn--qr" type="button" data-open-modal="qrPaymentModal" <%= isCancelled ? "disabled" : "" %>>
                     <i class="fas fa-qrcode"></i>
                     Thanh toán QR
                 </button>
+                <% } %>
             </aside>
         </section>
 
         <%-- Các nút xử lý: cập nhật trạng thái, hủy hóa đơn, in, xem lịch sử. --%>
         <section class="invoice-detail-actions">
             <div class="invoice-action-left">
-                <button class="invoice-btn invoice-btn--primary" type="button" data-open-modal="statusModal" <%= hoaDon.getTrangThai() != null && hoaDon.getTrangThai() == 5 ? "disabled" : "" %>>
+                <button class="invoice-btn invoice-btn--primary" type="button" data-open-modal="statusModal" <%= isPaid || isCancelled ? "disabled" : "" %>>
                     <i class="fas fa-arrows-rotate"></i>
                     <span>Đổi trạng thái</span>
                 </button>
@@ -441,7 +493,7 @@
                     <input type="hidden" name="id" value="<%= hoaDon.getId() %>">
                     <input type="hidden" name="trangThai" value="5">
                     <input type="hidden" name="ghiChu" value="Hủy hóa đơn từ màn hình chi tiết">
-                    <button class="invoice-btn invoice-btn--danger" type="submit" <%= hoaDon.getTrangThai() != null && hoaDon.getTrangThai() == 5 ? "disabled" : "" %>>
+                    <button class="invoice-btn invoice-btn--danger" type="submit" <%= isPaid || isCancelled ? "disabled" : "" %>>
                         <i class="fas fa-ban"></i>
                         Hủy đơn
                     </button>
@@ -463,15 +515,19 @@
                     <div class="invoice-customer-summary">
                         <div>
                             <span>Họ tên</span>
-                            <strong><%= "-".equals(text(hoaDon.getTenKhachHang())) ? text(hoaDon.getTenNguoiNhan()) : text(hoaDon.getTenKhachHang()) %></strong>
+                            <strong><%= customerName %></strong>
                         </div>
                         <div>
                             <span>Số điện thoại</span>
-                            <strong><%= text(hoaDon.getSoDienThoai()) %></strong>
+                            <strong><%= customerPhone %></strong>
                         </div>
                         <div>
                             <span>Email</span>
-                            <strong>-</strong>
+                            <strong><%= text(hoaDon.getEmailKhachHang()) %></strong>
+                        </div>
+                        <div>
+                            <span>Mã khách hàng</span>
+                            <strong><%= "-".equals(text(hoaDon.getMaKhachHang())) ? "Khách lẻ" : text(hoaDon.getMaKhachHang()) %></strong>
                         </div>
                         <div>
                             <span>Ghi chú</span>
@@ -559,11 +615,9 @@
 </div>
 
 <%
-    BigDecimal receiptSubtotal = BigDecimal.ZERO;
+    BigDecimal receiptSubtotal = invoiceSubtotal;
     int receiptQuantity = 0;
     for (ChiTietHoaDonView detail : chiTietList) {
-        BigDecimal lineTotal = detail.getTongTien() == null ? BigDecimal.ZERO : detail.getTongTien();
-        receiptSubtotal = receiptSubtotal.add(lineTotal);
         receiptQuantity += detail.getSoLuong() == null ? 0 : detail.getSoLuong();
     }
     BigDecimal receiptTotal = hoaDon.getTongTienThanhToan() == null
@@ -573,10 +627,11 @@
     if (receiptChange.signum() < 0) {
         receiptChange = BigDecimal.ZERO;
     }
-    String receiptCustomer = text(hoaDon.getTenKhachHang());
-    if ("-".equals(receiptCustomer)) {
-        receiptCustomer = text(hoaDon.getTenNguoiNhan());
+    BigDecimal receiptDiscount = receiptSubtotal.subtract(receiptTotal);
+    if (receiptDiscount.signum() < 0) {
+        receiptDiscount = BigDecimal.ZERO;
     }
+    String receiptCustomer = customerName;
 %>
 
 <section class="invoice-receipt-print" aria-label="Hóa đơn bán hàng">
@@ -595,11 +650,11 @@
             <span>Số HĐ: <%= receiptText(hoaDon.getMaHoaDon()) %></span>
         </div>
         <div class="receipt-meta-row">
-            <span>Người in: <%= receiptText(text(hoaDon.getMaNhanVien())) %></span>
+            <span>Người bán: <%= receiptText(employeeDisplay) %></span>
             <span>Loại đơn: Tại quầy</span>
         </div>
         <div>Khách: <%= receiptText(receiptCustomer) %></div>
-        <div>SĐT: <%= receiptText(hoaDon.getSoDienThoai()) %></div>
+        <div>SĐT: <%= receiptText(customerPhone) %></div>
         <div>Địa chỉ: <%= receiptText(hoaDon.getGhiChu()) %></div>
     </div>
     <div class="receipt-divider"></div>
@@ -636,7 +691,10 @@
 
     <div class="receipt-summary">
         <div><span>Tổng tiền</span><strong><%= moneyFormat.format(receiptSubtotal) %> đ</strong></div>
-        <div><span>Giảm giá</span><strong>0 đ</strong></div>
+        <div><span>Giảm giá</span><strong><%= moneyFormat.format(receiptDiscount) %> đ</strong></div>
+        <% if (!"-".equals(voucherDisplay)) { %>
+        <div><span>Voucher</span><strong><%= receiptText(voucherDisplay) %></strong></div>
+        <% } %>
         <div><span>Phí vận chuyển</span><strong>0 đ</strong></div>
         <div class="receipt-summary-total"><span>TỔNG THANH TOÁN</span><strong><%= moneyFormat.format(receiptTotal) %> đ</strong></div>
     </div>

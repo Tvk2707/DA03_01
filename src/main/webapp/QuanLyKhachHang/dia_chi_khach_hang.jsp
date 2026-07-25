@@ -2,7 +2,7 @@
 <%@ page import="java.util.List" %>
 <%
     request.setAttribute("pageTitle", "Quản lý địa chỉ khách hàng");
-    request.setAttribute("activeMenu", "khachhang");
+    request.setAttribute("activeMenu", "customer");
 %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -164,25 +164,26 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/Admin/css/customer-management.css">
 </head>
 <body>
 <%@ include file="../Admin/layout/sidebar.jsp" %>
 
-<div class="main-content">
+<div class="dashboard-container">
     <%@ include file="../Admin/layout/header.jsp" %>
 
-    <div id="page-content" class="address-page">
+    <div class="category-section address-page">
         <%
             List<DiaChiKhachHang> listDiaChi = (List<DiaChiKhachHang>) request.getAttribute("listDiaChi");
             Integer idKhachHang = (Integer) request.getAttribute("idKhachHang");
         %>
 
-        <h1 class="page-title">Quản lý địa chỉ khách hàng</h1>
-        <p>
+        <div class="address-page-heading">
+            <h2 class="category-title">Quản lý địa chỉ khách hàng</h2>
             <a class="btn btn-outline" href="<%= request.getContextPath() %>/khach-hang/hien-thi">
                 <i class="fas fa-arrow-left"></i> Quay lại danh sách khách hàng
             </a>
-        </p>
+        </div>
 
         <div class="address-card">
             <h3>Thêm địa chỉ</h3>
@@ -293,9 +294,14 @@
                             %>
                         </td>
                         <td>
-                            <a href="<%= request.getContextPath() %>/dia-chi-khach-hang/dat-mac-dinh?idDiaChi=<%= dc.getId() %>&idKhachHang=<%= idKhachHang %>">
-                                Đặt mặc định
-                            </a>
+                            <% if (!Integer.valueOf(1).equals(dc.getIsMacDinh())) { %>
+                                <a class="address-action"
+                                   href="<%= request.getContextPath() %>/dia-chi-khach-hang/dat-mac-dinh?idDiaChi=<%= dc.getId() %>&idKhachHang=<%= idKhachHang %>">
+                                    <i class="fas fa-check"></i> Đặt mặc định
+                                </a>
+                            <% } else { %>
+                                <span aria-label="Địa chỉ đang được chọn">—</span>
+                            <% } %>
                         </td>
                     </tr>
                     <%

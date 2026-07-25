@@ -230,7 +230,7 @@ public class SanPhamServlet extends HttpServlet {
 
     private void showAddSanPham(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         int count = sanPhamService.timKiem("", null, null, null, null).size();
-        String autoMa = String.format("SP%03d", count + 1);
+        String autoMa = String.format("SCPP%03d", count + 1);
         request.setAttribute("autoMaSanPham", autoMa);
 
         setLookupAttributes(request);

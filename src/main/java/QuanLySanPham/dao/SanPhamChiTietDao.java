@@ -7,11 +7,15 @@ public interface SanPhamChiTietDao extends GenericDao<SanPhamChiTiet, Integer> {
 
     List<SanPhamChiTiet> timKiem(Integer sanPhamId, String ma, Integer mauSacId, Integer kichCoId, Integer trangThai);
 
+    List<SanPhamChiTiet> timKiemTheoDanhMuc(String ma, Integer danhMucId, Integer trangThai);
+
     List<SanPhamChiTiet> findBySanPhamId(Integer sanPhamId);
 
     SanPhamChiTiet findByMauSacVaKichCo(Integer sanPhamId, Integer mauSacId, Integer kichCoId);
 
     void updateTonKho(Integer sanPhamChiTietId, Integer tonKhoMoi);
+    
+    SanPhamChiTiet findByIdForUpdate(Integer id);
 
     // --- THÊM 2 HÀM XÓA MỀM ---
 

@@ -3,6 +3,7 @@
 <%@ page import="QuanLyHoaDon.Model.ThongKeProduct" %>
 <%@ page import="java.math.BigDecimal" %>
 <%@ page import="java.text.DecimalFormat" %>
+<%@ page import="java.time.LocalDate" %>
 <%@ page import="java.util.Collections" %>
 <%@ page import="java.util.List" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
@@ -20,6 +21,13 @@
     ThongKeOverview weekOverview = overview(request.getAttribute("weekOverview"));
     ThongKeOverview monthOverview = overview(request.getAttribute("monthOverview"));
     ThongKeOverview yearOverview = overview(request.getAttribute("yearOverview"));
+    ThongKeOverview reportOverview = overview(request.getAttribute("reportOverview"));
+    LocalDate filterFrom = request.getAttribute("filterFrom") instanceof LocalDate
+            ? (LocalDate) request.getAttribute("filterFrom") : LocalDate.now().withDayOfMonth(1);
+    LocalDate filterTo = request.getAttribute("filterTo") instanceof LocalDate
+            ? (LocalDate) request.getAttribute("filterTo") : LocalDate.now();
+    LocalDate currentDate = request.getAttribute("currentDate") instanceof LocalDate
+            ? (LocalDate) request.getAttribute("currentDate") : LocalDate.now();
     Integer completionRate = (Integer) request.getAttribute("completionRate");
     if (completionRate == null) completionRate = 0;
 
@@ -60,7 +68,10 @@
     <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/header.css">
     <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/thongke.css?v=202607161120">
 </head>
-<body class="statistics-screen">
+<body class="statistics-screen"
+      data-statistics-url="<%= request.getContextPath() %>/admin/thong-ke"
+      data-current-year="<%= currentDate.getYear() %>"
+      data-current-month="<%= currentDate.getMonthValue() %>">
 <%@ include file="/Admin/layout/sidebar.jsp" %>
 
 <div class="main-content">
@@ -87,9 +98,9 @@
                 <strong class="stat-card-value" data-field="revenue"><%= money(moneyFormat, todayOverview.getRevenue()) %></strong>
                 <p class="stat-card-meta">Sản phẩm đã bán <b data-field="products"><%= todayOverview.getProducts() %></b> <i></i> Đơn hàng <b data-field="orders"><%= todayOverview.getOrders() %></b></p>
                 <div class="stat-card-statuses">
-                    <span class="is-done">Hoàn thành <b data-field="done"><%= todayOverview.getDone() %></b></span>
+                    <span class="is-done">Đã thanh toán <b data-field="done"><%= todayOverview.getDone() %></b></span>
                     <span class="is-cancel">Hủy <b data-field="cancelled"><%= todayOverview.getCancelled() %></b></span>
-                    <span class="is-process">Xử lý <b data-field="processing"><%= todayOverview.getProcessing() %></b></span>
+                    <span class="is-process">Chờ xử lý <b data-field="processing"><%= todayOverview.getProcessing() %></b></span>
                 </div>
             </article>
 
@@ -101,9 +112,9 @@
                 <strong class="stat-card-value" data-field="revenue"><%= money(moneyFormat, weekOverview.getRevenue()) %></strong>
                 <p class="stat-card-meta">Sản phẩm đã bán <b data-field="products"><%= weekOverview.getProducts() %></b> <i></i> Đơn hàng <b data-field="orders"><%= weekOverview.getOrders() %></b></p>
                 <div class="stat-card-statuses">
-                    <span class="is-done">Hoàn thành <b data-field="done"><%= weekOverview.getDone() %></b></span>
+                    <span class="is-done">Đã thanh toán <b data-field="done"><%= weekOverview.getDone() %></b></span>
                     <span class="is-cancel">Hủy <b data-field="cancelled"><%= weekOverview.getCancelled() %></b></span>
-                    <span class="is-process">Xử lý <b data-field="processing"><%= weekOverview.getProcessing() %></b></span>
+                    <span class="is-process">Chờ xử lý <b data-field="processing"><%= weekOverview.getProcessing() %></b></span>
                 </div>
             </article>
 
@@ -115,9 +126,9 @@
                 <strong class="stat-card-value" data-field="revenue"><%= money(moneyFormat, monthOverview.getRevenue()) %></strong>
                 <p class="stat-card-meta">Sản phẩm đã bán <b data-field="products"><%= monthOverview.getProducts() %></b> <i></i> Đơn hàng <b data-field="orders"><%= monthOverview.getOrders() %></b></p>
                 <div class="stat-card-statuses">
-                    <span class="is-done">Hoàn thành <b data-field="done"><%= monthOverview.getDone() %></b></span>
+                    <span class="is-done">Đã thanh toán <b data-field="done"><%= monthOverview.getDone() %></b></span>
                     <span class="is-cancel">Hủy <b data-field="cancelled"><%= monthOverview.getCancelled() %></b></span>
-                    <span class="is-process">Xử lý <b data-field="processing"><%= monthOverview.getProcessing() %></b></span>
+                    <span class="is-process">Chờ xử lý <b data-field="processing"><%= monthOverview.getProcessing() %></b></span>
                 </div>
             </article>
 
@@ -129,9 +140,9 @@
                 <strong class="stat-card-value" data-field="revenue"><%= money(moneyFormat, yearOverview.getRevenue()) %></strong>
                 <p class="stat-card-meta">Sản phẩm đã bán <b data-field="products"><%= yearOverview.getProducts() %></b> <i></i> Đơn hàng <b data-field="orders"><%= yearOverview.getOrders() %></b></p>
                 <div class="stat-card-statuses">
-                    <span class="is-done">Hoàn thành <b data-field="done"><%= yearOverview.getDone() %></b></span>
+                    <span class="is-done">Đã thanh toán <b data-field="done"><%= yearOverview.getDone() %></b></span>
                     <span class="is-cancel">Hủy <b data-field="cancelled"><%= yearOverview.getCancelled() %></b></span>
-                    <span class="is-process">Xử lý <b data-field="processing"><%= yearOverview.getProcessing() %></b></span>
+                    <span class="is-process">Chờ xử lý <b data-field="processing"><%= yearOverview.getProcessing() %></b></span>
                 </div>
             </article>
         </section>
@@ -143,7 +154,7 @@
                         <i class="fas fa-money-bill-trend-up"></i>
                         <div>
                             <h2>Doanh thu</h2>
-                            <p id="chartDescription">Doanh thu theo ngày trong tháng 04/2026</p>
+                            <p id="chartDescription">Doanh thu theo ngày trong tháng <%= String.format("%02d", currentDate.getMonthValue()) %>/<%= currentDate.getYear() %></p>
                         </div>
                     </div>
                     <div class="stat-chart-actions">
@@ -182,12 +193,12 @@
             <div class="stat-filter-fields">
                 <label class="stat-date-field">
                     <span>Từ ngày</span>
-                    <input id="reportFrom" type="date" value="2026-04-01">
+                    <input id="reportFrom" type="date" value="<%= filterFrom %>">
                 </label>
                 <span class="stat-date-arrow"><i class="fas fa-arrow-right"></i></span>
                 <label class="stat-date-field">
                     <span>Đến ngày</span>
-                    <input id="reportTo" type="date" value="2026-04-30">
+                    <input id="reportTo" type="date" value="<%= filterTo %>">
                 </label>
             </div>
             <div class="stat-filter-actions">
@@ -241,16 +252,16 @@
                             <p>Tiến độ xử lý trong kỳ đã lọc</p>
                         </div>
                     </div>
-                    <span class="stat-panel-badge" id="totalOrderBadge"><%= yearOverview.getOrders() %> đơn</span>
+                    <span class="stat-panel-badge" id="totalOrderBadge"><%= reportOverview.getOrders() %> đơn</span>
                 </div>
                 <div class="stat-completion">
                     <div><span>Tỷ lệ hoàn thành</span><strong id="completionRate"><%= completionRate %>%</strong></div>
                     <div class="stat-progress"><span id="completionBar" style="width: <%= completionRate %>%;"></span></div>
                 </div>
                 <div class="stat-status-list" id="orderStatusList">
-                    <div class="stat-status-item"><span>Hoàn thành</span><strong><%= yearOverview.getDone() %></strong></div>
-                    <div class="stat-status-item"><span>Đang xử lý</span><strong><%= yearOverview.getProcessing() %></strong></div>
-                    <div class="stat-status-item"><span>Đã hủy</span><strong><%= yearOverview.getCancelled() %></strong></div>
+                    <div class="stat-status-item"><span>Đã thanh toán</span><strong><%= reportOverview.getDone() %></strong></div>
+                    <div class="stat-status-item"><span>Chờ xử lý</span><strong><%= reportOverview.getProcessing() %></strong></div>
+                    <div class="stat-status-item"><span>Đã hủy</span><strong><%= reportOverview.getCancelled() %></strong></div>
                 </div>
             </article>
 
@@ -353,6 +364,6 @@
     <div><strong>Thành công</strong><span id="statToastMessage"></span></div>
 </div>
 
-<script src="<%= request.getContextPath() %>/FE/Admin/thongke.js?v=202607161120"></script>
+<script src="<%= request.getContextPath() %>/FE/Admin/thongke.js?v=202607241750"></script>
 </body>
 </html>

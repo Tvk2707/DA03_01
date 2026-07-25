@@ -502,8 +502,8 @@
 
         <!-- TOOLBAR CỐ ĐỊNH -->
         <div class="table-toolbar">
-            <div class="toolbar-left-results">
-                Danh sách khách hàng
+            <div class="toolbar-left-results" aria-live="polite">
+                Hiển thị <span data-customer-visible-count>${listKhachHang.size()}</span> khách hàng
             </div>
             <div>
                 <button type="button"
@@ -535,9 +535,9 @@
                 <tbody>
                 <c:choose>
                     <c:when test="${not empty listKhachHang}">
-                        <c:forEach var="kh" items="${listKhachHang}">
+                        <c:forEach var="kh" items="${listKhachHang}" varStatus="status">
                             <tr data-customer-search-row>
-                                <td><span class="category-id">#${kh.id}</span></td>
+                                <td><span class="category-id">${status.index + 1}</span></td>
                                 <td><strong style="color: #1f2937;"><c:out value="${kh.maKhachHang}" /></strong></td>
                                 <td><strong><c:out value="${kh.hoTen}" /></strong></td>
                                 <td title="${kh.email}"><c:out value="${empty kh.email ? '-' : kh.email}" /></td>

@@ -42,6 +42,9 @@ public class SanPhamChiTiet {
     @Column(name = "hinh_anh")
     private String hinhAnh;
 
+    @Transient
+    private String hinhAnhHienThi;
+
     @Column(name = "trang_thai")
     private Integer trangThai;
 
@@ -92,6 +95,8 @@ public class SanPhamChiTiet {
     public void setTrongLuong(Integer trongLuong) { this.trongLuong = trongLuong; }
     public String getHinhAnh() { return hinhAnh; }
     public void setHinhAnh(String hinhAnh) { this.hinhAnh = hinhAnh; }
+    public String getHinhAnhHienThi() { return hinhAnhHienThi; }
+    public void setHinhAnhHienThi(String hinhAnhHienThi) { this.hinhAnhHienThi = hinhAnhHienThi; }
     public Integer getTrangThai() { return trangThai; }
     public void setTrangThai(Integer trangThai) { this.trangThai = trangThai; }
     public List<ChiTietHoaDon> getChiTietHoaDons() { return chiTietHoaDons; }

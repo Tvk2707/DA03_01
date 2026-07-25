@@ -196,25 +196,6 @@
             transform: scale(0.99);
         }
 
-        /* --- FOOTER LINKS --- */
-        .footer-links {
-            text-align: center;
-            font-size: 14px;
-            color: #333333;
-        }
-
-        .footer-links a {
-            color: #333333;
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.2s;
-        }
-
-        .footer-links a:hover {
-            color: #c79c4a;
-            text-decoration: underline;
-        }
-
         /* Thông báo lỗi/thành công */
         .alert-box {
             width: 100%;
@@ -227,7 +208,6 @@
             gap: 10px;
         }
         .alert-error { background-color: #f8d7da; color: #721c24; }
-        .alert-success { background-color: #d4edda; color: #155724; }
     </style>
 </head>
 <body>
@@ -251,13 +231,6 @@
         <span><%= request.getAttribute("error") %></span>
     </div>
     <% } %>
-    <% if ("1".equals(request.getParameter("registered"))) { %>
-    <div class="alert-box alert-success">
-        <i class="fas fa-check-circle"></i>
-        <span>Đăng ký thành công! Hãy đăng nhập.</span>
-    </div>
-    <% } %>
-
     <!-- Form Đăng Nhập -->
     <form class="login-form" action="${pageContext.request.contextPath}/Login" method="post">
 
@@ -292,11 +265,6 @@
         <!-- Nút bấm -->
         <button type="submit" class="btn-submit">Đăng nhập</button>
 
-        <!-- Links chuyển đổi -->
-        <div class="footer-links">
-            <a href="${pageContext.request.contextPath}/ForgotPassword">Quên mật khẩu</a>,
-            <a href="${pageContext.request.contextPath}/Register">đăng ký</a>
-        </div>
     </form>
 </div>
 

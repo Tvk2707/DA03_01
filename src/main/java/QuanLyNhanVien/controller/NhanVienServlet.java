@@ -3,6 +3,7 @@ package QuanLyNhanVien.controller;
 import QuanLySanPham.Entity.NhanVien;
 import QuanLyNhanVien.service.NhanVienService;
 import QuanLyNhanVien.service.impl.NhanVienServiceImpl;
+import QuanLySanPham.Utils.EmailService; // Thêm import EmailService
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -98,7 +99,26 @@ public class NhanVienServlet extends HttpServlet {
     private void insert(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             NhanVien nv = getNhanVienFrom(request);
+            // 1. Lưu nhân viên vào Database
             nhanVienService.themNhanVien(nv);
+
+            // 2. Gửi Email thông báo chạy ngầm cho nhân viên mới
+            if (nv.getEmail() != null && !nv.getEmail().trim().isEmpty()) {
+                new Thread(() -> {
+                    String tieuDe = "Thông báo: Tài khoản nhân viên mới đã được khởi tạo";
+                    String noiDung = "<h3>Xin chào " + nv.getHoTen() + ",</h3>"
+                            + "<p>Tài khoản nhân viên của bạn đã được khởi tạo trên hệ thống quản lý.</p>"
+                            + "<ul>"
+                            + "  <li><b>Mã nhân viên:</b> " + nv.getMaNhanVien() + "</li>"
+                            + "  <li><b>Email đăng nhập:</b> " + nv.getEmail() + "</li>"
+                            + "  <li><b>Chức vụ:</b> " + (nv.getChucVu() != null ? nv.getChucVu() : "Chưa cập nhật") + "</li>"
+                            + "</ul>"
+                            + "<p>Vui lòng đăng nhập hệ thống hoặc liên hệ Quản lý để nhận mật khẩu làm việc.</p>";
+
+                    EmailService.sendEmail(nv.getEmail(), tieuDe, noiDung);
+                }).start();
+            }
+
             response.sendRedirect(request.getContextPath() + "/NhanVien");
         } catch (Exception e) {
             request.setAttribute("error", e.getMessage());
@@ -173,4 +193,3 @@ public class NhanVienServlet extends HttpServlet {
         return nv;
     }
 }
-

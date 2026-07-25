@@ -244,6 +244,7 @@
         const input = page.querySelector('[data-customer-search-input]');
         const clearButton = page.querySelector('[data-clear-customer-search]');
         const emptyRow = page.querySelector('[data-customer-search-empty]');
+        const visibleCountElement = page.querySelector('[data-customer-visible-count]');
         const rows = Array.from(page.querySelectorAll('[data-customer-search-row]'));
 
         if (!form || !input || rows.length === 0) {
@@ -267,6 +268,9 @@
             }
             if (clearButton) {
                 clearButton.hidden = !keyword;
+            }
+            if (visibleCountElement) {
+                visibleCountElement.textContent = String(visibleCount);
             }
         };
 
