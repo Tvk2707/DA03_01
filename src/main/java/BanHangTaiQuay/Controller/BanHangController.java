@@ -13,6 +13,7 @@ import BanHangTaiQuay.Model.ThemSanPhamRequest;
 import QuanLySanPham.Entity.HoaDon;
 import QuanLySanPham.Entity.KhachHang;
 import QuanLySanPham.Entity.NhanVien;
+import QuanLySanPham.Entity.PhieuGiamGia;
 import QuanLySanPham.Entity.SanPhamChiTiet;
 import QuanLySanPham.service.SanPhamChiTietService;
 import QuanLySanPham.service.impl.SanPhamChiTietServiceImpl;
@@ -42,6 +43,7 @@ import java.util.Map;
         "/ban-hang",
         "/ban-hang/tao-hoa-don",
         "/ban-hang/tim-san-pham",
+        "/ban-hang/tim-voucher",
         "/ban-hang/quet-qr",
         "/ban-hang/them-san-pham",
         "/ban-hang/xoa-san-pham",
@@ -90,7 +92,9 @@ public class BanHangController extends HttpServlet {
             req.setAttribute("danhSachHoaDonCho", danhSachHoaDonCho);
             req.setAttribute("idHoaDonDangTao", idHoaDonDangTao);
             req.setAttribute("hoaDonDangTao", hoaDonDangTao);
-            req.setAttribute("danhSachSanPham", List.of());
+            // Tai san pham dang kinh doanh ngay khi mo/tạo don de hien thi san pham ben duoi o tim kiem.
+            req.setAttribute("danhSachSanPham",
+                    sanPhamChiTietService.timKiemTheoDanhMuc(null, null, 1));
             Object nhanVienTrongSession = session.getAttribute("nhanVienDangNhap");
             NhanVien nhanVienBanHang = nhanVienTrongSession instanceof NhanVien
                     ? (NhanVien) nhanVienTrongSession
@@ -107,6 +111,9 @@ public class BanHangController extends HttpServlet {
         switch (action) {
             case "/ban-hang/tim-san-pham":
                 timSanPham(req, resp);
+                break;
+            case "/ban-hang/tim-voucher":
+                timVoucher(req, resp);
                 break;
             case "/ban-hang/quet-qr":
                 quetQr(req, resp);
@@ -382,6 +389,31 @@ public class BanHangController extends HttpServlet {
             response.put("success", false);
             response.put("message", e.getMessage());
 
+        }
+
+        out.print(gson.toJson(response));
+        out.flush();
+    }
+
+    private void timVoucher(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        resp.setContentType("application/json");
+        resp.setCharacterEncoding("UTF-8");
+        PrintWriter out = resp.getWriter();
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            int idHoaDon = requirePositiveInt(req, "idHoaDon");
+            String tuKhoa = requireText(req, "tuKhoa");
+            List<Map<String, Object>> vouchers = new ArrayList<>();
+            for (PhieuGiamGia voucher : banHangService.timKiemVoucher(idHoaDon, tuKhoa)) {
+                vouchers.add(toVoucherData(voucher));
+            }
+            response.put("success", true);
+            response.put("vouchers", vouchers);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.put("success", false);
+            response.put("message", e.getMessage());
         }
 
         out.print(gson.toJson(response));
@@ -697,6 +729,21 @@ public class BanHangController extends HttpServlet {
         data.put("email", khachHang.getEmail());
         data.put("ngaySinh", khachHang.getNgaySinh() == null ? null : khachHang.getNgaySinh().toString());
         data.put("gioiTinh", khachHang.getGioiTinh());
+        return data;
+    }
+
+    private Map<String, Object> toVoucherData(PhieuGiamGia voucher) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("id", voucher.getId());
+        data.put("maVoucher", voucher.getMaVoucher());
+        data.put("tenVoucher", voucher.getTenVoucher());
+        data.put("loaiGiamGia", voucher.isGiamPhanTram() ? "percent" : "amount");
+        data.put("giaTriGiam", voucher.getGiaTriGiam());
+        data.put("giamToiDa", voucher.getGiamToiDa());
+        data.put("donToiThieu", voucher.getDonToiThieu());
+        data.put("ngayKetThuc", voucher.getNgayKetThuc() == null
+                ? null
+                : voucher.getNgayKetThuc().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
         return data;
     }
 

@@ -30,6 +30,7 @@ const BanHangAPI = {
         traCuuHoacTaoKhachHang: ['/ban-hang/tra-cuu-khach-hang', 'POST'],
         ganKhachHang: ['/ban-hang/gan-khach-hang', 'POST'],
         chonKhachLe: ['/ban-hang/chon-khach-le', 'POST'],
+        timVoucher: ['/ban-hang/tim-voucher', 'GET'],
         apVoucher: ['/ban-hang/ap-voucher', 'POST'],
         goVoucher: ['/ban-hang/go-voucher', 'POST'],
         thanhToan: ['/thanh-toan/thanh-toan', 'POST']
@@ -392,7 +393,10 @@ function renderKetQuaKhachHang(khachHangs, tuKhoa = '') {
 
         const meta = document.createElement('span');
         meta.className = 'customer-result-meta';
-        meta.textContent = [khachHang.soDienThoai, khachHang.maKhachHang].filter(Boolean).join(' · ') || 'Chưa có thông tin liên hệ';
+        meta.textContent = [
+            khachHang.soDienThoai ? `SĐT: ${khachHang.soDienThoai}` : null,
+            khachHang.maKhachHang ? `Mã: ${khachHang.maKhachHang}` : null
+        ].filter(Boolean).join(' · ') || 'Chưa có thông tin liên hệ';
 
         button.append(name, meta);
         container.appendChild(button);
@@ -583,6 +587,96 @@ async function chonKhachLe(button) {
     });
 }
 
+function dinhDangTienVoucher(value) {
+    const amount = Number(value);
+    return Number.isFinite(amount)
+        ? `${new Intl.NumberFormat('vi-VN').format(amount)} đ`
+        : '0 đ';
+}
+
+function renderKetQuaVoucher(vouchers, tuKhoa = '') {
+    const container = document.getElementById('voucher-suggestions');
+    if (!container) return;
+
+    container.innerHTML = '';
+    if (!vouchers || vouchers.length === 0) {
+        if (tuKhoa) {
+            const empty = document.createElement('div');
+            empty.className = 'voucher-suggestion-empty';
+            empty.textContent = 'Mã voucher không hợp lệ, hết hạn hoặc chưa đủ điều kiện áp dụng.';
+            container.appendChild(empty);
+            container.classList.remove('hidden');
+            return;
+        }
+        container.classList.add('hidden');
+        return;
+    }
+
+    vouchers.forEach(voucher => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'voucher-suggestion';
+        button.dataset.voucherSelect = String(voucher.id || '');
+        button.dataset.voucherCode = voucher.maVoucher || '';
+        button.title = [voucher.maVoucher, voucher.tenVoucher, voucher.ngayKetThuc]
+            .filter(Boolean).join(' · ');
+
+        const head = document.createElement('span');
+        head.className = 'voucher-suggestion__head';
+        const code = document.createElement('span');
+        code.className = 'voucher-suggestion__code';
+        code.textContent = voucher.maVoucher || 'Voucher';
+        const discount = document.createElement('span');
+        discount.className = 'voucher-suggestion__discount';
+        discount.textContent = voucher.loaiGiamGia === 'percent'
+            ? `Giảm ${voucher.giaTriGiam || 0}%`
+            : `Giảm ${dinhDangTienVoucher(voucher.giaTriGiam)}`;
+        head.append(code, discount);
+
+        const meta = document.createElement('span');
+        meta.className = 'voucher-suggestion__meta';
+        const dieuKien = Number(voucher.donToiThieu || 0) > 0
+            ? `Đơn từ ${dinhDangTienVoucher(voucher.donToiThieu)}`
+            : 'Không yêu cầu giá trị tối thiểu';
+        const giamToiDa = voucher.loaiGiamGia === 'percent' && Number(voucher.giamToiDa || 0) > 0
+            ? ` · Tối đa ${dinhDangTienVoucher(voucher.giamToiDa)}`
+            : '';
+        const hanDung = voucher.ngayKetThuc ? ` · HSD ${voucher.ngayKetThuc}` : '';
+        meta.textContent = `${voucher.tenVoucher || 'Voucher đang áp dụng'} · ${dieuKien}${giamToiDa}${hanDung}`;
+
+        button.append(head, meta);
+        container.appendChild(button);
+    });
+    container.classList.remove('hidden');
+}
+
+const timVoucherDebounced = debounce(async (tuKhoa) => {
+    const keyword = String(tuKhoa || '').trim();
+    if (keyword.length < 2 || !idHoaDonHienTai) {
+        renderKetQuaVoucher([]);
+        return;
+    }
+
+    try {
+        const data = await BanHangAPI.goi('timVoucher', {
+            idHoaDon: idHoaDonHienTai,
+            tuKhoa: keyword
+        });
+        renderKetQuaVoucher(data.vouchers || [], keyword);
+    } catch (error) {
+        console.error('Không thể tìm voucher:', error);
+        renderKetQuaVoucher([], keyword);
+    }
+}, 350);
+
+function chonVoucher(button) {
+    const input = document.getElementById('input-voucher');
+    if (!input || !button?.dataset.voucherCode) return;
+    input.value = button.dataset.voucherCode;
+    renderKetQuaVoucher([]);
+    apVoucher(document.querySelector('.voucher-apply'));
+}
+
 function moPanelKhachHang() {
     const panel = document.getElementById('panel-khach-hang');
     const trigger = document.querySelector('[data-customer-open]');
@@ -616,6 +710,7 @@ async function apVoucher(button) {
         input?.focus();
         return;
     }
+    renderKetQuaVoucher([]);
     await withLoading(button, async () => {
         await BanHangAPI.goi('apVoucher', { idHoaDon: idHoaDonHienTai, maVoucher });
         alert('Áp dụng voucher thành công.');
@@ -835,6 +930,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const voucherInput = document.getElementById('input-voucher');
     const voucherButton = document.querySelector('.voucher-apply');
+    voucherInput?.addEventListener('input', () => {
+        timVoucherDebounced(voucherInput.value).catch(error => console.error(error));
+    });
     voucherInput?.addEventListener('keydown', event => {
         if (event.key === 'Enter') {
             event.preventDefault();
@@ -851,6 +949,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const customerPanel = document.getElementById('panel-khach-hang');
         if (customerPanel && !customerPanel.classList.contains('hidden') && !event.target.closest('.cust-box')) {
             dongPanelKhachHang();
+        }
+        const voucherSuggestions = document.getElementById('voucher-suggestions');
+        if (voucherSuggestions && !event.target.closest('.voucher-input-wrap')) {
+            renderKetQuaVoucher([]);
         }
 
         const add = event.target.closest('.p-add');
@@ -912,6 +1014,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const customerResult = event.target.closest('[data-customer-select]');
         if (customerResult) {
             ganVaChonKhachHang(customerResult);
+            return;
+        }
+        const voucherSuggestion = event.target.closest('[data-voucher-select]');
+        if (voucherSuggestion) {
+            chonVoucher(voucherSuggestion);
             return;
         }
         const voucher = event.target.closest('.voucher-apply');

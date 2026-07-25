@@ -1519,3 +1519,234 @@
         box-shadow: none;
     }
 }
+
+/* Bo loc chung va tong quan theo khoang ngay. */
+.statistics-screen #overviewCards.stat-overview {
+    display: block;
+    margin-bottom: 14px;
+}
+
+.statistics-screen .stat-overview-card--combined {
+    min-height: 0;
+    padding: 16px 16px 0;
+    border: 1px solid #e2e0da;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 5px 14px rgba(91, 72, 48, .07);
+}
+
+.statistics-screen .stat-overview-card--combined::before {
+    height: 3px;
+    background: #9b7a4e;
+}
+
+.statistics-screen .stat-overview-filter-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 42px;
+}
+
+.statistics-screen .stat-overview-filter-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 190px;
+}
+
+.statistics-screen .stat-overview-filter-title .stat-card-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 7px;
+    background: #f2eadc;
+    color: #6b5438;
+}
+
+.statistics-screen .stat-overview-filter-title .stat-card-label {
+    display: block;
+    color: #242a35;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.statistics-screen .stat-overview-filter-title small {
+    display: block;
+    margin-top: 2px;
+    color: #767b83;
+    font-size: 10px;
+}
+
+.statistics-screen .stat-overview-quick-filters {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.statistics-screen .stat-quick-filter {
+    min-height: 29px;
+    border: 1px solid #e0ded8;
+    border-radius: 999px;
+    background: #fff;
+    color: #4e535b;
+    padding: 5px 11px;
+    font-size: 10.5px;
+    cursor: pointer;
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+
+.statistics-screen .stat-quick-filter:hover,
+.statistics-screen .stat-quick-filter.is-active {
+    border-color: #5b4427;
+    background: #5b4427;
+    color: #fff;
+}
+
+.statistics-screen .stat-overview-filter-bar {
+    display: flex;
+    align-items: flex-end;
+    gap: 9px;
+    margin-top: 12px;
+    padding: 9px 0;
+    border-top: 1px solid #efede8;
+    border-bottom: 1px solid #efede8;
+}
+
+.statistics-screen .stat-overview-filter-icon {
+    align-self: center;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 70px;
+    color: #747982;
+    font-size: 10.5px;
+}
+
+.statistics-screen .stat-overview-filter-bar .stat-date-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 155px;
+}
+
+.statistics-screen .stat-overview-filter-bar .stat-date-field > span {
+    color: #41464f;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.statistics-screen .stat-overview-filter-bar .stat-date-field input {
+    width: 100%;
+    min-height: 31px;
+    box-sizing: border-box;
+    border: 1px solid #d9d8d4;
+    border-radius: 4px;
+    background: #fff;
+    color: #353a43;
+    padding: 5px 8px;
+    font-size: 11px;
+}
+
+.statistics-screen .stat-overview-filter-bar .stat-date-arrow {
+    align-self: center;
+    color: #85888d;
+    font-size: 10px;
+}
+
+.statistics-screen .stat-overview-filter-bar .stat-filter-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+}
+
+.statistics-screen .stat-overview-filter-bar .stat-btn {
+    min-height: 31px;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 10.5px;
+    white-space: nowrap;
+}
+
+.statistics-screen .stat-overview-metrics {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 1fr 1fr;
+    margin-top: 0;
+}
+
+.statistics-screen .stat-overview-metric {
+    min-width: 0;
+    padding: 13px 17px 15px;
+    border-right: 1px solid #e5e3de;
+    text-align: center;
+}
+
+.statistics-screen .stat-overview-metric:first-child { text-align: left; }
+.statistics-screen .stat-overview-metric:last-child { border-right: 0; }
+
+.statistics-screen .stat-overview-metric > span {
+    display: block;
+    color: #3f444c;
+    font-size: 10.5px;
+}
+
+.statistics-screen .stat-overview-metric > strong {
+    display: block;
+    margin-top: 3px;
+    color: #675035;
+    font-size: 20px;
+    line-height: 1.15;
+}
+
+.statistics-screen .stat-overview-metric > small {
+    display: block;
+    min-height: 15px;
+    margin-top: 4px;
+    color: #81858a;
+    font-size: 9.5px;
+    line-height: 1.35;
+}
+
+.statistics-screen .stat-overview-metric > small b { font-weight: 600; }
+.statistics-screen .stat-overview-metric > small .is-done { color: #408063; }
+.statistics-screen .stat-overview-metric > small .is-cancel { color: #ac4e69; }
+.statistics-screen .stat-overview-metric > small .is-process { color: #a17639; }
+.statistics-screen .stat-overview-metric--completion > strong { color: #4f463a; }
+
+.statistics-screen .stat-overview-progress {
+    height: 4px;
+    margin: 8px auto 0;
+    max-width: 130px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #e4e4df;
+}
+
+.statistics-screen .stat-overview-progress span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: #6f9d78;
+}
+
+@media (max-width: 900px) {
+    .statistics-screen .stat-overview-filter-head { align-items: flex-start; flex-direction: column; }
+    .statistics-screen .stat-overview-quick-filters { width: 100%; }
+    .statistics-screen .stat-overview-filter-bar { align-items: stretch; flex-wrap: wrap; }
+    .statistics-screen .stat-overview-filter-bar .stat-date-field { flex: 1 1 150px; }
+    .statistics-screen .stat-overview-filter-bar .stat-filter-actions { width: 100%; margin-left: 0; }
+    .statistics-screen .stat-overview-filter-bar .stat-filter-actions .stat-btn { flex: 1; }
+}
+
+@media (max-width: 640px) {
+    .statistics-screen .stat-overview-card--combined { padding: 14px 11px 0; }
+    .statistics-screen .stat-overview-filter-icon { width: 100%; }
+    .statistics-screen .stat-overview-filter-bar .stat-date-arrow { display: none; }
+    .statistics-screen .stat-overview-filter-bar .stat-date-field { flex-basis: 100%; }
+    .statistics-screen .stat-overview-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .statistics-screen .stat-overview-metric,
+    .statistics-screen .stat-overview-metric:first-child { padding: 12px 7px; border-right: 1px solid #e5e3de; text-align: center; }
+    .statistics-screen .stat-overview-metric:nth-child(2) { border-right: 0; }
+    .statistics-screen .stat-overview-metric:nth-child(-n+2) { border-bottom: 1px solid #e5e3de; }
+}

@@ -11,11 +11,15 @@ import java.sql.SQLException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ThongKeService {
     private final ThongKeDAO thongKeDAO = new ThongKeDAO();
@@ -117,6 +121,42 @@ public class ThongKeService {
         for (int month = 1; month <= 12; month++) {
             result.add(new ThongKeSeriesPoint("T" + month,
                     values.getOrDefault(month, BigDecimal.ZERO)));
+        }
+        return result;
+    }
+
+    public List<ThongKeSeriesPoint> getRevenueSeries(LocalDate from, LocalDate to) throws SQLException {
+        validateRange(from, to);
+        long days = java.time.temporal.ChronoUnit.DAYS.between(from, to) + 1;
+        boolean groupByMonth = days > 62;
+        List<ThongKeSeriesPoint> raw = thongKeDAO.getRevenueSeriesByRange(
+                from.atStartOfDay(), to.plusDays(1).atStartOfDay(), groupByMonth);
+        Map<String, BigDecimal> values = raw.stream().collect(Collectors.toMap(
+                ThongKeSeriesPoint::getLabel,
+                ThongKeSeriesPoint::getValue,
+                BigDecimal::add,
+                LinkedHashMap::new));
+
+        List<ThongKeSeriesPoint> result = new ArrayList<>();
+        if (groupByMonth) {
+            YearMonth current = YearMonth.from(from);
+            YearMonth last = YearMonth.from(to);
+            DateTimeFormatter crossYearLabel = DateTimeFormatter.ofPattern("MM/yy");
+            while (!current.isAfter(last)) {
+                String key = current.toString();
+                String label = from.getYear() == to.getYear()
+                        ? "T" + current.getMonthValue() : current.format(crossYearLabel);
+                result.add(new ThongKeSeriesPoint(label, values.getOrDefault(key, BigDecimal.ZERO)));
+                current = current.plusMonths(1);
+            }
+        } else {
+            DateTimeFormatter dayLabel = DateTimeFormatter.ofPattern("dd/MM");
+            LocalDate current = from;
+            while (!current.isAfter(to)) {
+                result.add(new ThongKeSeriesPoint(
+                        current.format(dayLabel), values.getOrDefault(current.toString(), BigDecimal.ZERO)));
+                current = current.plusDays(1);
+            }
         }
         return result;
     }

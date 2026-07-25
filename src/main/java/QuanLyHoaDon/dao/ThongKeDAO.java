@@ -158,6 +158,33 @@ public class ThongKeDAO {
         return points;
     }
 
+    public List<ThongKeSeriesPoint> getRevenueSeriesByRange(
+            LocalDateTime from, LocalDateTime to, boolean groupByMonth) throws SQLException {
+        String dateExpression = groupByMonth
+                ? "CONVERT(varchar(7), CONVERT(date, COALESCE(hd.ngay_thanh_toan, hd.ngay_tao)), 23)"
+                : "CONVERT(varchar(10), CONVERT(date, COALESCE(hd.ngay_thanh_toan, hd.ngay_tao)), 23)";
+        String sql = "SELECT " + dateExpression + " AS period_label, "
+                + "ISNULL(SUM(hd.tong_tien_thanh_toan), 0) AS revenue "
+                + "FROM hoa_don hd "
+                + "WHERE hd.trang_thai = 3 "
+                + "AND COALESCE(hd.ngay_thanh_toan, hd.ngay_tao) >= ? "
+                + "AND COALESCE(hd.ngay_thanh_toan, hd.ngay_tao) < ? "
+                + "GROUP BY " + dateExpression + " ORDER BY period_label";
+
+        List<ThongKeSeriesPoint> points = new ArrayList<>();
+        try (Connection connection = connectionManager.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            setRange(ps, from, to);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    points.add(new ThongKeSeriesPoint(
+                            rs.getString("period_label"), defaultMoney(rs.getBigDecimal("revenue"))));
+                }
+            }
+        }
+        return points;
+    }
+
     private List<ThongKeProduct> getProducts(
             String sql, LocalDateTime from, LocalDateTime to) throws SQLException {
         List<ThongKeProduct> items = new ArrayList<>();

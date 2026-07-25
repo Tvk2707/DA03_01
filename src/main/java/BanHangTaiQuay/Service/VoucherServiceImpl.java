@@ -13,10 +13,61 @@ import jakarta.persistence.LockModeType;
 import java.math.BigDecimal;
 import java.text.Normalizer;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 public class VoucherServiceImpl implements VoucherService {
+
+    @Override
+    public List<PhieuGiamGia> timKiemVoucher(int idHoaDon, String tuKhoa) {
+        if (idHoaDon <= 0) {
+            throw new IllegalArgumentException("ID hóa đơn không hợp lệ.");
+        }
+        if (tuKhoa == null || tuKhoa.trim().isEmpty()) {
+            return List.of();
+        }
+
+        EntityManager em = EntityManagerUtlis.getEntityManager();
+        try {
+            HoaDon hoaDon = em.find(HoaDon.class, idHoaDon);
+            if (hoaDon == null) {
+                throw new IllegalArgumentException("Hóa đơn không tồn tại.");
+            }
+            if (hoaDon.getPhieuGiamGia() != null) {
+                return List.of();
+            }
+
+            String keyword = tuKhoa.trim().toLowerCase(Locale.ROOT);
+            LocalDateTime hienTai = LocalDateTime.now();
+            List<PhieuGiamGia> ungVien = em.createQuery(
+                            "SELECT p FROM PhieuGiamGia p "
+                                    + "WHERE p.trangThai = 1 "
+                                    + "AND (LOWER(p.maVoucher) LIKE :keyword OR LOWER(p.tenVoucher) LIKE :keyword) "
+                                    + "AND (p.ngayBatDau IS NULL OR p.ngayBatDau <= :hienTai) "
+                                    + "AND (p.ngayKetThuc IS NULL OR p.ngayKetThuc >= :hienTai) "
+                                    + "ORDER BY p.id DESC",
+                            PhieuGiamGia.class)
+                    .setParameter("keyword", "%" + keyword + "%")
+                    .setParameter("hienTai", hienTai)
+                    .setMaxResults(20)
+                    .getResultList();
+
+            BigDecimal tongTienHang = tinhTongTienHang(hoaDon);
+            List<PhieuGiamGia> ketQua = new ArrayList<>();
+            for (PhieuGiamGia voucher : ungVien) {
+                if (laVoucherPhuHop(em, voucher, hoaDon, tongTienHang)) {
+                    ketQua.add(voucher);
+                }
+                if (ketQua.size() >= 8) {
+                    break;
+                }
+            }
+            return ketQua;
+        } finally {
+            em.close();
+        }
+    }
 
     @Override
     public void apDungVoucher(int idHoaDon, String maVoucher) {
@@ -223,6 +274,40 @@ public class VoucherServiceImpl implements VoucherService {
         if (voucher.getLoaiGiamGia() == null || voucher.getGiaTriGiam() == null) {
             throw new IllegalStateException("Voucher chưa có thông tin giảm giá hợp lệ.");
         }
+    }
+
+    private boolean laVoucherPhuHop(EntityManager em, PhieuGiamGia voucher,
+                                    HoaDon hoaDon, BigDecimal tongTienHang) {
+        int soLuong = voucher.getSoLuong() == null ? 0 : voucher.getSoLuong();
+        int soLuongDaDung = voucher.getSoLuongDaDung() == null ? 0 : voucher.getSoLuongDaDung();
+        if (soLuong <= 0 || soLuongDaDung >= soLuong
+                || voucher.getLoaiGiamGia() == null || voucher.getGiaTriGiam() == null) {
+            return false;
+        }
+
+        BigDecimal donToiThieu = voucher.getDonToiThieu() == null
+                ? BigDecimal.ZERO : voucher.getDonToiThieu();
+        if (tongTienHang.compareTo(donToiThieu) < 0) {
+            return false;
+        }
+
+        if (voucher.getLoaiPhieu() == null || voucher.getLoaiPhieu() != 1) {
+            return true;
+        }
+        if (hoaDon.getKhachHang() == null || hoaDon.getKhachHang().getId() == null) {
+            return false;
+        }
+        Long soLienKet = em.createQuery(
+                        "SELECT COUNT(k) FROM KhachHangPhieuGiamGia k "
+                                + "WHERE k.khachHang.id = :idKhachHang "
+                                + "AND k.phieuGiamGia.id = :idVoucher "
+                                + "AND k.ngaySuDung IS NULL "
+                                + "AND (k.trangThai IS NULL OR k.trangThai = 1)",
+                        Long.class)
+                .setParameter("idKhachHang", hoaDon.getKhachHang().getId())
+                .setParameter("idVoucher", voucher.getId())
+                .getSingleResult();
+        return soLienKet != null && soLienKet > 0;
     }
 
     private void kiemTraVoucher(PhieuGiamGia voucher, HoaDon hoaDon, boolean daGiuLuot) {

@@ -378,6 +378,11 @@ public class BanHangServiceImpl implements BanHangService {
     }
 
     @Override
+    public List<PhieuGiamGia> timKiemVoucher(int idHoaDon, String tuKhoa) {
+        return voucherService.timKiemVoucher(idHoaDon, tuKhoa);
+    }
+
+    @Override
     public void apDungVoucher(int idHoaDon, String maVoucher) {
         voucherService.apDungVoucher(idHoaDon, maVoucher);
         /*

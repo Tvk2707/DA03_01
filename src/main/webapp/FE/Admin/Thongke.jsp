@@ -11,16 +11,12 @@
     request.setAttribute("pageTitle", "Thống kê");
     request.setAttribute("activeMenu", "dashboard");
 
-    if (request.getAttribute("todayOverview") == null && request.getAttribute("errorMessage") == null) {
+    if (request.getAttribute("reportOverview") == null && request.getAttribute("errorMessage") == null) {
         response.sendRedirect(request.getContextPath() + "/admin/thong-ke");
         return;
     }
 
     DecimalFormat moneyFormat = new DecimalFormat("#,###");
-    ThongKeOverview todayOverview = overview(request.getAttribute("todayOverview"));
-    ThongKeOverview weekOverview = overview(request.getAttribute("weekOverview"));
-    ThongKeOverview monthOverview = overview(request.getAttribute("monthOverview"));
-    ThongKeOverview yearOverview = overview(request.getAttribute("yearOverview"));
     ThongKeOverview reportOverview = overview(request.getAttribute("reportOverview"));
     LocalDate filterFrom = request.getAttribute("filterFrom") instanceof LocalDate
             ? (LocalDate) request.getAttribute("filterFrom") : LocalDate.now().withDayOfMonth(1);
@@ -66,10 +62,219 @@
     <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/layout.css">
     <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/sidebar.css">
     <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/header.css">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/thongke.css?v=202607161120">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/thongke.css?v=202607251245">
+    <style>
+        /* Inline fallback de khung overview khong bi CSS grid cu ghi de khi WAR dang chay chua cap nhat. */
+        .statistics-screen #overviewCards.stat-overview {
+            display: block !important;
+            width: 100%;
+            margin: 0 0 14px;
+        }
+
+        .statistics-screen #overviewCards .stat-overview-card--combined {
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+            min-height: 0;
+            padding: 16px 16px 0;
+            border: 1px solid #e2e0da;
+            border-radius: 8px;
+            background: #fff;
+            box-shadow: 0 5px 14px rgba(91, 72, 48, .07);
+        }
+
+        .statistics-screen #overviewCards .stat-overview-filter-head,
+        .statistics-screen #overviewCards .stat-overview-filter-bar,
+        .statistics-screen #overviewCards .stat-overview-filter-title,
+        .statistics-screen #overviewCards .stat-overview-quick-filters,
+        .statistics-screen #overviewCards .stat-filter-actions {
+            display: flex;
+        }
+
+        .statistics-screen #overviewCards .stat-overview-filter-head {
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            min-height: 42px;
+        }
+
+        .statistics-screen #overviewCards .stat-overview-filter-title {
+            align-items: center;
+            gap: 10px;
+        }
+
+        .statistics-screen #overviewCards .stat-overview-filter-title .stat-card-icon {
+            width: 34px;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 7px;
+            background: #f2eadc;
+            color: #6b5438;
+        }
+
+        .statistics-screen #overviewCards .stat-overview-filter-title .stat-card-label {
+            display: block;
+            color: #242a35;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .statistics-screen #overviewCards .stat-overview-filter-title small {
+            display: block;
+            margin-top: 2px;
+            color: #767b83;
+            font-size: 10px;
+        }
+
+        .statistics-screen #overviewCards .stat-overview-quick-filters {
+            align-items: center;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .statistics-screen #overviewCards .stat-quick-filter {
+            min-height: 29px;
+            border: 1px solid #e0ded8;
+            border-radius: 999px;
+            background: #fff;
+            color: #4e535b;
+            padding: 5px 11px;
+            font: inherit;
+            font-size: 10.5px;
+            cursor: pointer;
+        }
+
+        .statistics-screen #overviewCards .stat-quick-filter:hover,
+        .statistics-screen #overviewCards .stat-quick-filter.is-active {
+            border-color: #5b4427;
+            background: #5b4427;
+            color: #fff;
+        }
+
+        .statistics-screen #overviewCards .stat-overview-filter-bar {
+            align-items: flex-end;
+            gap: 9px;
+            margin-top: 12px;
+            padding: 9px 0;
+            border-top: 1px solid #efede8;
+            border-bottom: 1px solid #efede8;
+        }
+
+        .statistics-screen #overviewCards .stat-overview-filter-icon {
+            align-self: center;
+            min-width: 70px;
+            color: #747982;
+            font-size: 10.5px;
+        }
+
+        .statistics-screen #overviewCards .stat-date-field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            width: 155px;
+        }
+
+        .statistics-screen #overviewCards .stat-date-field > span {
+            color: #41464f;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .statistics-screen #overviewCards .stat-date-field input {
+            width: 100%;
+            min-height: 31px;
+            box-sizing: border-box;
+            border: 1px solid #d9d8d4;
+            border-radius: 4px;
+            background: #fff;
+            padding: 5px 8px;
+            color: #353a43;
+            font-size: 11px;
+        }
+
+        .statistics-screen #overviewCards .stat-date-arrow {
+            align-self: center;
+            color: #85888d;
+            font-size: 10px;
+        }
+
+        .statistics-screen #overviewCards .stat-filter-actions {
+            align-items: center;
+            gap: 6px;
+            margin-left: auto;
+        }
+
+        .statistics-screen #overviewCards .stat-filter-actions .stat-btn {
+            min-height: 31px;
+            border-radius: 4px;
+            padding: 6px 10px;
+            font: inherit;
+            font-size: 10.5px;
+            white-space: nowrap;
+        }
+
+        .statistics-screen #overviewCards .stat-btn--primary {
+            border: 1px solid #9b7a4e;
+            background: #9b7a4e;
+            color: #fff;
+        }
+
+        .statistics-screen #overviewCards .stat-btn--ghost {
+            border: 1px solid #c4c0b8;
+            background: #fff;
+            color: #5e6268;
+        }
+
+        .statistics-screen #overviewCards .stat-overview-metrics {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr 1fr 1fr;
+            margin-top: 0;
+        }
+
+        .statistics-screen #overviewCards .stat-overview-metric {
+            min-width: 0;
+            padding: 13px 17px 15px;
+            border-right: 1px solid #e5e3de;
+            text-align: center;
+        }
+
+        .statistics-screen #overviewCards .stat-overview-metric:first-child { text-align: left; }
+        .statistics-screen #overviewCards .stat-overview-metric:last-child { border-right: 0; }
+        .statistics-screen #overviewCards .stat-overview-metric > span { display: block; color: #3f444c; font-size: 10.5px; }
+        .statistics-screen #overviewCards .stat-overview-metric > strong { display: block; margin-top: 3px; color: #675035; font-size: 20px; line-height: 1.15; }
+        .statistics-screen #overviewCards .stat-overview-metric > small { display: block; min-height: 15px; margin-top: 4px; color: #81858a; font-size: 9.5px; line-height: 1.35; }
+        .statistics-screen #overviewCards .stat-overview-metric > small .is-done { color: #408063; }
+        .statistics-screen #overviewCards .stat-overview-metric > small .is-cancel { color: #ac4e69; }
+        .statistics-screen #overviewCards .stat-overview-metric > small .is-process { color: #a17639; }
+        .statistics-screen #overviewCards .stat-overview-progress { height: 4px; max-width: 130px; margin: 8px auto 0; overflow: hidden; border-radius: 999px; background: #e4e4df; }
+        .statistics-screen #overviewCards .stat-overview-progress span { display: block; height: 100%; border-radius: inherit; background: #6f9d78; }
+
+        @media (max-width: 900px) {
+            .statistics-screen #overviewCards .stat-overview-filter-head { align-items: flex-start; flex-direction: column; }
+            .statistics-screen #overviewCards .stat-overview-quick-filters { width: 100%; }
+            .statistics-screen #overviewCards .stat-overview-filter-bar { align-items: stretch; flex-wrap: wrap; }
+            .statistics-screen #overviewCards .stat-date-field { flex: 1 1 150px; }
+            .statistics-screen #overviewCards .stat-filter-actions { width: 100%; margin-left: 0; }
+            .statistics-screen #overviewCards .stat-filter-actions .stat-btn { flex: 1; }
+        }
+
+        @media (max-width: 640px) {
+            .statistics-screen #overviewCards .stat-overview-card--combined { padding: 14px 11px 0; }
+            .statistics-screen #overviewCards .stat-date-arrow { display: none; }
+            .statistics-screen #overviewCards .stat-date-field { flex-basis: 100%; }
+            .statistics-screen #overviewCards .stat-overview-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .statistics-screen #overviewCards .stat-overview-metric,
+            .statistics-screen #overviewCards .stat-overview-metric:first-child { padding: 12px 7px; border-right: 1px solid #e5e3de; text-align: center; }
+            .statistics-screen #overviewCards .stat-overview-metric:nth-child(2) { border-right: 0; }
+            .statistics-screen #overviewCards .stat-overview-metric:nth-child(-n+2) { border-bottom: 1px solid #e5e3de; }
+        }
+    </style>
 </head>
 <body class="statistics-screen"
       data-statistics-url="<%= request.getContextPath() %>/admin/thong-ke"
+      data-current-date="<%= currentDate %>"
       data-current-year="<%= currentDate.getYear() %>"
       data-current-month="<%= currentDate.getMonthValue() %>">
 <%@ include file="/Admin/layout/sidebar.jsp" %>
@@ -89,60 +294,66 @@
             </button>
         </section>
 
-        <section class="stat-overview" id="overviewCards" aria-label="Số liệu tổng quan">
-            <article class="stat-overview-card" data-range="today">
-                <div class="stat-card-topline">
-                    <span class="stat-card-label">Hôm nay</span>
-                    <span class="stat-card-icon"><i class="far fa-calendar"></i></span>
+        <section class="stat-overview" id="overviewCards" aria-label="Bộ lọc và số liệu tổng quan">
+            <article class="stat-overview-card stat-overview-card--combined">
+                <div class="stat-overview-filter-head">
+                    <div class="stat-overview-filter-title">
+                        <span class="stat-card-icon"><i class="fas fa-chart-column"></i></span>
+                        <div>
+                            <span class="stat-card-label">Bộ lọc thống kê</span>
+                            <small>Dữ liệu bên dưới được cập nhật theo bộ lọc này</small>
+                        </div>
+                    </div>
+                    <div class="stat-overview-quick-filters" role="group" aria-label="Khoảng thời gian nhanh">
+                        <button type="button" class="stat-quick-filter" data-filter-preset="today">Hôm nay</button>
+                        <button type="button" class="stat-quick-filter" data-filter-preset="week">Tuần này</button>
+                        <button type="button" class="stat-quick-filter is-active" data-filter-preset="month">Tháng này</button>
+                        <button type="button" class="stat-quick-filter" data-filter-preset="year">Năm nay</button>
+                    </div>
                 </div>
-                <strong class="stat-card-value" data-field="revenue"><%= money(moneyFormat, todayOverview.getRevenue()) %></strong>
-                <p class="stat-card-meta">Sản phẩm đã bán <b data-field="products"><%= todayOverview.getProducts() %></b> <i></i> Đơn hàng <b data-field="orders"><%= todayOverview.getOrders() %></b></p>
-                <div class="stat-card-statuses">
-                    <span class="is-done">Đã thanh toán <b data-field="done"><%= todayOverview.getDone() %></b></span>
-                    <span class="is-cancel">Hủy <b data-field="cancelled"><%= todayOverview.getCancelled() %></b></span>
-                    <span class="is-process">Chờ xử lý <b data-field="processing"><%= todayOverview.getProcessing() %></b></span>
-                </div>
-            </article>
 
-            <article class="stat-overview-card" data-range="week">
-                <div class="stat-card-topline">
-                    <span class="stat-card-label">Tuần này</span>
-                    <span class="stat-card-icon"><i class="far fa-calendar-check"></i></span>
+                <div class="stat-overview-filter-bar">
+                    <span class="stat-overview-filter-icon"><i class="fas fa-filter"></i> Bộ lọc</span>
+                    <label class="stat-date-field">
+                        <span>Từ ngày</span>
+                        <input id="reportFrom" type="date" value="<%= filterFrom %>">
+                    </label>
+                    <span class="stat-date-arrow"><i class="fas fa-arrow-right"></i></span>
+                    <label class="stat-date-field">
+                        <span>Đến ngày</span>
+                        <input id="reportTo" type="date" value="<%= filterTo %>">
+                    </label>
+                    <div class="stat-filter-actions">
+                        <button class="stat-btn stat-btn--primary" id="applyReportFilter" type="button">
+                            <i class="fas fa-filter"></i> Lọc dữ liệu
+                        </button>
+                        <button class="stat-btn stat-btn--ghost" id="resetReportFilter" type="button">
+                            <i class="fas fa-rotate-left"></i> Đặt lại
+                        </button>
+                    </div>
                 </div>
-                <strong class="stat-card-value" data-field="revenue"><%= money(moneyFormat, weekOverview.getRevenue()) %></strong>
-                <p class="stat-card-meta">Sản phẩm đã bán <b data-field="products"><%= weekOverview.getProducts() %></b> <i></i> Đơn hàng <b data-field="orders"><%= weekOverview.getOrders() %></b></p>
-                <div class="stat-card-statuses">
-                    <span class="is-done">Đã thanh toán <b data-field="done"><%= weekOverview.getDone() %></b></span>
-                    <span class="is-cancel">Hủy <b data-field="cancelled"><%= weekOverview.getCancelled() %></b></span>
-                    <span class="is-process">Chờ xử lý <b data-field="processing"><%= weekOverview.getProcessing() %></b></span>
-                </div>
-            </article>
 
-            <article class="stat-overview-card" data-range="month">
-                <div class="stat-card-topline">
-                    <span class="stat-card-label">Tháng này</span>
-                    <span class="stat-card-icon"><i class="fas fa-chart-line"></i></span>
-                </div>
-                <strong class="stat-card-value" data-field="revenue"><%= money(moneyFormat, monthOverview.getRevenue()) %></strong>
-                <p class="stat-card-meta">Sản phẩm đã bán <b data-field="products"><%= monthOverview.getProducts() %></b> <i></i> Đơn hàng <b data-field="orders"><%= monthOverview.getOrders() %></b></p>
-                <div class="stat-card-statuses">
-                    <span class="is-done">Đã thanh toán <b data-field="done"><%= monthOverview.getDone() %></b></span>
-                    <span class="is-cancel">Hủy <b data-field="cancelled"><%= monthOverview.getCancelled() %></b></span>
-                    <span class="is-process">Chờ xử lý <b data-field="processing"><%= monthOverview.getProcessing() %></b></span>
-                </div>
-            </article>
-
-            <article class="stat-overview-card" data-range="year">
-                <div class="stat-card-topline">
-                    <span class="stat-card-label">Năm nay</span>
-                    <span class="stat-card-icon"><i class="fas fa-calendar-days"></i></span>
-                </div>
-                <strong class="stat-card-value" data-field="revenue"><%= money(moneyFormat, yearOverview.getRevenue()) %></strong>
-                <p class="stat-card-meta">Sản phẩm đã bán <b data-field="products"><%= yearOverview.getProducts() %></b> <i></i> Đơn hàng <b data-field="orders"><%= yearOverview.getOrders() %></b></p>
-                <div class="stat-card-statuses">
-                    <span class="is-done">Đã thanh toán <b data-field="done"><%= yearOverview.getDone() %></b></span>
-                    <span class="is-cancel">Hủy <b data-field="cancelled"><%= yearOverview.getCancelled() %></b></span>
-                    <span class="is-process">Chờ xử lý <b data-field="processing"><%= yearOverview.getProcessing() %></b></span>
+                <div class="stat-overview-metrics" aria-label="Tổng quan theo khoảng ngày đã chọn">
+                    <div class="stat-overview-metric">
+                        <span>Doanh thu</span>
+                        <strong data-field="revenue"><%= money(moneyFormat, reportOverview.getRevenue()) %></strong>
+                        <small>Đã ghi nhận trong kỳ</small>
+                    </div>
+                    <div class="stat-overview-metric">
+                        <span>Đơn hàng</span>
+                        <strong data-field="orders"><%= reportOverview.getOrders() %></strong>
+                        <small><b class="is-done">Hoàn thành <%= reportOverview.getDone() %></b> · <b class="is-cancel">Hủy <%= reportOverview.getCancelled() %></b> · <b class="is-process">Chờ <%= reportOverview.getProcessing() %></b></small>
+                    </div>
+                    <div class="stat-overview-metric">
+                        <span>Sản phẩm đã bán</span>
+                        <strong data-field="products"><%= reportOverview.getProducts() %></strong>
+                        <small>Items sold</small>
+                    </div>
+                    <div class="stat-overview-metric stat-overview-metric--completion">
+                        <span>Tỷ lệ hoàn thành</span>
+                        <strong><%= completionRate %>%</strong>
+                        <div class="stat-overview-progress"><span style="width: <%= completionRate %>%;"></span></div>
+                    </div>
                 </div>
             </article>
         </section>
@@ -179,35 +390,6 @@
             <div class="stat-chart-footer">
                 <p>Tổng doanh thu: <strong id="chartTotal">0 đ</strong></p>
                 <span><i class="fas fa-circle-info"></i> Đơn vị: VNĐ</span>
-            </div>
-        </section>
-
-        <section class="stat-panel stat-filter-panel">
-            <div class="stat-filter-title">
-                <span class="stat-heading-icon"><i class="fas fa-filter"></i></span>
-                <div>
-                    <h2>Bộ lọc báo cáo</h2>
-                    <p>Lọc dữ liệu chi tiết theo khoảng ngày</p>
-                </div>
-            </div>
-            <div class="stat-filter-fields">
-                <label class="stat-date-field">
-                    <span>Từ ngày</span>
-                    <input id="reportFrom" type="date" value="<%= filterFrom %>">
-                </label>
-                <span class="stat-date-arrow"><i class="fas fa-arrow-right"></i></span>
-                <label class="stat-date-field">
-                    <span>Đến ngày</span>
-                    <input id="reportTo" type="date" value="<%= filterTo %>">
-                </label>
-            </div>
-            <div class="stat-filter-actions">
-                <button class="stat-btn stat-btn--primary" id="applyReportFilter" type="button">
-                    <i class="fas fa-filter"></i> Lọc dữ liệu
-                </button>
-                <button class="stat-btn stat-btn--ghost" id="resetReportFilter" type="button">
-                    <i class="fas fa-rotate-left"></i> Đặt lại
-                </button>
             </div>
         </section>
 

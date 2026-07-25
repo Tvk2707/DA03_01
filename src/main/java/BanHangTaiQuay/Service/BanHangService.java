@@ -2,6 +2,7 @@ package BanHangTaiQuay.Service;
 
 import QuanLySanPham.Entity.HoaDon;
 import QuanLySanPham.Entity.KhachHang;
+import QuanLySanPham.Entity.PhieuGiamGia;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -19,6 +20,7 @@ public interface BanHangService {
                                      LocalDate ngaySinh, Integer gioiTinh);
     void ganKhachHang(int idHoaDon, int idKhachHang);
     void chonKhachLe(int idHoaDon);
+    List<PhieuGiamGia> timKiemVoucher(int idHoaDon, String tuKhoa);
     void apDungVoucher(int idHoaDon, String maVoucher);
     void goVoucher(int idHoaDon);
     void xacNhanThanhToan(int idHoaDon, String maPttt, BigDecimal soTienKhachDua);

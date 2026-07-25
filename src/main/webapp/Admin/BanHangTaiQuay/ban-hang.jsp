@@ -75,7 +75,7 @@
         .page-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--brown-900); margin: 0;}
         .page-sub { color: var(--text-sub); font-size: 14px; margin-top: 4px;}
         .seller-meta {
-            display: flex; align-items: center; gap: 10px 18px; flex-wrap: wrap;
+            display: none;
             margin-top: 10px; color: var(--text-sub); font-size: 12.5px;
         }
         .seller-meta__item { display: inline-flex; align-items: center; gap: 6px; }
@@ -164,23 +164,40 @@
             background: var(--brown-900); color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;
         }
 
-        .product-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 18px; }
-        .p-card {
-            border: 1px solid var(--line); border-radius: 12px; padding: 12px; cursor: pointer;
-            transition: box-shadow .15s ease; background: var(--panel);
+        /* Danh sach san pham dang bang de de quet ten, SKU, ton kho va gia. */
+        .product-grid { display: block; margin-top: 18px; }
+        .product-table-wrap { width: 100%; max-width: 100%; overflow: hidden; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+        .product-table { width: 100%; max-width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
+        .product-table th {
+            padding: 8px 9px; border-bottom: 1px solid var(--line); background: var(--bg);
+            color: var(--text-sub); font-size: 10.5px; font-weight: 700; letter-spacing: .02em; text-align: left;
+            white-space: normal; overflow-wrap: anywhere;
         }
-        .p-card:hover { box-shadow: 0 4px 14px rgba(74,59,39,.08); border-color: var(--brown-500); }
-        .p-thumb {
-            height: 92px; border-radius: 9px; background: var(--gold-bg);
-            display: flex; align-items: center; justify-content: center; margin-bottom: 10px; color: var(--brown-600);
+        .product-table th:first-child { width: 40%; }
+        .product-table th:nth-child(2) { width: 29%; }
+        .product-table th:nth-child(3) { width: 19%; text-align: right; }
+        .product-table th:last-child { width: 12%; text-align: center; }
+        .product-table td { padding: 8px 9px; border-bottom: 1px solid var(--line); vertical-align: middle; min-width: 0; overflow-wrap: anywhere; }
+        .product-table tbody tr:last-child td { border-bottom: 0; }
+        .product-table tbody tr.p-card { background: #fff; cursor: pointer; transition: background .15s ease; }
+        .product-table tbody tr.p-card:hover { background: var(--gold-bg); }
+        .product-table__product { display: flex; align-items: center; gap: 8px; min-width: 0; }
+        .product-table .p-thumb {
+            width: 44px; height: 44px; flex: 0 0 44px; margin: 0; border-radius: 7px; background: var(--gold-bg);
+            display: flex; align-items: center; justify-content: center; color: var(--brown-600); overflow: hidden;
         }
-        .p-name { font-size: 13px; font-weight: 600; line-height: 1.3; margin-bottom: 4px; }
-        .p-meta { font-size: 11px; color: var(--text-sub); margin-bottom: 8px;}
-        .p-bottom { display: flex; align-items: center; justify-content: space-between; }
-        .p-price { font-size: 13.5px; font-weight: 700; color: var(--brown-700); }
+        .product-table .p-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 7px; display: block; }
+        .product-table .p-name { font-size: 12px; font-weight: 700; line-height: 1.3; margin: 0; overflow-wrap: anywhere; word-break: break-word; }
+        .product-table .p-sku { color: var(--text-sub); font-size: 10px; line-height: 1.25; margin-top: 2px; overflow-wrap: anywhere; }
+        .product-table .p-meta { font-size: 11px; color: var(--text-sub); line-height: 1.35; margin: 0; overflow-wrap: anywhere; word-break: break-word; }
+        .product-table .p-bottom { display: flex; align-items: center; justify-content: flex-end; min-width: 0; }
+        .product-table .p-price { font-size: 11.5px; font-weight: 700; color: var(--brown-700); white-space: normal; overflow-wrap: anywhere; text-align: right; }
+        .product-table__empty { padding: 40px 16px !important; text-align: center; color: var(--text-sub); font-size: 14px; }
+        .product-table__empty i { display: block; margin-bottom: 10px; color: #ccc; font-size: 24px; }
         .p-add {
             width: 26px; height: 26px; border-radius: 8px; background: var(--gold-bg); color: var(--brown-700);
-            display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; cursor: pointer;
+            display: inline-flex; align-items: center; justify-content: center; border: 0; padding: 0;
+            font: inherit; font-weight: 700; font-size: 14px; cursor: pointer;
             transition: background .15s ease, color .15s ease, transform .15s ease, opacity .15s ease;
         }
         .p-add:hover {
@@ -194,6 +211,18 @@
             cursor: not-allowed;
             opacity: .4;
             pointer-events: none;
+        }
+        @media (max-width: 720px) {
+            .product-table th:first-child { width: 38%; }
+            .product-table th:nth-child(2) { width: 30%; }
+            .product-table th:nth-child(3) { width: 20%; }
+            .product-table th:last-child { width: 12%; }
+            .product-table td, .product-table th { padding: 7px 6px; }
+            .product-table .p-thumb { width: 38px; height: 38px; flex-basis: 38px; }
+            .product-table .p-name { font-size: 11.5px; }
+            .product-table .p-sku, .product-table .p-meta { font-size: 10px; }
+            .product-table .p-price { font-size: 10.5px; }
+            .product-table .p-add { width: 24px; height: 24px; }
         }
         .stock-low { color: var(--red-text); }
         .cart-fly-item {
@@ -312,16 +341,37 @@
         .ci-remove { border: 0; background: transparent; color: var(--red-text); font-size: 11px; cursor: pointer; padding: 3px 5px; }
         .ci-remove:hover { background: var(--red-bg); border-radius: 5px; }
 
-        .voucher-row { display: flex; gap: 8px; margin-bottom: 14px; }
-        #input-voucher { flex: 1; border: 1px dashed var(--brown-500); border-radius: 9px; padding: 9px 12px; font-size: 12.5px; color: var(--text-sub); background: var(--bg); outline: none;}
+        .voucher-row { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 14px; }
+        .voucher-input-wrap { position: relative; flex: 1; min-width: 0; }
+        #input-voucher { width: 100%; box-sizing: border-box; border: 1px dashed var(--brown-500); border-radius: 9px; padding: 9px 12px; font-size: 12.5px; color: var(--text-sub); background: var(--bg); outline: none;}
         #input-voucher[readonly] { color: var(--brown-700); background: var(--gold-bg); font-weight: 700; cursor: default; }
-        .voucher-apply { background: var(--gold-bg); color: var(--brown-700); border: none; border-radius: 9px; padding: 0 14px; font-size: 12px; font-weight: 700; cursor: pointer;}
+        .voucher-apply { height: 38px; background: var(--gold-bg); color: var(--brown-700); border: none; border-radius: 9px; padding: 0 14px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap;}
         .voucher-apply:disabled { background: var(--green-bg); color: var(--green-text); cursor: default; }
-        .voucher-remove {
-            border: 1px solid var(--red-text); border-radius: 9px; padding: 0 12px;
-            background: #fff; color: var(--red-text); font-size: 12px; font-weight: 700; cursor: pointer;
+        .voucher-suggestions {
+            position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 20;
+            display: flex; flex-direction: column; gap: 5px; max-height: 230px; overflow-y: auto;
+            padding: 6px; border: 1px solid var(--line); border-radius: 9px; background: #fff;
+            box-shadow: 0 8px 22px rgba(0,0,0,.12);
         }
-        .voucher-remove:hover { background: var(--red-bg); }
+        .voucher-suggestions.hidden { display: none; }
+        .voucher-suggestion {
+            width: 100%; padding: 8px 9px; border: 1px solid var(--line); border-radius: 7px;
+            background: #fff; color: var(--text-main); text-align: left; cursor: pointer;
+            transition: border-color .15s ease, background .15s ease;
+        }
+        .voucher-suggestion:hover { border-color: var(--brown-500); background: var(--gold-bg); }
+        .voucher-suggestion__head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+        .voucher-suggestion__code { color: var(--brown-700); font-size: 12px; font-weight: 700; overflow-wrap: anywhere; }
+        .voucher-suggestion__discount { color: var(--green-text); font-size: 11px; font-weight: 700; white-space: nowrap; }
+        .voucher-suggestion__meta { display: block; margin-top: 3px; color: var(--text-sub); font-size: 10.5px; line-height: 1.35; overflow-wrap: anywhere; }
+        .voucher-suggestion-empty { padding: 8px 5px; color: var(--text-sub); font-size: 11.5px; line-height: 1.4; }
+        .voucher-remove {
+            flex: 0 0 auto; height: 38px; display: inline-flex; align-items: center; justify-content: center;
+            border: 1px solid var(--red-text); border-radius: 9px; padding: 0 14px;
+            background: var(--red-bg); color: var(--red-text); font-size: 12px; font-weight: 700; cursor: pointer;
+            white-space: nowrap; transition: background .15s ease, color .15s ease, border-color .15s ease;
+        }
+        .voucher-remove:hover { background: var(--red-text); color: #fff; border-color: var(--red-text); }
 
         .totals { border-top: 1px dashed var(--line); padding-top: 12px; margin-bottom: 14px; }
         .t-row { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--text-sub); margin-bottom: 7px;}
@@ -487,6 +537,9 @@
         @media (max-width: 900px) {
             .page-head-row { flex-direction: column; }
             .head-btns { margin-left: 0; }
+            .pos-layout { flex-direction: column; }
+            .left-col, .right-col { width: 100%; box-sizing: border-box; }
+            .right-col { flex: 0 0 auto; }
         }
     </style>
 </head>
@@ -601,29 +654,56 @@
                         </div>
 
                         <div class="product-grid">
-                            <c:forEach var="sp" items="${danhSachSanPham}">
-                                <div class="p-card" data-spct="${sp.id}">
-                                    <div class="p-thumb">
-                                        <c:choose>
-                                            <c:when test="${not empty sp.hinhAnhHienThi && sp.hinhAnhHienThi != 'null'}">
-                                                <img src="${pageContext.request.contextPath}/${sp.hinhAnhHienThi}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 9px;" onerror="this.style.display='none';"/>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="6.5" cy="12" r="3.2"/><circle cx="17.5" cy="12" r="3.2"/><path d="M9.7 12h4.6M3 12l-1.5-1M21 12l1.5-1"/></svg>
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </div>
-                                    <div class="p-name">${sp.sanPham.tenSanPham} (${sp.ma})</div>
-                                    <div class="p-meta ${sp.soLuongTon <= 3 ? 'stock-low' : ''}" data-tonkho>
-                                        Còn ${sp.soLuongTon} · ${sp.mauSac.tenMau} - ${sp.kichCo.tenKichCo}
-                                    </div>
-                                    <div class="p-bottom">
-                                        <div class="p-price"><fmt:formatNumber value="${sp.giaBan}" type="currency" currencySymbol="đ"/></div>
-                                        <div class="p-add" ${empty idHoaDonDangTao || hoaDonDangTao.trangThai == 3 || hoaDonDangTao.trangThai == 5 || sp.soLuongTon <= 0 ? 'data-disabled="true"' : ''}
-                                             title="${empty idHoaDonDangTao ? 'Tạo hóa đơn trước' : 'Thêm vào giỏ'}">+</div>
-                                    </div>
-                                </div>
-                            </c:forEach>
+                            <div class="product-table-wrap">
+                                <table class="product-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Sản phẩm</th>
+                                            <th>Thuộc tính và tồn kho</th>
+                                            <th>Giá bán</th>
+                                            <th>Thêm</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <c:forEach var="sp" items="${danhSachSanPham}">
+                                            <tr class="p-card" data-spct="${sp.id}">
+                                                <td>
+                                                    <div class="product-table__product">
+                                                        <div class="p-thumb">
+                                                            <c:choose>
+                                                                <c:when test="${not empty sp.hinhAnhHienThi && sp.hinhAnhHienThi != 'null'}">
+                                                                    <img src="${pageContext.request.contextPath}/${sp.hinhAnhHienThi}" alt="${sp.sanPham.tenSanPham}" onerror="this.style.display='none';"/>
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="6.5" cy="12" r="3.2"/><circle cx="17.5" cy="12" r="3.2"/><path d="M9.7 12h4.6M3 12l-1.5-1M21 12l1.5-1"/></svg>
+                                                                </c:otherwise>
+                                                            </c:choose>
+                                                        </div>
+                                                        <div>
+                                                            <div class="p-name" title="${sp.sanPham.tenSanPham} (SKU: ${sp.ma})">${sp.sanPham.tenSanPham}</div>
+                                                            <div class="p-sku" title="SKU: ${sp.ma}">SKU: ${sp.ma}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="p-meta ${sp.soLuongTon <= 3 ? 'stock-low' : ''}" data-tonkho title="Còn ${sp.soLuongTon} · ${sp.mauSac.tenMau} - ${sp.kichCo.tenKichCo}">
+                                                        Còn ${sp.soLuongTon} · ${sp.mauSac.tenMau} - ${sp.kichCo.tenKichCo}
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="p-bottom">
+                                                        <div class="p-price"><fmt:formatNumber value="${sp.giaBan}" type="currency" currencySymbol="đ"/></div>
+                                                    </div>
+                                                </td>
+                                                <td style="text-align: center;">
+                                                    <button type="button" class="p-add" ${empty idHoaDonDangTao || hoaDonDangTao.trangThai == 3 || hoaDonDangTao.trangThai == 5 || sp.soLuongTon <= 0 ? 'data-disabled="true"' : ''}
+                                                            title="${empty idHoaDonDangTao ? 'Tạo hóa đơn trước' : 'Thêm vào giỏ'}" aria-label="Thêm ${sp.sanPham.tenSanPham} vào giỏ">+</button>
+                                                </td>
+                                            </tr>
+                                        </c:forEach>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
 
@@ -724,11 +804,14 @@
 
                         <c:set var="voucherDaApDung" value="${hoaDonDangTao.phieuGiamGia}"/>
                         <div class="voucher-row">
-                            <input type="text" id="input-voucher"
-                                   placeholder="Nhập mã voucher..."
-                                   autocomplete="off"
-                                   value="${not empty voucherDaApDung ? voucherDaApDung.maVoucher : ''}"
-                                   ${not empty voucherDaApDung ? 'readonly' : ''}>
+                            <div class="voucher-input-wrap">
+                                <input type="text" id="input-voucher"
+                                       placeholder="Nhập mã voucher..."
+                                       autocomplete="off"
+                                       value="${not empty voucherDaApDung ? voucherDaApDung.maVoucher : ''}"
+                                       ${not empty voucherDaApDung ? 'readonly' : ''}>
+                                <div id="voucher-suggestions" class="voucher-suggestions hidden" role="listbox"></div>
+                            </div>
                             <button type="button" class="voucher-apply"
                                     ${not empty voucherDaApDung ? 'disabled' : ''}>
                                 ${not empty voucherDaApDung ? 'Đã áp dụng' : 'Áp dụng'}

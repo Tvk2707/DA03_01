@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     var page = document.body;
     var endpoint = page.dataset.statisticsUrl || "admin/thong-ke";
+    var currentDateValue = page.dataset.currentDate || new Date().toISOString().slice(0, 10);
     var currentYear = Number(page.dataset.currentYear) || new Date().getFullYear();
     var currentMonth = Number(page.dataset.currentMonth) || new Date().getMonth() + 1;
     var state = {
@@ -29,6 +30,8 @@ document.addEventListener("DOMContentLoaded", function () {
     var reportTo = document.getElementById("reportTo");
     var applyFilter = document.getElementById("applyReportFilter");
     var resetFilter = document.getElementById("resetReportFilter");
+    var quickFilters = document.querySelectorAll("[data-filter-preset]");
+    var useGlobalRangeForChart = true;
 
     if (!periodMode || !periodFields || !chart || !chartLegend || !chartTotal || !chartDescription) {
         return;
@@ -42,6 +45,60 @@ document.addEventListener("DOMContentLoaded", function () {
         if (value === 0) return "0";
         if (value >= 1000000000) return (value / 1000000000).toFixed(1) + "B";
         return (value / 1000000).toFixed(1) + "M";
+    }
+
+    function dateParts(value) {
+        var parts = String(value).split("-").map(Number);
+        return new Date(parts[0], parts[1] - 1, parts[2]);
+    }
+
+    function dateValue(date) {
+        return date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0")
+            + "-" + String(date.getDate()).padStart(2, "0");
+    }
+
+    function setQuickFilterState(from, to) {
+        quickFilters.forEach(function (button) {
+            button.classList.toggle("is-active", false);
+        });
+
+        var today = dateParts(currentDateValue);
+        var todayValue = dateValue(today);
+        var fromDate = dateParts(from);
+        var toDate = dateParts(to);
+        var preset = null;
+        if (from === todayValue && to === todayValue) {
+            preset = "today";
+        } else {
+            var monday = new Date(today);
+            monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
+            if (from === dateValue(monday) && to === todayValue) preset = "week";
+            if (from === today.getFullYear() + "-" + String(today.getMonth() + 1).padStart(2, "0") + "-01"
+                && to === todayValue) preset = "month";
+            if (from === today.getFullYear() + "-01-01" && to === todayValue) preset = "year";
+        }
+        quickFilters.forEach(function (button) {
+            button.classList.toggle("is-active", button.dataset.filterPreset === preset);
+        });
+        return fromDate <= toDate;
+    }
+
+    function applyQuickFilter(preset) {
+        var today = dateParts(currentDateValue);
+        var from = new Date(today);
+        if (preset === "week") {
+            from.setDate(today.getDate() - ((today.getDay() + 6) % 7));
+        } else if (preset === "month") {
+            from = new Date(today.getFullYear(), today.getMonth(), 1);
+        } else if (preset === "year") {
+            from = new Date(today.getFullYear(), 0, 1);
+        }
+        var fromValue = dateValue(from);
+        var toValue = dateValue(today);
+        if (reportFrom) reportFrom.value = fromValue;
+        if (reportTo) reportTo.value = toValue;
+        setQuickFilterState(fromValue, toValue);
+        window.location.assign(endpoint + "?" + new URLSearchParams({ from: fromValue, to: toValue }).toString());
     }
 
     function showMessage(message, isError) {
@@ -131,20 +188,26 @@ document.addEventListener("DOMContentLoaded", function () {
         var yearSelect = document.getElementById("reportYear");
 
         monthSelect?.addEventListener("change", function () {
+            useGlobalRangeForChart = false;
             state.month = Number(this.value);
             loadRevenueSeries();
         });
         quarterSelect?.addEventListener("change", function () {
+            useGlobalRangeForChart = false;
             state.quarter = Number(this.value);
             loadRevenueSeries();
         });
         yearSelect?.addEventListener("change", function () {
+            useGlobalRangeForChart = false;
             state.year = Number(this.value);
             loadRevenueSeries();
         });
     }
 
     function seriesName() {
+        if (useGlobalRangeForChart && reportFrom?.value && reportTo?.value) {
+            return "Doanh thu theo khoảng đã lọc";
+        }
         if (state.mode === "quarter") {
             return "Doanh thu (quý " + state.quarter + "/" + state.year + ")";
         }
@@ -155,13 +218,22 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     async function loadRevenueSeries() {
-        var query = new URLSearchParams({
-            action: "revenue-series",
-            mode: state.mode,
-            year: String(state.year),
-            month: String(state.month),
-            quarter: String(state.quarter)
-        });
+        var query;
+        if (useGlobalRangeForChart && reportFrom?.value && reportTo?.value) {
+            query = new URLSearchParams({
+                action: "revenue-series",
+                from: reportFrom.value,
+                to: reportTo.value
+            });
+        } else {
+            query = new URLSearchParams({
+                action: "revenue-series",
+                mode: state.mode,
+                year: String(state.year),
+                month: String(state.month),
+                quarter: String(state.quarter)
+            });
+        }
 
         chart.classList.add("is-loading");
         try {
@@ -302,6 +374,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     periodMode.addEventListener("change", function () {
+        useGlobalRangeForChart = false;
         state.mode = this.value;
         renderPeriodFields();
         loadRevenueSeries();
@@ -318,6 +391,7 @@ document.addEventListener("DOMContentLoaded", function () {
             showMessage("Từ ngày không được lớn hơn đến ngày.", true);
             return;
         }
+        setQuickFilterState(from, to);
         var query = new URLSearchParams({ from: from, to: to });
         window.location.assign(endpoint + "?" + query.toString());
     });
@@ -325,6 +399,14 @@ document.addEventListener("DOMContentLoaded", function () {
     resetFilter?.addEventListener("click", function () {
         window.location.assign(endpoint);
     });
+
+    quickFilters.forEach(function (button) {
+        button.addEventListener("click", function () {
+            applyQuickFilter(button.dataset.filterPreset);
+        });
+    });
+
+    if (reportFrom && reportTo) setQuickFilterState(reportFrom.value, reportTo.value);
 
     document.getElementById("exportReport")?.addEventListener("click", function () {
         window.print();

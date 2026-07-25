@@ -36,12 +36,7 @@ public class ThongKeController extends HttpServlet {
         LocalDate filterTo = parseDate(request.getParameter("to"), today);
 
         try {
-            ThongKeOverview yearOverview = thongKeService.getYearOverview();
             ThongKeOverview reportOverview = thongKeService.getOverview(filterFrom, filterTo);
-            request.setAttribute("todayOverview", thongKeService.getTodayOverview());
-            request.setAttribute("weekOverview", thongKeService.getWeekOverview());
-            request.setAttribute("monthOverview", thongKeService.getMonthOverview());
-            request.setAttribute("yearOverview", yearOverview);
             request.setAttribute("reportOverview", reportOverview);
             request.setAttribute("completionRate", thongKeService.calculateCompletionRate(reportOverview));
             request.setAttribute("bestSellers", thongKeService.getBestSellers(filterFrom, filterTo));
@@ -68,6 +63,8 @@ public class ThongKeController extends HttpServlet {
 
         try {
             String mode = request.getParameter("mode");
+            String fromValue = request.getParameter("from");
+            String toValue = request.getParameter("to");
             int year = parseNumber(request.getParameter("year"), LocalDate.now().getYear());
             if (year < 2000 || year > 2100) {
                 throw new IllegalArgumentException("Năm thống kê không hợp lệ.");
@@ -75,7 +72,13 @@ public class ThongKeController extends HttpServlet {
 
             List<ThongKeSeriesPoint> series;
             String description;
-            if ("quarter".equals(mode)) {
+            if (fromValue != null && !fromValue.isBlank() && toValue != null && !toValue.isBlank()) {
+                LocalDate from = parseDate(fromValue, LocalDate.now().withDayOfMonth(1));
+                LocalDate to = parseDate(toValue, LocalDate.now());
+                series = thongKeService.getRevenueSeries(from, to);
+                description = "Doanh thu từ " + formatDate(from) + " đến " + formatDate(to);
+                mode = "range";
+            } else if ("quarter".equals(mode)) {
                 int quarter = parseNumber(request.getParameter("quarter"), 1);
                 series = thongKeService.getQuarterRevenueSeries(year, quarter);
                 description = "Doanh thu theo tháng trong quý " + quarter + "/" + year;
@@ -130,5 +133,9 @@ public class ThongKeController extends HttpServlet {
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Tham số thời gian không hợp lệ.");
         }
+    }
+
+    private String formatDate(LocalDate date) {
+        return date.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
     }
 }
