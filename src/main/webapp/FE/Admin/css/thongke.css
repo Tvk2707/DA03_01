@@ -423,7 +423,7 @@
 .stat-chart .chart-point:hover,
 .stat-chart .chart-point:focus {
     opacity: 1;
-    r: 6;
+    r: 6px;
 }
 
 .stat-chart-tooltip {
@@ -750,7 +750,10 @@
     color: var(--text-dark);
     font-size: 12px;
 }
-
+:root {
+    --status-bg: #f3eee6;
+    --status-color: var(--primary-dark);
+}
 .stat-status-icon {
     width: 25px;
     height: 25px;

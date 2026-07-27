@@ -32,7 +32,7 @@ public class ThongKeController extends HttpServlet {
         }
 
         LocalDate today = LocalDate.now();
-        LocalDate filterFrom = parseDate(request.getParameter("from"), today.withDayOfMonth(1));
+        LocalDate filterFrom = parseDate(request.getParameter("from"), today);
         LocalDate filterTo = parseDate(request.getParameter("to"), today);
 
         try {

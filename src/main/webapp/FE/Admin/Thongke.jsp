@@ -18,8 +18,11 @@
 
     DecimalFormat moneyFormat = new DecimalFormat("#,###");
     ThongKeOverview reportOverview = overview(request.getAttribute("reportOverview"));
+
+    // Đã sửa: Xóa .withDayOfMonth(1) để mặc định lấy ngày hôm nay
     LocalDate filterFrom = request.getAttribute("filterFrom") instanceof LocalDate
-            ? (LocalDate) request.getAttribute("filterFrom") : LocalDate.now().withDayOfMonth(1);
+            ? (LocalDate) request.getAttribute("filterFrom") : LocalDate.now();
+
     LocalDate filterTo = request.getAttribute("filterTo") instanceof LocalDate
             ? (LocalDate) request.getAttribute("filterTo") : LocalDate.now();
     LocalDate currentDate = request.getAttribute("currentDate") instanceof LocalDate
@@ -284,7 +287,7 @@
 
     <main id="page-content" class="stat-page">
         <% if (errorMessage != null) { %>
-            <div class="empty-state"><%= errorMessage %></div>
+        <div class="empty-state"><%= errorMessage %></div>
         <% } %>
 
         <section class="stat-page-header">
@@ -304,10 +307,11 @@
                             <small>Dữ liệu bên dưới được cập nhật theo bộ lọc này</small>
                         </div>
                     </div>
+                    <!-- Đã sửa: Chuyển class is-active sang nút Hôm nay -->
                     <div class="stat-overview-quick-filters" role="group" aria-label="Khoảng thời gian nhanh">
-                        <button type="button" class="stat-quick-filter" data-filter-preset="today">Hôm nay</button>
+                        <button type="button" class="stat-quick-filter is-active" data-filter-preset="today">Hôm nay</button>
                         <button type="button" class="stat-quick-filter" data-filter-preset="week">Tuần này</button>
-                        <button type="button" class="stat-quick-filter is-active" data-filter-preset="month">Tháng này</button>
+                        <button type="button" class="stat-quick-filter" data-filter-preset="month">Tháng này</button>
                         <button type="button" class="stat-quick-filter" data-filter-preset="year">Năm nay</button>
                     </div>
                 </div>
@@ -410,15 +414,15 @@
                         <thead><tr><th>Sản phẩm</th><th>Đã bán</th><th>Tồn</th></tr></thead>
                         <tbody id="bestSellerBody">
                         <% if (bestSellers.isEmpty()) { %>
-                            <tr><td colspan="3">Chưa có dữ liệu sản phẩm.</td></tr>
+                        <tr><td colspan="3">Chưa có dữ liệu sản phẩm.</td></tr>
                         <% } else { %>
-                            <% for (ThongKeProduct item : bestSellers) { %>
-                                <tr>
-                                    <td><%= safe(item.getTenSanPham()) %></td>
-                                    <td><%= item.getDaBan() %></td>
-                                    <td><%= item.getTonKho() %></td>
-                                </tr>
-                            <% } %>
+                        <% for (ThongKeProduct item : bestSellers) { %>
+                        <tr>
+                            <td><%= safe(item.getTenSanPham()) %></td>
+                            <td><%= item.getDaBan() %></td>
+                            <td><%= item.getTonKho() %></td>
+                        </tr>
+                        <% } %>
                         <% } %>
                         </tbody>
                     </table>
@@ -463,15 +467,15 @@
                         <thead><tr><th>Khách hàng</th><th>Số đơn</th><th>Tổng chi tiêu</th></tr></thead>
                         <tbody id="customerBody">
                         <% if (topCustomers.isEmpty()) { %>
-                            <tr><td colspan="3">Chưa có dữ liệu khách hàng.</td></tr>
+                        <tr><td colspan="3">Chưa có dữ liệu khách hàng.</td></tr>
                         <% } else { %>
-                            <% for (ThongKeCustomer item : topCustomers) { %>
-                                <tr>
-                                    <td><%= safe(item.getTenKhachHang()) %></td>
-                                    <td><%= item.getSoDon() %></td>
-                                    <td><%= money(moneyFormat, item.getTongChiTieu()) %></td>
-                                </tr>
-                            <% } %>
+                        <% for (ThongKeCustomer item : topCustomers) { %>
+                        <tr>
+                            <td><%= safe(item.getTenKhachHang()) %></td>
+                            <td><%= item.getSoDon() %></td>
+                            <td><%= money(moneyFormat, item.getTongChiTieu()) %></td>
+                        </tr>
+                        <% } %>
                         <% } %>
                         </tbody>
                     </table>
@@ -494,15 +498,15 @@
                         <thead><tr><th>Sản phẩm</th><th>Đã bán</th><th>Tồn</th></tr></thead>
                         <tbody id="slowStockBody">
                         <% if (slowStockProducts.isEmpty()) { %>
-                            <tr><td colspan="3">Chưa có dữ liệu tồn kho.</td></tr>
+                        <tr><td colspan="3">Chưa có dữ liệu tồn kho.</td></tr>
                         <% } else { %>
-                            <% for (ThongKeProduct item : slowStockProducts) { %>
-                                <tr>
-                                    <td><%= safe(item.getTenSanPham()) %></td>
-                                    <td><%= item.getDaBan() %></td>
-                                    <td><%= item.getTonKho() %></td>
-                                </tr>
-                            <% } %>
+                        <% for (ThongKeProduct item : slowStockProducts) { %>
+                        <tr>
+                            <td><%= safe(item.getTenSanPham()) %></td>
+                            <td><%= item.getDaBan() %></td>
+                            <td><%= item.getTonKho() %></td>
+                        </tr>
+                        <% } %>
                         <% } %>
                         </tbody>
                     </table>
