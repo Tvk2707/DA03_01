@@ -14,6 +14,7 @@ import java.time.LocalDate;
 @WebServlet({
         "/khach-hang/hien-thi",
         "/khach-hang/add",
+        "/khach-hang/sua", // Bổ sung đường dẫn sửa
         "/khach-hang/doi-trang-thai"
 })
 public class KhachHangServlet extends HttpServlet {
@@ -26,6 +27,10 @@ public class KhachHangServlet extends HttpServlet {
         switch (path) {
             case "/khach-hang/hien-thi":
                 hienThi(req, resp);
+                break;
+            case "/khach-hang/sua":
+                // Bắt luồng GET khi người dùng click vào nút Sửa trên bảng
+                hienThiFormSua(req, resp);
                 break;
             case "/khach-hang/doi-trang-thai":
                 doiTrangThai(req, resp);
@@ -45,6 +50,10 @@ public class KhachHangServlet extends HttpServlet {
         switch (path) {
             case "/khach-hang/add":
                 add(req, resp);
+                break;
+            case "/khach-hang/sua":
+                // Bắt luồng POST khi người dùng ấn nút "Cập nhật" ở form
+                update(req, resp);
                 break;
             default:
                 resp.sendRedirect(req.getContextPath() + "/khach-hang/hien-thi");
@@ -77,6 +86,56 @@ public class KhachHangServlet extends HttpServlet {
 
         kh.setTrangThai(1);
         repo.add(kh);
+        resp.sendRedirect(req.getContextPath() + "/khach-hang/hien-thi");
+    }
+
+    // --- HÀM MỚI: Hiển thị form sửa ---
+    private void hienThiFormSua(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String idStr = req.getParameter("id");
+        if (idStr != null) {
+            Integer id = Integer.parseInt(idStr);
+            KhachHang kh = repo.getById(id); // Lấy khách hàng theo ID từ CSDL
+
+            if (kh != null) {
+                // Đẩy đối tượng sang JSP để hiển thị Mã KH và Trạng thái
+                req.setAttribute("editKhachHang", kh);
+
+                // Bật cờ editMode để JSP tự động mở form và đổi action thành /khach-hang/sua
+                req.setAttribute("customerEditMode", true);
+
+                // Đổ lại dữ liệu cũ vào các trường input
+                req.setAttribute("formHoTen", kh.getHoTen());
+                req.setAttribute("formEmail", kh.getEmail());
+                req.setAttribute("formSoDienThoai", kh.getSoDienThoai());
+                req.setAttribute("formNgaySinh", kh.getNgaySinh());
+                req.setAttribute("formGioiTinh", kh.getGioiTinh());
+            }
+        }
+        // Gọi lại hàm hiển thị danh sách, form sửa sẽ tự mở nhờ logic trong JSP
+        hienThi(req, resp);
+    }
+
+    // --- HÀM MỚI: Xử lý cập nhật vào Database ---
+    private void update(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        Integer id = Integer.parseInt(req.getParameter("id"));
+
+        KhachHang kh = new KhachHang();
+        kh.setId(id);
+        kh.setHoTen(req.getParameter("hoTen"));
+        kh.setEmail(req.getParameter("email"));
+        kh.setSoDienThoai(req.getParameter("soDienThoai"));
+
+        String ngaySinh = req.getParameter("ngaySinh");
+        if (ngaySinh != null && !ngaySinh.isEmpty()) {
+            kh.setNgaySinh(LocalDate.parse(ngaySinh));
+        }
+
+        String gioiTinh = req.getParameter("gioiTinh");
+        if (gioiTinh != null && !gioiTinh.isEmpty()) {
+            kh.setGioiTinh(Integer.parseInt(gioiTinh));
+        }
+
+        repo.update(kh); // Cập nhật vào CSDL
         resp.sendRedirect(req.getContextPath() + "/khach-hang/hien-thi");
     }
 

@@ -30,6 +30,22 @@ public class KhachHangRepository {
         }
     }
 
+    // --- HÀM MỚI: Lấy khách hàng theo ID ---
+    public KhachHang getById(Integer id) {
+        EntityManager em = null;
+        try {
+            em = utils.getEntityManager();
+            return em.find(KhachHang.class, id);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            if (em != null) {
+                em.close();
+            }
+        }
+    }
+
     public KhachHang findBySoDienThoai(String sdt) {
         EntityManager em = null;
         try {
@@ -112,6 +128,44 @@ public class KhachHangRepository {
                 tran.rollback();
             }
             throw new IllegalStateException("Không thể lưu khách hàng vào database.", e);
+        } finally {
+            if (em != null) {
+                em.close();
+            }
+        }
+    }
+
+    // --- HÀM MỚI: Cập nhật thông tin khách hàng ---
+    public void update(KhachHang khachHangMoi) {
+        EntityManager em = null;
+        EntityTransaction tran = null;
+
+        try {
+            em = utils.getEntityManager();
+            tran = em.getTransaction();
+            tran.begin();
+
+            // 1. Tìm khách hàng cũ trong Database để lấy các thông tin không thay đổi (như Mã KH, Mật khẩu, Trạng thái)
+            KhachHang khCu = em.find(KhachHang.class, khachHangMoi.getId());
+
+            if (khCu != null) {
+                // 2. Chỉ cập nhật những trường được phép sửa
+                khCu.setHoTen(khachHangMoi.getHoTen());
+                khCu.setEmail(khachHangMoi.getEmail());
+                khCu.setSoDienThoai(khachHangMoi.getSoDienThoai());
+                khCu.setNgaySinh(khachHangMoi.getNgaySinh());
+                khCu.setGioiTinh(khachHangMoi.getGioiTinh());
+
+                // 3. Lưu thay đổi
+                em.merge(khCu);
+            }
+
+            tran.commit();
+        } catch (Exception e) {
+            if (tran != null && tran.isActive()) {
+                tran.rollback();
+            }
+            e.printStackTrace();
         } finally {
             if (em != null) {
                 em.close();
