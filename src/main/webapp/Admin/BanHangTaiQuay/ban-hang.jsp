@@ -131,26 +131,37 @@
         }
 
         /* Invoice tabs */
-        .tabs { display: flex; gap: 8px; padding: 18px 28px 0; }
+        .tabs { display: flex; gap: 8px; padding: 18px 28px 0; flex-wrap: wrap; }
         .tab {
-            padding: 9px 16px; border-radius: 10px 10px 0 0; font-size: 13px; font-weight: 600;
-            background: #EFE9DC; color: var(--text-sub); cursor: pointer; display: flex; align-items: center; gap: 8px;
+            padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 10px;
+            background: #f1f5f9; color: var(--text-sub); cursor: pointer; display: flex; align-items: center; gap: 8px; border: 1px solid transparent;
         }
-        .tab.active { background: var(--panel); color: var(--brown-700); border: 1px solid var(--line); border-bottom: 1px solid var(--panel); }
-        .tab .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--amber-text); }
+        .tab.active { background: #fee2e2; color: #c2103a; border: 1px solid #fca5a5; }
+        .tab .dot { display: none; }
         .tab-add {
             width: 34px; height: 34px; border-radius: 10px; background: transparent; border: 1px dashed var(--brown-500);
             color: var(--brown-600); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px;
         }
 
         /* Body layout */
-        .pos-layout { display: flex; align-items: flex-start; gap: 20px; padding: 0 28px 28px; flex: 1; min-height: 0; }
-        .left-col { flex: 1; min-width: 0; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
-        .right-col {
-            width: 360px; height: auto; align-self: flex-start; flex-shrink: 0;
+        .pos-layout { display: flex; flex-direction: column; gap: 20px; padding: 28px; }
+        .pos-top-section {
             background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
-            padding: 20px; display: flex; flex-direction: column;
+            padding: 24px; display: flex; flex-direction: column;
         }
+        .pos-bottom-section { display: flex; gap: 20px; align-items: stretch; }
+        .pos-customer-panel {
+            flex: 1; min-width: 0; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px;
+        }
+        .pos-payment-panel {
+            flex: 1; min-width: 0; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px;
+            display: flex; flex-direction: column;
+        }
+        .panel-title-row {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--line);
+        }
+        .panel-title-row h2 { margin: 0; font-size: 16px; color: var(--text-main); font-weight: 700; display: flex; align-items: center; gap: 8px; }
 
         .find-row { display: flex; gap: 10px; }
         .find-input {
@@ -541,6 +552,182 @@
             .left-col, .right-col { width: 100%; box-sizing: border-box; }
             .right-col { flex: 0 0 auto; }
         }
+        /* ================= THỐNG NHẤT NHẬN DIỆN MÀU SẮC ================= */
+        :root {
+            --primary: #b4975a; /* Vàng kim (Gold) - Khớp với Quản lý sản phẩm */
+            --primary-hover: #9f844b;
+            --primary-active: #856d3c;
+            --primary-light: #fbf9f4;
+            --danger: #dc2626; /* Đỏ Danger chuẩn Tailwind (Khớp QLSP) */
+            --danger-hover: #b91c1c;
+            --disabled-bg: #f3f4f6;
+            --disabled-text: #9ca3af;
+        }
+
+        /* Buttons (Solid) */
+        .pos-btn-solid,
+        #create-invoice-button,
+        .checkout-btn,
+        button[onclick*="product-list-modal"],
+        .p-add,
+        button[data-customer-create-open] {
+            background-color: var(--primary) !important;
+            color: #fff !important;
+            border: 1px solid var(--primary) !important;
+            border-radius: 10px !important;
+        }
+        .pos-btn-solid:hover,
+        #create-invoice-button:hover,
+        .checkout-btn:hover,
+        button[onclick*="product-list-modal"]:hover,
+        .p-add:hover,
+        button[data-customer-create-open]:hover {
+            background-color: var(--primary-hover) !important;
+            border-color: var(--primary-hover) !important;
+        }
+        .pos-btn-solid:active,
+        #create-invoice-button:active,
+        .checkout-btn:active,
+        button[onclick*="product-list-modal"]:active,
+        .p-add:active,
+        button[data-customer-create-open]:active {
+            background-color: var(--primary-active) !important;
+            border-color: var(--primary-active) !important;
+        }
+        
+        /* Buttons (Outline / Secondary) */
+        .pos-btn-outline,
+        #open-product-qr,
+        button[data-customer-open],
+        .close-modal-btn,
+        button[onclick*="closeModal"] {
+            background-color: #fff !important;
+            color: var(--primary) !important;
+            border: 1px solid var(--primary) !important;
+            border-radius: 10px !important;
+        }
+        .pos-btn-outline:hover,
+        #open-product-qr:hover,
+        button[data-customer-open]:hover,
+        .close-modal-btn:hover,
+        button[onclick*="closeModal"]:hover {
+            background-color: var(--primary-light) !important;
+        }
+
+        /* Disabled states */
+        .pos-btn-solid:disabled,
+        #create-invoice-button:disabled,
+        .checkout-btn:disabled,
+        .p-add[data-disabled="true"] {
+            background-color: var(--disabled-bg) !important;
+            color: var(--disabled-text) !important;
+            border-color: transparent !important;
+            cursor: not-allowed !important;
+            pointer-events: none;
+        }
+        .pos-btn-outline:disabled,
+        #open-product-qr:disabled,
+        button[data-customer-open]:disabled {
+            background-color: #fff !important;
+            color: var(--disabled-text) !important;
+            border-color: var(--disabled-bg) !important;
+            cursor: not-allowed !important;
+            pointer-events: none;
+        }
+
+        /* Danger buttons (Solid - Hủy Đơn) */
+        button[onclick*="xoaHoaDonCho"]:not(.btn-close-tab) {
+            background-color: var(--danger) !important;
+            color: #fff !important;
+            border: 1px solid var(--danger) !important;
+            border-radius: 10px !important;
+            box-shadow: none !important;
+            transition: all 0.2s ease !important;
+        }
+        button[onclick*="xoaHoaDonCho"]:not(.btn-close-tab):hover {
+            background-color: var(--danger-hover) !important;
+            border-color: var(--danger-hover) !important;
+        }
+
+        /* Danger buttons (Outline / Text - Xóa sản phẩm, Gỡ khách hàng) */
+        .cancel-btn,
+        .ci-remove,
+        button[onclick*="huyHoaDon"],
+        .cust-guest-action button {
+            background-color: transparent !important;
+            color: var(--danger) !important;
+            border: 1px solid var(--danger) !important;
+            border-radius: 8px !important;
+            box-shadow: none !important;
+        }
+        .ci-remove {
+            border: none !important;
+        }
+        .cancel-btn:hover,
+        .ci-remove:hover,
+        button[onclick*="huyHoaDon"]:hover,
+        .cust-guest-action button:hover {
+            background-color: #fee2e2 !important;
+            color: var(--danger-hover) !important;
+            border-color: var(--danger-hover) !important;
+        }
+        
+        /* Tabs */
+        .tab.active {
+            background-color: var(--primary-light) !important;
+            color: var(--primary) !important;
+            border-color: var(--primary) !important;
+        }
+        
+        /* Dropdowns & Selections */
+        .pttt-option[style*="background: #f0fdf4"], 
+        .pttt-option[style*="background: rgb(240, 253, 244)"],
+        #voucher-dropdown-items > div[style*="background: #fffbeb"],
+        #voucher-dropdown-items > div[style*="background: rgb(255, 251, 235)"] {
+            background-color: var(--primary-light) !important;
+            color: var(--primary) !important;
+        }
+        .pttt-option[style*="background: #f0fdf4"] i, 
+        .pttt-option[style*="background: rgb(240, 253, 244)"] i {
+            color: var(--primary) !important;
+        }
+
+        #voucher-dropdown-btn[style*="border-color: #c2103a"],
+        #pttt-dropdown-btn[style*="border-color: #c2103a"],
+        #voucher-dropdown-btn[style*="border-color: rgb(194, 16, 58)"],
+        #pttt-dropdown-btn[style*="border-color: rgb(194, 16, 58)"] {
+            border-color: var(--primary) !important;
+        }
+        
+        /* Icons and text */
+        .fa-check, .fa-tag, .fa-money-bill-wave, .fa-university {
+            color: var(--primary) !important;
+        }
+        #sum-tongcong,
+        .cust-name span,
+        .ci-price {
+            color: var(--primary) !important;
+        }
+
+        /* Pagination */
+        .page-item.active .page-link {
+            background-color: var(--primary) !important;
+            border-color: var(--primary) !important;
+            color: #fff !important;
+        }
+        .page-link {
+            color: var(--primary) !important;
+        }
+        .page-link:hover {
+            background-color: var(--primary-light) !important;
+            color: var(--primary) !important;
+        }
+
+        /* Checkboxes & Radios */
+        input[type="checkbox"],
+        input[type="radio"] {
+            accent-color: var(--primary) !important;
+        }
     </style>
 </head>
 <body>
@@ -586,14 +773,8 @@
                             </div>
                         </div>
                         <div class="head-btns">
-                            <button type="button" class="pos-btn pos-btn-outline" id="open-product-qr"
-                                    ${empty idHoaDonDangTao ? 'disabled' : ''}
-                                    title="${empty idHoaDonDangTao ? 'Vui lòng tạo đơn hàng trước khi quét sản phẩm' : 'Quét QR sản phẩm'}">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h4v4H4zM16 4h4v4h-4zM4 16h4v4H4z"/><path d="M14 14h2v2h-2zM18 14h2v6h-4v-2M14 18h2v2h-2z"/></svg>
-                                Quét QR
-                            </button>
-                            <button type="button" class="pos-btn pos-btn-solid" id="create-invoice-button">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                            <button type="button" class="pos-btn pos-btn-solid" id="create-invoice-button" style="background: #2e203b; color: white; border-radius: 20px; padding: 10px 20px;">
+                                <i class="fas fa-plus" style="margin-right: 5px;"></i>
                                 Tạo đơn hàng
                             </button>
                         </div>
@@ -644,118 +825,30 @@
                 </c:if>
 
                 <div class="pos-layout">
-                    <!-- LEFT: product search / grid -->
-                    <div class="left-col">
-                        <div class="find-row">
-                            <div class="find-input">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-                                <input type="text" id="search-product" placeholder="Tìm sản phẩm theo tên, mã SKU...">
-                            </div>
-                        </div>
-
-                        <div class="product-grid">
-                            <div class="product-table-wrap">
-                                <table class="product-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Sản phẩm</th>
-                                            <th>Thuộc tính và tồn kho</th>
-                                            <th>Giá bán</th>
-                                            <th>Thêm</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <c:forEach var="sp" items="${danhSachSanPham}">
-                                            <tr class="p-card" data-spct="${sp.id}">
-                                                <td>
-                                                    <div class="product-table__product">
-                                                        <div class="p-thumb">
-                                                            <c:choose>
-                                                                <c:when test="${not empty sp.hinhAnhHienThi && sp.hinhAnhHienThi != 'null'}">
-                                                                    <img src="${pageContext.request.contextPath}/${sp.hinhAnhHienThi}" alt="${sp.sanPham.tenSanPham}" onerror="this.style.display='none';"/>
-                                                                </c:when>
-                                                                <c:otherwise>
-                                                                    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="6.5" cy="12" r="3.2"/><circle cx="17.5" cy="12" r="3.2"/><path d="M9.7 12h4.6M3 12l-1.5-1M21 12l1.5-1"/></svg>
-                                                                </c:otherwise>
-                                                            </c:choose>
-                                                        </div>
-                                                        <div>
-                                                            <div class="p-name" title="${sp.sanPham.tenSanPham} (SKU: ${sp.ma})">${sp.sanPham.tenSanPham}</div>
-                                                            <div class="p-sku" title="SKU: ${sp.ma}">SKU: ${sp.ma}</div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="p-meta ${sp.soLuongTon <= 3 ? 'stock-low' : ''}" data-tonkho title="Còn ${sp.soLuongTon} · ${sp.mauSac.tenMau} - ${sp.kichCo.tenKichCo}">
-                                                        Còn ${sp.soLuongTon} · ${sp.mauSac.tenMau} - ${sp.kichCo.tenKichCo}
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="p-bottom">
-                                                        <div class="p-price"><fmt:formatNumber value="${sp.giaBan}" type="currency" currencySymbol="đ"/></div>
-                                                    </div>
-                                                </td>
-                                                <td style="text-align: center;">
-                                                    <button type="button" class="p-add" ${empty idHoaDonDangTao || hoaDonDangTao.trangThai == 3 || hoaDonDangTao.trangThai == 5 || sp.soLuongTon <= 0 ? 'data-disabled="true"' : ''}
-                                                            title="${empty idHoaDonDangTao ? 'Tạo hóa đơn trước' : 'Thêm vào giỏ'}" aria-label="Thêm ${sp.sanPham.tenSanPham} vào giỏ">+</button>
-                                                </td>
-                                            </tr>
-                                        </c:forEach>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- RIGHT: cart -->
-                    <div class="right-col">
-                        <div class="cust-box">
-                            <div class="cust-main-row">
-                                <div class="cust-info">
-                                    <c:set var="kh" value="${hoaDonDangTao.khachHang}"/>
-                                    <div class="cust-avatar">
-                                        <c:choose>
-                                            <c:when test="${not empty kh}">${kh.hoTen.substring(0,1)}${kh.hoTen.contains(' ') ? kh.hoTen.substring(kh.hoTen.lastIndexOf(' ') + 1, kh.hoTen.lastIndexOf(' ') + 2) : ''}</c:when>
-                                            <c:otherwise>KL</c:otherwise>
-                                        </c:choose>
-                                    </div>
-                                    <div>
-                                        <div class="cust-name">${not empty kh ? kh.hoTen : 'Khách lẻ'}</div>
-                                        <div class="cust-sub">${not empty kh ? kh.soDienThoai : 'Chưa gắn số điện thoại'}</div>
-                                    </div>
-                                </div>
-                                <div class="cust-guest-action">
-                                    <c:if test="${not empty kh}">
-                                        <button type="button" class="cust-remove-btn" data-customer-guest
-                                                title="Gỡ khách hàng khỏi hóa đơn"
-                                                aria-label="Gỡ khách hàng khỏi hóa đơn">&times;</button>
-                                    </c:if>
-                                </div>
-                            </div>
-                            <div class="cust-actions">
-                                <button type="button" class="cust-icon-btn" data-customer-open aria-expanded="false">
-                                    <i class="fas fa-search" aria-hidden="true"></i>
-                                    Tìm khách
+                    <!-- TOP SECTION: Products & Cart -->
+                    <div class="pos-top-section">
+                        <div class="panel-title-row">
+                            <h2><i class="fas fa-box" style="margin-right: 5px;"></i> Sản phẩm</h2>
+                            <div class="head-btns" style="margin: 0;">
+                                <button type="button" class="pos-btn pos-btn-outline" id="open-product-qr"
+                                        ${empty idHoaDonDangTao ? 'disabled' : ''}
+                                        style="color: #c2103a; border-color: #fca5a5; background: #fff; padding: 8px 16px;"
+                                        title="${empty idHoaDonDangTao ? 'Vui lòng tạo đơn hàng trước khi quét sản phẩm' : 'Quét QR sản phẩm'}">
+                                    <i class="fas fa-qrcode"></i> QUÉT QR SẢN PHẨM
                                 </button>
-                                <button type="button" class="cust-add-btn" data-customer-create-open>
-                                    <i class="fas fa-plus" aria-hidden="true"></i>
-                                    Thêm mới
+                                <button type="button" class="pos-btn pos-btn-solid" style="background: #2e203b; color: white; padding: 8px 16px;" onclick="document.getElementById('product-list-modal').classList.remove('hidden'); setTimeout(() => document.getElementById('client-search-product').focus(), 100);">
+                                    <i class="fas fa-plus"></i> THÊM SẢN PHẨM
                                 </button>
                             </div>
-                            <div id="panel-khach-hang" class="hidden">
-                                <div class="customer-panel-head">
-                                    <span>Chọn khách hàng</span>
-                                    <button type="button" class="customer-panel-close" data-customer-close aria-label="Đóng">&times;</button>
-                                </div>
-                                <input type="text" id="input-sdt" placeholder="Số điện thoại, mã hoặc tên khách hàng" />
-                                <div id="ket-qua-khach-hang" class="customer-results hidden"></div>
-                            </div>
                         </div>
 
-                        <div class="cart-title">Giỏ hàng · <span id="cart-count">${empty hoaDonDangTao.chiTietHoaDons ? 0 : hoaDonDangTao.chiTietHoaDons.size()}</span> sản phẩm</div>
-                        <div class="cart-list">
+                        <!-- Giỏ hàng (Cart) -->
+                        <div class="cart-list" style="margin-bottom: 20px;">
                             <c:if test="${empty hoaDonDangTao.chiTietHoaDons}">
-                                <div class="cart-empty">Chưa có sản phẩm nào trong giỏ</div>
+                                <div class="cart-empty" style="padding: 40px 0;">
+                                    <i class="fas fa-shopping-bag" style="font-size: 30px; color: #cbd5e1; margin-bottom: 10px;"></i>
+                                    <br>Không có dữ liệu
+                                </div>
                             </c:if>
                             <c:forEach var="ct" items="${hoaDonDangTao.chiTietHoaDons}">
                                 <div class="cart-item" data-id="${ct.id}" data-spct="${ct.sanPhamChiTiet.id}">
@@ -776,10 +869,10 @@
                                         <div class="ci-name">${ct.sanPhamChiTiet.sanPham.tenSanPham}</div>
                                         <div class="ci-variant">
                                             <c:if test="${not empty ct.sanPhamChiTiet.ma}">
-                                                <span>Ma: ${ct.sanPhamChiTiet.ma}</span>
+                                                <span>Mã: ${ct.sanPhamChiTiet.ma}</span>
                                             </c:if>
                                             <c:if test="${not empty ct.sanPhamChiTiet.mauSac.tenMau}">
-                                                <span>Mau: ${ct.sanPhamChiTiet.mauSac.tenMau}</span>
+                                                <span>Màu: ${ct.sanPhamChiTiet.mauSac.tenMau}</span>
                                             </c:if>
                                             <c:if test="${not empty ct.sanPhamChiTiet.kichCo.tenKichCo}">
                                                 <span>Size: ${ct.sanPhamChiTiet.kichCo.tenKichCo}</span>
@@ -792,9 +885,9 @@
                                                 <button class="qty-plus" data-id="${ct.id}" data-qty="${ct.soLuong}" data-spct="${ct.sanPhamChiTiet.id}">+</button>
                                             </div>
                                             <div class="ci-actions">
-                                                <div class="ci-price"><fmt:formatNumber value="${ct.tongTien}" type="currency" currencySymbol="đ"/></div>
+                                                <div class="ci-price"><fmt:formatNumber value="${ct.tongTien}" type="currency" currencySymbol="đ" maxFractionDigits="0"/></div>
                                                 <button type="button" class="ci-remove" data-id="${ct.id}"
-                                                        title="Xóa sản phẩm" aria-label="Xóa sản phẩm">Xóa</button>
+                                                        title="Xóa sản phẩm" aria-label="Xóa sản phẩm" style="color: #c2103a;">Xóa</button>
                                             </div>
                                         </div>
                                     </div>
@@ -802,48 +895,153 @@
                             </c:forEach>
                         </div>
 
-                        <c:set var="voucherDaApDung" value="${hoaDonDangTao.phieuGiamGia}"/>
-                        <div class="voucher-row">
-                            <div class="voucher-input-wrap">
-                                <input type="text" id="input-voucher"
-                                       placeholder="Nhập mã voucher..."
-                                       autocomplete="off"
-                                       value="${not empty voucherDaApDung ? voucherDaApDung.maVoucher : ''}"
-                                       ${not empty voucherDaApDung ? 'readonly' : ''}>
-                                <div id="voucher-suggestions" class="voucher-suggestions hidden" role="listbox"></div>
+
+                    </div>
+
+                    <!-- BOTTOM SECTION -->
+                    <div class="pos-bottom-section">
+                        <!-- LEFT: Customer -->
+                        <div class="pos-customer-panel">
+                            <div class="panel-title-row" style="border-bottom: 1px solid var(--line); margin-bottom: 15px; padding-bottom: 15px;">
+                                <h2>Thông tin khách hàng</h2>
+                                <button type="button" class="pos-btn pos-btn-outline" data-customer-open style="border-color: #fca5a5; color: #c2103a; padding: 6px 12px; font-size: 12px; border-radius: 8px;">
+                                    Chọn khách hàng
+                                </button>
                             </div>
-                            <button type="button" class="voucher-apply"
-                                    ${not empty voucherDaApDung ? 'disabled' : ''}>
-                                ${not empty voucherDaApDung ? 'Đã áp dụng' : 'Áp dụng'}
-                            </button>
-                            <c:if test="${not empty voucherDaApDung}">
-                                <button type="button" class="voucher-remove">Gỡ</button>
-                            </c:if>
+                            <div class="cust-box" style="border: none; background: transparent; padding: 0;">
+                                <div class="cust-main-row">
+                                    <div class="cust-info">
+                                        <c:set var="kh" value="${hoaDonDangTao.khachHang}"/>
+                                        <div>
+                                            <div class="cust-name" style="font-size: 14px;">Khách hàng: <span style="color: #c2103a; font-weight: bold;">${not empty kh ? kh.hoTen : 'Khách lẻ'}</span></div>
+                                            <div class="cust-sub" style="margin-top: 8px; color: var(--text-sub);">${not empty kh ? kh.soDienThoai : 'Tại quầy: chỉ cần chọn sản phẩm và thanh toán.'}</div>
+                                        </div>
+                                    </div>
+                                    <div class="cust-guest-action">
+                                        <c:if test="${not empty kh}">
+                                            <button type="button" class="cust-remove-btn" data-customer-guest
+                                                    title="Gỡ khách hàng khỏi hóa đơn"
+                                                    aria-label="Gỡ khách hàng khỏi hóa đơn">&times;</button>
+                                        </c:if>
+                                    </div>
+                                </div>
+                                
+                                <div class="cust-actions" style="display:none;">
+                                    <button type="button" class="cust-icon-btn" data-customer-open aria-expanded="false">Tìm khách</button>
+                                    <button type="button" class="cust-add-btn" data-customer-create-open>Thêm mới</button>
+                                </div>
+                                <div id="panel-khach-hang" class="hidden" style="top: 100px;">
+                                    <div class="customer-panel-head">
+                                        <span>Chọn khách hàng</span>
+                                        <button type="button" class="customer-panel-close" data-customer-close aria-label="Đóng">&times;</button>
+                                    </div>
+                                    <input type="text" id="input-sdt" placeholder="Số điện thoại, mã hoặc tên khách hàng" />
+                                    <div id="ket-qua-khach-hang" class="customer-results hidden"></div>
+                                    <div style="margin-top: 10px; text-align: center;">
+                                        <button type="button" class="pos-btn pos-btn-solid" data-customer-create-open style="width: 100%; justify-content: center; background: #c2103a;">Thêm khách hàng mới</button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <c:set var="tamTinhHoaDon" value="${0}"/>
-                        <c:forEach var="ct" items="${hoaDonDangTao.chiTietHoaDons}">
-                            <c:set var="tamTinhHoaDon" value="${tamTinhHoaDon + (ct.donGia * ct.soLuong)}"/>
-                        </c:forEach>
-                        <c:set var="tongThanhToanHienTai" value="${empty hoaDonDangTao.tongTienThanhToan ? 0 : hoaDonDangTao.tongTienThanhToan}"/>
-                        <c:set var="giamGiaHienTai" value="${tamTinhHoaDon > tongThanhToanHienTai ? tamTinhHoaDon - tongThanhToanHienTai : 0}"/>
-                        <div class="totals">
-                            <div class="t-row"><span>Tạm tính</span><span id="sum-tamtinh"><fmt:formatNumber value="${tamTinhHoaDon}" type="currency" currencySymbol="đ"/></span></div>
-                            <div class="t-row"><span>Giảm giá</span><span class="discount" id="sum-giamgia"><fmt:formatNumber value="${giamGiaHienTai}" type="currency" currencySymbol="đ"/></span></div>
-                            <div class="t-row grand"><span>Tổng cộng</span><span id="sum-tongcong"><fmt:formatNumber value="${tongThanhToanHienTai}" type="currency" currencySymbol="đ"/></span></div>
-                        </div>
+                        <!-- RIGHT: Payment -->
+                        <div class="pos-payment-panel">
+                            <div class="panel-title-row" style="border-bottom: 1px solid var(--line); margin-bottom: 15px; padding-bottom: 15px;">
+                                <h2>Thông tin thanh toán tại quầy</h2>
+                            </div>
+                            
+                            <div style="display: flex; gap: 16px; margin-bottom: 15px;">
+                                <!-- Phương thức thanh toán dropdown -->
+                                <div style="flex: 1; position: relative;">
+                                    <label style="font-size: 12px; color: var(--text-sub); display: block; margin-bottom: 6px; font-weight: 600;">Phương thức thanh toán *</label>
+                                    <div id="pttt-dropdown-btn" onclick="toggleDropdown('pttt')"
+                                         style="display: flex; align-items: center; justify-content: space-between; background: #fff; border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 14px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text-main); user-select: none; transition: border-color 0.2s;">
+                                        <span id="pttt-selected-label"><i class="fas fa-money-bill-wave" style="color: #10b981; margin-right: 7px;"></i>Tiền mặt</span>
+                                        <i class="fas fa-chevron-down" id="pttt-chevron" style="font-size: 11px; color: var(--text-sub); transition: transform 0.2s;"></i>
+                                    </div>
+                                    <div id="pttt-dropdown-list" style="display:none; position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: #fff; border: 1.5px solid var(--line); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); z-index: 200; overflow: hidden;">
+                                        <div class="pttt-option" data-ma="PTTT001" onclick="chonPhuongThucDropdown(this)"
+                                             style="display: flex; align-items: center; gap: 10px; padding: 11px 14px; cursor: pointer; font-size: 13px; font-weight: 600; background: #f0fdf4; color: #10b981;"
+                                             onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#f0fdf4'">
+                                            <i class="fas fa-money-bill-wave"></i> Tiền mặt
+                                            <i class="fas fa-check" style="margin-left: auto; font-size: 11px;"></i>
+                                        </div>
+                                        <div class="pttt-option" data-ma="PTTT002" onclick="chonPhuongThucDropdown(this)"
+                                             style="display: flex; align-items: center; gap: 10px; padding: 11px 14px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text-main);"
+                                             onmouseover="this.style.background='#f8f6f3'" onmouseout="this.style.background=''">
+                                            <i class="fas fa-university" style="color: #3b82f6;"></i> Chuyển khoản
+                                        </div>
+                                    </div>
+                                </div>
 
-                        <div class="pay-methods">
-                            <div class="pay-chip active" data-ma="PTTT001">Tiền mặt</div>
-                            <div class="pay-chip" data-ma="PTTT002">Chuyển khoản</div>
-                        </div>
+                                <!-- Voucher dropdown -->
+                                <div style="flex: 1; position: relative;">
+                                    <label style="font-size: 12px; color: var(--text-sub); display: block; margin-bottom: 6px; font-weight: 600;">Chọn phiếu giảm giá</label>
+                                    <c:set var="voucherDaApDung" value="${hoaDonDangTao.phieuGiamGia}"/>
+                                    <div id="voucher-dropdown-btn" onclick="toggleDropdown('voucher')"
+                                         style="display: flex; align-items: center; justify-content: space-between; background: #fff; border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 14px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text-main); user-select: none; transition: border-color 0.2s;">
+                                        <span id="voucher-selected-label">
+                                            <c:choose>
+                                                <c:when test="${not empty voucherDaApDung}">
+                                                    <i class="fas fa-tag" style="color: #f59e0b; margin-right: 7px;"></i>${voucherDaApDung.maVoucher}
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <i class="fas fa-tag" style="color: #cbd5e1; margin-right: 7px;"></i><span style="color: var(--text-sub);">-- Không áp dụng --</span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </span>
+                                        <i class="fas fa-chevron-down" id="voucher-chevron" style="font-size: 11px; color: var(--text-sub); transition: transform 0.2s;"></i>
+                                    </div>
+                                    <div id="voucher-dropdown-list" style="display:none; position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: #fff; border: 1.5px solid var(--line); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); z-index: 9999; overflow: hidden; flex-direction: column; max-height: 400px;">
+                                        <div style="padding: 10px; border-bottom: 1px solid var(--line); background: #f8fafc; flex-shrink: 0;">
+                                            <div style="position: relative;">
+                                                <i class="fas fa-search" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-sub); font-size: 12px;"></i>
+                                                <input type="text" id="voucher-search-input" placeholder="Tìm mã hoặc tên..." oninput="xuLyTimVoucherDropdown(this.value)" style="width: 100%; padding: 8px 10px 8px 30px; border: 1px solid var(--line); border-radius: 6px; font-size: 13px; outline: none;">
+                                            </div>
+                                        </div>
+                                        <div id="voucher-dropdown-content" style="overflow-y: auto; flex: 1;">
+                                            <div id="voucher-dropdown-loading" style="padding: 16px; text-align: center; color: var(--text-sub); font-size: 13px;">
+                                                <i class="fas fa-spinner fa-spin"></i> Đang tải...
+                                            </div>
+                                            <div id="voucher-dropdown-items"></div>
+                                        </div>
+                                    </div>
+                                    <!-- hidden fields giữ giá trị hiện tại để JS đọc -->
+                                    <input type="hidden" id="voucher-ma-hien-tai" value="${not empty voucherDaApDung ? voucherDaApDung.maVoucher : ''}">
+                                    <div id="voucher-suggestions" class="voucher-suggestions hidden" role="listbox"></div>
+                                </div>
+                            </div>
 
-                        <button type="button" class="checkout-btn" ${empty idHoaDonDangTao ? 'disabled' : ''}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M20 7L9 18l-5-5"/></svg>
-                            Thanh toán · <span id="checkout-total" data-amount="${tongThanhToanHienTai}"><fmt:formatNumber value="${tongThanhToanHienTai}" type="currency" currencySymbol="đ"/></span>
-                        </button>
+
+                            <c:set var="tamTinhHoaDon" value="${0}"/>
+                            <c:forEach var="ct" items="${hoaDonDangTao.chiTietHoaDons}">
+                                <c:set var="tamTinhHoaDon" value="${tamTinhHoaDon + (ct.donGia * ct.soLuong)}"/>
+                            </c:forEach>
+                            <c:set var="tongThanhToanHienTai" value="${empty hoaDonDangTao.tongTienThanhToan ? 0 : hoaDonDangTao.tongTienThanhToan}"/>
+                            <c:set var="giamGiaHienTai" value="${tamTinhHoaDon > tongThanhToanHienTai ? tamTinhHoaDon - tongThanhToanHienTai : 0}"/>
+                            
+                            <div class="totals" style="border-top: none; padding-top: 0; margin-bottom: 20px;">
+                                <div class="t-row" style="margin-bottom: 12px;"><span>Tiền hàng</span><span id="sum-tamtinh"><fmt:formatNumber value="${tamTinhHoaDon}" type="currency" currencySymbol="đ" maxFractionDigits="0"/></span></div>
+                                <div class="t-row" style="margin-bottom: 12px;"><span>Giảm giá</span><span class="discount" id="sum-giamgia" style="color: #ef4444;">-<fmt:formatNumber value="${giamGiaHienTai}" type="currency" currencySymbol="đ" maxFractionDigits="0"/></span></div>
+                                <div class="t-row grand" style="border-top: none; padding-top: 5px; margin-top: 5px;">
+                                    <strong style="color: var(--text-main); font-size: 14px;">Tổng số tiền cần thanh toán</strong>
+                                    <strong id="sum-tongcong" style="color: #c2103a; font-size: 16px;"><fmt:formatNumber value="${tongThanhToanHienTai}" type="currency" currencySymbol="đ" maxFractionDigits="0"/></strong>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 10px; margin-top: auto;">
+                                <button type="button" onclick="window.idHoaDonHienTai ? xoaHoaDonCho(event, window.idHoaDonHienTai) : null" class="pos-btn" style="flex: 1; border: 1px solid transparent; background: #f87171; color: white; justify-content: center; font-weight: bold; border-radius: 8px;">
+                                    Hủy Đơn
+                                </button>
+                                <button type="button" class="checkout-btn" ${empty idHoaDonDangTao ? 'disabled' : ''} style="flex: 1.5; background: #c2103a; border-radius: 8px; justify-content: center; font-weight: bold; padding: 12px;">
+                                    Xác nhận thanh toán
+                                    <span id="checkout-total" data-amount="${tongThanhToanHienTai}" style="display: none;"><fmt:formatNumber value="${tongThanhToanHienTai}" type="currency" currencySymbol="đ" maxFractionDigits="0"/></span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
                     </c:otherwise>
                 </c:choose>
             </div>
@@ -958,10 +1156,11 @@
 <div id="product-qr-modal" class="product-qr-modal hidden" aria-hidden="true">
     <section class="product-qr-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="product-qr-title">
         <div class="product-qr-modal__header">
-            <h2 id="product-qr-title">Quét QR sản phẩm</h2>
+            <h2 id="product-qr-title">Quét mã QR sản phẩm</h2>
             <button type="button" class="product-qr-modal__close" id="close-product-qr" aria-label="Đóng">&times;</button>
         </div>
         <p class="product-qr-modal__hint">Đưa mã QR của biến thể sản phẩm vào khung quét. Sản phẩm tìm thấy sẽ được thêm vào hóa đơn đang chọn.</p>
+        <select id="qr-camera-select" style="width: 100%; margin-bottom: 10px; padding: 8px; border-radius: 8px; border: 1px solid var(--line); display: none;"></select>
         <div id="product-qr-reader"></div>
         <p id="product-qr-status" role="status">Đang chờ camera hoặc mã QR.</p>
         <div class="product-qr-manual">
@@ -969,8 +1168,109 @@
             <button type="button" id="submit-product-qr">Thêm sản phẩm</button>
         </div>
         <div class="product-qr-modal__actions">
-            <button type="button" id="restart-product-qr">Quét lại</button>
+            <button type="button" id="restart-product-qr" style="display: none;">Quét lại</button>
             <button type="button" id="cancel-product-qr">Đóng</button>
+        </div>
+    </section>
+</div>
+
+<div id="product-list-modal" class="transfer-modal hidden" aria-hidden="true" style="z-index: 1050;">
+    <section class="transfer-modal__dialog" role="dialog" aria-modal="true" style="width: min(860px, 96vw); max-width: 860px; padding: 20px;">
+        <div class="transfer-modal__header" style="border-bottom: 1px solid var(--line); padding-bottom: 15px; margin-bottom: 20px;">
+            <h2 style="font-size: 18px; color: var(--text-main); font-weight: bold;">Chọn biến thể để thêm vào đơn</h2>
+            <button type="button" class="transfer-modal__close" onclick="document.getElementById('product-list-modal').classList.add('hidden')" aria-label="Đóng">&times;</button>
+        </div>
+        
+        <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+            <div style="flex: 1;">
+                <label style="font-size: 12px; color: var(--text-sub); display: block; margin-bottom: 5px;">Tìm kiếm</label>
+                <input type="text" id="client-search-product" placeholder="Tìm mã, tên..." style="width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 10px; font-size: 13px; outline: none;">
+            </div>
+            <div style="flex: 1;">
+                <label style="font-size: 12px; color: var(--text-sub); display: block; margin-bottom: 5px;">Màu sắc</label>
+                <select id="filter-color" style="width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 10px; font-size: 13px; outline: none; background: white;"><option value="">Tất cả màu</option></select>
+            </div>
+            <div style="flex: 1;">
+                <label style="font-size: 12px; color: var(--text-sub); display: block; margin-bottom: 5px;">Kích cỡ</label>
+                <select id="filter-size" style="width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 10px; font-size: 13px; outline: none; background: white;"><option value="">Tất cả kích cỡ</option></select>
+            </div>
+            <div style="flex: 1;">
+                <label style="font-size: 12px; color: var(--text-sub); display: block; margin-bottom: 5px;">Sản phẩm</label>
+                <select id="filter-product" style="width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 10px; font-size: 13px; outline: none; background: white;"><option value="">Tất cả sản phẩm</option></select>
+            </div>
+            <div style="display: flex; align-items: flex-end;">
+                <button type="button" id="btn-reset-filters" style="border: 1px solid #fca5a5; background: white; color: #c2103a; border-radius: 8px; padding: 10px 15px; font-weight: bold; cursor: pointer;">Đặt lại</button>
+            </div>
+        </div>
+
+        <div style="overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; max-height: 310px; overflow-y: auto;">
+            <table style="width: 100%; min-width: 750px; border-collapse: collapse;">
+                <thead style="position: sticky; top: 0; background: #f8f6f3; z-index: 1;">
+                    <tr style="border-bottom: 2px solid var(--line);">
+                        <th style="padding: 12px 10px; text-align: center; font-size: 12px; color: var(--text-sub); font-weight: 700; white-space: nowrap; width: 45px;">STT</th>
+                        <th style="padding: 12px 10px; text-align: center; font-size: 12px; color: var(--text-sub); font-weight: 700; white-space: nowrap; width: 60px;">Ảnh</th>
+                        <th style="padding: 12px 10px; text-align: left; font-size: 12px; color: var(--text-sub); font-weight: 700; white-space: nowrap; width: 110px;">Mã biến thể</th>
+                        <th style="padding: 12px 10px; text-align: left; font-size: 12px; color: var(--text-sub); font-weight: 700; white-space: nowrap;">Tên sản phẩm</th>
+                        <th style="padding: 12px 10px; text-align: left; font-size: 12px; color: var(--text-sub); font-weight: 700; white-space: nowrap;">Màu sắc</th>
+                        <th style="padding: 12px 10px; text-align: left; font-size: 12px; color: var(--text-sub); font-weight: 700; white-space: nowrap;">Kích cỡ</th>
+                        <th style="padding: 12px 10px; text-align: right; font-size: 12px; color: var(--text-sub); font-weight: 700; white-space: nowrap; width: 80px;">Tồn kho</th>
+                        <th style="padding: 12px 10px; text-align: right; font-size: 12px; color: var(--text-sub); font-weight: 700; white-space: nowrap; width: 110px;">Giá bán</th>
+                        <th style="padding: 12px 10px; text-align: center; font-size: 12px; color: var(--text-sub); font-weight: 700; white-space: nowrap; width: 110px;">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody id="modal-product-tbody">
+                    <c:forEach var="sp" items="${danhSachSanPham}" varStatus="loop">
+                        <tr class="p-card" data-spct="${sp.id}" style="border-bottom: 1px solid var(--line); transition: background 0.15s;" onmouseover="this.style.background='#fdf8f2'" onmouseout="this.style.background=''">
+                            <td style="padding: 12px 10px; font-size: 13px; text-align: center; color: var(--text-sub);">${loop.index + 1}</td>
+                            <td style="padding: 12px 10px; text-align: center;">
+                                <div class="p-thumb" style="width: 50px; height: 50px; border-radius: 8px; overflow: hidden; background: var(--gold-bg); display: inline-flex; align-items: center; justify-content: center; color: var(--brown-600);">
+                                    <c:choose>
+                                        <c:when test="${not empty sp.hinhAnhHienThi && sp.hinhAnhHienThi != 'null'}">
+                                            <img src="${pageContext.request.contextPath}/${sp.hinhAnhHienThi}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none';"/>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <span style="font-size: 11px; font-weight: bold;">SP</span>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
+                            </td>
+                            <td style="padding: 12px 10px; font-size: 13px; font-weight: 600; color: var(--text-main); white-space: nowrap;">${sp.ma}</td>
+                            <td style="padding: 12px 10px; font-size: 13px; color: var(--text-main);">
+                                <div class="p-name" style="max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${sp.sanPham.tenSanPham}</div>
+                            </td>
+                            <td style="padding: 12px 10px; font-size: 13px; color: var(--text-main); white-space: nowrap;">${sp.mauSac.tenMau}</td>
+                            <td style="padding: 12px 10px; font-size: 13px; color: var(--text-main); white-space: nowrap;">${sp.kichCo.tenKichCo}</td>
+                            <td style="padding: 12px 10px; font-size: 13px; font-weight: 600; color: #10b981; text-align: right;" data-tonkho>${sp.soLuongTon}</td>
+                            <td style="padding: 12px 10px; font-size: 13px; font-weight: 600; color: #c2103a; text-align: right; white-space: nowrap;">
+                                <div class="p-price"><fmt:formatNumber value="${sp.giaBan}" type="currency" currencySymbol="đ" maxFractionDigits="0"/></div>
+                            </td>
+                            <td style="padding: 10px 10px; text-align: center; white-space: nowrap;">
+                                <button type="button" class="p-add"
+                                        ${empty idHoaDonDangTao || hoaDonDangTao.trangThai == 3 || hoaDonDangTao.trangThai == 5 || sp.soLuongTon <= 0 ? 'data-disabled="true"' : ''}
+                                        style="display: inline-flex; align-items: center; gap: 4px; background: white; color: #c2103a; border: 1.5px solid #c2103a; border-radius: 6px; padding: 5px 14px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; min-width: 70px; justify-content: center; transition: all 0.15s;"
+                                        onmouseover="if(!this.dataset.disabled){this.style.background='#c2103a';this.style.color='white';}"
+                                        onmouseout="if(!this.dataset.disabled){this.style.background='white';this.style.color='#c2103a';}">
+                                    Thêm
+                                </button>
+                            </td>
+                        </tr>
+                    </c:forEach>
+                </tbody>
+            </table>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 15px;">
+            <div id="page-info" style="font-size: 13px; color: var(--text-sub);">
+                Đang tải...
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button type="button" id="btn-prev-page" style="border: 1px solid var(--line); background: white; border-radius: 8px; padding: 8px 15px; cursor: pointer;">Trước</button>
+                <button type="button" id="btn-next-page" style="border: 1px solid var(--line); background: white; border-radius: 8px; padding: 8px 15px; cursor: pointer;">Sau</button>
+            </div>
+        </div>
+        
+        <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+            <button type="button" onclick="document.getElementById('product-list-modal').classList.add('hidden')" style="border: 1px solid #fca5a5; background: white; color: #c2103a; border-radius: 8px; padding: 10px 30px; font-weight: bold; cursor: pointer;">Đóng</button>
         </div>
     </section>
 </div>
@@ -985,6 +1285,145 @@
 </script>
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script src="${pageContext.request.contextPath}/assets/js/banhang.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('product-list-modal');
+    if (!modal) return;
+    
+    const tbody = document.getElementById('modal-product-tbody');
+    if (!tbody) return;
+    const allRows = Array.from(tbody.querySelectorAll('tr.p-card'));
+    
+    const searchInput = document.getElementById('client-search-product');
+    const colorSelect = document.getElementById('filter-color');
+    const sizeSelect = document.getElementById('filter-size');
+    const productSelect = document.getElementById('filter-product');
+    const btnReset = document.getElementById('btn-reset-filters');
+    const btnPrev = document.getElementById('btn-prev-page');
+    const btnNext = document.getElementById('btn-next-page');
+    const pageInfo = document.getElementById('page-info');
+    
+    let filteredRows = [...allRows];
+    let currentPage = 1;
+    const itemsPerPage = 5;
+
+    const colors = new Set();
+    const sizes = new Set();
+    const products = new Set();
+    
+    allRows.forEach(row => {
+        // New column order: 0=STT, 1=Ảnh, 2=Mã, 3=Tên, 4=Màu, 5=Kích cỡ, 6=Tồn kho, 7=Giá, 8=Hành động
+        const ma = (row.cells[2] ? row.cells[2].innerText : '').trim();
+        const tenElement = row.querySelector('.p-name');
+        const ten = (tenElement ? tenElement.innerText : '').trim();
+        const mau = (row.cells[4] ? row.cells[4].innerText : '').trim();
+        const size = (row.cells[5] ? row.cells[5].innerText : '').trim();
+        
+        row.dataset.ma = ma.toLowerCase();
+        row.dataset.ten = ten.toLowerCase();
+        row.dataset.mau = mau;
+        row.dataset.size = size;
+        row.dataset.sp = ten;
+        
+        if (mau) colors.add(mau);
+        if (size) sizes.add(size);
+        if (ten) products.add(ten);
+        
+        const btnThem = row.querySelector('.p-add');
+        if (btnThem) {
+            btnThem.addEventListener('click', () => {
+                modal.classList.add('hidden');
+            });
+        }
+    });
+    
+    Array.from(colors).sort().forEach(c => colorSelect.add(new Option(c, c)));
+    Array.from(sizes).sort().forEach(s => sizeSelect.add(new Option(s, s)));
+    Array.from(products).sort().forEach(p => productSelect.add(new Option(p, p)));
+    
+    function renderPage() {
+        allRows.forEach(row => row.style.display = 'none');
+        
+        const totalPages = Math.ceil(filteredRows.length / itemsPerPage) || 1;
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+        
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        
+        const pageRows = filteredRows.slice(start, end);
+        pageRows.forEach((row, index) => {
+            row.style.display = '';
+            row.cells[0].innerText = start + index + 1;
+        });
+        
+        pageInfo.innerText = `Trang ${currentPage}/${totalPages} - ${filteredRows.length} biến thể`;
+        
+        btnPrev.disabled = currentPage === 1;
+        btnNext.disabled = currentPage === totalPages;
+        
+        btnPrev.style.opacity = btnPrev.disabled ? '0.5' : '1';
+        btnPrev.style.cursor = btnPrev.disabled ? 'not-allowed' : 'pointer';
+        btnNext.style.opacity = btnNext.disabled ? '0.5' : '1';
+        btnNext.style.cursor = btnNext.disabled ? 'not-allowed' : 'pointer';
+    }
+    
+    function applyFilters() {
+        const kw = searchInput.value.toLowerCase().trim();
+        const c = colorSelect.value;
+        const s = sizeSelect.value;
+        const p = productSelect.value;
+        
+        filteredRows = allRows.filter(row => {
+            const matchKw = !kw || row.dataset.ma.includes(kw) || row.dataset.ten.includes(kw);
+            const matchC = c === '' || row.dataset.mau === c;
+            const matchS = s === '' || row.dataset.size === s;
+            const matchP = p === '' || row.dataset.sp === p;
+            return matchKw && matchC && matchS && matchP;
+        });
+        
+        currentPage = 1;
+        renderPage();
+    }
+    
+    if(searchInput) searchInput.addEventListener('input', applyFilters);
+    if(colorSelect) colorSelect.addEventListener('change', applyFilters);
+    if(sizeSelect) sizeSelect.addEventListener('change', applyFilters);
+    if(productSelect) productSelect.addEventListener('change', applyFilters);
+    
+    if(btnReset) {
+        btnReset.addEventListener('click', () => {
+            searchInput.value = '';
+            colorSelect.value = '';
+            sizeSelect.value = '';
+            productSelect.value = '';
+            applyFilters();
+        });
+    }
+    
+    if(btnPrev) {
+        btnPrev.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderPage();
+            }
+        });
+    }
+    
+    if(btnNext) {
+        btnNext.addEventListener('click', () => {
+            const totalPages = Math.ceil(filteredRows.length / itemsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderPage();
+            }
+        });
+    }
+    
+    renderPage();
+});
+</script>
 
 </body>
 </html>

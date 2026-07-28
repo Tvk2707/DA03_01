@@ -486,6 +486,7 @@ async function themVaChonKhachHang(button) {
 
 let productQrScanner = null;
 let productQrLastCode = '';
+let productQrCurrentCamera = null;
 
 function capNhatTrangThaiQr(message) {
     const status = document.getElementById('product-qr-status');
@@ -507,12 +508,10 @@ async function dungQuetQr() {
 async function themSanPhamTuMaQr(ma) {
     const maQr = String(ma || '').trim();
     if (!maQr) {
-        hienThiLoi('Mã QR sản phẩm không được để trống.');
-        return;
+        throw new Error('Mã QR sản phẩm không được để trống.');
     }
     if (!idHoaDonHienTai) {
-        hienThiLoi('Vui lòng tạo hoặc chọn hóa đơn trước khi quét sản phẩm.');
-        return;
+        throw new Error('Vui lòng tạo hoặc chọn hóa đơn trước khi quét sản phẩm.');
     }
 
     capNhatTrangThaiQr('Đang tìm sản phẩm...');
@@ -522,8 +521,42 @@ async function themSanPhamTuMaQr(ma) {
         idSpct: data.idSanPhamChiTiet,
         soLuong: 1
     });
-    await dungQuetQr();
-    window.location.reload();
+    if (typeof capNhatGioHangTuServer === 'function') {
+        await capNhatGioHangTuServer(data.idSanPhamChiTiet);
+    } else {
+        window.location.reload();
+    }
+    alert('Đã thêm sản phẩm vào đơn hàng.');
+}
+
+async function startScannerWithCamera(cameraId) {
+    try {
+        await dungQuetQr();
+        productQrScanner = new Html5Qrcode('product-qr-reader');
+        await productQrScanner.start(
+            cameraId,
+            { fps: 10, qrbox: { width: 220, height: 220 } },
+            async decodedText => {
+                if (productQrLastCode === decodedText) return;
+                productQrLastCode = decodedText;
+                
+                try {
+                    await themSanPhamTuMaQr(decodedText);
+                    dongQuetQr();
+                } catch (error) {
+                    capNhatTrangThaiQr(error.message || 'Không tìm thấy sản phẩm tương ứng với mã QR.');
+                    setTimeout(() => {
+                        productQrLastCode = '';
+                        capNhatTrangThaiQr('Đang chờ camera hoặc mã QR.');
+                    }, 2500);
+                }
+            },
+            () => {}
+        );
+        capNhatTrangThaiQr('Đang quét...');
+    } catch (error) {
+        capNhatTrangThaiQr('Lỗi khởi động camera: ' + error.message);
+    }
 }
 
 async function moQuetQr() {
@@ -537,35 +570,46 @@ async function moQuetQr() {
     productQrLastCode = '';
     modal.classList.remove('hidden');
     modal.setAttribute('aria-hidden', 'false');
-    capNhatTrangThaiQr('Đang chờ camera hoặc mã QR.');
+    capNhatTrangThaiQr('Đang kết nối camera...');
 
     if (typeof Html5Qrcode === 'undefined') {
         capNhatTrangThaiQr('Camera QR chưa tải được. Bạn có thể nhập mã thủ công.');
         return;
     }
 
-    await dungQuetQr();
-    productQrScanner = new Html5Qrcode('product-qr-reader');
+    const cameraSelect = document.getElementById('qr-camera-select');
+    
     try {
-        await productQrScanner.start(
-            { facingMode: 'environment' },
-            { fps: 10, qrbox: { width: 220, height: 220 } },
-            async decodedText => {
-                if (productQrLastCode) return;
-                productQrLastCode = decodedText;
-                await dungQuetQr();
-                try {
-                    await themSanPhamTuMaQr(decodedText);
-                } catch (error) {
-                    productQrLastCode = '';
-                    capNhatTrangThaiQr(error.message || 'Không thể thêm sản phẩm từ mã QR.');
+        const devices = await Html5Qrcode.getCameras();
+        if (devices && devices.length > 0) {
+            if (cameraSelect) {
+                cameraSelect.innerHTML = '';
+                devices.forEach(device => {
+                    const option = document.createElement('option');
+                    option.value = device.id;
+                    option.text = device.label || `Camera ${cameraSelect.options.length + 1}`;
+                    cameraSelect.appendChild(option);
+                });
+                cameraSelect.style.display = 'block';
+                
+                if (!productQrCurrentCamera || !devices.find(d => d.id === productQrCurrentCamera)) {
+                    productQrCurrentCamera = devices[0].id;
                 }
-            },
-            () => {}
-        );
+                cameraSelect.value = productQrCurrentCamera;
+                
+                cameraSelect.onchange = async () => {
+                    productQrCurrentCamera = cameraSelect.value;
+                    await startScannerWithCamera(productQrCurrentCamera);
+                };
+            }
+            await startScannerWithCamera(productQrCurrentCamera || devices[0].id);
+        } else {
+            if (cameraSelect) cameraSelect.style.display = 'none';
+            capNhatTrangThaiQr('Không tìm thấy camera trên thiết bị.');
+        }
     } catch (error) {
-        await dungQuetQr();
-        capNhatTrangThaiQr('Không mở được camera. Bạn có thể nhập mã thủ công.');
+        if (cameraSelect) cameraSelect.style.display = 'none';
+        capNhatTrangThaiQr('Lỗi truy cập camera. Vui lòng cấp quyền.');
     }
 }
 
@@ -729,7 +773,321 @@ async function goVoucher(button) {
     });
 }
 
+
+// ===================== DROPDOWN HELPERS =====================
+let _activeDropdown = null;
+
+function toggleDropdown(which) {
+    const listEl = document.getElementById(which + '-dropdown-list');
+    const btnEl  = document.getElementById(which + '-dropdown-btn');
+    const chevron = document.getElementById(which + '-chevron');
+    if (!listEl || !btnEl) return;
+
+    const isOpen = listEl.style.display !== 'none';
+
+    // Đóng tất cả dropdown đang mở
+    closeAllDropdowns();
+
+    if (!isOpen) {
+        // Chuyển dropdown ra ngoài body để không bị ảnh hưởng bởi layout card (Ant Design style)
+        if (listEl.parentNode !== document.body) {
+            document.body.appendChild(listEl);
+            listEl.style.position = 'fixed';
+            listEl.style.zIndex = '99999';
+        }
+
+        // Bật display trước để tính toán chiều cao
+        listEl.style.display = which === 'voucher' ? 'flex' : 'block';
+
+        // Lấy toạ độ của nút bấm
+        const rect = btnEl.getBoundingClientRect();
+        listEl.style.width = rect.width + 'px';
+        listEl.style.left = rect.left + 'px';
+        
+        // Auto placement: Tính khoảng trống phía dưới
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const dropdownHeight = listEl.offsetHeight || 350; 
+        
+        if (spaceBelow < dropdownHeight && rect.top > spaceBelow) {
+            // Hết chỗ phía dưới -> Nổi lên trên
+            listEl.style.top = 'auto';
+            listEl.style.bottom = (window.innerHeight - rect.top + 5) + 'px';
+        } else {
+            // Còn chỗ -> Nổi xuống dưới
+            listEl.style.bottom = 'auto';
+            listEl.style.top = (rect.bottom + 5) + 'px';
+        }
+
+        if (btnEl) btnEl.style.borderColor = '#c2103a';
+        if (chevron) chevron.style.transform = 'rotate(180deg)';
+        _activeDropdown = which;
+
+        if (which === 'voucher') {
+            const searchInput = document.getElementById('voucher-search-input');
+            if (searchInput) searchInput.value = ''; // Reset input tìm kiếm
+            loadVoucherDropdown('');
+        }
+    }
+}
+
+function closeAllDropdowns() {
+    ['pttt', 'voucher'].forEach(which => {
+        const el = document.getElementById(which + '-dropdown-list');
+        const btn = document.getElementById(which + '-dropdown-btn');
+        const chev = document.getElementById(which + '-chevron');
+        if (el) el.style.display = 'none';
+        if (btn) btn.style.borderColor = '';
+        if (chev) chev.style.transform = '';
+    });
+    _activeDropdown = null;
+}
+
+// Đóng dropdown khi click ra ngoài
+document.addEventListener('click', function(e) {
+    if (_activeDropdown && !e.target.closest('#pttt-dropdown-btn') && !e.target.closest('#pttt-dropdown-list')
+        && !e.target.closest('#voucher-dropdown-btn') && !e.target.closest('#voucher-dropdown-list')) {
+        closeAllDropdowns();
+    }
+});
+
+// Đóng dropdown khi người dùng cuộn trang ngoài vùng dropdown hoặc thay đổi kích thước cửa sổ
+window.addEventListener('scroll', function(e) {
+    if (!_activeDropdown) return;
+    const activeList = document.getElementById(_activeDropdown + '-dropdown-list');
+    // Nếu sự kiện scroll xuất phát từ bên trong danh sách dropdown thì bỏ qua
+    if (e.target && e.target.nodeType === 1 && activeList && activeList.contains(e.target)) return;
+    
+    closeAllDropdowns();
+}, true); // Use capture to catch scroll events from any container
+
+window.addEventListener('resize', closeAllDropdowns);
+
+// ===================== PHƯƠNG THỨC THANH TOÁN =====================
+function chonPhuongThucDropdown(el) {
+    const ma = el.dataset.ma;
+    phuongThucThanhToanDangChon = ma;
+    closeAllDropdowns();
+
+    // Cập nhật label
+    const label = document.getElementById('pttt-selected-label');
+    if (label) {
+        if (ma === 'PTTT001') {
+            label.innerHTML = '<i class="fas fa-money-bill-wave" style="color:#10b981;margin-right:7px;"></i>Tiền mặt';
+        } else {
+            label.innerHTML = '<i class="fas fa-university" style="color:#3b82f6;margin-right:7px;"></i>Chuyển khoản';
+        }
+    }
+
+    // Cập nhật dấu check
+    document.querySelectorAll('.pttt-option').forEach(opt => {
+        const check = opt.querySelector('.fa-check');
+        if (check) check.remove();
+        opt.style.background = '';
+        opt.style.color = 'var(--text-main)';
+    });
+    const checkIcon = document.createElement('i');
+    checkIcon.className = 'fas fa-check';
+    checkIcon.style.marginLeft = 'auto';
+    checkIcon.style.fontSize = '11px';
+    el.appendChild(checkIcon);
+    if (ma === 'PTTT001') {
+        el.style.background = '#f0fdf4';
+        el.style.color = '#10b981';
+    } else {
+        el.style.background = '#eff6ff';
+        el.style.color = '#3b82f6';
+    }
+
+    closeAllDropdowns();
+}
+
 function chonPhuongThucThanhToan(element) {
+    // Legacy: giữ lại cho backward compat
+    document.querySelectorAll('.pay-chip').forEach(chip => chip.classList.remove('active'));
+    element.classList.add('active');
+    phuongThucThanhToanDangChon = element.dataset.ma;
+}
+
+// ===================== VOUCHER DROPDOWN =====================
+let _voucherDangAp = document.getElementById('voucher-ma-hien-tai')?.value || '';
+
+const xuLyTimVoucherDropdown = debounce((tuKhoa) => {
+    loadVoucherDropdown(tuKhoa);
+}, 300);
+
+async function loadVoucherDropdown(tuKhoa = '') {
+    if (!idHoaDonHienTai) {
+        renderVoucherDropdown([]);
+        return;
+    }
+    const itemsEl = document.getElementById('voucher-dropdown-items');
+    const loadingEl = document.getElementById('voucher-dropdown-loading');
+    
+    if (itemsEl) itemsEl.style.display = 'none';
+    if (loadingEl) loadingEl.style.display = 'block';
+
+    try {
+        const data = await BanHangAPI.goi('timVoucher', { idHoaDon: idHoaDonHienTai, tuKhoa: tuKhoa });
+        renderVoucherDropdown(data.vouchers || []);
+    } catch (e) {
+        if (itemsEl) {
+            itemsEl.innerHTML = '<div style="padding:14px;color:#ef4444;font-size:13px;">Không tải được danh sách voucher.</div>';
+            itemsEl.style.display = 'block';
+        }
+    } finally {
+        if (loadingEl) loadingEl.style.display = 'none';
+    }
+}
+
+function formatVoucherDiscount(v) {
+    if (v.loaiGiamGia === 'percent') {
+        let txt = `Giảm ${v.giaTriGiam}%`;
+        if (v.giamToiDa) txt += ` (tối đa ${new Intl.NumberFormat('vi-VN').format(v.giamToiDa)}đ)`;
+        return txt;
+    }
+    return `Giảm ${new Intl.NumberFormat('vi-VN').format(v.giaTriGiam)}đ`;
+}
+
+function renderVoucherDropdown(vouchers) {
+    const listEl = document.getElementById('voucher-dropdown-items');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+    listEl.style.display = 'block';
+
+    // Option: Không áp dụng
+    const noVoucher = document.createElement('div');
+    noVoucher.style.cssText = 'display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;font-size:13px;color:var(--text-sub);border-bottom:1px solid var(--line);';
+    noVoucher.innerHTML = '<i class="fas fa-ban"></i> Không áp dụng voucher';
+    noVoucher.addEventListener('mouseenter', () => noVoucher.style.background = '#f8f6f3');
+    noVoucher.addEventListener('mouseleave', () => noVoucher.style.background = '');
+    noVoucher.addEventListener('click', () => goVoucherDropdown());
+    listEl.appendChild(noVoucher);
+
+    if (vouchers.length === 0) {
+        const empty = document.createElement('div');
+        empty.style.cssText = 'padding:16px;text-align:center;color:var(--text-sub);font-size:13px;';
+        empty.textContent = 'Không có voucher khả dụng cho đơn này.';
+        listEl.appendChild(empty);
+        return;
+    }
+
+    vouchers.forEach(v => {
+        const item = document.createElement('div');
+        const isSelected = v.maVoucher === _voucherDangAp;
+        item.style.cssText = `padding:12px 14px;cursor:pointer;border-bottom:1px solid var(--line);background:${isSelected ? '#fffbeb' : ''};`;
+
+        const discountTxt = formatVoucherDiscount(v);
+        const dkTxt = v.donToiThieu ? `Đơn tối thiểu ${new Intl.NumberFormat('vi-VN').format(v.donToiThieu)}đ` : '';
+
+        item.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                    <span style="font-weight:700;font-size:13px;color:#c2103a;">${v.maVoucher}</span>
+                    <span style="margin-left:8px;font-size:12px;color:var(--text-sub);">${v.tenVoucher || ''}</span>
+                </div>
+                ${isSelected ? '<i class="fas fa-check" style="color:#10b981;"></i>' : ''}
+            </div>
+            <div style="margin-top:4px;font-size:12px;color:#f59e0b;font-weight:600;">${discountTxt}</div>
+            ${dkTxt ? `<div style="margin-top:2px;font-size:11px;color:var(--text-sub);">${dkTxt}</div>` : ''}
+        `;
+        item.addEventListener('mouseenter', () => { if (!isSelected) item.style.background = '#f8f6f3'; });
+        item.addEventListener('mouseleave', () => { if (!isSelected) item.style.background = ''; });
+        item.addEventListener('click', () => chonVoucherDropdown(v));
+        listEl.appendChild(item);
+    });
+}
+
+async function chonVoucherDropdown(v) {
+    if (!idHoaDonHienTai) return;
+    closeAllDropdowns();
+    try {
+        await BanHangAPI.goi('apVoucher', { idHoaDon: idHoaDonHienTai, maVoucher: v.maVoucher });
+        _voucherDangAp = v.maVoucher;
+
+        // Cập nhật label
+        const label = document.getElementById('voucher-selected-label');
+        if (label) label.innerHTML = `<i class="fas fa-tag" style="color:#f59e0b;margin-right:7px;"></i><strong>${v.maVoucher}</strong>`;
+
+        // Tính và cập nhật tiền giảm + tổng cộng
+        capNhatSoTienSauVoucher(v);
+    } catch (e) {
+        alert(e.message || 'Không thể áp dụng voucher.');
+    }
+}
+
+async function goVoucherDropdown() {
+    closeAllDropdowns();
+    if (!_voucherDangAp || !idHoaDonHienTai) {
+        // Chưa có voucher → chỉ đóng
+        return;
+    }
+    try {
+        await BanHangAPI.goi('goVoucher', { idHoaDon: idHoaDonHienTai });
+        _voucherDangAp = '';
+
+        // Cập nhật label
+        const label = document.getElementById('voucher-selected-label');
+        if (label) label.innerHTML = '<i class="fas fa-tag" style="color:#cbd5e1;margin-right:7px;"></i><span style="color:var(--text-sub);">-- Không áp dụng --</span>';
+
+        // Reset giảm giá về 0, tổng = tạm tính
+        const tamTinh = parseCurrencyVi(document.getElementById('sum-tamtinh')?.textContent || '0');
+        capNhatHienThiTongTien(tamTinh, 0);
+    } catch (e) {
+        alert(e.message || 'Không thể gỡ voucher.');
+    }
+}
+
+function parseCurrencyVi(str) {
+    return parseInt((str || '0').replace(/[^0-9]/g, '')) || 0;
+}
+
+function capNhatSoTienSauVoucher(v) {
+    const tamTinh = parseCurrencyVi(document.getElementById('sum-tamtinh')?.textContent || '0');
+    let giamGia = 0;
+    if (v.loaiGiamGia === 'percent') {
+        giamGia = Math.round(tamTinh * v.giaTriGiam / 100);
+        if (v.giamToiDa && giamGia > v.giamToiDa) giamGia = v.giamToiDa;
+    } else {
+        giamGia = v.giaTriGiam;
+    }
+    if (giamGia > tamTinh) giamGia = tamTinh;
+    capNhatHienThiTongTien(tamTinh, giamGia);
+}
+
+function capNhatHienThiTongTien(tamTinh, giamGia) {
+    const tongCong = tamTinh - giamGia;
+    const fmt = n => new Intl.NumberFormat('vi-VN').format(n) + 'đ';
+
+    const giamEl = document.getElementById('sum-giamgia');
+    if (giamEl) giamEl.textContent = '-' + fmt(giamGia);
+
+    const tongEl = document.getElementById('sum-tongcong');
+    if (tongEl) tongEl.textContent = fmt(tongCong);
+
+    const totalEl = document.getElementById('checkout-total');
+    if (totalEl) {
+        totalEl.dataset.amount = tongCong;
+        totalEl.textContent = fmt(tongCong);
+    }
+}
+
+// Legacy stubs (giữ lại để không break các listener cũ)
+async function apVoucher(button) {
+    const ma = document.getElementById('input-voucher')?.value?.trim();
+    if (!ma || !idHoaDonHienTai) return;
+    await BanHangAPI.goi('apVoucher', { idHoaDon: idHoaDonHienTai, maVoucher: ma });
+    window.location.reload();
+}
+async function goVoucher(button) {
+    if (!idHoaDonHienTai) return;
+    await withLoading(button, async () => {
+        await BanHangAPI.goi('goVoucher', { idHoaDon: idHoaDonHienTai });
+        window.location.reload();
+    });
+}
+
+function chonPhuongThucThanhToan(element) {
+
     document.querySelectorAll('.pay-chip').forEach(chip => chip.classList.remove('active'));
     element.classList.add('active');
     phuongThucThanhToanDangChon = element.dataset.ma;

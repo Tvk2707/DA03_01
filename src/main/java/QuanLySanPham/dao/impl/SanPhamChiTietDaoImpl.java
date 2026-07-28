@@ -194,6 +194,8 @@ public class SanPhamChiTietDaoImpl extends GenericDaoImpl<SanPhamChiTiet, Intege
             if (danhMucId != null) {
                 jpql.append(" AND sp.danhMuc.id = :danhMucId");
             }
+            
+            jpql.append(" ORDER BY s.id DESC");
 
             TypedQuery<SanPhamChiTiet> query = em.createQuery(jpql.toString(), SanPhamChiTiet.class);
 

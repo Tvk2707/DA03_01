@@ -348,10 +348,6 @@
 
         function extractDigits(value) {
             const text = String(value || '').trim();
-            const decimalNumber = text.match(/^(\d+)[.,](0+)$/);
-            if (decimalNumber) {
-                return decimalNumber[1];
-            }
             return text.replace(/\D/g, '');
         }
 

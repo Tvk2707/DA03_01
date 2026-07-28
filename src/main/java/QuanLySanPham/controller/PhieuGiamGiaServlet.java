@@ -438,10 +438,11 @@ public class PhieuGiamGiaServlet extends HttpServlet {
     }
 
     private Integer validateCouponType(String value, Map<String, String> errors) {
-        if ("public".equals(value)) {
+        String text = trim(value);
+        if (text.isEmpty() || "public".equals(text)) {
             return PUBLIC_COUPON_TYPE;
         }
-        if ("personal".equals(value)) {
+        if ("personal".equals(text)) {
             return PERSONAL_COUPON_TYPE;
         }
         errors.put("loaiPhieu", "Loại phiếu không hợp lệ.");
@@ -449,10 +450,11 @@ public class PhieuGiamGiaServlet extends HttpServlet {
     }
 
     private Integer validateStatus(String value, Map<String, String> errors) {
-        if ("1".equals(value)) {
+        String text = trim(value);
+        if (text.isEmpty() || "1".equals(text)) {
             return 1;
         }
-        if ("0".equals(value)) {
+        if ("0".equals(text)) {
             return 0;
         }
         errors.put("trangThai", "Trạng thái không hợp lệ.");

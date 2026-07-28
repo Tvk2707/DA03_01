@@ -403,7 +403,8 @@ public class BanHangController extends HttpServlet {
 
         try {
             int idHoaDon = requirePositiveInt(req, "idHoaDon");
-            String tuKhoa = requireText(req, "tuKhoa");
+            String tuKhoa = optionalText(req, "tuKhoa");
+            if (tuKhoa == null) tuKhoa = "";
             List<Map<String, Object>> vouchers = new ArrayList<>();
             for (PhieuGiamGia voucher : banHangService.timKiemVoucher(idHoaDon, tuKhoa)) {
                 vouchers.add(toVoucherData(voucher));

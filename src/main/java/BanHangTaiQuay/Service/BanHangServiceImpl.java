@@ -126,10 +126,13 @@ public class BanHangServiceImpl implements BanHangService {
                     .orElse(null);
 
             int tonKho = spct.getSoLuongTon() == null ? 0 : spct.getSoLuongTon();
-            int soLuongTrongGio = chiTiet == null || chiTiet.getSoLuong() == null ? 0 : chiTiet.getSoLuong();
-            if (soLuongTrongGio + soLuong > tonKho) {
+            if (soLuong > tonKho) {
                 throw new IllegalStateException("Không đủ tồn kho, còn lại: " + tonKho);
             }
+            // Trừ tồn kho ngay lập tức
+            spct.setSoLuongTon(tonKho - soLuong);
+
+            int soLuongTrongGio = chiTiet == null || chiTiet.getSoLuong() == null ? 0 : chiTiet.getSoLuong();
 
             if (chiTiet != null) {
                 int soLuongMoi = soLuongTrongGio + soLuong;
@@ -194,6 +197,16 @@ public class BanHangServiceImpl implements BanHangService {
                 throw new IllegalArgumentException("Chi tiết hóa đơn không hợp lệ.");
             }
 
+            // Hoàn lại tồn kho
+            if (chiTiet.getSanPhamChiTiet() != null && chiTiet.getSanPhamChiTiet().getId() != null) {
+                SanPhamChiTiet spct = em.find(SanPhamChiTiet.class, chiTiet.getSanPhamChiTiet().getId(), LockModeType.PESSIMISTIC_WRITE);
+                if (spct != null) {
+                    int tonKho = spct.getSoLuongTon() == null ? 0 : spct.getSoLuongTon();
+                    int soLuongHoan = chiTiet.getSoLuong() == null ? 0 : chiTiet.getSoLuong();
+                    spct.setSoLuongTon(tonKho + soLuongHoan);
+                }
+            }
+
             hd.getChiTietHoaDons().remove(chiTiet);
             em.remove(chiTiet);
             capNhatTongTien(hd);
@@ -256,9 +269,13 @@ public class BanHangServiceImpl implements BanHangService {
                 }
 
                 int tonKho = spct.getSoLuongTon() == null ? 0 : spct.getSoLuongTon();
-                if (soLuongMoi > tonKho) {
+                int chenhLech = soLuongMoi - soLuongCu;
+                if (chenhLech > tonKho) {
                     throw new IllegalStateException("Không đủ tồn kho, chỉ còn lại: " + tonKho);
                 }
+                
+                // Cập nhật lại tồn kho theo chênh lệch
+                spct.setSoLuongTon(tonKho - chenhLech);
 
                 chiTiet.setSoLuong(soLuongMoi);
                 if (chiTiet.getDonGia() == null) {
@@ -504,11 +521,10 @@ public class BanHangServiceImpl implements BanHangService {
                     throw new IllegalStateException("Hóa đơn có sản phẩm đã ngừng kinh doanh.");
                 }
                 int tonKho = spct.getSoLuongTon() == null ? 0 : spct.getSoLuongTon();
-                if (chiTiet.getSoLuong() > tonKho) {
-                    throw new IllegalStateException("Không đủ tồn kho cho sản phẩm " + spct.getMa()
-                            + ", chỉ còn: " + tonKho);
+                // Đã trừ tồn kho lúc thêm vào giỏ, chỉ kiểm tra xem số lượng có âm bất thường không.
+                if (tonKho < 0) {
+                    throw new IllegalStateException("Tồn kho bị âm bất thường cho sản phẩm " + spct.getMa());
                 }
-                spct.setSoLuongTon(tonKho - chiTiet.getSoLuong());
             }
 
             BigDecimal tongTien = hd.getTongTienThanhToan() == null
@@ -618,6 +634,20 @@ public class BanHangServiceImpl implements BanHangService {
             }
             if (hd.getTrangThai() != null && hd.getTrangThai() == 3) {
                 throw new IllegalStateException("Không thể hủy hóa đơn đã thanh toán.");
+            }
+
+            // Hoàn lại tồn kho cho tất cả sản phẩm trong giỏ
+            if (hd.getChiTietHoaDons() != null) {
+                for (ChiTietHoaDon ct : hd.getChiTietHoaDons()) {
+                    if (ct.getSanPhamChiTiet() != null && ct.getSanPhamChiTiet().getId() != null) {
+                        SanPhamChiTiet spct = em.find(SanPhamChiTiet.class, ct.getSanPhamChiTiet().getId(), LockModeType.PESSIMISTIC_WRITE);
+                        if (spct != null) {
+                            int tonKho = spct.getSoLuongTon() == null ? 0 : spct.getSoLuongTon();
+                            int soLuongHoan = ct.getSoLuong() == null ? 0 : ct.getSoLuong();
+                            spct.setSoLuongTon(tonKho + soLuongHoan);
+                        }
+                    }
+                }
             }
 
             voucherService.hoanVoucherKhiHuy(em, hd);

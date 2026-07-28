@@ -24,9 +24,6 @@ public class VoucherServiceImpl implements VoucherService {
         if (idHoaDon <= 0) {
             throw new IllegalArgumentException("ID hóa đơn không hợp lệ.");
         }
-        if (tuKhoa == null || tuKhoa.trim().isEmpty()) {
-            return List.of();
-        }
 
         EntityManager em = EntityManagerUtlis.getEntityManager();
         try {
@@ -38,20 +35,26 @@ public class VoucherServiceImpl implements VoucherService {
                 return List.of();
             }
 
-            String keyword = tuKhoa.trim().toLowerCase(Locale.ROOT);
+            String keyword = tuKhoa == null ? null : tuKhoa.trim().toLowerCase(Locale.ROOT);
             LocalDateTime hienTai = LocalDateTime.now();
-            List<PhieuGiamGia> ungVien = em.createQuery(
-                            "SELECT p FROM PhieuGiamGia p "
-                                    + "WHERE p.trangThai = 1 "
-                                    + "AND (LOWER(p.maVoucher) LIKE :keyword OR LOWER(p.tenVoucher) LIKE :keyword) "
-                                    + "AND (p.ngayBatDau IS NULL OR p.ngayBatDau <= :hienTai) "
-                                    + "AND (p.ngayKetThuc IS NULL OR p.ngayKetThuc >= :hienTai) "
-                                    + "ORDER BY p.id DESC",
-                            PhieuGiamGia.class)
-                    .setParameter("keyword", "%" + keyword + "%")
+
+            StringBuilder jpql = new StringBuilder(
+                    "SELECT p FROM PhieuGiamGia p "
+                    + "WHERE p.trangThai = 1 "
+                    + "AND (p.ngayBatDau IS NULL OR p.ngayBatDau <= :hienTai) "
+                    + "AND (p.ngayKetThuc IS NULL OR p.ngayKetThuc >= :hienTai)");
+            if (keyword != null && !keyword.isEmpty()) {
+                jpql.append(" AND (LOWER(p.maVoucher) LIKE :keyword OR LOWER(p.tenVoucher) LIKE :keyword)");
+            }
+            jpql.append(" ORDER BY p.id DESC");
+
+            var q = em.createQuery(jpql.toString(), PhieuGiamGia.class)
                     .setParameter("hienTai", hienTai)
-                    .setMaxResults(20)
-                    .getResultList();
+                    .setMaxResults(50);
+            if (keyword != null && !keyword.isEmpty()) {
+                q.setParameter("keyword", "%" + keyword + "%");
+            }
+            List<PhieuGiamGia> ungVien = q.getResultList();
 
             BigDecimal tongTienHang = tinhTongTienHang(hoaDon);
             List<PhieuGiamGia> ketQua = new ArrayList<>();
