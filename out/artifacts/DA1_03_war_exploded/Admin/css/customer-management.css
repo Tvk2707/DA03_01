@@ -1,0 +1,565 @@
+/*
+ * Customer management
+ * Uses the same visual language as the product and employee management pages.
+ * All page-specific rules are scoped so they do not affect the shared layout.
+ */
+
+body .dashboard-container {
+    margin-left: 260px !important;
+    padding: 24px 32px !important;
+    width: auto !important;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+.customer-page {
+    width: 100%;
+}
+
+.customer-page .category-header {
+    margin-bottom: 24px;
+}
+
+.customer-page .category-title {
+    margin: 0;
+    color: #2c2c2c;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+/* Search panel */
+.customer-page .filter-section {
+    margin-bottom: 24px;
+    padding: 20px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .05);
+}
+
+.customer-page .filter-header {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.customer-page .filter-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #1f2937;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.customer-page .filter-title i {
+    color: #b4975a;
+}
+
+.customer-page .filter-grid-kh {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+}
+
+.customer-page .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.customer-page .filter-label,
+.customer-page .customer-field label,
+.address-page .form-group label {
+    color: #4b5563;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.customer-page .filter-input,
+.customer-page .filter-select,
+.address-page .form-group input,
+.address-page .form-group select {
+    width: 100%;
+    height: 40px;
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    outline: none;
+    background: #fff;
+    color: #1f2937;
+    font: inherit;
+    font-size: 14px;
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.customer-page .filter-input:focus,
+.customer-page .filter-select:focus,
+.address-page .form-group input:focus,
+.address-page .form-group select:focus {
+    border-color: #b4975a !important;
+    box-shadow: 0 0 0 3px rgba(180, 151, 90, .15);
+}
+
+.customer-page .filter-action-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px dashed #e5e7eb;
+}
+
+.customer-page .filter-action-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Shared-looking buttons */
+.customer-page .add-new-btn,
+.customer-page .btn-secondary-outline,
+.address-page .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 9px 18px;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color .2s ease, border-color .2s ease, color .2s ease;
+}
+
+.customer-page .add-new-btn,
+.address-page .btn-primary {
+    border: 1px solid #b4975a !important;
+    background: #b4975a !important;
+    color: #fff !important;
+}
+
+.customer-page .add-new-btn:hover,
+.address-page .btn-primary:hover {
+    border-color: #9a8048 !important;
+    background: #9a8048 !important;
+}
+
+.customer-page .btn-secondary-outline,
+.address-page .btn-outline {
+    border: 1px solid #d1d5db !important;
+    background: #fff !important;
+    color: #4b5563 !important;
+}
+
+.customer-page .btn-secondary-outline:hover,
+.address-page .btn-outline:hover {
+    border-color: #b4975a !important;
+    background: #fcf8f2 !important;
+    color: #9a7d55 !important;
+}
+
+.customer-page button:focus-visible,
+.customer-page a:focus-visible,
+.address-page button:focus-visible,
+.address-page a:focus-visible {
+    outline: 3px solid rgba(180, 151, 90, .3);
+    outline-offset: 2px;
+}
+
+/* Add/edit form */
+.customer-page .customer-form-panel {
+    margin-bottom: 24px;
+}
+
+.customer-page .customer-form-panel[hidden] {
+    display: none;
+}
+
+.customer-page .customer-form-panel.is-open {
+    display: block;
+}
+
+.customer-page .customer-card {
+    margin: 0 !important;
+    padding: 20px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .05);
+}
+
+.customer-page .customer-card-heading {
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.customer-page .customer-card-heading h2 {
+    margin: 0;
+    color: #1f2937;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.customer-page .customer-card-heading p {
+    margin: 4px 0 0;
+    color: #6b7280;
+    font-size: 13px;
+}
+
+.customer-page .customer-edit-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px 28px;
+    margin-bottom: 20px;
+    padding: 14px 16px;
+    border: 1px solid #eee7dc;
+    border-radius: 8px;
+    background: #fcfaf7;
+}
+
+.customer-page .customer-summary-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.customer-page .customer-summary-label {
+    color: #6b7280;
+    font-size: 13px;
+}
+
+.customer-page .customer-management-form {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.customer-page .customer-field {
+    min-width: 0;
+}
+
+.customer-page .customer-field label {
+    display: block;
+    margin-bottom: 6px;
+}
+
+.customer-page .customer-field label span {
+    color: #dc2626;
+}
+
+.customer-page .customer-field-error {
+    display: block;
+    min-height: 18px;
+    margin-top: 4px;
+    color: #dc2626;
+    font-size: 12px;
+}
+
+.customer-page .customer-field-error:empty {
+    visibility: hidden;
+}
+
+.customer-page [aria-invalid="true"] {
+    border-color: #dc2626 !important;
+}
+
+.customer-page .customer-form-actions {
+    display: flex !important;
+    align-items: flex-end;
+    gap: 12px !important;
+    margin-top: 0 !important;
+    padding-bottom: 18px;
+}
+
+/* List toolbar and table */
+.customer-page .table-toolbar {
+    position: static;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 0;
+    padding: 14px 16px;
+    border: 1px solid #e5e7eb;
+    border-bottom: 0;
+    border-radius: 10px 10px 0 0;
+    background: #fff;
+    box-shadow: none;
+}
+
+.customer-page .toolbar-left-results {
+    color: #374151;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.customer-page .table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid #e5e7eb;
+    border-radius: 0 0 10px 10px;
+    background: #fff;
+    box-shadow: none;
+}
+
+.customer-page .customer-management-table,
+.address-page .address-table {
+    width: 100%;
+    min-width: 1040px;
+    margin: 0 !important;
+    border: 0 !important;
+    border-collapse: collapse;
+    table-layout: auto !important;
+}
+
+.customer-page .customer-management-table th,
+.customer-page .customer-management-table td,
+.address-page .address-table th,
+.address-page .address-table td {
+    padding: 13px 14px !important;
+    border-bottom: 1px solid #f0ebe3 !important;
+    color: #2c2c2c !important;
+    font-size: 14px !important;
+    text-align: left !important;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.customer-page .customer-management-table th,
+.address-page .address-table th {
+    border-bottom-width: 2px !important;
+    background: #faf8f5 !important;
+    color: #4a4a4a !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+}
+
+.customer-page .customer-management-table tbody tr:hover,
+.address-page .address-table tbody tr:hover {
+    background: #faf8f5;
+}
+
+.customer-page .category-status,
+.address-page .status {
+    display: inline-flex;
+    align-items: center;
+    min-height: 26px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.customer-page .status-active,
+.address-page .status-active {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.customer-page .status-inactive,
+.address-page .status-inactive {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.customer-page .action-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.customer-page .btn-icon-circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    font-size: 14px;
+    text-decoration: none;
+    transition: filter .2s ease, transform .2s ease;
+}
+
+.customer-page .btn-icon-circle:hover {
+    filter: brightness(.96);
+    transform: translateY(-1px);
+}
+
+.customer-page .customer-search-empty-row td {
+    padding: 30px !important;
+    color: #888 !important;
+    text-align: center !important;
+}
+
+/* Notifications */
+.customer-page .toast-custom {
+    position: fixed;
+    z-index: 3000;
+    top: 24px;
+    right: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, .15);
+    font-size: 14px;
+    font-weight: 600;
+    transition: opacity .3s ease, transform .3s ease;
+}
+
+.customer-page .toast-success-style {
+    border: 1px solid #c8e6c9;
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.customer-page .toast-error-style {
+    border: 1px solid #fad2cf;
+    background: #fdecea;
+    color: #b3261e;
+}
+
+/* Customer address screen */
+.address-page .address-page-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.address-page .category-title {
+    margin: 0;
+    color: #2c2c2c;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.address-page .address-card {
+    margin-bottom: 24px;
+    padding: 20px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .05);
+}
+
+.address-page .address-card h3 {
+    margin: 0 0 18px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f3f4f6;
+    color: #1f2937;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.address-page .address-form {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.address-page .form-group label {
+    display: block;
+    margin-bottom: 6px;
+}
+
+.address-page .form-actions {
+    display: flex;
+    align-items: flex-end;
+}
+
+.address-page .table-wrap {
+    overflow-x: auto;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+}
+
+.address-page .address-table {
+    min-width: 1200px;
+}
+
+.address-page .address-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 34px;
+    padding: 0 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #fff;
+    color: #4b5563;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.address-page .address-action:hover {
+    border-color: #b4975a;
+    background: #fcf8f2;
+    color: #9a7d55;
+}
+
+.address-page .empty-row {
+    padding: 30px !important;
+    color: #888 !important;
+    text-align: center !important;
+}
+
+@media (max-width: 1024px) {
+    body .dashboard-container {
+        margin-left: 0 !important;
+        padding: 16px !important;
+    }
+
+    .customer-page .customer-management-form,
+    .address-page .address-form {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .customer-page .filter-action-row,
+    .customer-page .table-toolbar,
+    .address-page .address-page-heading {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .customer-page .filter-action-right,
+    .customer-page .customer-form-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .customer-page .filter-action-right > *,
+    .customer-page .table-toolbar .add-new-btn,
+    .customer-page .customer-form-actions > *,
+    .address-page .address-page-heading .btn {
+        width: 100%;
+    }
+
+    .customer-page .customer-management-form,
+    .address-page .address-form {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .customer-page .customer-form-actions {
+        padding-bottom: 0;
+    }
+}

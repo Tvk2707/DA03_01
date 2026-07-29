@@ -1,0 +1,408 @@
+/* ==========================================================
+   🎨 QUẢN LÝ PHIẾU GIẢM GIÁ - HỆ THỐNG CSS ĐỒNG BỘ GIAO DIỆN
+   ========================================================== */
+
+/* 1. TOAST NOTIFICATIONS (GÓC TRÊN PHẢI) */
+
+.toast-custom {
+    position: fixed;
+    top: 25px;
+    right: 25px;
+    padding: 14px 22px;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+    z-index: 1000000;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 600;
+    font-size: 14px;
+    opacity: 1;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    animation: slideInToast 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.toast-success-style {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #c8e6c9;
+}
+
+.toast-error-style {
+    background-color: #fdecea;
+    color: #b3261e;
+    border: 1px solid #fad2cf;
+}
+
+@keyframes slideInToast {
+    from { transform: translateX(120%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* 2. BỘ LỌC TÌM KIẾM (FILTER GRID) */
+.filter-section {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.filter-header {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.filter-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1f2937;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-title i {
+    color: #b4975a;
+}
+
+.filter-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    align-items: flex-start;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.filter-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #4b5563;
+}
+
+.filter-input,
+.filter-select {
+    width: 100%;
+    height: 40px;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background-color: #ffffff;
+    color: #1f2937;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+}
+
+.filter-input:focus,
+.filter-select:focus {
+    border-color: #b4975a !important;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(180, 151, 90, 0.15);
+}
+
+/* Hàng hành động bộ lọc (Nút Tìm kiếm & Đặt lại đẩy sang góc phải) */
+.filter-action-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px dashed #e5e7eb;
+}
+
+.filter-action-left {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.filter-action-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* 3. NÚT BẤM CƠ BẢN */
+.add-new-btn {
+    background-color: #b4975a !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    text-decoration: none;
+}
+
+.add-new-btn:hover {
+    background-color: #9a8048 !important;
+}
+
+.btn-secondary-outline {
+    background: #ffffff !important;
+    color: #4b5563 !important;
+    border: 1px solid #d1d5db !important;
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-secondary-outline:hover {
+    background: #f9fafb !important;
+    border-color: #9ca3af !important;
+    color: #1f2937 !important;
+}
+
+/* 4. TOOLBAR VÀ BẢNG DỮ LIỆU (STICKY TOOLBAR) */
+.table-toolbar {
+    position: sticky;
+    top: 70px;
+    background: #ffffff;
+    z-index: 90;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    margin-top: 24px;
+    border: 1px solid #e5e7eb;
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.toolbar-left-results {
+    font-size: 14px;
+    font-weight: 500;
+    color: #4b5563;
+}
+
+.toolbar-left-results span {
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.category-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-top: none !important;
+    border-radius: 0 0 8px 8px !important;
+    overflow: hidden;
+}
+
+.category-table th {
+    background-color: #f9fafb;
+    color: #374151;
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.category-table td {
+    padding: 14px 16px;
+    font-size: 14px;
+    color: #374151;
+    border-bottom: 1px solid #f3f4f6;
+    vertical-align: middle;
+}
+
+.category-table tbody tr:hover {
+    background-color: #f9fafb;
+}
+
+.category-id {
+    font-weight: 600;
+    color: #6b7280;
+}
+
+/* 5. TRẠNG THÁI VÀ BADGES */
+.badge-type {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    background-color: #f3f4f6;
+    color: #4b5563;
+    display: inline-block;
+}
+
+.category-status {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.status-active {
+    background-color: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
+}
+
+.status-inactive {
+    background-color: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+
+/* 6. THAO TÁC VÀ TOGGLE SWITCH TRẠNG THÁI */
+.action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.btn-icon-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f3f4f6;
+    color: #4b5563;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.btn-icon-circle:hover {
+    background-color: #b4975a;
+    color: #ffffff;
+}
+
+.status-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 22px;
+}
+
+.status-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.status-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #94a3b8;
+    transition: .3s;
+    border-radius: 22px;
+}
+
+.status-slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 3px;
+    background-color: #ffffff;
+    transition: .3s;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.status-switch input:checked + .status-slider {
+    background-color: #b4975a;
+}
+
+.status-switch input:checked + .status-slider:before {
+    transform: translateX(22px);
+}
+
+/* 7. PHÂN TRANG (PAGINATION) */
+.sp-pagination {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 6px;
+    margin-top: 16px;
+    padding: 10px 0;
+}
+
+.sp-page-btn {
+    padding: 6px 12px;
+    border: 1px solid #d1d5db;
+    background-color: #ffffff;
+    color: #374151;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.sp-page-btn:hover:not(:disabled) {
+    background-color: #f3f4f6;
+    color: #374151;
+}
+
+.sp-page-btn.active {
+    background-color: #b4975a;
+    color: #ffffff;
+    border-color: #b4975a;
+}
+
+.sp-page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #f9fafb;
+}
+
+/* 8. RESPONSIVE MOBILE & TABLET */
+@media (max-width: 1024px) {
+    .filter-grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .filter-grid-4 {
+        grid-template-columns: 1fr;
+    }
+    .filter-action-row {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+    }
+    .filter-action-right {
+        flex-direction: column;
+        gap: 8px;
+    }
+    .filter-action-right button,
+    .filter-action-right a {
+        width: 100%;
+        justify-content: center;
+    }
+}
