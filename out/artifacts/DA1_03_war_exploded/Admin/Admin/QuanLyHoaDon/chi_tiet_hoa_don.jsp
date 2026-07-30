@@ -234,16 +234,13 @@
 
     private String stepClass(Integer status, int step) {
         int current = status == null ? 1 : status;
+        boolean finished = current == 3 || current == 5;
 
-        if (current == 5 && step == 5) {
-            return " is-current";
+        if (step == 1) {
+            return finished ? "" : " is-current";
         }
 
-        if (current == 3 && step <= 3) {
-            return step == 3 ? " is-current" : " is-done";
-        }
-
-        if (current == 1 && step == 1) {
+        if (finished && step == current) {
             return " is-current";
         }
 
@@ -261,7 +258,7 @@
     <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/layout.css">
     <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/sidebar.css">
     <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/header.css">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/hoa_don.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/hoa_don.css?v=202607304">
 </head>
 <body>
 <%@ include file="/Admin/layout/sidebar.jsp" %>
@@ -288,18 +285,17 @@
 
         <%-- Thanh tiến trình trạng thái được đặt đầu tiên để dễ theo dõi. --%>
         <section class="invoice-timeline-card invoice-timeline-card--top">
-            <div class="invoice-timeline">
+            <div class="invoice-timeline invoice-timeline--two">
                 <div class="timeline-step<%= stepClass(hoaDon.getTrangThai(), 1) %>">
                     <div class="timeline-step__name">Chờ thanh toán</div>
                     <div class="timeline-step__dot"><i class="fas fa-check"></i></div>
                 </div>
-                <div class="timeline-step<%= stepClass(hoaDon.getTrangThai(), 3) %>">
-                    <div class="timeline-step__name">Đã thanh toán</div>
-                    <div class="timeline-step__dot"><i class="fas fa-check"></i></div>
-                </div>
-                <div class="timeline-step<%= stepClass(hoaDon.getTrangThai(), 5) %>">
-                    <div class="timeline-step__name">Đã hủy</div>
-                    <div class="timeline-step__dot"><i class="fas fa-xmark"></i></div>
+                <% boolean cancelledInvoice = hoaDon.getTrangThai() != null && hoaDon.getTrangThai() == 5; %>
+                <div class="timeline-step<%= stepClass(hoaDon.getTrangThai(), cancelledInvoice ? 5 : 3) %>">
+                    <div class="timeline-step__name"><%= cancelledInvoice ? "Đã hủy" : "Đã thanh toán" %></div>
+                    <div class="timeline-step__dot">
+                        <i class="fas <%= cancelledInvoice ? "fa-xmark" : "fa-check" %>"></i>
+                    </div>
                 </div>
             </div>
         </section>

@@ -2,6 +2,7 @@ package BanHangTaiQuay.Service;
 
 import BanHangTaiQuay.Dao.BanHangDAO;
 import BanHangTaiQuay.Dao.BanHangDAOImpl;
+import BanHangTaiQuay.Model.HoaDonResponse;
 import QuanLySanPham.Entity.*;
 import QuanLySanPham.service.SanPhamChiTietService;
 import QuanLySanPham.service.impl.SanPhamChiTietServiceImpl;
@@ -11,12 +12,14 @@ import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.LockModeType;
 
 import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -571,6 +574,15 @@ public class BanHangServiceImpl implements BanHangService {
             BigDecimal tongTien = hd.getTongTienThanhToan() == null
                     ? BigDecimal.ZERO
                     : hd.getTongTienThanhToan();
+            boolean thanhToanTienMat = "PTTT001".equals(maPtttChuanHoa);
+            if (thanhToanTienMat) {
+                if (soTienKhachDua == null || soTienKhachDua.compareTo(BigDecimal.ZERO) <= 0) {
+                    throw new IllegalArgumentException("Vui lòng nhập số tiền khách trả.");
+                }
+                if (soTienKhachDua.compareTo(tongTien) < 0) {
+                    throw new IllegalArgumentException("Số tiền khách trả chưa đủ.");
+                }
+            }
             String maGiaoDichChuanHoa = normalizeText(maGiaoDich);
             if (maGiaoDichChuanHoa != null) {
                 Long soLanTrungMa = em.createQuery(
@@ -711,6 +723,45 @@ public class BanHangServiceImpl implements BanHangService {
     }
 
     @Override
+    public int huyHoaDonChoCuoiNgay(LocalDate ngayBanHang) {
+        if (ngayBanHang == null) {
+            throw new IllegalArgumentException("Ngay ban hang khong hop le.");
+        }
+
+        LocalDateTime mocKetThucNgay = ngayBanHang.plusDays(1).atStartOfDay();
+        List<Integer> hoaDonChoIds;
+        EntityManager em = EntityManagerUtlis.getEntityManager();
+        try {
+            hoaDonChoIds = em.createQuery(
+                            "SELECT h.id FROM HoaDon h "
+                                    + "WHERE h.trangThai IN (0, 1) "
+                                    + "AND h.ngayTao < :mocKetThucNgay",
+                            Integer.class)
+                    .setParameter("mocKetThucNgay", mocKetThucNgay)
+                    .getResultList();
+        } finally {
+            if (em != null && em.isOpen()) {
+                em.close();
+            }
+        }
+
+        int soHoaDonDaHuy = 0;
+        String lyDo = "Tự động hủy hóa đơn chờ cuối ngày " + ngayBanHang;
+        for (Integer idHoaDon : hoaDonChoIds) {
+            if (idHoaDon == null) {
+                continue;
+            }
+            try {
+                huyHoaDon(idHoaDon, lyDo);
+                soHoaDonDaHuy++;
+            } catch (IllegalStateException ignored) {
+                // Hoa don co the vua duoc thanh toan/huy boi request khac.
+            }
+        }
+        return soHoaDonDaHuy;
+    }
+
+    @Override
     public List<HoaDon> layDanhSachHoaDonCho(int idNhanVien) {
         return banHangDAO.layDanhSachHoaDonCho(idNhanVien);
     }
@@ -731,6 +782,69 @@ public class BanHangServiceImpl implements BanHangService {
         } finally {
             em.close();
         }
+    }
+
+    /**
+     * Tạo dữ liệu mô tả giảm giá để JSP chỉ chịu trách nhiệm hiển thị.
+     */
+    @Override
+    public HoaDonResponse taoHoaDonResponse(HoaDon hoaDon) {
+        if (hoaDon == null || hoaDon.getPhieuGiamGia() == null) {
+            return new HoaDonResponse(null);
+        }
+
+        BigDecimal tienGiam = tinhTienGiamHienTai(hoaDon);
+        if (tienGiam.compareTo(BigDecimal.ZERO) <= 0) {
+            return new HoaDonResponse(null);
+        }
+
+        PhieuGiamGia voucher = hoaDon.getPhieuGiamGia();
+        String maVoucher = normalizeText(voucher.getMaVoucher());
+        BigDecimal giaTriGiam = voucher.getGiaTriGiam();
+        String loaiGiam = normalizeText(voucher.getLoaiGiamGia());
+        if (maVoucher == null || giaTriGiam == null || loaiGiam == null) {
+            return new HoaDonResponse(null);
+        }
+
+        String loaiChuanHoa = java.text.Normalizer.normalize(
+                        loaiGiam, java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .trim()
+                .toLowerCase(Locale.ROOT);
+
+        String noiDung;
+        if ("0".equals(loaiChuanHoa)
+                || loaiChuanHoa.contains("%")
+                || loaiChuanHoa.contains("phan tram")
+                || loaiChuanHoa.contains("percent")) {
+            noiDung = "Giảm " + giaTriGiam.stripTrailingZeros().toPlainString() + "%";
+        } else if ("1".equals(loaiChuanHoa)
+                || loaiChuanHoa.contains("tien")
+                || loaiChuanHoa.contains("amount")) {
+            NumberFormat dinhDangTien = NumberFormat.getNumberInstance(new Locale("vi", "VN"));
+            dinhDangTien.setMaximumFractionDigits(0);
+            noiDung = "Giảm cố định " + dinhDangTien.format(giaTriGiam) + "đ";
+        } else {
+            return new HoaDonResponse(null);
+        }
+
+        return new HoaDonResponse("(" + maVoucher + " · " + noiDung + ")");
+    }
+
+    private BigDecimal tinhTienGiamHienTai(HoaDon hoaDon) {
+        BigDecimal tongTienHang = BigDecimal.ZERO;
+        if (hoaDon.getChiTietHoaDons() != null) {
+            for (ChiTietHoaDon chiTiet : hoaDon.getChiTietHoaDons()) {
+                if (chiTiet.getDonGia() != null && chiTiet.getSoLuong() != null) {
+                    tongTienHang = tongTienHang.add(
+                            chiTiet.getDonGia().multiply(BigDecimal.valueOf(chiTiet.getSoLuong())));
+                }
+            }
+        }
+        BigDecimal tongThanhToan = hoaDon.getTongTienThanhToan() == null
+                ? BigDecimal.ZERO
+                : hoaDon.getTongTienThanhToan();
+        return tongTienHang.subtract(tongThanhToan).max(BigDecimal.ZERO);
     }
 
     private String normalizeText(String value) {

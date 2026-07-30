@@ -346,6 +346,10 @@
         .ci-row { display: flex; align-items: center; justify-content: space-between; }
         .qty-stepper { display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 3px 8px;}
         .qty-stepper span { font-size: 12px; font-weight: 600; width: 14px; text-align: center;}
+        .qty-input { width: 34px; height: 24px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: var(--text-main); font-size: 12px; font-weight: 700; text-align: center; outline: none; }
+        .qty-input:focus { border-color: var(--brown-500); background: #fff; box-shadow: 0 0 0 2px rgba(180, 151, 85, .18); }
+        .qty-input::-webkit-outer-spin-button, .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .qty-input { -moz-appearance: textfield; }
         .qty-stepper button { border: none; background: none; color: var(--brown-700); font-weight: 700; cursor: pointer; font-size: 13px; width: 16px;}
         .ci-price { font-size: 12.5px; font-weight: 700; color: var(--brown-700);}
         .ci-actions { display: flex; align-items: center; gap: 8px; }
@@ -398,6 +402,17 @@
             font-size: 14.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
         }
         .checkout-btn:hover { background: var(--brown-700); }
+        .checkout-action-row {
+            display: flex;
+            margin-top: auto;
+        }
+        .checkout-action-row .checkout-btn {
+            min-height: 54px;
+            padding: 14px 18px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 700;
+        }
         /* Nút X đóng tab */
         .btn-close-tab {
             margin-left: 5px;
@@ -700,6 +715,44 @@
         #pttt-dropdown-btn[style*="border-color: rgb(194, 16, 58)"] {
             border-color: var(--primary) !important;
         }
+
+        #voucher-dropdown-btn {
+            gap: 8px;
+            min-width: 0;
+        }
+        #voucher-selected-label {
+            display: flex;
+            align-items: center;
+            flex: 1 1 auto;
+            min-width: 0;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        #voucher-selected-label > i,
+        #voucher-dropdown-btn > .fa-chevron-down {
+            flex: 0 0 auto;
+        }
+        #voucher-selected-label > strong {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .voucher-best-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
+            margin-left: 6px;
+            padding: 2px 7px;
+            border-radius: 999px;
+            background: #fef3c7;
+            color: #92400e;
+            font-size: 10px;
+            font-weight: 800;
+            line-height: 1.2;
+            white-space: nowrap;
+        }
         
         /* Icons and text */
         .fa-check, .fa-tag, .fa-money-bill-wave, .fa-university {
@@ -709,6 +762,22 @@
         .cust-name span,
         .ci-price {
             color: var(--primary) !important;
+        }
+        .totals .t-row.grand,
+        .totals .t-row.grand strong,
+        #sum-tongcong,
+        .checkout-action-row .checkout-btn {
+            font-family: 'Inter', sans-serif !important;
+            letter-spacing: 0 !important;
+        }
+        .totals .t-row.grand strong {
+            font-weight: 700 !important;
+        }
+        #sum-tongcong {
+            font-weight: 700 !important;
+        }
+        .checkout-action-row .checkout-btn {
+            font-weight: 700 !important;
         }
 
         /* Pagination */
@@ -883,7 +952,9 @@
                                         <div class="ci-row">
                                             <div class="qty-stepper">
                                                 <button class="qty-minus" data-id="${ct.id}" data-qty="${ct.soLuong}">–</button>
-                                                <span>${ct.soLuong}</span>
+                                                <input class="qty-input" type="number" min="1" inputmode="numeric"
+                                                       value="${ct.soLuong}" data-id="${ct.id}" data-qty="${ct.soLuong}"
+                                                       data-spct="${ct.sanPhamChiTiet.id}" aria-label="Số lượng ${ct.sanPhamChiTiet.sanPham.tenSanPham}">
                                                 <button class="qty-plus" data-id="${ct.id}" data-qty="${ct.soLuong}" data-spct="${ct.sanPhamChiTiet.id}">+</button>
                                             </div>
                                             <div class="ci-actions">
@@ -954,7 +1025,7 @@
                             
                             <div style="display: flex; gap: 16px; margin-bottom: 15px;">
                                 <!-- Phương thức thanh toán dropdown -->
-                                <div style="flex: 1; position: relative;">
+                                <div style="flex: 1; min-width: 0; position: relative;">
                                     <label style="font-size: 12px; color: var(--text-sub); display: block; margin-bottom: 6px; font-weight: 600;">Phương thức thanh toán *</label>
                                     <div id="pttt-dropdown-btn" onclick="toggleDropdown('pttt')"
                                          style="display: flex; align-items: center; justify-content: space-between; background: #fff; border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 14px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text-main); user-select: none; transition: border-color 0.2s;">
@@ -1024,18 +1095,18 @@
                             
                             <div class="totals" style="border-top: none; padding-top: 0; margin-bottom: 20px;">
                                 <div class="t-row" style="margin-bottom: 12px;"><span>Tiền hàng</span><span id="sum-tamtinh"><fmt:formatNumber value="${tamTinhHoaDon}" type="currency" currencySymbol="đ" maxFractionDigits="0"/></span></div>
-                                <div class="t-row" style="margin-bottom: 12px;"><span>Giảm giá</span><span class="discount" id="sum-giamgia" style="color: #ef4444;">-<fmt:formatNumber value="${giamGiaHienTai}" type="currency" currencySymbol="đ" maxFractionDigits="0"/></span></div>
+                                <div id="discount-summary" ${empty hoaDonResponse.moTaGiamGia ? 'hidden' : ''}>
+                                    <div class="t-row" style="margin-bottom: 5px;"><span>Giảm giá</span><span class="discount" id="sum-giamgia" style="color: #ef4444;">-<fmt:formatNumber value="${giamGiaHienTai}" type="currency" currencySymbol="đ" maxFractionDigits="0"/></span></div>
+                                    <div id="discount-description" style="margin-bottom: 12px; color: var(--text-sub); font-size: 12px;">${hoaDonResponse.moTaGiamGia}</div>
+                                </div>
                                 <div class="t-row grand" style="border-top: none; padding-top: 5px; margin-top: 5px;">
                                     <strong style="color: var(--text-main); font-size: 14px;">Tổng số tiền cần thanh toán</strong>
                                     <strong id="sum-tongcong" style="color: #c2103a; font-size: 16px;"><fmt:formatNumber value="${tongThanhToanHienTai}" type="currency" currencySymbol="đ" maxFractionDigits="0"/></strong>
                                 </div>
                             </div>
 
-                            <div style="display: flex; gap: 10px; margin-top: auto;">
-                                <button type="button" onclick="window.idHoaDonHienTai ? xoaHoaDonCho(event, window.idHoaDonHienTai) : null" class="pos-btn" style="flex: 1; border: 1px solid transparent; background: #f87171; color: white; justify-content: center; font-weight: bold; border-radius: 8px;">
-                                    Hủy Đơn
-                                </button>
-                                <button type="button" id="checkout-btn" class="checkout-btn" ${empty idHoaDonDangTao ? 'disabled' : ''} style="flex: 1.5; background: #c2103a; border-radius: 8px; justify-content: center; font-weight: bold; padding: 12px;">
+                            <div class="checkout-action-row">
+                                <button type="button" id="checkout-btn" class="checkout-btn" ${empty idHoaDonDangTao ? 'disabled' : ''}>
                                     Xác nhận thanh toán
                                     <span id="checkout-total" data-amount="${tongThanhToanHienTai}" style="display: none;"><fmt:formatNumber value="${tongThanhToanHienTai}" type="currency" currencySymbol="đ" maxFractionDigits="0"/></span>
                                 </button>
@@ -1062,6 +1133,18 @@
         </p>
         <div class="transfer-modal__qr" id="transfer-payment-qr-wrap">
             <img id="transfer-payment-qr" alt="Mã QR thanh toán hóa đơn">
+        </div>
+        <div id="cash-payment-fields" class="transfer-modal__cash hidden">
+            <label class="transfer-modal__field" for="cash-paid-amount">
+                Số tiền khách trả <span aria-hidden="true">*</span>
+                <input id="cash-paid-amount" type="text" inputmode="numeric" autocomplete="off"
+                       placeholder="Nhập số tiền khách trả">
+            </label>
+            <div class="cash-change-row">
+                <span>Tiền thối lại</span>
+                <strong id="cash-paid-change">0đ</strong>
+            </div>
+            <p id="cash-paid-error" class="cash-payment-error" hidden></p>
         </div>
         <div class="transfer-modal__actions">
             <button type="button" class="transfer-modal__cancel" id="cancel-transfer-payment">Hủy</button>
@@ -1291,7 +1374,7 @@
     window.idHoaDonHienTai = ${empty idHoaDonDangTao ? 'null' : idHoaDonDangTao};
 </script>
 <script src="https://unpkg.com/html5-qrcode"></script>
-<script src="${pageContext.request.contextPath}/assets/js/banhang.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/banhang.js?v=202607303"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -1337,12 +1420,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (size) sizes.add(size);
         if (ten) products.add(ten);
         
-        const btnThem = row.querySelector('.p-add');
-        if (btnThem) {
-            btnThem.addEventListener('click', () => {
-                modal.classList.add('hidden');
-            });
-        }
     });
     
     Array.from(colors).sort().forEach(c => colorSelect.add(new Option(c, c)));

@@ -20,22 +20,25 @@ public class ThongKeDAO {
     private final DatabaseConnectionManager connectionManager = DatabaseConnectionManager.fromEnvironment();
 
     public ThongKeOverview getOverview(LocalDateTime from, LocalDateTime to) throws SQLException {
-        String sql = "WITH invoice_period AS ("
-                + "SELECT hd.id, hd.trang_thai, hd.tong_tien_thanh_toan, "
-                + "CASE WHEN hd.trang_thai = 3 "
-                + "THEN COALESCE(hd.ngay_thanh_toan, hd.ngay_tao) ELSE hd.ngay_tao END AS period_date "
-                + "FROM hoa_don hd"
-                + "), filtered AS ("
-                + "SELECT * FROM invoice_period WHERE period_date >= ? AND period_date < ?"
+        String sql = "WITH filter_range AS ("
+                + "SELECT CAST(? AS datetime2) AS from_date, CAST(? AS datetime2) AS to_date"
+                + "), filtered_orders AS ("
+                + "SELECT hd.id, hd.trang_thai FROM hoa_don hd CROSS JOIN filter_range r "
+                + "WHERE hd.ngay_tao >= r.from_date AND hd.ngay_tao < r.to_date"
+                + "), paid_orders AS ("
+                + "SELECT hd.id, hd.tong_tien_thanh_toan FROM hoa_don hd CROSS JOIN filter_range r "
+                + "WHERE hd.trang_thai = 3 "
+                + "AND COALESCE(hd.ngay_thanh_toan, hd.ngay_tao) >= r.from_date "
+                + "AND COALESCE(hd.ngay_thanh_toan, hd.ngay_tao) < r.to_date"
                 + ") "
                 + "SELECT COUNT(*) AS orders, "
-                + "ISNULL(SUM(CASE WHEN trang_thai = 3 THEN ISNULL(tong_tien_thanh_toan, 0) ELSE 0 END), 0) AS revenue, "
+                + "ISNULL((SELECT SUM(ISNULL(tong_tien_thanh_toan, 0)) FROM paid_orders), 0) AS revenue, "
                 + "ISNULL((SELECT SUM(ct.so_luong) FROM chi_tiet_hoa_don ct "
-                + "JOIN filtered paid ON paid.id = ct.id_hoa_don WHERE paid.trang_thai = 3), 0) AS products, "
+                + "JOIN paid_orders paid ON paid.id = ct.id_hoa_don), 0) AS products, "
                 + "SUM(CASE WHEN trang_thai = 3 THEN 1 ELSE 0 END) AS done, "
                 + "SUM(CASE WHEN trang_thai = 5 THEN 1 ELSE 0 END) AS cancelled, "
                 + "SUM(CASE WHEN trang_thai NOT IN (3, 5) OR trang_thai IS NULL THEN 1 ELSE 0 END) AS processing "
-                + "FROM filtered";
+                + "FROM filtered_orders";
 
         try (Connection connection = connectionManager.getConnection();
              PreparedStatement ps = connection.prepareStatement(sql)) {

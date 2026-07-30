@@ -747,6 +747,10 @@
     position: relative;
 }
 
+.invoice-timeline--two {
+    grid-template-columns: repeat(2, minmax(120px, 1fr));
+}
+
 .invoice-timeline::before {
     content: "";
     position: absolute;
@@ -756,6 +760,11 @@
     height: 4px;
     border-radius: 999px;
     background: #eee9e0;
+}
+
+.invoice-timeline--two::before {
+    left: 25%;
+    right: 25%;
 }
 
 .timeline-step {
@@ -783,6 +792,10 @@
     justify-content: center;
     border: 3px solid var(--white);
     box-shadow: 0 0 0 1px var(--border-color);
+}
+
+.timeline-step:not(.is-done):not(.is-current) .timeline-step__dot i {
+    visibility: hidden;
 }
 
 .timeline-step.is-done .timeline-step__dot,

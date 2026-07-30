@@ -32,6 +32,8 @@ document.addEventListener("DOMContentLoaded", function () {
     var resetFilter = document.getElementById("resetReportFilter");
     var quickFilters = document.querySelectorAll("[data-filter-preset]");
     var useGlobalRangeForChart = true;
+    var overviewRequestPending = false;
+    var lastRevenue = null;
 
     if (!periodMode || !periodFields || !chart || !chartLegend || !chartTotal || !chartDescription) {
         return;
@@ -125,6 +127,56 @@ document.addEventListener("DOMContentLoaded", function () {
             throw new Error(data.message || "Không tải được dữ liệu thống kê.");
         }
         return data;
+    }
+
+    function updateField(field, value) {
+        document.querySelectorAll('[data-field="' + field + '"]').forEach(function (node) {
+            node.textContent = String(value);
+        });
+    }
+
+    async function refreshOverview(refreshChartWhenRevenueChanges) {
+        if (overviewRequestPending || !reportFrom?.value || !reportTo?.value) return;
+        overviewRequestPending = true;
+        try {
+            var query = new URLSearchParams({
+                action: "overview",
+                from: reportFrom.value,
+                to: reportTo.value
+            });
+            var data = await readJson(endpoint + "?" + query.toString());
+            var overview = data.overview || {};
+            var revenue = Number(overview.revenue) || 0;
+            var completion = Number(data.completionRate) || 0;
+            var revenueChanged = lastRevenue !== null && lastRevenue !== revenue;
+            lastRevenue = revenue;
+
+            updateField("revenue", formatCurrency(revenue));
+            updateField("orders", Number(overview.orders) || 0);
+            updateField("products", Number(overview.products) || 0);
+            updateField("done", Number(overview.done) || 0);
+            updateField("cancelled", Number(overview.cancelled) || 0);
+            updateField("processing", Number(overview.processing) || 0);
+            updateField("completion", completion + "%");
+            document.querySelectorAll('[data-field="completion-bar"]').forEach(function (node) {
+                node.style.width = completion + "%";
+            });
+
+            var totalOrderBadge = document.getElementById("totalOrderBadge");
+            var completionRate = document.getElementById("completionRate");
+            var completionBar = document.getElementById("completionBar");
+            if (totalOrderBadge) totalOrderBadge.textContent = (Number(overview.orders) || 0) + " đơn";
+            if (completionRate) completionRate.textContent = completion + "%";
+            if (completionBar) completionBar.style.width = completion + "%";
+
+            if (refreshChartWhenRevenueChanges && revenueChanged) {
+                loadRevenueSeries();
+            }
+        } catch (error) {
+            console.warn("Không thể tự đồng bộ thống kê:", error.message);
+        } finally {
+            overviewRequestPending = false;
+        }
     }
 
     function createSelect(id, label, options, value) {
@@ -412,6 +464,22 @@ document.addEventListener("DOMContentLoaded", function () {
         window.print();
     });
 
+    window.addEventListener("storage", function (event) {
+        if (event.key === "rior-statistics-changed") {
+            refreshOverview(true);
+        }
+    });
+    window.addEventListener("focus", function () {
+        refreshOverview(true);
+    });
+    document.addEventListener("visibilitychange", function () {
+        if (!document.hidden) refreshOverview(true);
+    });
+
     renderPeriodFields();
     loadRevenueSeries();
+    refreshOverview(false);
+    window.setInterval(function () {
+        if (!document.hidden) refreshOverview(true);
+    }, 5000);
 });

@@ -17,6 +17,14 @@ function duongDanChiTietHoaDon(idHoaDon, inHoaDon = false) {
     return `${posContextPath()}/admin/hoa-don/chi-tiet?${query}`;
 }
 
+function thongBaoThongKeThayDoi() {
+    try {
+        localStorage.setItem('rior-statistics-changed', String(Date.now()));
+    } catch (error) {
+        // Trang thống kê vẫn tự đồng bộ định kỳ nếu trình duyệt chặn localStorage.
+    }
+}
+
 class BanHangError extends Error {}
 
 const BanHangAPI = {
@@ -148,6 +156,50 @@ function bayVaoGioHang(button) {
     }
 }
 
+function capNhatTrangThaiNutThem(row, nextRow, tonKhoMoi) {
+    const currentButton = row.querySelector('.p-add');
+    if (!currentButton) return;
+
+    const nextButton = nextRow?.querySelector('.p-add');
+    if (nextButton?.dataset.disabled === 'true' || tonKhoMoi <= 0) {
+        currentButton.dataset.disabled = 'true';
+        currentButton.setAttribute('aria-disabled', 'true');
+        currentButton.style.opacity = '0.5';
+        currentButton.style.cursor = 'not-allowed';
+        return;
+    }
+
+    delete currentButton.dataset.disabled;
+    currentButton.removeAttribute('aria-disabled');
+    currentButton.style.opacity = '';
+    currentButton.style.cursor = '';
+}
+
+function capNhatTonKhoSanPhamDangHienThi(doc) {
+    const nextRows = new Map();
+    doc.querySelectorAll('.p-card[data-spct]').forEach(row => {
+        nextRows.set(row.dataset.spct, row);
+    });
+
+    document.querySelectorAll('.p-card[data-spct]').forEach(row => {
+        const nextRow = nextRows.get(row.dataset.spct);
+        if (!nextRow) return;
+
+        const currentStock = row.querySelector('[data-tonkho]');
+        const nextStock = nextRow.querySelector('[data-tonkho]');
+        if (!currentStock || !nextStock) return;
+
+        currentStock.textContent = nextStock.textContent;
+        currentStock.title = nextStock.title || currentStock.title;
+        currentStock.className = nextStock.className;
+
+        const tonKhoMoi = Number(String(nextStock.textContent || '').replace(/[^\d-]/g, ''));
+        if (Number.isFinite(tonKhoMoi)) {
+            capNhatTrangThaiNutThem(row, nextRow, tonKhoMoi);
+        }
+    });
+}
+
 async function capNhatGioHangTuServer(idSpctVuaThem) {
     if (!idHoaDonHienTai) return;
 
@@ -163,13 +215,16 @@ async function capNhatGioHangTuServer(idSpctVuaThem) {
 
     const html = await response.text();
     const doc = new DOMParser().parseFromString(html, 'text/html');
-    const selectors = ['.cart-list', '#cart-count', '#sum-tamtinh', '#sum-giamgia', '#sum-tongcong', '#checkout-total'];
+    const selectors = ['.cart-list', '#cart-count', '#sum-tamtinh', '#discount-summary', '#sum-tongcong', '#checkout-total'];
+
+    capNhatTonKhoSanPhamDangHienThi(doc);
 
     selectors.forEach(selector => {
         const current = document.querySelector(selector);
         const next = doc.querySelector(selector);
         if (!current || !next) return;
         if (selector === '.cart-list') current.innerHTML = next.innerHTML;
+        else if (selector === '#discount-summary') current.outerHTML = next.outerHTML;
         else {
             current.textContent = next.textContent;
             if (next.dataset.amount != null) {
@@ -177,6 +232,8 @@ async function capNhatGioHangTuServer(idSpctVuaThem) {
             }
         }
     });
+
+    await tuDongApVoucherTotNhat();
 
     if (!daCoTrongGio && itemSelector) {
         const dongMoi = document.querySelector(`.cart-list ${itemSelector}`);
@@ -309,10 +366,33 @@ function themSanPham(idSpct, button) {
 
 async function doiSoLuong(idChiTiet, soLuongMoi, button) {
     if (!idHoaDonHienTai) return;
+    const cartItem = button?.closest?.('.cart-item');
+    const idSpct = cartItem?.dataset.spct || button?.dataset.spct;
     await withLoading(button, async () => {
         await BanHangAPI.goi('capNhatSoLuong', { idChiTiet, soLuongMoi });
-        window.location.reload();
+        await capNhatGioHangTuServer(idSpct);
     });
+}
+
+async function capNhatSoLuongNhap(input) {
+    if (!input || input.dataset.updating === 'true') return;
+    const idChiTiet = input.dataset.id;
+    const soLuongCu = Number(input.dataset.qty) || 1;
+    const soLuongMoi = Number(input.value);
+
+    if (!Number.isInteger(soLuongMoi) || soLuongMoi <= 0) {
+        input.value = String(soLuongCu);
+        hienThiLoi('Số lượng phải là số nguyên lớn hơn 0.');
+        return;
+    }
+    if (soLuongMoi === soLuongCu) {
+        input.value = String(soLuongCu);
+        return;
+    }
+
+    input.dataset.updating = 'true';
+    await doiSoLuong(idChiTiet, soLuongMoi, input);
+    input.dataset.updating = 'false';
 }
 
 const traCuuKhachHangDebounced = debounce(async (tuKhoa) => {
@@ -424,6 +504,7 @@ async function ganVaChonKhachHang(button) {
         capNhatKhachHangTrenGiaoDien(khachHang);
         renderKetQuaKhachHang([]);
         dongPanelKhachHang();
+        await tuDongApVoucherTotNhat();
     });
 }
 
@@ -481,6 +562,7 @@ async function themVaChonKhachHang(button) {
         renderKetQuaKhachHang([]);
         dongModalThemKhachHang();
         dongPanelKhachHang();
+        await tuDongApVoucherTotNhat();
     });
 }
 
@@ -628,6 +710,7 @@ async function chonKhachLe(button) {
         capNhatKhachHangTrenGiaoDien(null);
         renderKetQuaKhachHang([]);
         dongPanelKhachHang();
+        await tuDongApVoucherTotNhat();
     });
 }
 
@@ -927,6 +1010,7 @@ function chonPhuongThucThanhToan(element) {
 
 // ===================== VOUCHER DROPDOWN =====================
 let _voucherDangAp = document.getElementById('voucher-ma-hien-tai')?.value || '';
+let _dangTuDongApVoucher = false;
 
 const xuLyTimVoucherDropdown = debounce((tuKhoa) => {
     loadVoucherDropdown(tuKhoa);
@@ -965,6 +1049,93 @@ function formatVoucherDiscount(v) {
     return `Giảm ${new Intl.NumberFormat('vi-VN').format(v.giaTriGiam)}đ`;
 }
 
+function tinhTienGiamVoucherClient(voucher, tamTinh) {
+    if (!voucher || !tamTinh) return 0;
+    const giaTriGiam = Number(voucher.giaTriGiam) || 0;
+    let tienGiam = 0;
+    if (voucher.loaiGiamGia === 'percent') {
+        tienGiam = Math.round(tamTinh * giaTriGiam / 100);
+        const giamToiDa = Number(voucher.giamToiDa) || 0;
+        if (giamToiDa > 0) tienGiam = Math.min(tienGiam, giamToiDa);
+    } else {
+        tienGiam = giaTriGiam;
+    }
+    return Math.max(0, Math.min(tienGiam, tamTinh));
+}
+
+function layTamTinhHienTai() {
+    return parseCurrencyVi(document.getElementById('sum-tamtinh')?.textContent || '0');
+}
+
+function timVoucherTotNhat(vouchers, tamTinh = layTamTinhHienTai()) {
+    return (vouchers || [])
+        .map(voucher => ({
+            voucher,
+            tienGiam: tinhTienGiamVoucherClient(voucher, tamTinh)
+        }))
+        .filter(item => item.tienGiam > 0)
+        .sort((a, b) => {
+            if (b.tienGiam !== a.tienGiam) return b.tienGiam - a.tienGiam;
+            return (Number(a.voucher.donToiThieu) || 0) - (Number(b.voucher.donToiThieu) || 0);
+        })[0]?.voucher || null;
+}
+
+function capNhatNhanVoucherDangAp(voucher, laTuDong = false) {
+    const label = document.getElementById('voucher-selected-label');
+    if (!label || !voucher) return;
+    const badge = laTuDong
+        ? '<span class="voucher-best-badge">Tốt nhất</span>'
+        : '';
+    label.innerHTML = `<i class="fas fa-tag" style="color:#f59e0b;margin-right:7px;"></i><strong>${voucher.maVoucher}</strong>${badge}`;
+}
+
+function moTaVoucherClient(voucher) {
+    if (!voucher?.maVoucher) return '';
+    return `(${voucher.maVoucher} · ${formatVoucherDiscount(voucher)})`;
+}
+
+function capNhatMoTaGiamGia(voucher, giamGia) {
+    const summary = document.getElementById('discount-summary');
+    const desc = document.getElementById('discount-description');
+    if (!summary || !desc) return;
+
+    if (!voucher || !giamGia || giamGia <= 0) {
+        summary.hidden = true;
+        desc.textContent = '';
+        return;
+    }
+
+    summary.hidden = false;
+    desc.textContent = moTaVoucherClient(voucher);
+}
+
+async function tuDongApVoucherTotNhat() {
+    if (!idHoaDonHienTai || _dangTuDongApVoucher) return;
+    const tamTinh = layTamTinhHienTai();
+    if (tamTinh <= 0) return;
+
+    _dangTuDongApVoucher = true;
+    try {
+        const data = await BanHangAPI.goi('timVoucher', { idHoaDon: idHoaDonHienTai, tuKhoa: '' });
+        const voucherTotNhat = timVoucherTotNhat(data.vouchers || [], tamTinh);
+        if (!voucherTotNhat || voucherTotNhat.maVoucher === _voucherDangAp) return;
+
+        if (_voucherDangAp) {
+            await BanHangAPI.goi('goVoucher', { idHoaDon: idHoaDonHienTai });
+            _voucherDangAp = '';
+        }
+
+        await BanHangAPI.goi('apVoucher', { idHoaDon: idHoaDonHienTai, maVoucher: voucherTotNhat.maVoucher });
+        _voucherDangAp = voucherTotNhat.maVoucher;
+        capNhatNhanVoucherDangAp(voucherTotNhat, true);
+        capNhatSoTienSauVoucher(voucherTotNhat);
+    } catch (error) {
+        console.warn('Khong the tu dong ap voucher tot nhat:', error);
+    } finally {
+        _dangTuDongApVoucher = false;
+    }
+}
+
 function renderVoucherDropdown(vouchers) {
     const listEl = document.getElementById('voucher-dropdown-items');
     if (!listEl) return;
@@ -988,9 +1159,18 @@ function renderVoucherDropdown(vouchers) {
         return;
     }
 
-    vouchers.forEach(v => {
+    const voucherTotNhat = timVoucherTotNhat(vouchers);
+    const tamTinh = layTamTinhHienTai();
+    const vouchersSapXep = [...vouchers].sort((a, b) => {
+        const giamB = tinhTienGiamVoucherClient(b, tamTinh);
+        const giamA = tinhTienGiamVoucherClient(a, tamTinh);
+        return giamB - giamA;
+    });
+
+    vouchersSapXep.forEach(v => {
         const item = document.createElement('div');
         const isSelected = v.maVoucher === _voucherDangAp;
+        const isBest = voucherTotNhat?.maVoucher === v.maVoucher;
         item.style.cssText = `padding:12px 14px;cursor:pointer;border-bottom:1px solid var(--line);background:${isSelected ? '#fffbeb' : ''};`;
 
         const discountTxt = formatVoucherDiscount(v);
@@ -1001,6 +1181,7 @@ function renderVoucherDropdown(vouchers) {
                 <div>
                     <span style="font-weight:700;font-size:13px;color:#c2103a;">${v.maVoucher}</span>
                     <span style="margin-left:8px;font-size:12px;color:var(--text-sub);">${v.tenVoucher || ''}</span>
+                    ${isBest ? '<span class="voucher-best-badge">Tốt nhất</span>' : ''}
                 </div>
                 ${isSelected ? '<i class="fas fa-check" style="color:#10b981;"></i>' : ''}
             </div>
@@ -1022,8 +1203,7 @@ async function chonVoucherDropdown(v) {
         _voucherDangAp = v.maVoucher;
 
         // Cập nhật label
-        const label = document.getElementById('voucher-selected-label');
-        if (label) label.innerHTML = `<i class="fas fa-tag" style="color:#f59e0b;margin-right:7px;"></i><strong>${v.maVoucher}</strong>`;
+        capNhatNhanVoucherDangAp(v);
 
         // Tính và cập nhật tiền giảm + tổng cộng
         capNhatSoTienSauVoucher(v);
@@ -1049,6 +1229,7 @@ async function goVoucherDropdown() {
         // Reset giảm giá về 0, tổng = tạm tính
         const tamTinh = parseCurrencyVi(document.getElementById('sum-tamtinh')?.textContent || '0');
         capNhatHienThiTongTien(tamTinh, 0);
+        capNhatMoTaGiamGia(null, 0);
     } catch (e) {
         alert(e.message || 'Không thể gỡ voucher.');
     }
@@ -1056,6 +1237,30 @@ async function goVoucherDropdown() {
 
 function parseCurrencyVi(str) {
     return parseInt((str || '0').replace(/[^0-9]/g, '')) || 0;
+}
+
+function dinhDangTienVi(value) {
+    return new Intl.NumberFormat('vi-VN').format(Math.max(0, Number(value) || 0)) + 'đ';
+}
+
+function capNhatTienThoiModal() {
+    const input = document.getElementById('cash-paid-amount');
+    const change = document.getElementById('cash-paid-change');
+    const error = document.getElementById('cash-paid-error');
+    if (!input || !change || !error) return;
+
+    const tongTien = Number(layTongTienHienThi()) || 0;
+    const tienKhachTra = parseCurrencyVi(input.value);
+    const tienThoi = tienKhachTra - tongTien;
+
+    change.textContent = dinhDangTienVi(tienThoi > 0 ? tienThoi : 0);
+    if (!tienKhachTra) {
+        error.textContent = '';
+        error.hidden = true;
+        return;
+    }
+    error.textContent = tienThoi < 0 ? 'Số tiền khách trả chưa đủ.' : '';
+    error.hidden = tienThoi >= 0;
 }
 
 function capNhatSoTienSauVoucher(v) {
@@ -1069,6 +1274,7 @@ function capNhatSoTienSauVoucher(v) {
     }
     if (giamGia > tamTinh) giamGia = tamTinh;
     capNhatHienThiTongTien(tamTinh, giamGia);
+    capNhatMoTaGiamGia(v, giamGia);
 }
 
 function capNhatHienThiTongTien(tamTinh, giamGia) {
@@ -1135,6 +1341,9 @@ function moModalXacNhanThanhToan() {
     const qrWrap = document.getElementById('transfer-payment-qr-wrap');
     const title = document.getElementById('transfer-payment-title');
     const hint = modal?.querySelector('.transfer-modal__hint');
+    const cashFields = document.getElementById('cash-payment-fields');
+    const cashInput = document.getElementById('cash-paid-amount');
+    const cashError = document.getElementById('cash-paid-error');
     if (!modal || !qrImage || !qrWrap || !title || !hint) {
         throw new BanHangError('Không tải được màn hình xác nhận thanh toán.');
     }
@@ -1146,16 +1355,30 @@ function moModalXacNhanThanhToan() {
         title.textContent = 'Xác nhận thanh toán tiền mặt';
         hint.textContent = `Xác nhận đã nhận đủ ${amountText}. Chọn Hủy để giữ hóa đơn ở trạng thái chờ.`;
         qrWrap.hidden = true;
+        cashFields?.classList.remove('hidden');
+        if (cashInput) {
+            cashInput.value = '';
+            cashInput.disabled = false;
+        }
+        if (cashError) {
+            cashError.textContent = '';
+            cashError.hidden = true;
+        }
+        hint.textContent = `Nhập số tiền khách trả cho hóa đơn ${amountText}, sau đó bấm Xác nhận thanh toán.`;
+        capNhatTienThoiModal();
     } else {
         title.textContent = 'Thanh toán chuyển khoản / QR';
         hint.textContent = `Khách quét QR và chuyển ${amountText}. Sau khi nhận tiền, bấm Xác nhận thanh toán. Chọn Hủy để giữ hóa đơn chờ.`;
         const qrContent = `THANH TOAN HOA DON ${idHoaDonHienTai} SO TIEN ${amount} VND`;
         qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(qrContent)}`;
         qrWrap.hidden = false;
+        cashFields?.classList.add('hidden');
+        if (cashInput) cashInput.value = '';
     }
     modal.classList.remove('hidden');
     modal.setAttribute('aria-hidden', 'false');
-    document.getElementById('confirm-transfer-payment')?.focus();
+    if (laTienMat) cashInput?.focus();
+    else document.getElementById('confirm-transfer-payment')?.focus();
 }
 
 function dongModalXacNhanThanhToan() {
@@ -1163,14 +1386,41 @@ function dongModalXacNhanThanhToan() {
     if (!modal) return;
     modal.classList.add('hidden');
     modal.setAttribute('aria-hidden', 'true');
+    const cashInput = document.getElementById('cash-paid-amount');
+    if (cashInput) cashInput.value = '';
 }
 
 async function xacNhanThanhToanTuModal(button) {
     await withLoading(button, async () => {
-        const data = await BanHangAPI.thanhToan({
+        const params = {
             idHoaDon: idHoaDonHienTai,
             maPttt: phuongThucThanhToanDangChon
-        });
+        };
+        if (phuongThucThanhToanDangChon === 'PTTT001') {
+            const cashInput = document.getElementById('cash-paid-amount');
+            const cashError = document.getElementById('cash-paid-error');
+            const tongTien = Number(layTongTienHienThi()) || 0;
+            const tienKhachTra = parseCurrencyVi(cashInput?.value || '');
+            if (!tienKhachTra) {
+                if (cashError) {
+                    cashError.textContent = 'Vui lòng nhập số tiền khách trả.';
+                    cashError.hidden = false;
+                }
+                cashInput?.focus();
+                return;
+            }
+            if (tienKhachTra < tongTien) {
+                if (cashError) {
+                    cashError.textContent = 'Số tiền khách trả chưa đủ.';
+                    cashError.hidden = false;
+                }
+                cashInput?.focus();
+                return;
+            }
+            params.soTienKhachDua = String(tienKhachTra);
+        }
+        const data = await BanHangAPI.thanhToan(params);
+        thongBaoThongKeThayDoi();
         sauThanhToanThanhCong(data);
     });
 }
@@ -1231,6 +1481,7 @@ async function taoHoaDonMoi(button) {
     await withLoading(button, async () => {
         const data = await BanHangAPI.goi('taoHoaDon');
         const idHoaDonMoi = data.idHoaDon || idHoaDonHienTai;
+        thongBaoThongKeThayDoi();
         window.location.href = `${posContextPath()}/ban-hang?id=${encodeURIComponent(idHoaDonMoi)}`;
     });
 }
@@ -1276,6 +1527,7 @@ async function xacNhanHuyHoaDon(button) {
             method: 'POST'
         });
         await BanHangAPI.docJson(response);
+        thongBaoThongKeThayDoi();
         window.location.reload();
     });
 }
@@ -1368,6 +1620,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             return;
         }
+        const qtyInput = event.target.closest('.qty-input');
+        if (qtyInput) {
+            qtyInput.select();
+            return;
+        }
         const guestCustomer = event.target.closest('[data-customer-guest]');
         if (guestCustomer) {
             chonKhachLe(guestCustomer);
@@ -1423,10 +1680,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    document.addEventListener('focusout', event => {
+        const qtyInput = event.target.closest?.('.qty-input');
+        if (qtyInput) {
+            capNhatSoLuongNhap(qtyInput).catch(error => hienThiLoi(error.message));
+        }
+    });
+
     document.getElementById('close-transfer-payment')?.addEventListener('click', dongModalXacNhanThanhToan);
     document.getElementById('cancel-transfer-payment')?.addEventListener('click', dongModalXacNhanThanhToan);
     document.getElementById('confirm-transfer-payment')?.addEventListener('click', event => {
         xacNhanThanhToanTuModal(event.currentTarget).catch(error => hienThiLoi(error.message));
+    });
+    document.getElementById('cash-paid-amount')?.addEventListener('input', event => {
+        const value = parseCurrencyVi(event.currentTarget.value);
+        event.currentTarget.value = value ? new Intl.NumberFormat('vi-VN').format(value) : '';
+        capNhatTienThoiModal();
+    });
+    document.getElementById('cash-paid-amount')?.addEventListener('keydown', event => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            document.getElementById('confirm-transfer-payment')?.click();
+        }
     });
     document.getElementById('transfer-payment-modal')?.addEventListener('click', event => {
         if (event.target.id === 'transfer-payment-modal') dongModalXacNhanThanhToan();
@@ -1452,7 +1727,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (event.target.id === 'cancel-invoice-modal') dongModalHuyHoaDon();
     });
 
+    tuDongApVoucherTotNhat();
+
     document.addEventListener('keydown', event => {
+        const qtyInput = event.target.closest?.('.qty-input');
+        if (qtyInput && event.key === 'Enter') {
+            event.preventDefault();
+            qtyInput.blur();
+            return;
+        }
         if (event.key === 'Escape') {
             const paymentSuccessModal = document.getElementById('payment-success-modal');
             if (paymentSuccessModal && !paymentSuccessModal.classList.contains('hidden')) {

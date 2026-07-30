@@ -30,6 +30,10 @@ public class ThongKeController extends HttpServlet {
             writeRevenueSeries(request, response);
             return;
         }
+        if ("overview".equals(request.getParameter("action"))) {
+            writeOverview(request, response);
+            return;
+        }
 
         LocalDate today = LocalDate.now();
         LocalDate filterFrom = parseDate(request.getParameter("from"), today);
@@ -54,6 +58,32 @@ public class ThongKeController extends HttpServlet {
         request.setAttribute("filterTo", filterTo);
         request.setAttribute("currentDate", today);
         request.getRequestDispatcher("/FE/Admin/Thongke.jsp").forward(request, response);
+    }
+
+    private void writeOverview(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        Map<String, Object> result = new LinkedHashMap<>();
+
+        try {
+            LocalDate today = LocalDate.now();
+            LocalDate from = parseDate(request.getParameter("from"), today);
+            LocalDate to = parseDate(request.getParameter("to"), today);
+            ThongKeOverview overview = thongKeService.getOverview(from, to);
+            result.put("success", true);
+            result.put("overview", overview);
+            result.put("completionRate", thongKeService.calculateCompletionRate(overview));
+        } catch (SQLException e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            result.put("success", false);
+            result.put("message", "Không truy vấn được tổng quan đơn hàng: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            result.put("success", false);
+            result.put("message", e.getMessage());
+        }
+
+        response.getWriter().write(gson.toJson(result));
     }
 
     private void writeRevenueSeries(HttpServletRequest request, HttpServletResponse response) throws IOException {

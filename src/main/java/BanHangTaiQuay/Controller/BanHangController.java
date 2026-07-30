@@ -8,6 +8,7 @@ import BanHangTaiQuay.Model.ApVoucherRequest;
 import BanHangTaiQuay.Model.ChonKhachHangRequest;
 import BanHangTaiQuay.Model.CapNhatSoLuongRequest;
 import BanHangTaiQuay.Model.HoaDonCreateRequest;
+import BanHangTaiQuay.Model.HoaDonResponse;
 import BanHangTaiQuay.Model.ThanhToanRequest;
 import BanHangTaiQuay.Model.ThemSanPhamRequest;
 import QuanLySanPham.Entity.HoaDon;
@@ -114,6 +115,8 @@ public class BanHangController extends HttpServlet {
             req.setAttribute("danhSachHoaDonCho", danhSachHoaDonCho);
             req.setAttribute("idHoaDonDangTao", idHoaDonDangTao);
             req.setAttribute("hoaDonDangTao", hoaDonDangTao);
+            HoaDonResponse hoaDonResponse = banHangService.taoHoaDonResponse(hoaDonDangTao);
+            req.setAttribute("hoaDonResponse", hoaDonResponse);
             // Tai san pham dang kinh doanh ngay khi mo/tạo don de hien thi san pham ben duoi o tim kiem.
             req.setAttribute("danhSachSanPham",
                     sanPhamChiTietService.timKiemTheoDanhMuc(null, null, 1));
@@ -629,7 +632,7 @@ public class BanHangController extends HttpServlet {
             ThanhToanRequest request = new ThanhToanRequest();
             request.setIdHoaDon(requirePositiveInt(req, "idHoaDon"));
             request.setMaPttt(requireText(req, "maPttt").toUpperCase());
-            request.setSoTienKhachDua(null);
+            request.setSoTienKhachDua(parseOptionalPositiveAmount(req.getParameter("soTienKhachDua")));
             request.setMaGiaoDich(optionalText(req, "maGiaoDich"));
             request.setGhiChu(optionalText(req, "ghiChu"));
 
@@ -658,6 +661,9 @@ public class BanHangController extends HttpServlet {
             response.put("printUrl", req.getContextPath()
                     + "/admin/hoa-don/chi-tiet?id=" + request.getIdHoaDon() + "&print=1");
             response.put("soTienThanhToan", tongTien);
+            if (request.getSoTienKhachDua() != null) {
+                response.put("tienThoi", request.getSoTienKhachDua().subtract(tongTien).max(BigDecimal.ZERO));
+            }
         } catch (IllegalStateException | IllegalArgumentException e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.put("success", false);
@@ -793,6 +799,25 @@ public class BanHangController extends HttpServlet {
             return null;
         }
         return value.trim();
+    }
+
+    private BigDecimal parseOptionalPositiveAmount(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return null;
+        }
+        String digits = value.trim().replaceAll("[^0-9]", "");
+        if (digits.isEmpty()) {
+            return null;
+        }
+        try {
+            BigDecimal amount = new BigDecimal(digits);
+            if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+                throw new IllegalArgumentException("Số tiền khách trả phải lớn hơn 0.");
+            }
+            return amount;
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Số tiền khách trả không hợp lệ.");
+        }
     }
 
     private String thongBaoLoi(RuntimeException exception) {

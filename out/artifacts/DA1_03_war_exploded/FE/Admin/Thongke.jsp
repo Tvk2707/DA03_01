@@ -346,7 +346,11 @@
                     <div class="stat-overview-metric">
                         <span>Đơn hàng</span>
                         <strong data-field="orders"><%= reportOverview.getOrders() %></strong>
-                        <small><b class="is-done">Hoàn thành <%= reportOverview.getDone() %></b> · <b class="is-cancel">Hủy <%= reportOverview.getCancelled() %></b> · <b class="is-process">Chờ <%= reportOverview.getProcessing() %></b></small>
+                        <small>
+                            <span class="is-done">Đã thanh toán <b data-field="done"><%= reportOverview.getDone() %></b></span> ·
+                            <span class="is-cancel">Hủy <b data-field="cancelled"><%= reportOverview.getCancelled() %></b></span> ·
+                            <span class="is-process">Chờ <b data-field="processing"><%= reportOverview.getProcessing() %></b></span>
+                        </small>
                     </div>
                     <div class="stat-overview-metric">
                         <span>Sản phẩm đã bán</span>
@@ -355,8 +359,8 @@
                     </div>
                     <div class="stat-overview-metric stat-overview-metric--completion">
                         <span>Tỷ lệ hoàn thành</span>
-                        <strong><%= completionRate %>%</strong>
-                        <div class="stat-overview-progress"><span style="width: <%= completionRate %>%;"></span></div>
+                        <strong data-field="completion"><%= completionRate %>%</strong>
+                        <div class="stat-overview-progress"><span data-field="completion-bar" style="width: <%= completionRate %>%;"></span></div>
                     </div>
                 </div>
             </article>
@@ -445,9 +449,9 @@
                     <div class="stat-progress"><span id="completionBar" style="width: <%= completionRate %>%;"></span></div>
                 </div>
                 <div class="stat-status-list" id="orderStatusList">
-                    <div class="stat-status-item"><span>Đã thanh toán</span><strong><%= reportOverview.getDone() %></strong></div>
-                    <div class="stat-status-item"><span>Chờ xử lý</span><strong><%= reportOverview.getProcessing() %></strong></div>
-                    <div class="stat-status-item"><span>Đã hủy</span><strong><%= reportOverview.getCancelled() %></strong></div>
+                    <div class="stat-status-item"><span>Đã thanh toán</span><strong data-field="done"><%= reportOverview.getDone() %></strong></div>
+                    <div class="stat-status-item"><span>Chờ xử lý</span><strong data-field="processing"><%= reportOverview.getProcessing() %></strong></div>
+                    <div class="stat-status-item"><span>Đã hủy</span><strong data-field="cancelled"><%= reportOverview.getCancelled() %></strong></div>
                 </div>
             </article>
 
@@ -550,6 +554,6 @@
     <div><strong>Thành công</strong><span id="statToastMessage"></span></div>
 </div>
 
-<script src="<%= request.getContextPath() %>/FE/Admin/thongke.js?v=202607241750"></script>
+<script src="<%= request.getContextPath() %>/FE/Admin/thongke.js?v=202607301"></script>
 </body>
 </html>
