@@ -994,14 +994,14 @@
                                         </span>
                                         <i class="fas fa-chevron-down" id="voucher-chevron" style="font-size: 11px; color: var(--text-sub); transition: transform 0.2s;"></i>
                                     </div>
-                                    <div id="voucher-dropdown-list" style="display:none; position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: #fff; border: 1.5px solid var(--line); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); z-index: 9999; overflow: hidden; flex-direction: column; max-height: 400px;">
+                                    <div id="voucher-dropdown-list" style="display:none; position: absolute; top: calc(100% + 6px); left: 0; right: 0; box-sizing: border-box; background: #fff; border: 1.5px solid var(--line); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); z-index: 9999; overflow: hidden; flex-direction: column;">
                                         <div style="padding: 10px; border-bottom: 1px solid var(--line); background: #f8fafc; flex-shrink: 0;">
                                             <div style="position: relative;">
                                                 <i class="fas fa-search" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-sub); font-size: 12px;"></i>
                                                 <input type="text" id="voucher-search-input" placeholder="Tìm mã hoặc tên..." oninput="xuLyTimVoucherDropdown(this.value)" style="width: 100%; padding: 8px 10px 8px 30px; border: 1px solid var(--line); border-radius: 6px; font-size: 13px; outline: none;">
                                             </div>
                                         </div>
-                                        <div id="voucher-dropdown-content" style="overflow-y: auto; flex: 1;">
+                                        <div id="voucher-dropdown-content" style="overflow-y: auto; flex: 1; min-height: 0;">
                                             <div id="voucher-dropdown-loading" style="padding: 16px; text-align: center; color: var(--text-sub); font-size: 13px;">
                                                 <i class="fas fa-spinner fa-spin"></i> Đang tải...
                                             </div>
@@ -1035,7 +1035,7 @@
                                 <button type="button" onclick="window.idHoaDonHienTai ? xoaHoaDonCho(event, window.idHoaDonHienTai) : null" class="pos-btn" style="flex: 1; border: 1px solid transparent; background: #f87171; color: white; justify-content: center; font-weight: bold; border-radius: 8px;">
                                     Hủy Đơn
                                 </button>
-                                <button type="button" class="checkout-btn" ${empty idHoaDonDangTao ? 'disabled' : ''} style="flex: 1.5; background: #c2103a; border-radius: 8px; justify-content: center; font-weight: bold; padding: 12px;">
+                                <button type="button" id="checkout-btn" class="checkout-btn" ${empty idHoaDonDangTao ? 'disabled' : ''} style="flex: 1.5; background: #c2103a; border-radius: 8px; justify-content: center; font-weight: bold; padding: 12px;">
                                     Xác nhận thanh toán
                                     <span id="checkout-total" data-amount="${tongThanhToanHienTai}" style="display: none;"><fmt:formatNumber value="${tongThanhToanHienTai}" type="currency" currencySymbol="đ" maxFractionDigits="0"/></span>
                                 </button>
@@ -1095,14 +1095,19 @@
                     <span>Ngày sinh</span>
                     <input type="date" id="input-khach-ngay-sinh" name="ngaySinh">
                 </label>
-                <label class="customer-form-field">
+                <div class="customer-form-field">
                     <span>Giới tính <span class="customer-required">*</span></span>
-                    <select id="input-khach-gioi-tinh" name="gioiTinh" required>
-                        <option value="">-- Chọn giới tính --</option>
-                        <option value="1">Nam</option>
-                        <option value="0">Nữ</option>
-                    </select>
-                </label>
+                    <div style="display: flex; gap: 20px; align-items: center; margin-top: 8px; height: 38px;">
+                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: normal; margin: 0; font-size: 14px; color: var(--text-main);">
+                            <input type="radio" name="gioiTinh" value="1" required style="width: 16px; height: 16px; cursor: pointer;">
+                            <span>Nam</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: normal; margin: 0; font-size: 14px; color: var(--text-main);">
+                            <input type="radio" name="gioiTinh" value="0" required style="width: 16px; height: 16px; cursor: pointer;">
+                            <span>Nữ</span>
+                        </label>
+                    </div>
+                </div>
             </div>
             <div class="customer-form-actions">
                 <button type="button" class="customer-form-cancel" id="cancel-customer-create">Hủy</button>
@@ -1177,7 +1182,7 @@
 </div>
 
 <div id="product-list-modal" class="transfer-modal hidden" aria-hidden="true" style="z-index: 1050;">
-    <section class="transfer-modal__dialog" role="dialog" aria-modal="true" style="width: min(860px, 96vw); max-width: 860px; padding: 20px;">
+    <section class="transfer-modal__dialog" role="dialog" aria-modal="true" style="width: min(1050px, 96vw); max-width: 1050px; padding: 20px;">
         <div class="transfer-modal__header" style="border-bottom: 1px solid var(--line); padding-bottom: 15px; margin-bottom: 20px;">
             <h2 style="font-size: 18px; color: var(--text-main); font-weight: bold;">Chọn biến thể để thêm vào đơn</h2>
             <button type="button" class="transfer-modal__close" onclick="document.getElementById('product-list-modal').classList.add('hidden')" aria-label="Đóng">&times;</button>
@@ -1211,8 +1216,8 @@
                     <tr style="border-bottom: 2px solid var(--line);">
                         <th style="padding: 12px 10px; text-align: center; font-size: 12px; color: var(--text-sub); font-weight: 700; white-space: nowrap; width: 45px;">STT</th>
                         <th style="padding: 12px 10px; text-align: center; font-size: 12px; color: var(--text-sub); font-weight: 700; white-space: nowrap; width: 60px;">Ảnh</th>
-                        <th style="padding: 12px 10px; text-align: left; font-size: 12px; color: var(--text-sub); font-weight: 700; white-space: nowrap; width: 110px;">Mã biến thể</th>
-                        <th style="padding: 12px 10px; text-align: left; font-size: 12px; color: var(--text-sub); font-weight: 700; white-space: nowrap;">Tên sản phẩm</th>
+                        <th style="padding: 12px 10px; text-align: left; font-size: 12px; color: var(--text-sub); font-weight: 700; width: 140px;">Mã biến thể</th>
+                        <th style="padding: 12px 10px; text-align: left; font-size: 12px; color: var(--text-sub); font-weight: 700; width: 180px;">Tên sản phẩm</th>
                         <th style="padding: 12px 10px; text-align: left; font-size: 12px; color: var(--text-sub); font-weight: 700; white-space: nowrap;">Màu sắc</th>
                         <th style="padding: 12px 10px; text-align: left; font-size: 12px; color: var(--text-sub); font-weight: 700; white-space: nowrap;">Kích cỡ</th>
                         <th style="padding: 12px 10px; text-align: right; font-size: 12px; color: var(--text-sub); font-weight: 700; white-space: nowrap; width: 80px;">Tồn kho</th>
@@ -1236,9 +1241,9 @@
                                     </c:choose>
                                 </div>
                             </td>
-                            <td style="padding: 12px 10px; font-size: 13px; font-weight: 600; color: var(--text-main); white-space: nowrap;">${sp.ma}</td>
+                            <td style="padding: 12px 10px; font-size: 13px; font-weight: 600; color: var(--text-main);">${sp.ma}</td>
                             <td style="padding: 12px 10px; font-size: 13px; color: var(--text-main);">
-                                <div class="p-name" style="max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${sp.sanPham.tenSanPham}</div>
+                                <div class="p-name">${sp.sanPham.tenSanPham}</div>
                             </td>
                             <td style="padding: 12px 10px; font-size: 13px; color: var(--text-main); white-space: nowrap;">${sp.mauSac.tenMau}</td>
                             <td style="padding: 12px 10px; font-size: 13px; color: var(--text-main); white-space: nowrap;">${sp.kichCo.tenKichCo}</td>

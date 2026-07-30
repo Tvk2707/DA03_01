@@ -460,9 +460,9 @@ async function themVaChonKhachHang(button) {
     const email = document.getElementById('input-khach-email')?.value.trim();
     const soDienThoai = document.getElementById('input-khach-sdt')?.value.trim();
     const ngaySinh = document.getElementById('input-khach-ngay-sinh')?.value;
-    const gioiTinh = document.getElementById('input-khach-gioi-tinh')?.value;
-    if (!hoTen || !soDienThoai || gioiTinh === '') {
-        hienThiLoi('Vui long nhap ho ten, so dien thoai va gioi tinh.');
+    const gioiTinh = document.querySelector('input[name="gioiTinh"]:checked')?.value;
+    if (!hoTen || !soDienThoai || gioiTinh === undefined || gioiTinh === null || gioiTinh === '') {
+        hienThiLoi('Vui lòng nhập họ tên, số điện thoại và chọn giới tính.');
         return;
     }
     await withLoading(button, async () => {
@@ -804,18 +804,35 @@ function toggleDropdown(which) {
         listEl.style.width = rect.width + 'px';
         listEl.style.left = rect.left + 'px';
         
-        // Auto placement: Tính khoảng trống phía dưới
-        const spaceBelow = window.innerHeight - rect.bottom;
-        const dropdownHeight = listEl.offsetHeight || 350; 
-        
-        if (spaceBelow < dropdownHeight && rect.top > spaceBelow) {
-            // Hết chỗ phía dưới -> Nổi lên trên
-            listEl.style.top = 'auto';
-            listEl.style.bottom = (window.innerHeight - rect.top + 5) + 'px';
-        } else {
-            // Còn chỗ -> Nổi xuống dưới
+        if (which === 'voucher') {
+            // Voucher luôn mở xuống; chiều cao kết thúc tại đáy nút xác nhận thanh toán.
+            const checkoutBtn = document.getElementById('checkout-btn');
+            const dropdownTop = rect.bottom + 6;
+            const viewportBottom = window.innerHeight - 12;
+            const checkoutBottom = checkoutBtn
+                ? checkoutBtn.getBoundingClientRect().bottom
+                : viewportBottom;
+            const dropdownBottom = Math.min(checkoutBottom, viewportBottom);
+            const availableHeight = Math.max(1, dropdownBottom - dropdownTop);
+
+            listEl.style.top = dropdownTop + 'px';
             listEl.style.bottom = 'auto';
-            listEl.style.top = (rect.bottom + 5) + 'px';
+            listEl.style.height = availableHeight + 'px';
+            listEl.style.maxHeight = availableHeight + 'px';
+        } else {
+            // Các dropdown còn lại vẫn tự chọn hướng mở theo khoảng trống màn hình.
+            listEl.style.height = '';
+            listEl.style.maxHeight = '';
+            const spaceBelow = window.innerHeight - rect.bottom;
+            const dropdownHeight = listEl.offsetHeight || 350;
+
+            if (spaceBelow < dropdownHeight && rect.top > spaceBelow) {
+                listEl.style.top = 'auto';
+                listEl.style.bottom = (window.innerHeight - rect.top + 5) + 'px';
+            } else {
+                listEl.style.bottom = 'auto';
+                listEl.style.top = (rect.bottom + 5) + 'px';
+            }
         }
 
         if (btnEl) btnEl.style.borderColor = '#c2103a';

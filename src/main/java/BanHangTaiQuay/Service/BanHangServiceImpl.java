@@ -19,6 +19,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * ============================================
+ * CHỨC NĂNG: Xử lý nghiệp vụ bán hàng tại quầy.
+ *
+ * - Tạo và quản lý hóa đơn chờ.
+ * - Thêm, xóa, cập nhật sản phẩm trong giỏ hàng.
+ * - Gán khách hàng, áp voucher, thanh toán và hủy hóa đơn.
+ * - Kiểm soát tồn kho, trạng thái sản phẩm và lịch sử hóa đơn.
+ * ============================================
+ */
 public class BanHangServiceImpl implements BanHangService {
 
     private final BanHangDAO banHangDAO;
@@ -30,7 +40,11 @@ public class BanHangServiceImpl implements BanHangService {
         this(new BanHangDAOImpl());
     }
 
-    // Cho phép kiểm thử các quy tắc nghiệp vụ mà không cần mở kết nối database.
+    /**
+     * CHỨC NĂNG: Khởi tạo service với DAO tùy biến.
+     *
+     * Dùng constructor này để test nghiệp vụ mà không phụ thuộc trực tiếp vào DAO thật.
+     */
     public BanHangServiceImpl(BanHangDAO banHangDAO) {
         if (banHangDAO == null) {
             throw new IllegalArgumentException("DAO bán hàng không được để trống.");
@@ -38,6 +52,14 @@ public class BanHangServiceImpl implements BanHangService {
         this.banHangDAO = banHangDAO;
     }
 
+    /**
+     * CHỨC NĂNG: Tạo hóa đơn chờ mới cho nhân viên trong ca đang mở.
+     *
+     * Quy trình:
+     * 1. Kiểm tra nhân viên và ca làm việc.
+     * 2. Giới hạn tối đa 10 hóa đơn chờ cho mỗi nhân viên.
+     * 3. Khởi tạo hóa đơn trạng thái chờ và ghi lịch sử tạo đơn.
+     */
     @Override
     public HoaDon taoHoaDonMoi(Integer idNhanVien, Integer idCa) {
         if (idNhanVien == null || idNhanVien <= 0) {
@@ -53,14 +75,12 @@ public class BanHangServiceImpl implements BanHangService {
 
         HoaDon hd = new HoaDon();
 
-        // 👇 THÊM DÒNG NÀY ĐỂ FIX LỖI SQL (Tạo mã hóa đơn tự động bằng thời gian thực)
         hd.setMaHoaDon("HD" + System.currentTimeMillis());
 
         NhanVien nv = new NhanVien();
         nv.setId(idNhanVien);
         hd.setNhanVien(nv);
 
-        // Gắn hóa đơn vào ca đang được lưu trong session, không tạo ca mới.
         CaLamViec ca = new CaLamViec();
         ca.setId(idCa);
         hd.setCa(ca);
@@ -74,6 +94,16 @@ public class BanHangServiceImpl implements BanHangService {
         ghiLichSu(newHoaDon, "TAO_DON", "Tạo hóa đơn mới");
         return newHoaDon;
     }
+    /**
+     * CHỨC NĂNG: Thêm sản phẩm vào giỏ hàng của hóa đơn.
+     *
+     * Quy trình:
+     * 1. Kiểm tra hóa đơn, sản phẩm và số lượng.
+     * 2. Khóa bản ghi sản phẩm để tránh bán vượt tồn khi nhiều thao tác cùng lúc.
+     * 3. Nếu sản phẩm đã có trong giỏ thì tăng số lượng.
+     * 4. Nếu chưa có thì thêm dòng chi tiết mới.
+     * 5. Tính lại tổng tiền hóa đơn.
+     */
     @Override
     public void themSanPhamVaoGio(int idHoaDon, int idSanPhamChiTiet, int soLuong) {
         validatePositiveId(idHoaDon, "ID hóa đơn");
@@ -82,7 +112,6 @@ public class BanHangServiceImpl implements BanHangService {
             throw new IllegalArgumentException("Số lượng phải lớn hơn 0");
         }
 
-        // Lấy sản phẩm qua module QuanLySanPham trước khi cập nhật giỏ hàng.
         SanPhamChiTiet sanPhamTuModule = sanPhamChiTietService.timTheoId(idSanPhamChiTiet);
         if (sanPhamTuModule == null) {
             throw new IllegalArgumentException("Sản phẩm không tồn tại.");
@@ -96,6 +125,10 @@ public class BanHangServiceImpl implements BanHangService {
         try {
             transaction.begin();
 
+            /*
+             * Dùng khóa ghi trên sản phẩm chi tiết để kiểm soát tồn kho ngay tại thời điểm thêm.
+             * Cách này giúp tránh hai request POS cùng thêm một biến thể làm vượt số lượng còn lại.
+             */
             SanPhamChiTiet spct = em.find(SanPhamChiTiet.class, idSanPhamChiTiet, LockModeType.PESSIMISTIC_WRITE);
 
             if (spct == null || Boolean.TRUE.equals(spct.getIsDeleted())) {
@@ -167,12 +200,15 @@ public class BanHangServiceImpl implements BanHangService {
             if (transaction != null && transaction.isActive()) {
                 transaction.rollback();
             }
-            throw e; // Re-throw the exception to be handled by the controller
+            throw e;
         } finally {
             em.close();
         }
     }
 
+    /**
+     * CHỨC NĂNG: Xóa một sản phẩm khỏi giỏ hàng và tính lại tổng tiền.
+     */
     @Override
     public void xoaSanPhamKhoiGio(int idHoaDon, int idChiTiet) {
         validatePositiveId(idHoaDon, "ID hóa đơn");
@@ -222,6 +258,11 @@ public class BanHangServiceImpl implements BanHangService {
         }
     }
 
+    /**
+     * CHỨC NĂNG: Cập nhật số lượng của dòng sản phẩm trong giỏ.
+     *
+     * Hệ thống khóa sản phẩm liên quan để kiểm tra tồn kho trước khi ghi số lượng mới.
+     */
     @Override
     public void capNhatSoLuong(int idChiTiet, int soLuongMoi) {
         validatePositiveId(idChiTiet, "ID chi tiết hóa đơn");

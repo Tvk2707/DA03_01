@@ -39,6 +39,17 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * ============================================
+ * CHỨC NĂNG: Điều phối bán hàng tại quầy (POS).
+ *
+ * - Hiển thị màn hình bán hàng và danh sách hóa đơn chờ.
+ * - Tìm kiếm/quet QR sản phẩm.
+ * - Thêm, xóa, cập nhật sản phẩm trong giỏ.
+ * - Tra cứu/gán khách hàng hoặc chọn khách lẻ.
+ * - Áp voucher, hủy hóa đơn và xác nhận thanh toán.
+ * ============================================
+ */
 @WebServlet({
         "/ban-hang",
         "/ban-hang/tao-hoa-don",
@@ -65,6 +76,13 @@ public class BanHangController extends HttpServlet {
     private final NhanVienService nhanVienService = new NhanVienServiceImpl();
     private final Gson gson = new Gson();
 
+    /**
+     * CHỨC NĂNG: Xử lý các request GET của POS.
+     *
+     * Quy trình:
+     * 1. Nếu vào /ban-hang thì dựng dữ liệu màn hình chính.
+     * 2. Nếu là AJAX GET thì trả về sản phẩm, QR, khách hàng hoặc hóa đơn chờ.
+     */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");
@@ -77,6 +95,10 @@ public class BanHangController extends HttpServlet {
                     ? List.of()
                     : banHangService.layDanhSachHoaDonCho(idNhanVien);
             Integer idHoaDonDangTao = parseOptionalPositiveInt(req.getParameter("id"));
+            /*
+             * Khi người dùng bấm hóa đơn tạm khác nhau, id trên URL là nguồn ưu tiên.
+             * Nếu không có id URL thì mới fallback về session hoặc hóa đơn chờ đầu tiên.
+             */
             if (idHoaDonDangTao == null && idNhanVien == null) {
                 idHoaDonDangTao = parseSessionInvoiceId(session);
             }
@@ -127,6 +149,14 @@ public class BanHangController extends HttpServlet {
         }
     }
 
+    /**
+     * CHỨC NĂNG: Xử lý các thao tác ghi dữ liệu của POS qua AJAX.
+     *
+     * Các nhánh chính:
+     * - Tạo hóa đơn, thêm/xóa/cập nhật giỏ hàng.
+     * - Gán khách hàng, áp/gỡ voucher.
+     * - Hủy hóa đơn và thanh toán.
+     */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");
@@ -168,6 +198,9 @@ public class BanHangController extends HttpServlet {
         }
     }
 
+    /**
+     * CHỨC NĂNG: Tạo hóa đơn chờ mới cho ca bán hàng hiện tại.
+     */
     private void taoHoaDon(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
@@ -201,6 +234,9 @@ public class BanHangController extends HttpServlet {
         out.flush();
     }
 
+    /**
+     * CHỨC NĂNG: Tìm kiếm sản phẩm để hiển thị lên lưới sản phẩm POS.
+     */
     private void timSanPham(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String keyword = optionalText(req, "keyword");
         Integer idDanhMuc = parseOptionalPositiveInt(req.getParameter("idDanhMuc"));
@@ -216,6 +252,9 @@ public class BanHangController extends HttpServlet {
         req.getRequestDispatcher("/Admin/BanHangTaiQuay/_product-grid.jsp").forward(req, resp);
     }
 
+    /**
+     * CHỨC NĂNG: Quét hoặc nhập mã QR để lấy đúng biến thể sản phẩm.
+     */
     private void quetQr(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
@@ -244,6 +283,9 @@ public class BanHangController extends HttpServlet {
         resp.getWriter().print(gson.toJson(response));
     }
 
+    /**
+     * CHỨC NĂNG: Thêm sản phẩm vào giỏ hàng của hóa đơn đang chọn.
+     */
     private void themSanPham(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
@@ -274,6 +316,9 @@ public class BanHangController extends HttpServlet {
         out.flush();
     }
 
+    /**
+     * CHỨC NĂNG: Xóa một dòng sản phẩm khỏi giỏ hàng.
+     */
     private void xoaSanPham(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
@@ -297,6 +342,9 @@ public class BanHangController extends HttpServlet {
         out.flush();
     }
 
+    /**
+     * CHỨC NĂNG: Cập nhật số lượng của một dòng trong giỏ hàng.
+     */
     private void capNhatSoLuong(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
@@ -321,6 +369,9 @@ public class BanHangController extends HttpServlet {
         out.flush();
     }
 
+    /**
+     * CHỨC NĂNG: Tra cứu khách hàng hoặc tạo mới khách hàng từ form POS.
+     */
     private void traCuuKhachHang(HttpServletRequest req, HttpServletResponse resp, boolean createIfNotFound) throws IOException {
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
@@ -371,6 +422,9 @@ public class BanHangController extends HttpServlet {
         out.flush();
     }
 
+    /**
+     * CHỨC NĂNG: Áp mã voucher vào hóa đơn hiện tại.
+     */
     private void apVoucher(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
@@ -421,6 +475,9 @@ public class BanHangController extends HttpServlet {
         out.flush();
     }
 
+    /**
+     * CHỨC NĂNG: Gỡ voucher khỏi hóa đơn.
+     */
     private void goVoucher(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
@@ -442,6 +499,9 @@ public class BanHangController extends HttpServlet {
         out.flush();
     }
 
+    /**
+     * CHỨC NĂNG: Hủy hóa đơn chờ và lưu lý do hủy.
+     */
     private void huyHoaDon(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
@@ -468,6 +528,9 @@ public class BanHangController extends HttpServlet {
         out.flush();
     }
 
+    /**
+     * CHỨC NĂNG: Lấy danh sách hóa đơn đang chờ của nhân viên hiện tại.
+     */
     private void layHoaDonCho(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
@@ -499,6 +562,9 @@ public class BanHangController extends HttpServlet {
         out.flush();
     }
 
+    /**
+     * CHỨC NĂNG: Gán khách hàng thành viên vào hóa đơn.
+     */
     private void ganKhachHang(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
@@ -520,6 +586,9 @@ public class BanHangController extends HttpServlet {
         out.flush();
     }
 
+    /**
+     * CHỨC NĂNG: Chuyển hóa đơn về khách lẻ khi nhân viên không chọn khách hàng.
+     */
     private void chonKhachLe(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
@@ -541,6 +610,15 @@ public class BanHangController extends HttpServlet {
         out.flush();
     }
 
+    /**
+     * CHỨC NĂNG: Xác nhận thanh toán hóa đơn POS.
+     *
+     * Quy trình:
+     * 1. Nhận hóa đơn và phương thức thanh toán.
+     * 2. Kiểm tra hóa đơn còn tồn tại và có sản phẩm.
+     * 3. Gọi service thanh toán để trừ tồn, ghi thanh toán và cập nhật trạng thái.
+     * 4. Trả về link xem chi tiết/in hóa đơn.
+     */
     private void thanhToan(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         resp.setContentType("application/json");
         resp.setCharacterEncoding("UTF-8");
@@ -590,6 +668,12 @@ public class BanHangController extends HttpServlet {
         out.flush();
     }
 
+    /**
+     * CHỨC NĂNG: Xác định nhân viên đang bán từ session.
+     *
+     * Nếu session chưa có nhân viên, hệ thống fallback sang một nhân viên đang hoạt động
+     * để POS vẫn có thể tạo hóa đơn trong môi trường demo/test.
+     */
     private Integer layIdNhanVien(HttpSession session) {
         Object idNhanVien = session.getAttribute("idNhanVien");
         if (idNhanVien instanceof Number) {
