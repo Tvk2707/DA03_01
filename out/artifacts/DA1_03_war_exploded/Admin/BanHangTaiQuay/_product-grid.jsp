@@ -54,7 +54,7 @@
                                 </div>
                             </td>
                             <td style="text-align: center;">
-                                <button type="button" class="p-add" ${sp.soLuongTon <= 0 ? 'data-disabled="true"' : ''}
+                                <button type="button" class="p-add"
                                         title="Thêm vào giỏ" aria-label="Thêm ${sp.sanPham.tenSanPham} vào giỏ">+</button>
                             </td>
                         </tr>

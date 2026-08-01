@@ -1,5 +1,6 @@
 package BanHangTaiQuay.Service;
 
+import BanHangTaiQuay.Model.VoucherRevalidationResult;
 import QuanLySanPham.Entity.ChiTietHoaDon;
 import QuanLySanPham.Entity.HoaDon;
 import QuanLySanPham.Entity.KhachHangPhieuGiamGia;
@@ -31,10 +32,6 @@ public class VoucherServiceImpl implements VoucherService {
             if (hoaDon == null) {
                 throw new IllegalArgumentException("Hóa đơn không tồn tại.");
             }
-            if (hoaDon.getPhieuGiamGia() != null) {
-                return List.of();
-            }
-
             String keyword = tuKhoa == null ? null : tuKhoa.trim().toLowerCase(Locale.ROOT);
             LocalDateTime hienTai = LocalDateTime.now();
 
@@ -58,13 +55,21 @@ public class VoucherServiceImpl implements VoucherService {
 
             BigDecimal tongTienHang = tinhTongTienHang(hoaDon);
             List<PhieuGiamGia> ketQua = new ArrayList<>();
+            Integer idVoucherDangAp = hoaDon.getPhieuGiamGia() == null
+                    ? null
+                    : hoaDon.getPhieuGiamGia().getId();
             for (PhieuGiamGia voucher : ungVien) {
-                if (laVoucherPhuHop(em, voucher, hoaDon, tongTienHang)) {
+                boolean laVoucherDangAp = idVoucherDangAp != null
+                        && idVoucherDangAp.equals(voucher.getId());
+                if (laVoucherDangAp || laVoucherPhuHop(em, voucher, hoaDon, tongTienHang)) {
                     ketQua.add(voucher);
                 }
-                if (ketQua.size() >= 8) {
+                if (ketQua.size() >= 8 && !laVoucherDangAp) {
                     break;
                 }
+            }
+            if (idVoucherDangAp != null && ketQua.stream().noneMatch(v -> idVoucherDangAp.equals(v.getId()))) {
+                ketQua.add(hoaDon.getPhieuGiamGia());
             }
             return ketQua;
         } finally {
@@ -197,6 +202,74 @@ public class VoucherServiceImpl implements VoucherService {
         kiemTraPhanQuyenVoucherDaApDung(em, voucher, hoaDon);
     }
 
+    /**
+     * Kiểm tra lại voucher trong transaction đang xử lý hóa đơn.
+     * Nếu voucher không còn hợp lệ thì gỡ voucher và trả hóa đơn về giá gốc;
+     * nếu giá trị giảm thay đổi thì đồng bộ lại snapshot các dòng và tổng tiền.
+     */
+    @Override
+    public VoucherRevalidationResult revalidateVoucher(EntityManager em, HoaDon hoaDon) {
+        if (em == null || hoaDon == null || hoaDon.getPhieuGiamGia() == null) {
+            return VoucherRevalidationResult.unchanged(null, BigDecimal.ZERO);
+        }
+
+        String maVoucher = hoaDon.getPhieuGiamGia().getMaVoucher();
+        BigDecimal tongTienHang = tinhTongTienHang(hoaDon);
+        BigDecimal tongTienCu = hoaDon.getTongTienThanhToan() == null
+                ? tongTienHang
+                : hoaDon.getTongTienThanhToan();
+        BigDecimal tienGiamCu = tongTienHang.subtract(tongTienCu).max(BigDecimal.ZERO);
+
+        PhieuGiamGia voucher = hoaDon.getPhieuGiamGia().getId() == null
+                ? null
+                : em.find(PhieuGiamGia.class, hoaDon.getPhieuGiamGia().getId(), LockModeType.PESSIMISTIC_WRITE);
+        if (voucher == null) {
+            hoanVoucherKhiHuy(em, hoaDon);
+            ghiLichSu(em, hoaDon, "VOUCHER_HET_HAN",
+                    "Voucher " + maVoucher + " không còn tồn tại, đã gỡ khỏi hóa đơn.");
+            return new VoucherRevalidationResult(
+                    true, false, "VOUCHER_HET_HAN",
+                    "Mã giảm giá đã hết hạn, hệ thống đã gỡ voucher",
+                    maVoucher, tienGiamCu, BigDecimal.ZERO);
+        }
+
+        try {
+            kiemTraVoucher(voucher, hoaDon, true);
+            kiemTraPhanQuyenVoucherDaApDung(em, voucher, hoaDon);
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            boolean hetHan = voucher.getNgayKetThuc() != null
+                    && LocalDateTime.now().isAfter(voucher.getNgayKetThuc());
+            String hanhDong = hetHan ? "VOUCHER_HET_HAN" : "VOUCHER_KHONG_DU_DK";
+            String thongBao = hetHan
+                    ? "Mã giảm giá đã hết hạn, hệ thống đã gỡ voucher"
+                    : "Mã giảm giá không còn đủ điều kiện, hệ thống đã gỡ voucher: " + ex.getMessage();
+
+            hoanVoucherKhiHuy(em, hoaDon);
+            ghiLichSu(em, hoaDon, hanhDong,
+                    "Voucher " + maVoucher + " bị gỡ khi kiểm tra lại. Lý do: " + ex.getMessage());
+            return new VoucherRevalidationResult(
+                    true, false, hanhDong, thongBao, maVoucher, tienGiamCu, BigDecimal.ZERO);
+        }
+
+        BigDecimal tienGiamMoi = tinhTienGiam(tongTienHang, voucher);
+        capNhatChiTietVeGiaGoc(hoaDon);
+        capNhatTongTien(hoaDon);
+
+        if (tienGiamCu.compareTo(tienGiamMoi) != 0) {
+            String thongBao = "Giá trị ưu đãi của mã " + maVoucher
+                    + " đã thay đổi, hệ thống đã cập nhật lại tổng tiền";
+            ghiLichSu(em, hoaDon, "VOUCHER_CAP_NHAT_GIA_TRI",
+                    "Voucher " + maVoucher + " thay đổi giá trị giảm từ "
+                            + tienGiamCu.toPlainString() + "đ thành "
+                            + tienGiamMoi.toPlainString() + "đ.");
+            return new VoucherRevalidationResult(
+                    false, true, "VOUCHER_CAP_NHAT_GIA_TRI", thongBao,
+                    maVoucher, tienGiamCu, tienGiamMoi);
+        }
+
+        return VoucherRevalidationResult.unchanged(maVoucher, tienGiamMoi);
+    }
+
     @Override
     public void hoanVoucherKhiHuy(EntityManager em, HoaDon hoaDon) {
         if (em == null || hoaDon == null || hoaDon.getPhieuGiamGia() == null) {
@@ -258,7 +331,7 @@ public class VoucherServiceImpl implements VoucherService {
             throw new IllegalStateException("Voucher chưa bắt đầu áp dụng.");
         }
         if (voucher.getNgayKetThuc() != null && hienTai.isAfter(voucher.getNgayKetThuc())) {
-            throw new IllegalStateException("Voucher đã hết hạn.");
+            throw new IllegalStateException("Mã giảm giá đã hết hạn sử dụng");
         }
 
         int soLuong = voucher.getSoLuong() == null ? 0 : voucher.getSoLuong();
@@ -422,6 +495,20 @@ public class VoucherServiceImpl implements VoucherService {
                 ? BigDecimal.ZERO
                 : tinhTienGiam(tongTienHang, hoaDon.getPhieuGiamGia());
         hoaDon.setTongTienThanhToan(tongTienHang.subtract(tienGiam));
+    }
+
+    private void capNhatChiTietVeGiaGoc(HoaDon hoaDon) {
+        if (hoaDon.getChiTietHoaDons() == null) {
+            return;
+        }
+        for (ChiTietHoaDon chiTiet : hoaDon.getChiTietHoaDons()) {
+            BigDecimal donGiaGoc = chiTiet.getDonGia();
+            int soLuong = chiTiet.getSoLuong() == null ? 0 : chiTiet.getSoLuong();
+            if (donGiaGoc != null) {
+                chiTiet.setGiaBanRa(donGiaGoc);
+                chiTiet.setTongTien(donGiaGoc.multiply(BigDecimal.valueOf(soLuong)));
+            }
+        }
     }
 
     private void kiemTraPhanQuyenVoucherDaApDung(

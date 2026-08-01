@@ -1,4 +1,4 @@
-<%
+﻿<%
     // Setup các thuộc tính cho layout chung
     request.setAttribute("pageTitle", "Bán hàng tại quầy (POS)");
     request.setAttribute("activeMenu", "pos");
@@ -133,10 +133,19 @@
         /* Invoice tabs */
         .tabs { display: flex; gap: 8px; padding: 18px 28px 0; flex-wrap: wrap; }
         .tab {
+            position: relative;
             padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 10px;
             background: #f1f5f9; color: var(--text-sub); cursor: pointer; display: flex; align-items: center; gap: 8px; border: 1px solid transparent;
         }
         .tab.active { background: #fee2e2; color: #c2103a; border: 1px solid #fca5a5; }
+        .tab-badge {
+            position: absolute;
+            top: -5px; right: -5px;
+            background: #ef4444; color: white;
+            font-size: 10px; font-weight: 700;
+            padding: 2px 5px; border-radius: 10px;
+            line-height: 1; z-index: 2;
+        }
         .tab .dot { display: none; }
         .tab-add {
             width: 34px; height: 34px; border-radius: 10px; background: transparent; border: 1px dashed var(--brown-500);
@@ -732,6 +741,13 @@
         #voucher-dropdown-btn > .fa-chevron-down {
             flex: 0 0 auto;
         }
+        #voucher-dropdown-btn[data-locked="true"] {
+            cursor: not-allowed !important;
+            opacity: .82;
+        }
+        #voucher-dropdown-btn[data-locked="true"] > .fa-chevron-down {
+            display: none;
+        }
         #voucher-selected-label > strong {
             min-width: 0;
             overflow: hidden;
@@ -871,6 +887,8 @@
                 <div class="tabs">
                     <c:forEach var="hd" items="${danhSachHoaDonCho}">
                         <div class="tab ${hd.id == idHoaDonDangTao ? 'active' : ''}" data-hoadon="${hd.id}">
+                            <c:set var="sl" value="${soLuongSpMap[hd.id] != null ? soLuongSpMap[hd.id] : 0}"/>
+                            <span class="tab-badge" style="display: ${sl > 0 ? 'inline-flex' : 'none'};" data-badge="${hd.id}">${sl}</span>
                             <span class="dot"></span>
                             Đơn #${hd.id} · ${hd.maHoaDon}
 
@@ -1052,6 +1070,8 @@
                                     <label style="font-size: 12px; color: var(--text-sub); display: block; margin-bottom: 6px; font-weight: 600;">Chọn phiếu giảm giá</label>
                                     <c:set var="voucherDaApDung" value="${hoaDonDangTao.phieuGiamGia}"/>
                                     <div id="voucher-dropdown-btn" onclick="toggleDropdown('voucher')"
+                                         data-locked="true"
+                                         aria-disabled="true"
                                          style="display: flex; align-items: center; justify-content: space-between; background: #fff; border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 14px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text-main); user-select: none; transition: border-color 0.2s;">
                                         <span id="voucher-selected-label">
                                             <c:choose>
@@ -1094,6 +1114,7 @@
                             <c:set var="giamGiaHienTai" value="${tamTinhHoaDon > tongThanhToanHienTai ? tamTinhHoaDon - tongThanhToanHienTai : 0}"/>
                             
                             <div class="totals" style="border-top: none; padding-top: 0; margin-bottom: 20px;">
+                                <div id="best-voucher-message" ${empty voucherDaApDung ? 'hidden' : ''} style="margin-bottom: 10px; color: var(--brown-700); font-size: 12px; font-weight: 700;">Đã lựa chọn phiếu giảm giá tốt nhất</div>
                                 <div class="t-row" style="margin-bottom: 12px;"><span>Tiền hàng</span><span id="sum-tamtinh"><fmt:formatNumber value="${tamTinhHoaDon}" type="currency" currencySymbol="đ" maxFractionDigits="0"/></span></div>
                                 <div id="discount-summary" ${empty hoaDonResponse.moTaGiamGia ? 'hidden' : ''}>
                                     <div class="t-row" style="margin-bottom: 5px;"><span>Giảm giá</span><span class="discount" id="sum-giamgia" style="color: #ef4444;">-<fmt:formatNumber value="${giamGiaHienTai}" type="currency" currencySymbol="đ" maxFractionDigits="0"/></span></div>
@@ -1336,7 +1357,7 @@
                             </td>
                             <td style="padding: 10px 10px; text-align: center; white-space: nowrap;">
                                 <button type="button" class="p-add"
-                                        ${empty idHoaDonDangTao || hoaDonDangTao.trangThai == 3 || hoaDonDangTao.trangThai == 5 || sp.soLuongTon <= 0 ? 'data-disabled="true"' : ''}
+                                        ${empty idHoaDonDangTao || hoaDonDangTao.trangThai == 3 || hoaDonDangTao.trangThai == 5 ? 'data-disabled="true"' : ''}
                                         style="display: inline-flex; align-items: center; gap: 4px; background: white; color: #c2103a; border: 1.5px solid #c2103a; border-radius: 6px; padding: 5px 14px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; min-width: 70px; justify-content: center; transition: all 0.15s;"
                                         onmouseover="if(!this.dataset.disabled){this.style.background='#c2103a';this.style.color='white';}"
                                         onmouseout="if(!this.dataset.disabled){this.style.background='white';this.style.color='#c2103a';}">

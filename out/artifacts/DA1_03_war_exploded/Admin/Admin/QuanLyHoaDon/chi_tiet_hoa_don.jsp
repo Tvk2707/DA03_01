@@ -258,7 +258,7 @@
     <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/layout.css">
     <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/sidebar.css">
     <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/header.css">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/hoa_don.css?v=202607304">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/FE/Admin/css/hoa_don.css?v=202607305">
 </head>
 <body>
 <%@ include file="/Admin/layout/sidebar.jsp" %>

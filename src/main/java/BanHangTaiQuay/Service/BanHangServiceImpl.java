@@ -3,6 +3,7 @@ package BanHangTaiQuay.Service;
 import BanHangTaiQuay.Dao.BanHangDAO;
 import BanHangTaiQuay.Dao.BanHangDAOImpl;
 import BanHangTaiQuay.Model.HoaDonResponse;
+import BanHangTaiQuay.Model.VoucherRevalidationResult;
 import QuanLySanPham.Entity.*;
 import QuanLySanPham.service.SanPhamChiTietService;
 import QuanLySanPham.service.impl.SanPhamChiTietServiceImpl;
@@ -502,6 +503,36 @@ public class BanHangServiceImpl implements BanHangService {
         voucherService.goVoucher(idHoaDon);
     }
 
+    /**
+     * Kiểm tra lại voucher và lưu ngay các thay đổi vào hóa đơn POS.
+     */
+    @Override
+    public VoucherRevalidationResult revalidateVoucher(int idHoaDon) {
+        validatePositiveId(idHoaDon, "ID hóa đơn");
+        EntityManager em = EntityManagerUtlis.getEntityManager();
+        EntityTransaction transaction = em.getTransaction();
+        try {
+            transaction.begin();
+            HoaDon hd = findHoaDonWithDetails(em, idHoaDon, true);
+            if (hd == null) {
+                throw new IllegalArgumentException("Hóa đơn không tồn tại.");
+            }
+            if (!laHoaDonDangChoThanhToan(hd)) {
+                throw new IllegalStateException("Chỉ được kiểm tra voucher cho hóa đơn đang chờ thanh toán.");
+            }
+            VoucherRevalidationResult result = voucherService.revalidateVoucher(em, hd);
+            transaction.commit();
+            return result;
+        } catch (Exception e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
     @Override
     public void xacNhanThanhToan(int idHoaDon, String maPttt, BigDecimal soTienKhachDua) {
         xacNhanThanhToan(idHoaDon, maPttt, soTienKhachDua, null, null);
@@ -539,7 +570,7 @@ public class BanHangServiceImpl implements BanHangService {
             if (hd.getChiTietHoaDons() == null || hd.getChiTietHoaDons().isEmpty()) {
                 throw new IllegalStateException("Hóa đơn chưa có sản phẩm.");
             }
-            voucherService.kiemTraVoucherKhiThanhToan(em, hd);
+            voucherService.revalidateVoucher(em, hd);
             // Luôn tính lại từ toàn bộ chi tiết để không thanh toán theo tổng tiền cũ.
             capNhatTongTien(hd);
 
@@ -764,6 +795,11 @@ public class BanHangServiceImpl implements BanHangService {
     @Override
     public List<HoaDon> layDanhSachHoaDonCho(int idNhanVien) {
         return banHangDAO.layDanhSachHoaDonCho(idNhanVien);
+    }
+
+    @Override
+    public java.util.Map<Integer, Integer> laySoLuongSanPhamCacHoaDon(List<Integer> ids) {
+        return banHangDAO.laySoLuongSanPhamCacHoaDon(ids);
     }
 
     @Override

@@ -242,6 +242,20 @@ async function capNhatGioHangTuServer(idSpctVuaThem) {
             dongMoi.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
     }
+
+    let totalItems = 0;
+    document.querySelectorAll('.cart-list .cart-item .qty-input').forEach(input => {
+        totalItems += parseInt(input.value) || 0;
+    });
+    const badge = document.querySelector(`.tab-badge[data-badge="${idHoaDonHienTai}"]`);
+    if (badge) {
+        if (totalItems > 0) {
+            badge.textContent = totalItems;
+            badge.style.display = 'inline-flex';
+        } else {
+            badge.style.display = 'none';
+        }
+    }
 }
 
 async function withLoading(element, callback) {

@@ -11,6 +11,7 @@ import BanHangTaiQuay.Model.HoaDonCreateRequest;
 import BanHangTaiQuay.Model.HoaDonResponse;
 import BanHangTaiQuay.Model.ThanhToanRequest;
 import BanHangTaiQuay.Model.ThemSanPhamRequest;
+import BanHangTaiQuay.Model.VoucherRevalidationResult;
 import QuanLySanPham.Entity.HoaDon;
 import QuanLySanPham.Entity.KhachHang;
 import QuanLySanPham.Entity.NhanVien;
@@ -63,6 +64,7 @@ import java.util.Map;
         "/ban-hang/tra-cuu-khach-hang",
         "/ban-hang/ap-voucher",
         "/ban-hang/go-voucher",
+        "/ban-hang/revalidate-voucher",
         "/ban-hang/huy-hoa-don",
         "/ban-hang/lay-hoa-don-cho",
         "/ban-hang/gan-khach-hang",
@@ -113,11 +115,14 @@ public class BanHangController extends HttpServlet {
                 danhSachHoaDonCho = List.of(hoaDonDangTao);
             }
             req.setAttribute("danhSachHoaDonCho", danhSachHoaDonCho);
+            
+            List<Integer> listIds = danhSachHoaDonCho.stream().map(HoaDon::getId).toList();
+            java.util.Map<Integer, Integer> soLuongSpMap = banHangService.laySoLuongSanPhamCacHoaDon(listIds);
+            req.setAttribute("soLuongSpMap", soLuongSpMap);
             req.setAttribute("idHoaDonDangTao", idHoaDonDangTao);
             req.setAttribute("hoaDonDangTao", hoaDonDangTao);
             HoaDonResponse hoaDonResponse = banHangService.taoHoaDonResponse(hoaDonDangTao);
             req.setAttribute("hoaDonResponse", hoaDonResponse);
-            // Tai san pham dang kinh doanh ngay khi mo/tạo don de hien thi san pham ben duoi o tim kiem.
             req.setAttribute("danhSachSanPham",
                     sanPhamChiTietService.timKiemTheoDanhMuc(null, null, 1));
             Object nhanVienTrongSession = session.getAttribute("nhanVienDangNhap");
@@ -185,6 +190,9 @@ public class BanHangController extends HttpServlet {
                 break;
             case "/ban-hang/go-voucher":
                 goVoucher(req, resp);
+                break;
+            case "/ban-hang/revalidate-voucher":
+                revalidateVoucher(req, resp);
                 break;
             case "/ban-hang/huy-hoa-don":
                 huyHoaDon(req, resp);
@@ -503,6 +511,30 @@ public class BanHangController extends HttpServlet {
     }
 
     /**
+     * Kiểm tra lại voucher sau khi giỏ hàng hoặc khách hàng thay đổi.
+     */
+    private void revalidateVoucher(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        resp.setContentType("application/json");
+        resp.setCharacterEncoding("UTF-8");
+        PrintWriter out = resp.getWriter();
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            int idHoaDon = requirePositiveInt(req, "idHoaDon");
+            VoucherRevalidationResult result = banHangService.revalidateVoucher(idHoaDon);
+            response.put("success", true);
+            response.put("revalidation", result);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.put("success", false);
+            response.put("message", e.getMessage());
+        }
+
+        out.print(gson.toJson(response));
+        out.flush();
+    }
+
+    /**
      * CHỨC NĂNG: Hủy hóa đơn chờ và lưu lý do hủy.
      */
     private void huyHoaDon(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -650,6 +682,10 @@ public class BanHangController extends HttpServlet {
                     request.getSoTienKhachDua(),
                     request.getMaGiaoDich(),
                     request.getGhiChu());
+            hoaDon = banHangService.layHoaDonTheoId(request.getIdHoaDon());
+            tongTien = hoaDon == null || hoaDon.getTongTienThanhToan() == null
+                    ? BigDecimal.ZERO
+                    : hoaDon.getTongTienThanhToan();
             xoaSessionInvoiceNeuTrung(req.getSession(), request.getIdHoaDon());
 
             response.put("success", true);

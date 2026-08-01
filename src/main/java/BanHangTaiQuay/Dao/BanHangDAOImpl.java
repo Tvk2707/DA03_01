@@ -90,6 +90,27 @@ public class BanHangDAOImpl implements BanHangDAO {
     }
 
     @Override
+    public java.util.Map<Integer, Integer> laySoLuongSanPhamCacHoaDon(java.util.List<Integer> ids) {
+        if (ids == null || ids.isEmpty()) return new java.util.HashMap<>();
+        EntityManager em = EntityManagerUtlis.getEntityManager();
+        try {
+            String jpql = "SELECT c.hoaDon.id, SUM(c.soLuong) FROM ChiTietHoaDon c WHERE c.hoaDon.id IN :ids GROUP BY c.hoaDon.id";
+            java.util.List<Object[]> results = em.createQuery(jpql, Object[].class)
+                    .setParameter("ids", ids)
+                    .getResultList();
+            java.util.Map<Integer, Integer> map = new java.util.HashMap<>();
+            for (Object[] row : results) {
+                if (row[0] != null && row[1] != null) {
+                    map.put((Integer) row[0], ((Number) row[1]).intValue());
+                }
+            }
+            return map;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
     public Integer timCaDangMo(int idNhanVien) {
         EntityManager em = EntityManagerUtlis.getEntityManager();
         try {

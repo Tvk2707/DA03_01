@@ -120,5 +120,10 @@ class BanHangServiceValidationTest {
 
         @Override
         public LichSuHoaDon insertLichSu(LichSuHoaDon ls) { return ls; }
+
+        @Override
+        public java.util.Map<Integer, Integer> laySoLuongSanPhamCacHoaDon(java.util.List<Integer> ids) {
+            return new java.util.HashMap<>();
+        }
     }
 }

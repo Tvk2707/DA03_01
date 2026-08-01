@@ -1,6 +1,7 @@
 package BanHangTaiQuay.Service;
 
 import BanHangTaiQuay.Model.HoaDonResponse;
+import BanHangTaiQuay.Model.VoucherRevalidationResult;
 import QuanLySanPham.Entity.HoaDon;
 import QuanLySanPham.Entity.KhachHang;
 import QuanLySanPham.Entity.PhieuGiamGia;
@@ -24,12 +25,14 @@ public interface BanHangService {
     List<PhieuGiamGia> timKiemVoucher(int idHoaDon, String tuKhoa);
     void apDungVoucher(int idHoaDon, String maVoucher);
     void goVoucher(int idHoaDon);
+    VoucherRevalidationResult revalidateVoucher(int idHoaDon);
     void xacNhanThanhToan(int idHoaDon, String maPttt, BigDecimal soTienKhachDua);
     void xacNhanThanhToan(int idHoaDon, String maPttt, BigDecimal soTienKhachDua,
                           String maGiaoDich, String ghiChu);
     void huyHoaDon(int idHoaDon, String lyDo);
     int huyHoaDonChoCuoiNgay(LocalDate ngayBanHang);
     List<HoaDon> layDanhSachHoaDonCho(int idNhanVien);
+    java.util.Map<Integer, Integer> laySoLuongSanPhamCacHoaDon(List<Integer> ids);
     HoaDon layHoaDonTheoId(int idHoaDon);
     HoaDonResponse taoHoaDonResponse(HoaDon hoaDon);
 }

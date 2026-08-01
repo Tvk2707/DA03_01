@@ -1,5 +1,6 @@
 package BanHangTaiQuay.Service;
 
+import BanHangTaiQuay.Model.VoucherRevalidationResult;
 import QuanLySanPham.Entity.HoaDon;
 import QuanLySanPham.Entity.PhieuGiamGia;
 import jakarta.persistence.EntityManager;
@@ -14,6 +15,8 @@ public interface VoucherService {
     void goVoucher(int idHoaDon);
 
     void kiemTraVoucherKhiThanhToan(EntityManager em, HoaDon hoaDon);
+
+    VoucherRevalidationResult revalidateVoucher(EntityManager em, HoaDon hoaDon);
 
     void hoanVoucherKhiHuy(EntityManager em, HoaDon hoaDon);
 }

@@ -1246,7 +1246,7 @@
     margin: -1px -1px 0;
     border: 0;
     border-radius: 5px 5px 0 0;
-    background: var(--text-dark);
+    background: var(--primary-color);
     padding: 8px 12px;
 }
 

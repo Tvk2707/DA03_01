@@ -187,9 +187,6 @@ public class SanPhamChiTietDaoImpl extends GenericDaoImpl<SanPhamChiTiet, Intege
             }
             if (trangThai != null) {
                 jpql.append(" AND s.trangThai = :trangThai AND sp.trangThai = :trangThai");
-                if (trangThai == 1) {
-                    jpql.append(" AND s.soLuongTon > 0");
-                }
             }
             if (danhMucId != null) {
                 jpql.append(" AND sp.danhMuc.id = :danhMucId");
