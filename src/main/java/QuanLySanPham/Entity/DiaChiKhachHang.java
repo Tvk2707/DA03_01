@@ -38,6 +38,12 @@ public class DiaChiKhachHang {
     @Column(name = "is_mac_dinh")
     private Integer isMacDinh;
 
+    @Column(name = "province_code")
+    private String provinceCode;
+
+    @Column(name = "ward_code")
+    private String wardCode;
+
     public DiaChiKhachHang() {}
 
     public DiaChiKhachHang(Integer id, KhachHang khachHang, String tenNguoiNhan, String sdtNguoiNhan, String tinhThanh, String quanHuyen, String phuongXa, String diaChiCuThe, Integer loaiDiaChi, Integer isMacDinh) {
@@ -73,4 +79,8 @@ public class DiaChiKhachHang {
     public void setLoaiDiaChi(Integer loaiDiaChi) { this.loaiDiaChi = loaiDiaChi; }
     public Integer getIsMacDinh() { return isMacDinh; }
     public void setIsMacDinh(Integer isMacDinh) { this.isMacDinh = isMacDinh; }
+    public String getProvinceCode() { return provinceCode; }
+    public void setProvinceCode(String provinceCode) { this.provinceCode = provinceCode; }
+    public String getWardCode() { return wardCode; }
+    public void setWardCode(String wardCode) { this.wardCode = wardCode; }
 }

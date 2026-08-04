@@ -69,9 +69,11 @@ public class DiaChiKhachHangServlet extends HttpServlet {
         DiaChiKhachHang diaChi = new DiaChiKhachHang();
         diaChi.setTenNguoiNhan(req.getParameter("tenNguoiNhan"));
         diaChi.setSdtNguoiNhan(req.getParameter("sdtNguoiNhan"));
-        diaChi.setTinhThanh(req.getParameter("tinhThanh"));
-        diaChi.setQuanHuyen(req.getParameter("quanHuyen"));
-        diaChi.setPhuongXa(req.getParameter("phuongXa"));
+        diaChi.setTinhThanh(req.getParameter("tinhThanh"));       // Tên tỉnh (từ hidden input)
+        diaChi.setProvinceCode(req.getParameter("provinceCode"));  // Mã tỉnh từ API
+        diaChi.setQuanHuyen("");                                   // Giữ NOT NULL, để trống vì form không còn thu thập
+        diaChi.setPhuongXa(req.getParameter("phuongXa"));         // Tên phường/xã (từ hidden input)
+        diaChi.setWardCode(req.getParameter("wardCode"));          // Mã phường/xã từ API
         diaChi.setDiaChiCuThe(req.getParameter("diaChiCuThe"));
 
         String loaiDiaChi = req.getParameter("loaiDiaChi");
