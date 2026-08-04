@@ -163,11 +163,7 @@
     const bindStatusConfirmation = (page) => {
         page.querySelectorAll('[data-customer-status-form]').forEach((form) => {
             form.addEventListener('submit', (event) => {
-                const button = form.querySelector('button[data-current-status]');
-                const isActive = button && button.dataset.currentStatus === '1';
-                const message = isActive
-                    ? 'Bạn có chắc chắn muốn ngừng hoạt động khách hàng này không?'
-                    : 'Bạn có chắc chắn muốn kích hoạt lại khách hàng này không?';
+                const message = 'Bạn có chắc chắn muốn xóa khách hàng này không?';
 
                 if (!window.confirm(message)) {
                     event.preventDefault();

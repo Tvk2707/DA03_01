@@ -385,7 +385,7 @@ public class PhieuGiamGiaDaoImpl extends GenericDaoImpl<PhieuGiamGia, Integer> i
 
     private void setBigDecimal(PreparedStatement statement, int index, BigDecimal value) throws SQLException {
         if (value == null) {
-            statement.setBigDecimal(index, BigDecimal.ZERO);
+            statement.setNull(index, Types.DECIMAL);
         } else {
             statement.setBigDecimal(index, value);
         }

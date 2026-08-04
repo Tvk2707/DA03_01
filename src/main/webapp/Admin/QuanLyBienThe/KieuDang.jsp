@@ -44,6 +44,14 @@
             </form>
         </div>
 
+        <c:if test="${not empty errors}">
+            <div class="alert alert-danger" style="margin: 10px 0; padding: 10px; background:#fde8e8; border:1px solid #f5c2c2; border-radius:6px; color:#a94442;">
+                <c:forEach var="err" items="${errors}">
+                    <div><i class="fas fa-exclamation-circle"></i> ${err.value}</div>
+                </c:forEach>
+            </div>
+        </c:if>
+
         <div class="table-responsive">
         <table class="category-table">
             <thead>
@@ -92,10 +100,11 @@
     </main>
 </div>
 
+<%-- ===== MODAL THÊM MỚI ===== --%>
 <div id="addCategoryModal" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-header">
-            <h3>Thêm Mới Danh Mục</h3>
+            <h3>Thêm Mới Kiểu Dáng</h3>
             <span class="close-btn" onclick="closeAddModal()">&times;</span>
         </div>
         <form action="${pageContext.request.contextPath}/KieuDang/insert" method="post">
@@ -107,7 +116,7 @@
 
                 <div class="form-group">
                     <label for="trangthai">Trạng thái</label>
-                    <select id="trangthai" name="trangThai">
+                    <select id="trangthai" name="trangthai">
                         <option value="1">Hoạt động</option>
                         <option value="0">Không hoạt động</option>
                     </select>
@@ -121,27 +130,27 @@
     </div>
 </div>
 
+<%-- ===== MODAL CHỈNH SỬA ===== --%>
 <div id="editCategoryModal" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-header">
-            <h3>Chỉnh Sửa Danh Mục</h3>
+            <h3>Chỉnh Sửa Kiểu Dáng</h3>
             <span class="close-btn" onclick="closeEditModal()">&times;</span>
         </div>
         <form action="${pageContext.request.contextPath}/KieuDang/update" method="post">
             <div class="modal-body">
                 <input type="hidden" id="editId" name="id">
 
-
                 <div class="form-group">
-                    <label for="editTenKieuDang">Tên danh mục</label>
-                    <input type="text" id="editTenKieuDang" name="tenKieuDang" value="${kieuDang.tenKieuDang}" placeholder="Nhập tên kiểu dáng" required>
+                    <label for="editTenKieuDang">Tên kiểu dáng</label>
+                    <input type="text" id="editTenKieuDang" name="tenKieuDang" placeholder="Nhập tên kiểu dáng" required>
                 </div>
 
                 <div class="form-group">
                     <label for="editTrangThai">Trạng thái</label>
-                    <select id="editTrangThai" name="trangThai">
-                        <option value="1" ${kieuDang.trangThai == 1 ? 'selected' : ''}>Hoạt động</option>
-                        <option value="0" ${kieuDang.trangThai == 0 ? 'selected' : ''}>Không hoạt động</option>
+                    <select id="editTrangThai" name="trangthai">
+                        <option value="1">Hoạt động</option>
+                        <option value="0">Không hoạt động</option>
                     </select>
                 </div>
             </div>
@@ -165,12 +174,9 @@
 
     // --- XỬ LÝ MODAL SỬA ---
     function openEditModal(id, tenKieuDang, trangThai) {
-        // Đổ dữ liệu từ hàng được click vào các ô input trong Modal Sửa
         document.getElementById("editId").value = id;
         document.getElementById("editTenKieuDang").value = tenKieuDang;
         document.getElementById("editTrangThai").value = trangThai;
-
-        // Hiển thị modal sửa lên màn hình
         document.getElementById("editCategoryModal").style.display = "flex";
     }
 
@@ -190,6 +196,13 @@
             editModal.style.display = "none";
         }
     }
+
+    // --- TỰ MỞ MODAL NẾU CÓ LỖI TỪ SERVER ---
+    <c:if test="${not empty errors}">
+        window.addEventListener('DOMContentLoaded', function() {
+            openAddModal();
+        });
+    </c:if>
 </script>
 </body>
 </html>

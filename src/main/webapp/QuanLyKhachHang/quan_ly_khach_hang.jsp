@@ -586,9 +586,9 @@
                                             <button type="submit"
                                                     class="btn-icon-circle"
                                                     data-current-status="${kh.trangThai}"
-                                                    title="${kh.trangThai == 1 ? 'Ngừng hoạt động' : 'Kích hoạt'}"
-                                                    style="border: none; cursor: pointer; background: ${kh.trangThai == 1 ? '#fee2e2' : '#dcfce7'}; color: ${kh.trangThai == 1 ? '#dc2626' : '#16a34a'};">
-                                                <i class="fas ${kh.trangThai == 1 ? 'fa-ban' : 'fa-circle-check'}"></i>
+                                                    title="Xóa khách hàng"
+                                                    style="border: none; cursor: pointer; background: #fee2e2; color: #dc2626;">
+                                                <i class="fas fa-trash"></i>
                                             </button>
                                         </form>
                                     </div>

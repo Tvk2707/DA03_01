@@ -18,7 +18,7 @@ public class KhachHangRepository {
         EntityManager em = null;
         try {
             em = utils.getEntityManager();
-            return em.createQuery("SELECT kh FROM KhachHang kh ORDER BY kh.id DESC", KhachHang.class)
+            return em.createQuery("SELECT kh FROM KhachHang kh WHERE kh.trangThai IS NULL OR kh.trangThai = 1 ORDER BY kh.id DESC", KhachHang.class)
                     .getResultList();
         } catch (Exception e) {
             e.printStackTrace();

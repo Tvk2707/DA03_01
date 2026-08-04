@@ -53,8 +53,8 @@ public class NhanVienServiceImpl implements NhanVienService {
     }
 
     @Override
-    public List<NhanVien> timKiem(String hoTen, String email) {
-        return nhanVienDao.search(hoTen, email);
+    public List<NhanVien> timKiem(String tuKhoa) {
+        return nhanVienDao.search(tuKhoa);
     }
     @Override
     public NhanVien dangNhap(String taiKhoan, String matKhau) throws Exception {

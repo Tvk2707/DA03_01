@@ -1,6 +1,7 @@
 package QuanLySanPham.controller;
 
 import QuanLySanPham.Entity.KieuDang;
+import QuanLySanPham.Utils.ValidationException;
 import QuanLySanPham.service.LookupService;
 import QuanLySanPham.service.impl.LookupServiceImpl;
 import jakarta.servlet.ServletException;
@@ -103,8 +104,8 @@ public class KieuDangServlet extends HttpServlet {
         try {
             lookupService.themKieuDang(kieuDang);
             response.sendRedirect(request.getContextPath() + "/KieuDang");
-        } catch (IllegalArgumentException e) {
-            request.setAttribute("errorMessage", e.getMessage());
+        } catch (ValidationException e) {
+            request.setAttribute("errors", e.getErrors());
             request.setAttribute("kieuDang", kieuDang);
             showKieuDang(request, response);
         }
@@ -119,8 +120,8 @@ public class KieuDangServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/KieuDang");
         } catch (NumberFormatException e) {
             response.sendRedirect(request.getContextPath() + "/KieuDang");
-        } catch (IllegalArgumentException e) {
-            request.setAttribute("errorMessage", e.getMessage());
+        } catch (ValidationException e) {
+            request.setAttribute("errors", e.getErrors());
             request.setAttribute("kieuDang", kieuDang);
             showKieuDang(request, response);
         }

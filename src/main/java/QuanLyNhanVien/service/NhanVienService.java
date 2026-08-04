@@ -10,7 +10,7 @@ public interface NhanVienService {
     NhanVien timTheoId(Integer id);
     List<NhanVien> layTatCa();
     List<NhanVien> layCoPhanTrang(int pageNumber, int pageSize);
-    List<NhanVien> timKiem(String hoTen, String email);
+    List<NhanVien> timKiem(String tuKhoa);
     NhanVien dangNhap(String taiKhoan, String matKhau) throws Exception;
 }
 

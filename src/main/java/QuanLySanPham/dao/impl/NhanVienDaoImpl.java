@@ -27,22 +27,21 @@ public class NhanVienDaoImpl extends GenericDaoImpl<NhanVien, Integer> implement
     }
 
     @Override
-    public List<NhanVien> search(String hoTen, String email) {
+    public List<NhanVien> search(String tuKhoa) {
         EntityManager em = EntityManagerUtlis.getEntityManager();
         try {
-            StringBuilder jpql = new StringBuilder("SELECT n FROM NhanVien n WHERE 1=1");
-            if (hoTen != null && !hoTen.trim().isEmpty()) {
-                jpql.append(" AND LOWER(n.hoTen) LIKE :hoTen");
-            }
-            if (email != null && !email.trim().isEmpty()) {
-                jpql.append(" AND LOWER(n.email) LIKE :email");
-            }
-            TypedQuery<NhanVien> q = em.createQuery(jpql.toString(), NhanVien.class);
-            if (hoTen != null && !hoTen.trim().isEmpty()) {
-                q.setParameter("hoTen", "%" + hoTen.toLowerCase() + "%");
-            }
-            if (email != null && !email.trim().isEmpty()) {
-                q.setParameter("email", "%" + email.toLowerCase() + "%");
+            String jpql;
+            TypedQuery<NhanVien> q;
+            if (tuKhoa != null && !tuKhoa.trim().isEmpty()) {
+                jpql = "SELECT n FROM NhanVien n WHERE n.trangThai = 1 AND (" +
+                       "LOWER(n.hoTen) LIKE :kw OR " +
+                       "LOWER(n.maNhanVien) LIKE :kw OR " +
+                       "LOWER(n.email) LIKE :kw)";
+                q = em.createQuery(jpql, NhanVien.class);
+                q.setParameter("kw", "%" + tuKhoa.trim().toLowerCase() + "%");
+            } else {
+                jpql = "SELECT n FROM NhanVien n WHERE n.trangThai = 1";
+                q = em.createQuery(jpql, NhanVien.class);
             }
             return q.getResultList();
         } finally {
@@ -77,6 +76,23 @@ public class NhanVienDaoImpl extends GenericDaoImpl<NhanVien, Integer> implement
             q.setParameter("email", email);
             List<NhanVien> list = q.getResultList();
             return list.isEmpty() ? null : list.get(0);
+        } finally {
+            em.close();
+        }
+    }
+    /**
+     * Override findWithPaging để chỉ lấy nhân viên đang hoạt động (trangThai = 1)
+     * Nhân viên đã xóa mềm (trangThai = 0) sẽ không hiện trong danh sách
+     */
+    @Override
+    public List<NhanVien> findWithPaging(int pageNumber, int pageSize) {
+        EntityManager em = EntityManagerUtlis.getEntityManager();
+        try {
+            TypedQuery<NhanVien> q = em.createQuery(
+                "SELECT n FROM NhanVien n WHERE n.trangThai = 1", NhanVien.class);
+            q.setFirstResult((pageNumber - 1) * pageSize);
+            q.setMaxResults(pageSize);
+            return q.getResultList();
         } finally {
             em.close();
         }

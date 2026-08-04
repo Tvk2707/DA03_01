@@ -7,6 +7,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -55,6 +56,9 @@ public class KhachHangServlet extends HttpServlet {
                 // Bắt luồng POST khi người dùng ấn nút "Cập nhật" ở form
                 update(req, resp);
                 break;
+            case "/khach-hang/doi-trang-thai":
+                doiTrangThai(req, resp);
+                break;
             default:
                 resp.sendRedirect(req.getContextPath() + "/khach-hang/hien-thi");
                 break;
@@ -62,6 +66,16 @@ public class KhachHangServlet extends HttpServlet {
     }
 
     private void hienThi(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        HttpSession session = req.getSession();
+        if (session.getAttribute("successMessage") != null) {
+            req.setAttribute("successMessage", session.getAttribute("successMessage"));
+            session.removeAttribute("successMessage");
+        }
+        if (session.getAttribute("errorMessage") != null) {
+            req.setAttribute("errorMessage", session.getAttribute("errorMessage"));
+            session.removeAttribute("errorMessage");
+        }
+
         req.setAttribute("listKhachHang", repo.getAll());
         req.getRequestDispatcher("/QuanLyKhachHang/quan_ly_khach_hang.jsp").forward(req, resp);
     }
@@ -86,6 +100,8 @@ public class KhachHangServlet extends HttpServlet {
 
         kh.setTrangThai(1);
         repo.add(kh);
+
+        req.getSession().setAttribute("successMessage", "Thêm khách hàng thành công!");
         resp.sendRedirect(req.getContextPath() + "/khach-hang/hien-thi");
     }
 
@@ -136,12 +152,14 @@ public class KhachHangServlet extends HttpServlet {
         }
 
         repo.update(kh); // Cập nhật vào CSDL
+        req.getSession().setAttribute("successMessage", "Cập nhật thông tin khách hàng thành công!");
         resp.sendRedirect(req.getContextPath() + "/khach-hang/hien-thi");
     }
 
     private void doiTrangThai(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Integer id = Integer.parseInt(req.getParameter("id"));
         repo.doiTrangThai(id);
+        req.getSession().setAttribute("successMessage", "Xóa khách hàng thành công!");
         resp.sendRedirect(req.getContextPath() + "/khach-hang/hien-thi");
     }
 }

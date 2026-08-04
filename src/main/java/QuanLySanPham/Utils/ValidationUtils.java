@@ -5,7 +5,8 @@ import java.util.regex.Pattern;
 
 public class ValidationUtils {
 
-    private static final Pattern SPECIAL_CHAR_PATTERN = Pattern.compile("[^a-zA-Z0-9\\s-/]");
+    // Cho phép: chữ cái mọi ngôn ngữ (bao gồm tiếng Việt) \p{L}, chữ số, khoảng trắng, dấu gạch ngang, dấu gạch chéo
+    private static final Pattern SPECIAL_CHAR_PATTERN = Pattern.compile("[^\\p{L}0-9\\s\\-/]");
     private static final Pattern ALL_NUMBERS_PATTERN = Pattern.compile("^[0-9]+$");
     private static final Pattern VALID_CODE_PATTERN = Pattern.compile("^[a-zA-Z0-9_-]+$");
 
