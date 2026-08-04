@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -91,7 +92,7 @@ public class VoucherServiceImpl implements VoucherService {
         try {
             transaction.begin();
 
-            HoaDon hoaDon = em.find(HoaDon.class, idHoaDon);
+            HoaDon hoaDon = em.find(HoaDon.class, idHoaDon, LockModeType.PESSIMISTIC_WRITE);
             if (hoaDon == null) {
                 throw new IllegalArgumentException("Hóa đơn không tồn tại.");
             }
@@ -121,6 +122,7 @@ public class VoucherServiceImpl implements VoucherService {
             if (hoaDon.getPhieuGiamGia() != null) {
                 throw new IllegalStateException("Hóa đơn đã được áp dụng voucher.");
             }
+            dongBoSoLuongDaDung(em, voucher);
             kiemTraVoucher(voucher, hoaDon);
             kiemTraPhanQuyenVoucher(em, voucher, hoaDon);
 
@@ -134,8 +136,8 @@ public class VoucherServiceImpl implements VoucherService {
                 chiTiet.setTongTien(chiTiet.getDonGia().multiply(BigDecimal.valueOf(soLuong)));
             }
 
-            voucher.setSoLuongDaDung((voucher.getSoLuongDaDung() == null ? 0 : voucher.getSoLuongDaDung()) + 1);
             danhDauVoucherCaNhanDaDung(em, voucher, hoaDon);
+            dongBoSoLuongDaDung(em, voucher);
             capNhatTongTien(hoaDon);
             ghiLichSu(em, hoaDon, "AP_VOUCHER", "Áp dụng voucher: " + maVoucherChuanHoa);
             transaction.commit();
@@ -233,6 +235,13 @@ public class VoucherServiceImpl implements VoucherService {
                     maVoucher, tienGiamCu, BigDecimal.ZERO);
         }
 
+        if (loaiBoHoaDonGiuVuotLuot(em, voucher, hoaDon.getId())) {
+            return new VoucherRevalidationResult(
+                    true, false, "VOUCHER_HET_LUOT",
+                    "Mã giảm giá đã hết lượt do hóa đơn khác áp dụng trước",
+                    maVoucher, tienGiamCu, BigDecimal.ZERO);
+        }
+
         try {
             kiemTraVoucher(voucher, hoaDon, true);
             kiemTraPhanQuyenVoucherDaApDung(em, voucher, hoaDon);
@@ -276,35 +285,10 @@ public class VoucherServiceImpl implements VoucherService {
             return;
         }
 
-        PhieuGiamGia voucher = em.find(
-                PhieuGiamGia.class,
-                hoaDon.getPhieuGiamGia().getId(),
-                LockModeType.PESSIMISTIC_WRITE
-        );
-        if (voucher != null) {
-            int soLuongDaDung = voucher.getSoLuongDaDung() == null ? 0 : voucher.getSoLuongDaDung();
-            voucher.setSoLuongDaDung(Math.max(0, soLuongDaDung - 1));
-        }
-
-        if (hoaDon.getKhachHang() != null && hoaDon.getKhachHang().getId() != null && voucher != null) {
-            KhachHangPhieuGiamGia lienKet = em.createQuery(
-                            "SELECT k FROM KhachHangPhieuGiamGia k "
-                                    + "WHERE k.khachHang.id = :idKhachHang "
-                                    + "AND k.phieuGiamGia.id = :idVoucher "
-                                    + "AND k.ngaySuDung IS NOT NULL",
-                            KhachHangPhieuGiamGia.class)
-                    .setParameter("idKhachHang", hoaDon.getKhachHang().getId())
-                    .setParameter("idVoucher", voucher.getId())
-                    .setLockMode(LockModeType.PESSIMISTIC_WRITE)
-                    .setMaxResults(1)
-                    .getResultStream()
-                    .findFirst()
-                    .orElse(null);
-            if (lienKet != null) {
-                lienKet.setNgaySuDung(null);
-                lienKet.setTrangThai(1);
-            }
-        }
+        Integer idVoucher = hoaDon.getPhieuGiamGia().getId();
+        Integer idKhachHang = hoaDon.getKhachHang() == null ? null : hoaDon.getKhachHang().getId();
+        PhieuGiamGia voucher = idVoucher == null ? null : em.find(
+                PhieuGiamGia.class, idVoucher, LockModeType.PESSIMISTIC_WRITE);
 
         for (ChiTietHoaDon chiTiet : hoaDon.getChiTietHoaDons()) {
             BigDecimal donGiaGoc = chiTiet.getDonGia();
@@ -316,9 +300,38 @@ public class VoucherServiceImpl implements VoucherService {
         }
         hoaDon.setPhieuGiamGia(null);
         capNhatTongTien(hoaDon);
+        em.flush();
+
+        if (idKhachHang != null && voucher != null
+                && !conHoaDonKhacGiuVoucherCuaKhach(em, idKhachHang, voucher.getId())) {
+            KhachHangPhieuGiamGia lienKet = em.createQuery(
+                            "SELECT k FROM KhachHangPhieuGiamGia k "
+                                    + "WHERE k.khachHang.id = :idKhachHang "
+                                    + "AND k.phieuGiamGia.id = :idVoucher "
+                                    + "AND k.ngaySuDung IS NOT NULL",
+                            KhachHangPhieuGiamGia.class)
+                    .setParameter("idKhachHang", idKhachHang)
+                    .setParameter("idVoucher", voucher.getId())
+                    .setLockMode(LockModeType.PESSIMISTIC_WRITE)
+                    .setMaxResults(1)
+                    .getResultStream()
+                    .findFirst()
+                    .orElse(null);
+            if (lienKet != null) {
+                lienKet.setNgaySuDung(null);
+                lienKet.setTrangThai(1);
+            }
+        }
+        if (voucher != null) {
+            dongBoSoLuongDaDung(em, voucher);
+        }
     }
 
     private void kiemTraVoucher(PhieuGiamGia voucher, HoaDon hoaDon) {
+        kiemTraVoucher(voucher, hoaDon, false);
+    }
+
+    private void kiemTraVoucher(PhieuGiamGia voucher, HoaDon hoaDon, boolean daGiuLuot) {
         if (voucher == null) {
             throw new IllegalArgumentException("Mã voucher không hợp lệ.");
         }
@@ -336,7 +349,7 @@ public class VoucherServiceImpl implements VoucherService {
 
         int soLuong = voucher.getSoLuong() == null ? 0 : voucher.getSoLuong();
         int soLuongDaDung = voucher.getSoLuongDaDung() == null ? 0 : voucher.getSoLuongDaDung();
-        if (soLuong <= 0 || soLuongDaDung >= soLuong) {
+        if (soLuong <= 0 || (!daGiuLuot && soLuongDaDung >= soLuong)) {
             throw new IllegalStateException("Voucher đã hết lượt sử dụng.");
         }
 
@@ -355,8 +368,8 @@ public class VoucherServiceImpl implements VoucherService {
     private boolean laVoucherPhuHop(EntityManager em, PhieuGiamGia voucher,
                                     HoaDon hoaDon, BigDecimal tongTienHang) {
         int soLuong = voucher.getSoLuong() == null ? 0 : voucher.getSoLuong();
-        int soLuongDaDung = voucher.getSoLuongDaDung() == null ? 0 : voucher.getSoLuongDaDung();
-        if (soLuong <= 0 || soLuongDaDung >= soLuong
+        long soLuotDangGiu = demHoaDonDangGiuVoucher(em, voucher.getId());
+        if (soLuong <= 0 || !VoucherReservationPolicy.canReserve(soLuong, soLuotDangGiu)
                 || voucher.getLoaiGiamGia() == null || voucher.getGiaTriGiam() == null) {
             return false;
         }
@@ -384,20 +397,6 @@ public class VoucherServiceImpl implements VoucherService {
                 .setParameter("idVoucher", voucher.getId())
                 .getSingleResult();
         return soLienKet != null && soLienKet > 0;
-    }
-
-    private void kiemTraVoucher(PhieuGiamGia voucher, HoaDon hoaDon, boolean daGiuLuot) {
-        if (!daGiuLuot) {
-            kiemTraVoucher(voucher, hoaDon);
-            return;
-        }
-        Integer soLuongDaDung = voucher.getSoLuongDaDung();
-        voucher.setSoLuongDaDung(Math.max(0, (soLuongDaDung == null ? 0 : soLuongDaDung) - 1));
-        try {
-            kiemTraVoucher(voucher, hoaDon);
-        } finally {
-            voucher.setSoLuongDaDung(soLuongDaDung);
-        }
     }
 
     private void kiemTraPhanQuyenVoucher(EntityManager em, PhieuGiamGia voucher, HoaDon hoaDon) {
@@ -531,6 +530,128 @@ public class VoucherServiceImpl implements VoucherService {
         if (soLienKet == null || soLienKet == 0) {
             throw new IllegalStateException("Voucher cá nhân không thuộc về khách hàng của hóa đơn.");
         }
+    }
+
+    /**
+     * Kiểm tra hóa đơn hiện tại có nằm trong nhóm giữ voucher sớm nhất hay không.
+     * Chỉ gỡ trên chính hóa đơn đang revalidate để tránh khóa chéo nhiều hóa đơn POS.
+     */
+    private boolean loaiBoHoaDonGiuVuotLuot(
+            EntityManager em, PhieuGiamGia voucher, Integer idHoaDonDangKiemTra) {
+        List<HoaDon> hoaDonDangGiu = em.createQuery(
+                        "SELECT h FROM HoaDon h "
+                                + "WHERE h.phieuGiamGia.id = :idVoucher "
+                                + "AND (h.trangThai IS NULL OR h.trangThai <> 5)",
+                        HoaDon.class)
+                .setParameter("idVoucher", voucher.getId())
+                .getResultList();
+
+        long soHoaDonDaHoanTat = hoaDonDangGiu.stream()
+                .filter(hoaDon -> !laHoaDonCho(hoaDon))
+                .count();
+        int soChoConLai = VoucherReservationPolicy.waitingSlots(
+                voucher.getSoLuong(), soHoaDonDaHoanTat);
+
+        List<VoucherReservationOrder> hoaDonCho = hoaDonDangGiu.stream()
+                .filter(this::laHoaDonCho)
+                .map(hoaDon -> layThuTuGiuVoucher(em, hoaDon))
+                .sorted(Comparator
+                        .comparing(VoucherReservationOrder::appliedAt)
+                        .thenComparing(VoucherReservationOrder::historyId)
+                        .thenComparing(order -> order.hoaDon().getId()))
+                .toList();
+
+        int viTriHoaDonDangKiemTra = -1;
+        for (int index = 0; index < hoaDonCho.size(); index++) {
+            if (idHoaDonDangKiemTra != null
+                    && idHoaDonDangKiemTra.equals(hoaDonCho.get(index).hoaDon().getId())) {
+                viTriHoaDonDangKiemTra = index;
+                break;
+            }
+        }
+        if (VoucherReservationPolicy.mayKeepReservation(
+                viTriHoaDonDangKiemTra, soChoConLai)) {
+            dongBoSoLuongDaDung(em, voucher);
+            return false;
+        }
+        if (viTriHoaDonDangKiemTra < 0) {
+            dongBoSoLuongDaDung(em, voucher);
+            return false;
+        }
+
+        HoaDon hoaDonBiGo = hoaDonCho.get(viTriHoaDonDangKiemTra).hoaDon();
+        String maVoucher = voucher.getMaVoucher();
+        hoanVoucherKhiHuy(em, hoaDonBiGo);
+        ghiLichSu(em, hoaDonBiGo, "VOUCHER_HET_LUOT",
+                "Tự động gỡ voucher " + maVoucher
+                        + " vì số lượt đã được hóa đơn áp trước giữ hết.");
+        dongBoSoLuongDaDung(em, voucher);
+        return true;
+    }
+
+    private VoucherReservationOrder layThuTuGiuVoucher(EntityManager em, HoaDon hoaDon) {
+        LichSuHoaDon lichSuAp = em.createQuery(
+                        "SELECT l FROM LichSuHoaDon l "
+                                + "WHERE l.hoaDon.id = :idHoaDon AND l.hanhDong = :hanhDong "
+                                + "ORDER BY l.ngayTao DESC, l.id DESC",
+                        LichSuHoaDon.class)
+                .setParameter("idHoaDon", hoaDon.getId())
+                .setParameter("hanhDong", "AP_VOUCHER")
+                .setMaxResults(1)
+                .getResultStream()
+                .findFirst()
+                .orElse(null);
+        LocalDateTime thoiDiemAp = lichSuAp == null || lichSuAp.getNgayTao() == null
+                ? (hoaDon.getNgayTao() == null ? LocalDateTime.MIN : hoaDon.getNgayTao())
+                : lichSuAp.getNgayTao();
+        int idLichSu = lichSuAp == null || lichSuAp.getId() == null ? 0 : lichSuAp.getId();
+        return new VoucherReservationOrder(hoaDon, thoiDiemAp, idLichSu);
+    }
+
+    private boolean laHoaDonCho(HoaDon hoaDon) {
+        return hoaDon.getTrangThai() == null
+                || hoaDon.getTrangThai() == 0
+                || hoaDon.getTrangThai() == 1;
+    }
+
+    private long demHoaDonDangGiuVoucher(EntityManager em, Integer idVoucher) {
+        if (idVoucher == null) {
+            return 0L;
+        }
+        Long soHoaDon = em.createQuery(
+                        "SELECT COUNT(h) FROM HoaDon h "
+                                + "WHERE h.phieuGiamGia.id = :idVoucher "
+                                + "AND (h.trangThai IS NULL OR h.trangThai <> 5)",
+                        Long.class)
+                .setParameter("idVoucher", idVoucher)
+                .getSingleResult();
+        return soHoaDon == null ? 0L : soHoaDon;
+    }
+
+    private void dongBoSoLuongDaDung(EntityManager em, PhieuGiamGia voucher) {
+        em.flush();
+        long soLuotDangGiu = demHoaDonDangGiuVoucher(em, voucher.getId());
+        voucher.setSoLuongDaDung(soLuotDangGiu > Integer.MAX_VALUE
+                ? Integer.MAX_VALUE
+                : (int) soLuotDangGiu);
+    }
+
+    private boolean conHoaDonKhacGiuVoucherCuaKhach(
+            EntityManager em, Integer idKhachHang, Integer idVoucher) {
+        Long soHoaDon = em.createQuery(
+                        "SELECT COUNT(h) FROM HoaDon h "
+                                + "WHERE h.khachHang.id = :idKhachHang "
+                                + "AND h.phieuGiamGia.id = :idVoucher "
+                                + "AND (h.trangThai IS NULL OR h.trangThai <> 5)",
+                        Long.class)
+                .setParameter("idKhachHang", idKhachHang)
+                .setParameter("idVoucher", idVoucher)
+                .getSingleResult();
+        return soHoaDon != null && soHoaDon > 0;
+    }
+
+    private record VoucherReservationOrder(
+            HoaDon hoaDon, LocalDateTime appliedAt, int historyId) {
     }
 
     private void ghiLichSu(EntityManager em, HoaDon hoaDon, String hanhDong, String ghiChu) {

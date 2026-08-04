@@ -28,6 +28,7 @@ class RouteMappingTest {
         assertTrue(routes.contains("/ban-hang/chon-khach-le"));
         assertTrue(routes.contains("/ban-hang/ap-voucher"));
         assertTrue(routes.contains("/ban-hang/go-voucher"));
+        assertTrue(routes.contains("/ban-hang/revalidate-voucher"));
         assertTrue(routes.contains("/ban-hang/huy-hoa-don"));
         assertTrue(routes.contains("/ban-hang/lay-hoa-don-cho"));
         assertTrue(routes.contains("/ban-hang/chon-khach-le"));

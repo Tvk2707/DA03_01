@@ -395,6 +395,13 @@ public class BanHangServiceImpl implements BanHangService {
             if (kh == null) {
                 throw new IllegalArgumentException("Khách hàng không tồn tại.");
             }
+            Integer idKhachHangCu = hd.getKhachHang() == null ? null : hd.getKhachHang().getId();
+            if (!Integer.valueOf(idKhachHang).equals(idKhachHangCu) && hd.getPhieuGiamGia() != null) {
+                String maVoucherCu = hd.getPhieuGiamGia().getMaVoucher();
+                voucherService.hoanVoucherKhiHuy(em, hd);
+                ghiLichSu(em, hd, "GO_VOUCHER_DOI_KHACH_HANG",
+                        "Tự động gỡ voucher " + maVoucherCu + " trước khi đổi khách hàng");
+            }
             hd.setKhachHang(kh);
             ghiLichSu(em, hd, "GAN_KHACH_HANG", "Gán khách hàng vào đơn");
             transaction.commit();
@@ -426,6 +433,12 @@ public class BanHangServiceImpl implements BanHangService {
                 throw new IllegalStateException("Chỉ được chọn khách lẻ cho hóa đơn đang chờ thanh toán.");
             }
 
+            if (hd.getKhachHang() != null && hd.getPhieuGiamGia() != null) {
+                String maVoucherCu = hd.getPhieuGiamGia().getMaVoucher();
+                voucherService.hoanVoucherKhiHuy(em, hd);
+                ghiLichSu(em, hd, "GO_VOUCHER_CHON_KHACH_LE",
+                        "Tự động gỡ voucher " + maVoucherCu + " trước khi chuyển sang khách lẻ");
+            }
             hd.setKhachHang(null);
             ghiLichSu(em, hd, "CHON_KHACH_LE", "Chuyển hóa đơn sang khách lẻ");
             transaction.commit();
@@ -550,6 +563,9 @@ public class BanHangServiceImpl implements BanHangService {
         String maPtttChuanHoa = "TM".equalsIgnoreCase(maPttt.trim())
                 ? "PTTT001"
                 : maPttt.trim().toUpperCase();
+
+        // Lưu riêng kết quả kiểm tra voucher để không mất trạng thái mới nếu bước thanh toán phía sau thất bại.
+        revalidateVoucher(idHoaDon);
 
         EntityManager em = EntityManagerUtlis.getEntityManager();
         EntityTransaction transaction = em.getTransaction();

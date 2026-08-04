@@ -75,7 +75,7 @@ class BanHangServiceValidationTest {
         assertThrows(IllegalArgumentException.class, () -> service.goVoucher(0));
     }
 
-    private static final class FakeBanHangDAO implements BanHangDAO {
+    private static final    class FakeBanHangDAO implements BanHangDAO {
         private final long soHoaDonCho;
 
         private FakeBanHangDAO(long soHoaDonCho) {

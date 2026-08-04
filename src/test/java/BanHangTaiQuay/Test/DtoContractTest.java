@@ -6,6 +6,7 @@ import BanHangTaiQuay.Model.ChonKhachHangRequest;
 import BanHangTaiQuay.Model.HoaDonCreateRequest;
 import BanHangTaiQuay.Model.ThanhToanRequest;
 import BanHangTaiQuay.Model.ThemSanPhamRequest;
+import BanHangTaiQuay.Model.VoucherRevalidationResult;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -14,6 +15,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 class DtoContractTest {
+
+    @Test
+    void ketQuaRevalidateVoucherLuuDungTrangThai() {
+        VoucherRevalidationResult result = new VoucherRevalidationResult(
+                true, false, "VOUCHER_HET_HAN", "Voucher đã hết hạn", "VC001",
+                new BigDecimal("10000"), BigDecimal.ZERO);
+
+        assertEquals(true, result.isVoucherRemoved());
+        assertEquals(false, result.isDiscountChanged());
+        assertEquals("VOUCHER_HET_HAN", result.getAction());
+        assertEquals("VC001", result.getMaVoucher());
+        assertEquals(new BigDecimal("10000"), result.getTienGiamCu());
+        assertEquals(BigDecimal.ZERO, result.getTienGiamMoi());
+    }
 
     @Test
     void themSanPhamRequestLuuDungDuLieu() {

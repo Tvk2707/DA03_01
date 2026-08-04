@@ -41,6 +41,7 @@ const BanHangAPI = {
         timVoucher: ['/ban-hang/tim-voucher', 'GET'],
         apVoucher: ['/ban-hang/ap-voucher', 'POST'],
         goVoucher: ['/ban-hang/go-voucher', 'POST'],
+        revalidateVoucher: ['/ban-hang/revalidate-voucher', 'POST'],
         thanhToan: ['/thanh-toan/thanh-toan', 'POST']
     },
 
@@ -879,6 +880,7 @@ function toggleDropdown(which) {
     const btnEl  = document.getElementById(which + '-dropdown-btn');
     const chevron = document.getElementById(which + '-chevron');
     if (!listEl || !btnEl) return;
+    if (which === 'voucher' && btnEl.dataset.locked === 'true') return;
 
     const isOpen = listEl.style.display !== 'none';
 
@@ -1024,7 +1026,7 @@ function chonPhuongThucThanhToan(element) {
 
 // ===================== VOUCHER DROPDOWN =====================
 let _voucherDangAp = document.getElementById('voucher-ma-hien-tai')?.value || '';
-let _dangTuDongApVoucher = false;
+let _tuDongApVoucherPromise = null;
 
 const xuLyTimVoucherDropdown = debounce((tuKhoa) => {
     loadVoucherDropdown(tuKhoa);
@@ -1103,6 +1105,22 @@ function capNhatNhanVoucherDangAp(voucher, laTuDong = false) {
     label.innerHTML = `<i class="fas fa-tag" style="color:#f59e0b;margin-right:7px;"></i><strong>${voucher.maVoucher}</strong>${badge}`;
 }
 
+function capNhatThongBaoVoucherTotNhat(coVoucher) {
+    const message = document.getElementById('best-voucher-message');
+    if (message) message.hidden = !coVoucher;
+}
+
+function datHienThiKhongCoVoucher() {
+    _voucherDangAp = '';
+    const label = document.getElementById('voucher-selected-label');
+    if (label) {
+        label.innerHTML = '<i class="fas fa-tag" style="color:#cbd5e1;margin-right:7px;"></i><span style="color:var(--text-sub);">-- Không áp dụng --</span>';
+    }
+    const tamTinh = layTamTinhHienTai();
+    capNhatHienThiTongTien(tamTinh, 0);
+    capNhatMoTaGiamGia(null, 0);
+}
+
 function moTaVoucherClient(voucher) {
     if (!voucher?.maVoucher) return '';
     return `(${voucher.maVoucher} · ${formatVoucherDiscount(voucher)})`;
@@ -1116,38 +1134,73 @@ function capNhatMoTaGiamGia(voucher, giamGia) {
     if (!voucher || !giamGia || giamGia <= 0) {
         summary.hidden = true;
         desc.textContent = '';
+        capNhatThongBaoVoucherTotNhat(false);
         return;
     }
 
     summary.hidden = false;
     desc.textContent = moTaVoucherClient(voucher);
+    capNhatThongBaoVoucherTotNhat(true);
 }
 
-async function tuDongApVoucherTotNhat() {
-    if (!idHoaDonHienTai || _dangTuDongApVoucher) return;
-    const tamTinh = layTamTinhHienTai();
-    if (tamTinh <= 0) return;
+async function revalidateVoucherDangAp() {
+    if (!idHoaDonHienTai || !_voucherDangAp) return null;
 
-    _dangTuDongApVoucher = true;
-    try {
-        const data = await BanHangAPI.goi('timVoucher', { idHoaDon: idHoaDonHienTai, tuKhoa: '' });
-        const voucherTotNhat = timVoucherTotNhat(data.vouchers || [], tamTinh);
-        if (!voucherTotNhat || voucherTotNhat.maVoucher === _voucherDangAp) return;
-
-        if (_voucherDangAp) {
-            await BanHangAPI.goi('goVoucher', { idHoaDon: idHoaDonHienTai });
-            _voucherDangAp = '';
-        }
-
-        await BanHangAPI.goi('apVoucher', { idHoaDon: idHoaDonHienTai, maVoucher: voucherTotNhat.maVoucher });
-        _voucherDangAp = voucherTotNhat.maVoucher;
-        capNhatNhanVoucherDangAp(voucherTotNhat, true);
-        capNhatSoTienSauVoucher(voucherTotNhat);
-    } catch (error) {
-        console.warn('Khong the tu dong ap voucher tot nhat:', error);
-    } finally {
-        _dangTuDongApVoucher = false;
+    const data = await BanHangAPI.goi('revalidateVoucher', { idHoaDon: idHoaDonHienTai });
+    const result = data.revalidation || {};
+    if (result.voucherRemoved || !result.maVoucher) {
+        datHienThiKhongCoVoucher();
     }
+    return result;
+}
+
+function tuDongApVoucherTotNhat(batBuoc = false) {
+    if (!idHoaDonHienTai) return Promise.resolve();
+    if (_tuDongApVoucherPromise) return _tuDongApVoucherPromise;
+
+    _tuDongApVoucherPromise = (async () => {
+        try {
+            await revalidateVoucherDangAp();
+
+            const tamTinh = layTamTinhHienTai();
+            if (tamTinh <= 0) {
+                if (_voucherDangAp) {
+                    await BanHangAPI.goi('goVoucher', { idHoaDon: idHoaDonHienTai });
+                    datHienThiKhongCoVoucher();
+                }
+                return;
+            }
+
+            const data = await BanHangAPI.goi('timVoucher', { idHoaDon: idHoaDonHienTai, tuKhoa: '' });
+            const voucherTotNhat = timVoucherTotNhat(data.vouchers || [], tamTinh);
+            if (!voucherTotNhat) {
+                if (_voucherDangAp) {
+                    await BanHangAPI.goi('goVoucher', { idHoaDon: idHoaDonHienTai });
+                }
+                datHienThiKhongCoVoucher();
+                return;
+            }
+
+            if (voucherTotNhat.maVoucher !== _voucherDangAp) {
+                if (_voucherDangAp) {
+                    await BanHangAPI.goi('goVoucher', { idHoaDon: idHoaDonHienTai });
+                    _voucherDangAp = '';
+                }
+                await BanHangAPI.goi('apVoucher', { idHoaDon: idHoaDonHienTai, maVoucher: voucherTotNhat.maVoucher });
+                _voucherDangAp = voucherTotNhat.maVoucher;
+            }
+
+            capNhatNhanVoucherDangAp(voucherTotNhat, true);
+            capNhatSoTienSauVoucher(voucherTotNhat);
+        } catch (error) {
+            console.warn('Khong the tu dong ap voucher tot nhat:', error);
+            if (batBuoc) throw error;
+        }
+    })().finally(() => {
+        _tuDongApVoucherPromise = null;
+    });
+
+    return _tuDongApVoucherPromise;
 }
 
 function renderVoucherDropdown(vouchers) {
@@ -1211,6 +1264,7 @@ function renderVoucherDropdown(vouchers) {
 
 async function chonVoucherDropdown(v) {
     if (!idHoaDonHienTai) return;
+    if (document.getElementById('voucher-dropdown-btn')?.dataset.locked === 'true') return;
     closeAllDropdowns();
     try {
         await BanHangAPI.goi('apVoucher', { idHoaDon: idHoaDonHienTai, maVoucher: v.maVoucher });
@@ -1227,6 +1281,7 @@ async function chonVoucherDropdown(v) {
 }
 
 async function goVoucherDropdown() {
+    if (document.getElementById('voucher-dropdown-btn')?.dataset.locked === 'true') return;
     closeAllDropdowns();
     if (!_voucherDangAp || !idHoaDonHienTai) {
         // Chưa có voucher → chỉ đóng
@@ -1234,16 +1289,7 @@ async function goVoucherDropdown() {
     }
     try {
         await BanHangAPI.goi('goVoucher', { idHoaDon: idHoaDonHienTai });
-        _voucherDangAp = '';
-
-        // Cập nhật label
-        const label = document.getElementById('voucher-selected-label');
-        if (label) label.innerHTML = '<i class="fas fa-tag" style="color:#cbd5e1;margin-right:7px;"></i><span style="color:var(--text-sub);">-- Không áp dụng --</span>';
-
-        // Reset giảm giá về 0, tổng = tạm tính
-        const tamTinh = parseCurrencyVi(document.getElementById('sum-tamtinh')?.textContent || '0');
-        capNhatHienThiTongTien(tamTinh, 0);
-        capNhatMoTaGiamGia(null, 0);
+        datHienThiKhongCoVoucher();
     } catch (e) {
         alert(e.message || 'Không thể gỡ voucher.');
     }
@@ -1479,12 +1525,14 @@ async function xacNhanThanhToan(button) {
         return;
     }
 
-    const tongTien = Number(layTongTienHienThi());
-    if (!tongTien) {
-        hienThiLoi('Hóa đơn chưa có số tiền cần thanh toán.');
-        return;
-    }
-    moModalXacNhanThanhToan();
+    await withLoading(button, async () => {
+        await tuDongApVoucherTotNhat(true);
+        const tongTien = Number(layTongTienHienThi());
+        if (!tongTien) {
+            throw new BanHangError('Hóa đơn chưa có số tiền cần thanh toán.');
+        }
+        moModalXacNhanThanhToan();
+    });
 }
 
 function chonTab(idHoaDon) {

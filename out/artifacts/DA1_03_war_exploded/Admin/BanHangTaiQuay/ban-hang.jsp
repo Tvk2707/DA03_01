@@ -744,6 +744,7 @@
         #voucher-dropdown-btn[data-locked="true"] {
             cursor: not-allowed !important;
             opacity: .82;
+            pointer-events: none;
         }
         #voucher-dropdown-btn[data-locked="true"] > .fa-chevron-down {
             display: none;

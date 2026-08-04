@@ -346,13 +346,16 @@
         const moneyInputs = document.querySelectorAll('[data-money-input]');
         let submitted = false;
 
-        function extractDigits(value) {
-            const text = String(value || '').trim();
+        function extractDigits(value, stripInitialDecimal) {
+            let text = String(value || '').trim();
+            if (stripInitialDecimal && /^\d+[\.,]\d+$/.test(text)) {
+                text = text.replace(/[\.,]\d+$/, '');
+            }
             return text.replace(/\D/g, '');
         }
 
-        function formatMoneyInput(input) {
-            const digits = extractDigits(input.value);
+        function formatMoneyInput(input, stripInitialDecimal) {
+            const digits = extractDigits(input.value, stripInitialDecimal);
             input.value = digits ? Number(digits).toLocaleString('vi-VN') : '';
         }
 
@@ -360,21 +363,21 @@
             input.value = extractDigits(input.value);
         }
 
-        function normalizePercentInput(input) {
-            input.value = extractDigits(input.value).slice(0, 3);
+        function normalizePercentInput(input, stripInitialDecimal) {
+            input.value = extractDigits(input.value, stripInitialDecimal).slice(0, 3);
         }
 
-        function syncDiscountFields() {
+        function syncDiscountFields(stripInitialDecimal) {
             const isPercent = discountType.value === 'percent';
             discountUnit.textContent = isPercent ? '%' : 'VND';
             maxDiscountGroup.style.display = isPercent ? 'flex' : 'none';
             maxDiscount.disabled = !isPercent;
 
             if (isPercent) {
-                normalizePercentInput(discountValue);
-                formatMoneyInput(maxDiscount);
+                normalizePercentInput(discountValue, stripInitialDecimal);
+                formatMoneyInput(maxDiscount, stripInitialDecimal);
             } else {
-                formatMoneyInput(discountValue);
+                formatMoneyInput(discountValue, stripInitialDecimal);
                 maxDiscount.value = '';
             }
         }
@@ -391,11 +394,11 @@
             input.addEventListener('input', function () {
                 formatMoneyInput(input);
             });
-            formatMoneyInput(input);
+            formatMoneyInput(input, true);
         });
 
         discountType.addEventListener('change', syncDiscountFields);
-        syncDiscountFields();
+        syncDiscountFields(true);
 
         form.addEventListener('submit', function (event) {
             if (submitted) {
