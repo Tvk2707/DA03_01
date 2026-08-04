@@ -52,6 +52,58 @@ public class HoaDonDAO {
         }
     }
 
+    public List<HoaDonView> findWithPaging(int pageNumber, int pageSize) throws SQLException {
+        String sql = "SELECT hd.id, hd.ma_hoa_don, hd.ten_nguoi_nhan, hd.sdt_nguoi_nhan, "
+                + "hd.id_nhan_vien, hd.tong_tien_thanh_toan, hd.trang_thai, hd.ngay_tao, hd.ghi_chu, "
+                + "nv.ho_ten AS ten_nhan_vien, nv.ma_nhan_vien AS ma_nhan_vien, "
+                + "kh.ho_ten AS ten_khach_hang, kh.ma_khach_hang, "
+                + "kh.so_dien_thoai AS sdt_khach_hang, kh.email AS email_khach_hang, "
+                + "pgg.ma_voucher, pgg.ten_voucher "
+                + "FROM hoa_don hd "
+                + "LEFT JOIN nhan_vien nv ON hd.id_nhan_vien = nv.id "
+                + "LEFT JOIN khach_hang kh ON hd.id_khach_hang = kh.id "
+                + "LEFT JOIN phieu_giam_gia pgg ON hd.id_phieu_giam_gia = pgg.id "
+                + "WHERE NOT (hd.trang_thai = 5 AND hd.ly_do_huy LIKE N'Xóa mềm%') "
+                + "ORDER BY hd.id DESC "
+                + "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+        int offset = (pageNumber - 1) * pageSize;
+
+        try (Connection connection = connectionManager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, offset);
+            statement.setInt(2, pageSize);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                List<HoaDonView> invoices = new ArrayList<>();
+
+                while (resultSet.next()) {
+                    invoices.add(mapHoaDon(resultSet));
+                }
+
+                return invoices;
+            }
+        }
+    }
+
+    public long countAll() throws SQLException {
+        String sql = "SELECT COUNT(*) "
+                + "FROM hoa_don hd "
+                + "WHERE NOT (hd.trang_thai = 5 AND hd.ly_do_huy LIKE N'Xóa mềm%')";
+
+        try (Connection connection = connectionManager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet resultSet = statement.executeQuery()) {
+
+            if (resultSet.next()) {
+                return resultSet.getLong(1);
+            }
+
+            return 0;
+        }
+    }
+
     // READ: lấy thông tin 1 hóa đơn theo id.
     public HoaDonView findById(int id) throws SQLException {
         String sql = "SELECT hd.id, hd.ma_hoa_don, hd.ten_nguoi_nhan, hd.sdt_nguoi_nhan, "

@@ -823,11 +823,11 @@
 <!-- NHÚNG SIDEBAR CHUNG -->
 <%@include file="/Admin/layout/sidebar.jsp" %>
 
-<div class="dashboard-container">
+<div class="main-content">
 
     <!-- NHÚNG HEADER CHUNG -->
     <%@include file="/Admin/layout/header.jsp" %>
-    <div class="category-section">
+    <main id="page-content" class="pos-page">
 
         <!-- ĐÃ BỔ SUNG CLASS NÀY ĐỂ FIX LỖI ĐÈ GIAO DIỆN -->
         <div class="main-content-wrapper">
@@ -1141,7 +1141,7 @@
                 </c:choose>
             </div>
         </div>
-    </div><!-- Kết thúc main-content-wrapper -->
+    </main><!-- Kết thúc main-content-wrapper -->
 </div>
 
 <div id="transfer-payment-modal" class="transfer-modal hidden" aria-hidden="true">

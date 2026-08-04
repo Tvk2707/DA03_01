@@ -5,8 +5,9 @@
  */
 
 body .dashboard-container {
-    margin-left: 260px !important;
-    padding: 24px 32px !important;
+    margin-left: 280px !important;
+    padding: 0 !important;
+    max-width: none !important;
     width: auto !important;
     min-height: 100vh;
     box-sizing: border-box;

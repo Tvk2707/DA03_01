@@ -1429,8 +1429,13 @@ function moModalXacNhanThanhToan() {
     } else {
         title.textContent = 'Thanh toán chuyển khoản / QR';
         hint.textContent = `Khách quét QR và chuyển ${amountText}. Sau khi nhận tiền, bấm Xác nhận thanh toán. Chọn Hủy để giữ hóa đơn chờ.`;
-        const qrContent = `THANH TOAN HOA DON ${idHoaDonHienTai} SO TIEN ${amount} VND`;
-        qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(qrContent)}`;
+        // VietQR – Techcombank (TCB), STK: 19073848200016, Chủ TK: TRAN VAN KHANH
+        const BANK_ID    = 'TCB';
+        const ACCOUNT_NO = '19073848200016';
+        const ACCT_NAME  = 'TRAN VAN KHANH';
+        const amountInt  = Math.round(parseFloat(amount) || 0);
+        const addInfo    = encodeURIComponent('Thanh toan hoa don ' + idHoaDonHienTai);
+        qrImage.src = `https://img.vietqr.io/image/${BANK_ID}-${ACCOUNT_NO}-compact2.png?amount=${amountInt}&addInfo=${addInfo}&accountName=${encodeURIComponent(ACCT_NAME)}`;
         qrWrap.hidden = false;
         cashFields?.classList.add('hidden');
         if (cashInput) cashInput.value = '';

@@ -31,12 +31,16 @@ body {
 }
 
 /* Main Content Area */
-.main-content {
+.main-content,
+.dashboard-container {
     flex: 1;
     margin-left: 280px;
     background-color: var(--bg-color);
     min-height: 100vh;
     transition: margin-left 0.3s ease;
+    box-sizing: border-box;
+    width: calc(100% - 280px);
+    max-width: none;
 }
 
 #page-content {
@@ -44,10 +48,16 @@ body {
     min-height: calc(100vh - 70px);
 }
 
+.dashboard-container > .category-section {
+    margin: 30px 28px 36px;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
-    .main-content {
+    .main-content,
+    .dashboard-container {
         margin-left: 0;
+        width: 100%;
     }
 
     .sidebar {

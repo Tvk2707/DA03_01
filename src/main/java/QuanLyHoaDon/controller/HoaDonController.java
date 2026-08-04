@@ -22,7 +22,37 @@ public class HoaDonController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             // GET /admin/hoa-don: lấy danh sách hóa đơn và chuyển sang trang JSP.
-            request.setAttribute("hoaDonList", hoaDonService.getAllHoaDon());
+            String pageStr = request.getParameter("page");
+            String sizeStr = request.getParameter("size");
+
+            int currentPage = parseInt(pageStr, 1);
+            int pageSize = parseInt(sizeStr, 10);
+
+            if (currentPage < 1) {
+                currentPage = 1;
+            }
+
+            if (pageSize < 1) {
+                pageSize = 10;
+            }
+
+            long totalCount = hoaDonService.countHoaDon();
+            int totalPages = (int) Math.ceil((double) totalCount / pageSize);
+
+            if (totalPages < 1) {
+                totalPages = 1;
+            }
+
+            if (currentPage > totalPages) {
+                currentPage = totalPages;
+            }
+
+            request.setAttribute("hoaDonList", hoaDonService.getHoaDonWithPaging(currentPage, pageSize));
+            request.setAttribute("currentPage", currentPage);
+            request.setAttribute("pageSize", pageSize);
+            request.setAttribute("totalCount", totalCount);
+            request.setAttribute("totalPages", totalPages);
+
             request.getRequestDispatcher("/FE/Admin/QuanLyHoaDon/quan_ly_hoa_don.jsp").forward(request, response);
         } catch (SQLException exception) {
             throw new ServletException("Không thể lấy danh sách hóa đơn từ database.", exception);

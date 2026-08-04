@@ -30,8 +30,10 @@
         }
 
         .dashboard-container {
-            margin-left: 260px !important; /* Đẩy nội dung tránh bị Sidebar che */
-            padding: 24px 32px !important;
+            margin-left: 280px !important;
+            padding: 0 !important;
+            width: calc(100% - 280px) !important;
+            max-width: none !important;
             min-height: 100vh;
             box-sizing: border-box;
             transition: all 0.3s ease;

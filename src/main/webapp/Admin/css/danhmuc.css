@@ -1,8 +1,6 @@
-/* === Category Section === */
-.dashboard-container {
-    max-width: 1000px;
-    margin-left: 280px;
-    top: 0;
+/* === Attribute management page (same layout frame as Thong ke) === */
+.attribute-page {
+    width: 100%;
 }
 
 .category-section {
@@ -10,6 +8,9 @@
     padding: 25px;
     border-radius: 16px;
     box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .category-header {
@@ -127,6 +128,17 @@
     width: 100%;
     border-collapse: collapse;
     font-size: 14px;
+}
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid #eee8de;
+    border-radius: 12px;
+}
+
+.table-responsive .category-table {
+    min-width: 720px;
 }
 
 .category-table thead {
@@ -320,3 +332,28 @@
 }
 .btn-submit:hover { background-color: #9c7f56; }
 .add-new-btn { cursor: pointer; border: none; font-family: inherit; }
+
+@media (max-width: 768px) {
+    .category-section {
+        padding: 18px;
+        border-radius: 12px;
+    }
+
+    .category-header {
+        align-items: flex-start;
+        gap: 12px;
+        flex-direction: column;
+    }
+
+    .search-form,
+    .search-input-wrapper,
+    .search-btn,
+    .clear-btn {
+        width: 100%;
+    }
+
+    .search-btn,
+    .clear-btn {
+        justify-content: center;
+    }
+}

@@ -15,6 +15,16 @@
     request.setAttribute("activeMenu", "hoadon");
 
     List<HoaDonView> hoaDonList = (List<HoaDonView>) request.getAttribute("hoaDonList");
+    Integer currentPage = (Integer) request.getAttribute("currentPage");
+    Integer pageSize = (Integer) request.getAttribute("pageSize");
+    Integer totalPages = (Integer) request.getAttribute("totalPages");
+    Long totalCount = (Long) request.getAttribute("totalCount");
+
+    if (currentPage == null) currentPage = 1;
+    if (pageSize == null) pageSize = 10;
+    if (totalPages == null) totalPages = 1;
+    if (totalCount == null) totalCount = 0L;
+
     DecimalFormat moneyFormat = new DecimalFormat("#,###");
     DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 %>
@@ -190,7 +200,7 @@
                     %>
                     <%-- Mỗi dòng table tương ứng với 1 hóa đơn trong database. --%>
                     <tr data-search="<%= searchText %>" data-status="<%= statusLabel %>" data-type="<%= invoiceType %>" data-date="<%= dateValue %>">
-                        <td><%= i + 1 %></td>
+                        <td><%= i + 1 + ((currentPage - 1) * pageSize) %></td>
                         <td><strong><%= hoaDon.getMaHoaDon() %></strong></td>
                         <td><%= text(hoaDon.getMaNhanVien()) %></td>
                         <td><%= text(customerName) %></td>
@@ -223,16 +233,35 @@
             </div>
 
             <div class="invoice-table-footer">
-                <span id="orderCount">Hiển thị <%= hoaDonList.size() %> / tổng <%= hoaDonList.size() %> hóa đơn</span>
+                <span id="orderCount">
+                    Hiển thị <%= hoaDonList.size() %> / tổng <%= totalCount %> hóa đơn
+                </span>
+
                 <div class="invoice-pagination">
-                    <button type="button" disabled><i class="fas fa-chevron-left"></i></button>
-                    <span>Trang <strong>1</strong></span>
-                    <button type="button" disabled><i class="fas fa-chevron-right"></i></button>
+                    <% if (currentPage > 1) { %>
+                        <a href="<%= request.getContextPath() %>/admin/hoa-don?page=<%= currentPage - 1 %>&size=<%= pageSize %>">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    <% } else { %>
+                        <button type="button" disabled><i class="fas fa-chevron-left"></i></button>
+                    <% } %>
+
+                    <span>Trang <strong><%= currentPage %></strong> / <%= totalPages %></span>
+
+                    <% if (currentPage < totalPages) { %>
+                        <a href="<%= request.getContextPath() %>/admin/hoa-don?page=<%= currentPage + 1 %>&size=<%= pageSize %>">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    <% } else { %>
+                        <button type="button" disabled><i class="fas fa-chevron-right"></i></button>
+                    <% } %>
                 </div>
-                <select aria-label="Số bản ghi mỗi trang">
-                    <option>10 bản ghi / trang</option>
-                    <option>20 bản ghi / trang</option>
-                    <option>50 bản ghi / trang</option>
+
+                <select aria-label="Số bản ghi mỗi trang"
+                        onchange="window.location.href='<%= request.getContextPath() %>/admin/hoa-don?page=1&size=' + this.value">
+                    <option value="10" <%= pageSize == 10 ? "selected" : "" %>>10 bản ghi / trang</option>
+                    <option value="20" <%= pageSize == 20 ? "selected" : "" %>>20 bản ghi / trang</option>
+                    <option value="50" <%= pageSize == 50 ? "selected" : "" %>>50 bản ghi / trang</option>
                 </select>
             </div>
         </section>

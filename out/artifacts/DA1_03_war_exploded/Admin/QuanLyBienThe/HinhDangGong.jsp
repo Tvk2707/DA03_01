@@ -17,9 +17,10 @@
 </head>
 <body>
 <%@include file="../../FE/Admin/layout/sidebar.jsp"%>
-<div class="dashboard-container">
+<div class="main-content">
     <%@include file="../../FE/Admin/layout/header.jsp"%>
-    <main class="category-section">
+    <main id="page-content" class="attribute-page">
+    <section class="category-section">
         <div class="category-header">
             <h2 class="category-title">Hình dạng gọng</h2>
             <a class="add-new-btn" href="${pageContext.request.contextPath}/HinhDangGong/new">+ Thêm mới</a>
@@ -42,6 +43,7 @@
             </form>
         </c:if>
 
+        <div class="table-responsive">
         <table class="category-table">
             <thead><tr><th>ID</th><th>Hình dạng</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
             <tbody>
@@ -61,6 +63,8 @@
             </c:forEach>
             </tbody>
         </table>
+        </div>
+    </section>
     </main>
 </div>
 </body>

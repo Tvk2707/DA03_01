@@ -32,8 +32,10 @@
 
         /* Đồng bộ khoảng cách dashboard-container như bảng Danh mục */
         .dashboard-container {
-            margin-left: 260px !important; /* Dẩy nội dung sang phải tránh Sidebar */
-            padding: 24px 32px !important;
+            margin-left: 280px !important;
+            padding: 0 !important;
+            width: calc(100% - 280px) !important;
+            max-width: none !important;
             min-height: 100vh;
             box-sizing: border-box;
             transition: all 0.3s ease;

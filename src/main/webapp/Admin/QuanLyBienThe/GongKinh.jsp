@@ -16,10 +16,10 @@
 </head>
 <div>
     <%@include file="../layout/sidebar.jsp"%>
-    <div class="dashboard-container">
+    <div class="main-content">
         <%@include file="../layout/header.jsp"%>
-
-        <div class="category-section">
+        <main id="page-content" class="attribute-page">
+        <section class="category-section">
             <div class="category-header">
                 <h2 class="category-title">Gọng kính</h2>
                 <button class="add-new-btn" onclick="openAddModal()">
@@ -50,6 +50,7 @@
                 </div>
             </c:if>
 
+            <div class="table-responsive">
             <table class="category-table">
                 <thead>
                 <tr>
@@ -94,7 +95,9 @@
                 </c:if>
                 </tbody>
             </table>
-        </div>
+            </div>
+        </section>
+        </main>
     </div>
 
     <div id="addCategoryModal" class="modal-overlay">

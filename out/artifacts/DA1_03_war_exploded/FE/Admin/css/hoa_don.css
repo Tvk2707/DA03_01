@@ -700,6 +700,201 @@
     border: 1px dashed var(--border-color);
     border-radius: 14px;
 }
+.invoice-tab:hover,
+.invoice-tab.is-active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--white);
+}
+
+/* Bảng danh sách hóa đơn và bảng sản phẩm trong chi tiết hóa đơn. */
+.invoice-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+}
+
+.invoice-table {
+    width: 100%;
+    min-width: 980px;
+    border-collapse: collapse;
+}
+
+.invoice-table thead th {
+    background: #faf8f4;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: left;
+    padding: 13px 14px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.invoice-table tbody td {
+    color: var(--text-dark);
+    font-size: 14px;
+    padding: 14px;
+    border-bottom: 1px solid #f2eee7;
+    vertical-align: middle;
+}
+
+.invoice-table tbody tr:hover {
+    background: #fbf8f3;
+}
+
+.invoice-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.invoice-table small {
+    display: block;
+    color: var(--text-light);
+    font-size: 11px;
+    margin-top: 2px;
+}
+
+.invoice-money {
+    color: #a84d68;
+    font-weight: 700;
+}
+
+.invoice-pill,
+.invoice-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 24px;
+    padding: 4px 11px;
+    border-radius: 999px;
+    border: 1px solid var(--border-color);
+    background: #fafafa;
+    color: var(--text-dark);
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.invoice-status--waiting {
+    background: #f2f2f2;
+    color: #616161;
+}
+
+.invoice-status--confirmed,
+.invoice-status--shipping {
+    background: #eef4ff;
+    color: #2360b8;
+}
+
+.invoice-status--processing {
+    background: #fff5e6;
+    color: #bf6b00;
+}
+
+.invoice-status--shipped {
+    background: #edf7f8;
+    color: #24747b;
+}
+
+.invoice-status--done {
+    background: #e8f6ef;
+    color: #1f7a4d;
+}
+
+.invoice-status--cancelled {
+    background: #fff0f0;
+    color: #c62828;
+}
+
+.invoice-actions {
+    gap: 8px;
+}
+
+.invoice-icon-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    border: 1px solid var(--border-color);
+    background: var(--white);
+    color: var(--text-dark);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.invoice-icon-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: #faf8f4;
+}
+
+.invoice-product-picker {
+    grid-column: 1 / -1;
+    padding: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background: #faf8f4;
+}
+
+.invoice-product-picker__heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    color: var(--text-dark);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.invoice-product-add {
+    min-height: 32px;
+    padding: 7px 10px;
+    font-size: 12px;
+}
+
+.invoice-product-line {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 110px 34px;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.invoice-product-line select,
+.invoice-product-line input {
+    width: 100%;
+    min-height: 38px;
+    box-sizing: border-box;
+    border: 1px solid var(--border-color);
+    border-radius: 9px;
+    padding: 8px 10px;
+    background: var(--white);
+    color: var(--text-dark);
+    font: inherit;
+}
+
+.invoice-product-picker__note {
+    display: block;
+    color: var(--text-light);
+    font-size: 12px;
+}
+
+.invoice-empty {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 36px;
+    color: var(--text-light);
+    border: 1px dashed var(--border-color);
+    border-radius: 14px;
+}
 
 .invoice-empty.is-visible {
     display: flex;
@@ -727,6 +922,26 @@
     background: var(--white);
     color: var(--text-dark);
     padding: 8px 10px;
+}
+
+.invoice-pagination a,
+.invoice-pagination button {
+    min-width: 36px;
+    height: 36px;
+    border: 1px solid #d1d5db;
+    background: #fff;
+    color: #374151;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.invoice-pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .invoice-timeline-card {

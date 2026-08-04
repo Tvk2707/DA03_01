@@ -26,8 +26,10 @@
         }
 
         .dashboard-container {
-            margin-left: 260px !important; /* Đẩy nội dung tránh bị Sidebar che */
-            padding: 24px 32px !important;
+            margin-left: 280px !important;
+            padding: 0 !important;
+            width: calc(100% - 280px) !important;
+            max-width: none !important;
             min-height: 100vh;
             box-sizing: border-box;
             transition: all 0.3s ease;
@@ -62,10 +64,10 @@
             color: #b4975a;
         }
 
-        /* Lưới lọc 3 cột cho NV */
+        /* Lưới lọc 2 cột cho NV */
         .filter-grid-nv {
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr;
+            grid-template-columns: 2fr 1fr;
             gap: 16px;
             align-items: flex-start;
         }
@@ -358,20 +360,11 @@
                             <option value="0" ${param.trangThai == '0' ? 'selected' : ''}>Ngừng hoạt động</option>
                         </select>
                     </div>
-
-                    <div class="filter-group">
-                        <label class="filter-label">Giới tính</label>
-                        <div class="gender-radio-group">
-                            <label><input type="radio" name="gioiTinh" value="" ${empty param.gioiTinh ? 'checked' : ''}> Tất cả</label>
-                            <label><input type="radio" name="gioiTinh" value="1" ${param.gioiTinh == '1' ? 'checked' : ''}> Nam</label>
-                            <label><input type="radio" name="gioiTinh" value="0" ${param.gioiTinh == '0' ? 'checked' : ''}> Nữ</label>
-                        </div>
-                    </div>
                 </div>
 
                 <div class="filter-action-row">
                     <div class="filter-action-left">
-                        <c:if test="${not empty param.hoTen || not empty param.trangThai || not empty param.gioiTinh}">
+                        <c:if test="${not empty param.hoTen || not empty param.trangThai}">
                             <a href="${pageContext.request.contextPath}/NhanVien"
                                style="padding: 10px 20px; background: #fee2e2; color: #dc2626; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 14px;">
                                 <i class="fas fa-xmark"></i> Xóa bộ lọc

@@ -295,7 +295,8 @@
 <style>
     /* --- STYLE CHUNG & LAYOUT --- */
     .sp-wide-page {
-        max-width: 1280px;
+        width: calc(100% - 280px);
+        max-width: none;
         margin-left: 280px;
     }
     .sp-product-builder {
