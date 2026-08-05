@@ -388,9 +388,6 @@
                         <div class="stat-period-fields" id="periodFields"></div>
                     </div>
                 </div>
-                <button class="stat-btn stat-btn--soft" id="openCompare" type="button">
-                    <i class="fas fa-code-compare"></i> So sánh
-                </button>
             </div>
 
             <div class="stat-chart-legend" id="chartLegend"></div>

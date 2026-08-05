@@ -216,6 +216,14 @@ public class PhieuGiamGiaServlet extends HttpServlet {
             errors.put("maVoucher", "Mã giảm giá đã tồn tại.");
         }
 
+        // Validate: không được bật trạng thái hoạt động nếu ngày kết thúc đã qua
+        if (coupon.getTrangThai() != null && coupon.getTrangThai() == 1
+                && coupon.getNgayKetThuc() != null
+                && coupon.getNgayKetThuc().toLocalDate().isBefore(java.time.LocalDate.now())) {
+            errors.put("ngayKetThuc",
+                    "Không thể đặt trạng thái hoạt động cho phiếu đã hết hạn. Vui lòng cập nhật ngày kết thúc.");
+        }
+
         if (!errors.isEmpty()) {
             forwardFormWithErrors(request, response, coupon, errors, "edit");
             return;
@@ -253,6 +261,17 @@ public class PhieuGiamGiaServlet extends HttpServlet {
         Integer currentStatus = parseInteger(request.getParameter("currentStatus"));
         if (id != null && currentStatus != null) {
             int nextStatus = currentStatus == 1 ? 0 : 1;
+            if (nextStatus == 1) {
+                // Kiểm tra ngày hết hạn trước khi bật trạng thái
+                PhieuGiamGia existing = phieuGiamGiaDao.getById(id);
+                if (existing != null && existing.getNgayKetThuc() != null
+                        && existing.getNgayKetThuc().toLocalDate().isBefore(java.time.LocalDate.now())) {
+                    setFlashMessage(request.getSession(), "errorMessage",
+                            "Không thể bật phiếu giảm giá đã hết hạn. Vui lòng vào trang sửa để cập nhật ngày kết thúc.");
+                    response.sendRedirect(request.getContextPath() + "/PhieuGiamGia" + buildReturnQuery(request));
+                    return;
+                }
+            }
             phieuGiamGiaDao.updateStatus(id, nextStatus);
             setFlashMessage(request.getSession(), "successMessage",
                     nextStatus == 1 ? "Đã bật phiếu giảm giá." : "Đã ngừng áp dụng phiếu giảm giá.");
@@ -390,7 +409,7 @@ public class PhieuGiamGiaServlet extends HttpServlet {
         }
         try {
             LocalDate date = LocalDate.parse(text);
-            return endOfDay ? date.atTime(LocalTime.MAX) : date.atStartOfDay();
+            return endOfDay ? date.atTime(java.time.LocalTime.of(23, 59, 59)) : date.atStartOfDay();
         } catch (DateTimeParseException e) {
             errors.put(field, "Ngày không đúng định dạng.");
             return null;

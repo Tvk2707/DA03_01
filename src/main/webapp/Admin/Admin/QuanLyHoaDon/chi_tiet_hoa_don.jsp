@@ -1,4 +1,4 @@
-<%@ page import="QuanLyHoaDon.Model.ChiTietHoaDonView" %>
+﻿<%@ page import="QuanLyHoaDon.Model.ChiTietHoaDonView" %>
 <%@ page import="QuanLyHoaDon.Model.HoaDonView" %>
 <%@ page import="QuanLyHoaDon.Model.LichSuHoaDonView" %>
 <%@ page import="QuanLyHoaDon.Model.LichSuThanhToanView" %>
@@ -448,22 +448,6 @@
 
         <%-- Các nút xử lý: cập nhật trạng thái, hủy hóa đơn, in, xem lịch sử. --%>
         <section class="invoice-detail-actions">
-            <div class="invoice-action-left">
-                <button class="invoice-btn invoice-btn--primary" type="button" data-open-modal="statusModal" <%= hoaDon.getTrangThai() != null && hoaDon.getTrangThai() == 5 ? "disabled" : "" %>>
-                    <i class="fas fa-arrows-rotate"></i>
-                    <span>Đổi trạng thái</span>
-                </button>
-                <form method="post" action="<%= request.getContextPath() %>/admin/hoa-don">
-                    <input type="hidden" name="action" value="changeStatus">
-                    <input type="hidden" name="id" value="<%= hoaDon.getId() %>">
-                    <input type="hidden" name="trangThai" value="5">
-                    <input type="hidden" name="ghiChu" value="Hủy hóa đơn từ màn hình chi tiết">
-                    <button class="invoice-btn invoice-btn--danger" type="submit" <%= hoaDon.getTrangThai() != null && hoaDon.getTrangThai() == 5 ? "disabled" : "" %>>
-                        <i class="fas fa-ban"></i>
-                        Hủy đơn
-                    </button>
-                </form>
-            </div>
             <div class="invoice-action-right">
                 <button class="invoice-btn invoice-btn--outline" type="button" data-open-modal="historyModal">
                     <i class="fas fa-clock-rotate-left"></i>

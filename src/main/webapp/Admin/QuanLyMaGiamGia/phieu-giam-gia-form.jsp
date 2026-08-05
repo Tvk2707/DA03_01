@@ -20,9 +20,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* ========================================================== */
-        /* 🛠️ SỬA LỖI TRÀN / MAT CSS & ĐỒNG BỘ CÙNG HỆ THỐNG          */
-        /* ========================================================== */
         body {
             background-color: #f8fafc;
             margin: 0;
@@ -39,7 +36,6 @@
             transition: all 0.3s ease;
         }
 
-        /* Card chứa form chính */
         .coupon-form-card {
             background: #ffffff;
             border: 1px solid #e5e7eb;
@@ -49,7 +45,6 @@
             margin-top: 20px;
         }
 
-        /* Lưới 2 cột cho các ô nhập liệu */
         .coupon-form-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -118,7 +113,6 @@
             margin-top: 4px;
         }
 
-        /* Nút thao tác dưới form */
         .coupon-form-actions {
             display: flex;
             justify-content: flex-end;
@@ -171,7 +165,6 @@
             color: #1f2937 !important;
         }
 
-        /* Thông báo Lỗi */
         .coupon-alert-error {
             background-color: #fdecea;
             color: #b3261e;
@@ -267,6 +260,8 @@
                         </c:if>
                     </label>
 
+
+
                     <label class="coupon-field">
                         <span>Loại giảm <em>*</em></span>
                         <select id="discountType" class="coupon-select" name="loaiGiamGia" required>
@@ -319,7 +314,7 @@
                             <span>Trạng thái hiện tại</span>
                             <div style="padding-top: 8px;">
                                 <span class="category-status ${coupon.trangThaiCssClass == 'status-active' ? 'status-active' : 'status-inactive'}">
-                                        ${coupon.trangThaiHienThi}
+                                    ${coupon.trangThaiHienThi}
                                 </span>
                             </div>
                         </div>
@@ -346,18 +341,38 @@
         const maxDiscountGroup = document.getElementById('maxDiscountGroup');
         const maxDiscount = document.getElementById('maxDiscount');
         const moneyInputs = document.querySelectorAll('[data-money-input]');
+        const startDate = form.querySelector('[name="ngayBatDau"]');
+        const endDate = form.querySelector('[name="ngayKetThuc"]');
         let submitted = false;
 
-        function extractDigits(value, stripInitialDecimal) {
+        /**
+         * Lấy phần nguyên từ chuỗi số.
+         * Xử lý cả dạng "50000.00" (BigDecimal từ Java) và "50.000" (đã format VND).
+         * - "50000.00"  -> "50000"
+         * - "50.000"    -> "50000"
+         * - "1.000.000" -> "1000000"
+         */
+        function extractDigits(value) {
             let text = String(value || '').trim();
-            if (stripInitialDecimal && /^\d+[\.,]\d+$/.test(text)) {
-                text = text.replace(/[\.,]\d+$/, '');
+
+            // Kiểm tra xem đây là số thập phân kiểu BigDecimal ("50000.00")
+            // hay số đã được format kiểu VND ("50.000" / "1.000.000")
+            // Dấu hiệu: nếu chỉ có 1 dấu chấm/phẩy và phần sau là toàn số 0 -> phần thập phân, bỏ đi
+            const separators = text.match(/[.,]/g) || [];
+            if (separators.length === 1) {
+                const sepIdx = Math.max(text.lastIndexOf('.'), text.lastIndexOf(','));
+                const afterSep = text.slice(sepIdx + 1);
+                // Nếu sau dấu phân cách cuối cùng chỉ là số 0 (phần .00 của BigDecimal)
+                if (/^0{1,2}$/.test(afterSep)) {
+                    text = text.slice(0, sepIdx);
+                }
             }
+
             return text.replace(/\D/g, '');
         }
 
-        function formatMoneyInput(input, stripInitialDecimal) {
-            const digits = extractDigits(input.value, stripInitialDecimal);
+        function formatMoneyInput(input) {
+            const digits = extractDigits(input.value);
             input.value = digits ? Number(digits).toLocaleString('vi-VN') : '';
         }
 
@@ -365,22 +380,47 @@
             input.value = extractDigits(input.value);
         }
 
-        function normalizePercentInput(input, stripInitialDecimal) {
-            input.value = extractDigits(input.value, stripInitialDecimal).slice(0, 3);
+        function normalizePercentInput(input) {
+            input.value = extractDigits(input.value).slice(0, 3);
         }
 
-        function syncDiscountFields(stripInitialDecimal) {
+        function todayValue() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function validateEndDate() {
+            if (!endDate || !endDate.value) {
+                return true;
+            }
+            if (startDate && startDate.value && endDate.value < startDate.value) {
+                endDate.setCustomValidity('Ngày kết thúc không được trước ngày bắt đầu.');
+                endDate.reportValidity();
+                return false;
+            }
+            if (endDate.value < todayValue()) {
+                endDate.setCustomValidity('Ngày kết thúc không được trước ngày hiện tại.');
+                endDate.reportValidity();
+                return false;
+            }
+            endDate.setCustomValidity('');
+            return true;
+        }
+
+        function syncDiscountFields() {
             const isPercent = discountType.value === 'percent';
             discountUnit.textContent = isPercent ? '%' : 'VND';
-            maxDiscountGroup.style.display = isPercent ? 'flex' : 'none';
+            maxDiscountGroup.style.display = isPercent ? '' : 'none';
             maxDiscount.disabled = !isPercent;
 
             if (isPercent) {
-                normalizePercentInput(discountValue, stripInitialDecimal);
-                formatMoneyInput(maxDiscount, stripInitialDecimal);
+                normalizePercentInput(discountValue);
+                formatMoneyInput(maxDiscount);
             } else {
-                formatMoneyInput(discountValue, stripInitialDecimal);
-                maxDiscount.value = '';
+                formatMoneyInput(discountValue);
             }
         }
 
@@ -396,14 +436,22 @@
             input.addEventListener('input', function () {
                 formatMoneyInput(input);
             });
-            formatMoneyInput(input, true);
+            // Format giá trị pre-fill từ server khi trang load
+            formatMoneyInput(input);
         });
 
         discountType.addEventListener('change', syncDiscountFields);
-        syncDiscountFields(true);
+        startDate?.addEventListener('change', validateEndDate);
+        endDate?.addEventListener('change', validateEndDate);
+        syncDiscountFields();
 
         form.addEventListener('submit', function (event) {
             if (submitted) {
+                event.preventDefault();
+                return;
+            }
+
+            if (!validateEndDate()) {
                 event.preventDefault();
                 return;
             }
@@ -416,6 +464,7 @@
                 return;
             }
 
+            // Strip formatting trước khi submit để gửi số nguyên thuần
             if (discountType.value === 'amount') {
                 normalizeMoneyInput(discountValue);
                 maxDiscount.value = '';
