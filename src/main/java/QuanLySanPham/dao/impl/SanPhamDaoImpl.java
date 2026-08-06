@@ -124,7 +124,7 @@ public class SanPhamDaoImpl extends GenericDaoImpl<SanPham, Integer> implements 
     public List<SanPham> findByDanhMuc(Integer danhMucId) {
         EntityManager em = EntityManagerUtlis.getEntityManager();
         try {
-            String jpql = "SELECT s FROM SanPham s WHERE s.danhMuc.id = :danhMucId AND s.isDeleted = false";
+            String jpql = "SELECT s FROM SanPham s WHERE s.danhMuc.id = :danhMucId AND s.isDeleted = false ORDER BY s.id DESC";
             TypedQuery<SanPham> query = em.createQuery(jpql, SanPham.class);
             query.setParameter("danhMucId", danhMucId);
             return query.getResultList();
@@ -140,7 +140,7 @@ public class SanPhamDaoImpl extends GenericDaoImpl<SanPham, Integer> implements 
     public List<SanPham> findByThuongHieu(Integer thuongHieuId) {
         EntityManager em = EntityManagerUtlis.getEntityManager();
         try {
-            String jpql = "SELECT s FROM SanPham s WHERE s.thuongHieu.id = :thuongHieuId AND s.isDeleted = false";
+            String jpql = "SELECT s FROM SanPham s WHERE s.thuongHieu.id = :thuongHieuId AND s.isDeleted = false ORDER BY s.id DESC";
             TypedQuery<SanPham> query = em.createQuery(jpql, SanPham.class);
             query.setParameter("thuongHieuId", thuongHieuId);
             return query.getResultList();
@@ -197,6 +197,9 @@ public class SanPhamDaoImpl extends GenericDaoImpl<SanPham, Integer> implements 
                 }
                 jpql.append(")");
             }
+
+            // Sắp xếp sản phẩm mới nhất lên đầu
+            jpql.append(" ORDER BY s.id DESC");
 
             TypedQuery<SanPham> query = em.createQuery(jpql.toString(), SanPham.class);
 

@@ -17,4 +17,9 @@ public interface DanhMucDao extends GenericDao<DanhMuc, Integer> {
      * Tìm kiếm danh mục theo keyword (tìm trong mã hoặc tên)
      */
     List<DanhMuc> searchByKeyword(String keyword);
+
+    /**
+     * Sinh mã danh mục tự động theo format DM001, DM002, ...
+     */
+    String generateNextMaDanhMuc();
 }

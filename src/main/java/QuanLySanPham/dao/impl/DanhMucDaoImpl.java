@@ -15,6 +15,24 @@ public class DanhMucDaoImpl extends GenericDaoImpl<DanhMuc, Integer> implements 
     public DanhMucDaoImpl() {
         super(DanhMuc.class);
     }
+
+    /**
+     * Lấy tất cả danh mục, sắp xếp mới nhất lên đầu
+     */
+    @Override
+    public List<DanhMuc> findAll() {
+        EntityManager em = EntityManagerUtlis.getEntityManager();
+        try {
+            String jpql = "SELECT d FROM DanhMuc d ORDER BY d.id DESC";
+            TypedQuery<DanhMuc> query = em.createQuery(jpql, DanhMuc.class);
+            return query.getResultList();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi lấy tất cả danh mục", e);
+        } finally {
+            em.close();
+        }
+    }
     
     /**
      * Tìm danh mục theo tên
@@ -53,6 +71,24 @@ public class DanhMucDaoImpl extends GenericDaoImpl<DanhMuc, Integer> implements 
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Lỗi khi tìm kiếm danh mục", e);
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public String generateNextMaDanhMuc() {
+        EntityManager em = EntityManagerUtlis.getEntityManager();
+        try {
+            String jpql = "SELECT MAX(d.maDanhMuc) FROM DanhMuc d WHERE d.maDanhMuc LIKE 'DM%'";
+            String maxMa = (String) em.createQuery(jpql).getSingleResult();
+            if (maxMa == null) {
+                return "DM001";
+            }
+            int num = Integer.parseInt(maxMa.substring(2)) + 1;
+            return String.format("DM%03d", num);
+        } catch (Exception e) {
+            return "DM001";
         } finally {
             em.close();
         }

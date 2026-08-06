@@ -104,7 +104,7 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label for="maThuongHieu">Mã thương hiệu</label>
-                    <input type="text" id="maThuongHieu" name="maThuongHieu" value="${thuongHieu.maThuongHieu}" placeholder="Nhập mã thương hiệu (ví dụ: TH006)">
+                    <input type="text" id="maThuongHieu" name="maThuongHieu" value="${not empty thuongHieu.maThuongHieu ? thuongHieu.maThuongHieu : nextMa}" readonly style="background-color: #f5f5f5; cursor: not-allowed;" placeholder="Mã tự động sinh">
                     <span class="error-message">${errors.maThuongHieu}</span>
                 </div>
 

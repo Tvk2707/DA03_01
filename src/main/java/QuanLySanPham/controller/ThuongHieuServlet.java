@@ -2,6 +2,8 @@ package QuanLySanPham.controller;
 
 import QuanLySanPham.Entity.ThuongHieu;
 import QuanLySanPham.Utils.ValidationException;
+import QuanLySanPham.dao.ThuongHieuDao;
+import QuanLySanPham.dao.impl.ThuongHieuDaoImpl;
 import QuanLySanPham.service.LookupService;
 import QuanLySanPham.service.impl.LookupServiceImpl;
 import jakarta.servlet.ServletException;
@@ -23,6 +25,7 @@ import java.util.List;
 })
 public class ThuongHieuServlet extends HttpServlet {
     private final LookupService lookupService = new LookupServiceImpl();
+    private final ThuongHieuDao thuongHieuDao = new ThuongHieuDaoImpl();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -74,6 +77,7 @@ public class ThuongHieuServlet extends HttpServlet {
         }
 
         request.setAttribute("items", items);
+        request.setAttribute("nextMa", thuongHieuDao.generateNextMaThuongHieu());
         request.setAttribute("activeMenu", "product");
         request.setAttribute("activeSubMenu", "brand");
         request.getRequestDispatcher("/Admin/QuanLyBienThe/ThuongHieu.jsp").forward(request, response);
@@ -101,6 +105,8 @@ public class ThuongHieuServlet extends HttpServlet {
 
     private void insertThuongHieu(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         ThuongHieu thuongHieu = getThuongHieuFromRequest(request);
+        // Tự sinh mã thương hiệu
+        thuongHieu.setMaThuongHieu(thuongHieuDao.generateNextMaThuongHieu());
         try {
             lookupService.themThuongHieu(thuongHieu);
             response.sendRedirect(request.getContextPath() + "/ThuongHieu");

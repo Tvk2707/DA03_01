@@ -15,6 +15,24 @@ public class ThuongHieuDaoImpl extends GenericDaoImpl<ThuongHieu, Integer> imple
     public ThuongHieuDaoImpl() {
         super(ThuongHieu.class);
     }
+
+    /**
+     * Lấy tất cả thương hiệu, sắp xếp mới nhất lên đầu
+     */
+    @Override
+    public List<ThuongHieu> findAll() {
+        EntityManager em = EntityManagerUtlis.getEntityManager();
+        try {
+            String jpql = "SELECT t FROM ThuongHieu t ORDER BY t.id DESC";
+            TypedQuery<ThuongHieu> query = em.createQuery(jpql, ThuongHieu.class);
+            return query.getResultList();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi khi lấy tất cả thương hiệu", e);
+        } finally {
+            em.close();
+        }
+    }
     
     /**
      * Tìm thương hiệu theo tên
@@ -48,6 +66,24 @@ public class ThuongHieuDaoImpl extends GenericDaoImpl<ThuongHieu, Integer> imple
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Lỗi khi tìm kiếm thương hiệu", e);
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public String generateNextMaThuongHieu() {
+        EntityManager em = EntityManagerUtlis.getEntityManager();
+        try {
+            String jpql = "SELECT MAX(t.maThuongHieu) FROM ThuongHieu t WHERE t.maThuongHieu LIKE 'TH%'";
+            String maxMa = (String) em.createQuery(jpql).getSingleResult();
+            if (maxMa == null) {
+                return "TH001";
+            }
+            int num = Integer.parseInt(maxMa.substring(2)) + 1;
+            return String.format("TH%03d", num);
+        } catch (Exception e) {
+            return "TH001";
         } finally {
             em.close();
         }

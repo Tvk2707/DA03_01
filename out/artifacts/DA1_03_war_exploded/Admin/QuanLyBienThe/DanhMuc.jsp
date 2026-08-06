@@ -104,7 +104,7 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label for="maDanhMuc">Mã danh mục</label>
-                    <input type="text" id="maDanhMuc" name="maDanhMuc" value="${danhMuc.maDanhMuc}" placeholder="Nhập mã danh mục (ví dụ: DM006)">
+                    <input type="text" id="maDanhMuc" name="maDanhMuc" value="${not empty danhMuc.maDanhMuc ? danhMuc.maDanhMuc : nextMa}" readonly style="background-color: #f5f5f5; cursor: not-allowed;" placeholder="Mã tự động sinh">
                     <span class="error-message">${errors.maDanhMuc}</span>
                 </div>
 

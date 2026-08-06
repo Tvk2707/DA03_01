@@ -4,6 +4,8 @@ import QuanLySanPham.Entity.NhanVien;
 import QuanLyNhanVien.service.NhanVienService;
 import QuanLyNhanVien.service.impl.NhanVienServiceImpl;
 import QuanLySanPham.Utils.EmailService;
+import QuanLySanPham.dao.NhanVienDao;
+import QuanLySanPham.dao.impl.NhanVienDaoImpl;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -14,12 +16,14 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @WebServlet(name = "NhanVienServlet", value = {"/NhanVien","/NhanVien/new","/NhanVien/insert","/NhanVien/edit","/NhanVien/update","/NhanVien/delete","/NhanVien/search","/NhanVien/export"})
 public class NhanVienServlet extends HttpServlet {
     private final NhanVienService nhanVienService = new NhanVienServiceImpl();
+    private final NhanVienDao nhanVienDao = new NhanVienDaoImpl();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -85,6 +89,15 @@ public class NhanVienServlet extends HttpServlet {
         // Set active menu for sidebar highlight
         request.setAttribute("activeMenu", "employee");
         request.setAttribute("action", "add");
+
+        // Tự sinh mã nhân viên
+        String generatedMa = generateMaNhanVien();
+        request.setAttribute("generatedMaNV", generatedMa);
+
+        // Tự sinh mật khẩu ngẫu nhiên 8 ký tự
+        String generatedPass = generatePassword(8);
+        request.setAttribute("generatedMatKhau", generatedPass);
+
         request.getRequestDispatcher("/Admin/QuanLyNhanVien/NhanVienAdd.jsp").forward(request, response);
     }
 
@@ -109,8 +122,9 @@ public class NhanVienServlet extends HttpServlet {
             // 1. Lưu nhân viên vào Database
             nhanVienService.themNhanVien(nv);
 
-            // 2. Gửi Email thông báo chạy ngầm cho nhân viên mới
+            // 2. Gửi Email thông báo chạy ngầm cho nhân viên mới (kèm mật khẩu)
             if (nv.getEmail() != null && !nv.getEmail().trim().isEmpty()) {
+                final String matKhauGui = nv.getMatKhau();
                 new Thread(() -> {
                     String tieuDe = "Thông báo: Tài khoản nhân viên mới đã được khởi tạo";
                     String noiDung = "<h3>Xin chào " + nv.getHoTen() + ",</h3>"
@@ -118,9 +132,10 @@ public class NhanVienServlet extends HttpServlet {
                             + "<ul>"
                             + "  <li><b>Mã nhân viên:</b> " + nv.getMaNhanVien() + "</li>"
                             + "  <li><b>Email đăng nhập:</b> " + nv.getEmail() + "</li>"
+                            + "  <li><b>Mật khẩu:</b> " + matKhauGui + "</li>"
                             + "  <li><b>Chức vụ:</b> " + (nv.getChucVu() != null ? nv.getChucVu() : "Chưa cập nhật") + "</li>"
                             + "</ul>"
-                            + "<p>Vui lòng đăng nhập hệ thống hoặc liên hệ Quản lý để nhận mật khẩu làm việc.</p>";
+                            + "<p style='color:#d32f2f;'><b>Lưu ý:</b> Vui lòng đổi mật khẩu sau lần đăng nhập đầu tiên để đảm bảo an toàn.</p>";
 
                     EmailService.sendEmail(nv.getEmail(), tieuDe, noiDung);
                 }).start();
@@ -214,6 +229,33 @@ public class NhanVienServlet extends HttpServlet {
         nv.setAnhDaiDien(anh);
         nv.setTrangThai((trangThaiStr != null && !trangThaiStr.isEmpty()) ? Integer.parseInt(trangThaiStr) : 1);
         return nv;
+    }
+
+    /**
+     * Tự sinh mã nhân viên dạng NV0001, NV0002,...
+     */
+    private String generateMaNhanVien() {
+        String maxMa = nhanVienDao.findMaxMaNhanVien();
+        int nextNumber = 1;
+        if (maxMa != null && maxMa.startsWith("NV")) {
+            try {
+                nextNumber = Integer.parseInt(maxMa.substring(2)) + 1;
+            } catch (NumberFormatException ignored) {}
+        }
+        return String.format("NV%04d", nextNumber);
+    }
+
+    /**
+     * Tự sinh mật khẩu ngẫu nhiên gồm chữ hoa, chữ thường và số
+     */
+    private String generatePassword(int length) {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        SecureRandom random = new SecureRandom();
+        StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            sb.append(chars.charAt(random.nextInt(chars.length())));
+        }
+        return sb.toString();
     }
 
     // =========================================================

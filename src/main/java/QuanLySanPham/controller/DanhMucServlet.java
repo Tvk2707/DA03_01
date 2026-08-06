@@ -2,6 +2,8 @@ package QuanLySanPham.controller;
 
 import QuanLySanPham.Entity.DanhMuc;
 import QuanLySanPham.Utils.ValidationException;
+import QuanLySanPham.dao.DanhMucDao;
+import QuanLySanPham.dao.impl.DanhMucDaoImpl;
 import QuanLySanPham.service.LookupService;
 import QuanLySanPham.service.impl.LookupServiceImpl;
 import jakarta.servlet.ServletException;
@@ -23,6 +25,7 @@ import java.util.List;
 })
 public class DanhMucServlet extends HttpServlet {
     private final LookupService lookupService = new LookupServiceImpl();
+    private final DanhMucDao danhMucDao = new DanhMucDaoImpl();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -74,6 +77,7 @@ public class DanhMucServlet extends HttpServlet {
         }
 
         request.setAttribute("items", items);
+        request.setAttribute("nextMa", danhMucDao.generateNextMaDanhMuc());
         request.setAttribute("activeMenu", "product");
         request.setAttribute("activeSubMenu", "category");
         request.getRequestDispatcher("/Admin/QuanLyBienThe/DanhMuc.jsp").forward(request, response);
@@ -101,6 +105,8 @@ public class DanhMucServlet extends HttpServlet {
 
     private void insertDanhMuc(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         DanhMuc danhMuc = getDanhMucFromRequest(request);
+        // Tự sinh mã danh mục
+        danhMuc.setMaDanhMuc(danhMucDao.generateNextMaDanhMuc());
         try {
             lookupService.themDanhMuc(danhMuc);
             response.sendRedirect(request.getContextPath() + "/DanhMuc");

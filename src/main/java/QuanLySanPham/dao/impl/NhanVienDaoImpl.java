@@ -97,5 +97,19 @@ public class NhanVienDaoImpl extends GenericDaoImpl<NhanVien, Integer> implement
             em.close();
         }
     }
+
+    @Override
+    public String findMaxMaNhanVien() {
+        EntityManager em = EntityManagerUtlis.getEntityManager();
+        try {
+            TypedQuery<String> q = em.createQuery(
+                "SELECT n.maNhanVien FROM NhanVien n WHERE n.maNhanVien LIKE 'NV%' ORDER BY n.maNhanVien DESC", String.class);
+            q.setMaxResults(1);
+            List<String> list = q.getResultList();
+            return list.isEmpty() ? null : list.get(0);
+        } finally {
+            em.close();
+        }
+    }
 }
 

@@ -15,4 +15,9 @@ public interface ThuongHieuDao extends GenericDao<ThuongHieu, Integer> {
     ThuongHieu findByTen(String ten);
     List<ThuongHieu> searchByKeyword(String keyword);
 
+    /**
+     * Sinh mã thương hiệu tự động theo format TH001, TH002, ...
+     */
+    String generateNextMaThuongHieu();
+
 }

@@ -250,7 +250,15 @@
                 <div class="form-row full">
                     <div class="form-group">
                         <label>Mã nhân viên <span style="color:#d32f2f;">*</span></label>
-                        <input type="text" name="maNhanVien" value="${nhanVien.maNhanVien}" ${isEdit ? 'readonly' : ''} required>
+                        <c:choose>
+                            <c:when test="${isEdit}">
+                                <input type="text" name="maNhanVien" value="${nhanVien.maNhanVien}" readonly>
+                            </c:when>
+                            <c:otherwise>
+                                <input type="text" value="${generatedMaNV}" readonly style="background-color:#f5f5f5;color:#b8956a;font-weight:600;cursor:not-allowed;">
+                                <input type="hidden" name="maNhanVien" value="${generatedMaNV}">
+                            </c:otherwise>
+                        </c:choose>
                     </div>
                 </div>
 
@@ -303,12 +311,25 @@
                     </div>
                     <div class="form-group">
                         <label>Mật khẩu</label>
-                        <div class="password-wrapper">
-                            <input type="password" name="matKhau" id="matKhauInput" value="${nhanVien.matKhau}" autocomplete="new-password">
-                            <button type="button" class="password-toggle-btn" id="toggleMatKhauBtn" onclick="toggleMatKhau()" title="Hiện/Ẩn mật khẩu">
-                                <i class="fas fa-eye" id="toggleMatKhauIcon"></i>
-                            </button>
-                        </div>
+                        <c:choose>
+                            <c:when test="${isEdit}">
+                                <div class="password-wrapper">
+                                    <input type="password" name="matKhau" id="matKhauInput" value="${nhanVien.matKhau}" autocomplete="new-password">
+                                    <button type="button" class="password-toggle-btn" id="toggleMatKhauBtn" onclick="toggleMatKhau()" title="Hiện/Ẩn mật khẩu">
+                                        <i class="fas fa-eye" id="toggleMatKhauIcon"></i>
+                                    </button>
+                                </div>
+                            </c:when>
+                            <c:otherwise>
+                                <div class="password-wrapper">
+                                    <input type="password" id="matKhauInput" value="${generatedMatKhau}" readonly style="background-color:#f5f5f5;cursor:not-allowed;" autocomplete="new-password">
+                                    <input type="hidden" name="matKhau" value="${generatedMatKhau}">
+                                    <button type="button" class="password-toggle-btn" id="toggleMatKhauBtn" onclick="toggleMatKhau()" title="Hiện/Ẩn mật khẩu">
+                                        <i class="fas fa-eye" id="toggleMatKhauIcon"></i>
+                                    </button>
+                                </div>
+                            </c:otherwise>
+                        </c:choose>
                     </div>
                 </div>
             </div>
