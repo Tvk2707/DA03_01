@@ -150,11 +150,7 @@ public class SanPhamChiTietServlet extends HttpServlet {
 
                 // Tìm biến thể dựa trên ID nhận về
                 // (Vì phương thức timBienThe của bạn yêu cầu cả sanPhamId, nên ở đây ta gọi trực tiếp Service tìm theo danh sách hoặc lấy đối tượng cũ)
-                List<SanPhamChiTiet> danhSachHienTai = sanPhamChiTietService.timKiem(null, null, null, null, null);
-                SanPhamChiTiet spct = danhSachHienTai.stream()
-                        .filter(ct -> ct.getId().equals(id))
-                        .findFirst()
-                        .orElse(null);
+                SanPhamChiTiet spct = sanPhamChiTietService.timTheoId(id);
 
                 if (spct != null) {
                     spct.setTrangThai(trangThai);

@@ -588,16 +588,19 @@
 
                 row.dataset.trangThai = statusValue;
 
+                const formData = new FormData();
+                formData.append('id', variantId);
+                formData.append('trangThai', statusValue);
+
                 fetch('${pageContext.request.contextPath}/SanPhamChiTiet/update-status', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `id=${variantId}&trangThai=${statusValue}`
+                    body: formData
                 })
                     .then(response => {
                         if (response.ok) {
                             if (textLabel) {
                                 textLabel.textContent = statusText;
-                                textLabel.className = `category-status JS-variant-status-text ${isChecked ? 'status-active' : 'status-inactive'}`;
+                                textLabel.className = 'category-status JS-variant-status-text ' + (isChecked ? 'status-active' : 'status-inactive');
                             }
                         } else {
                             alert("Cập nhật thất bại!");
