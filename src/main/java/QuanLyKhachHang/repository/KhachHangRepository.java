@@ -156,6 +156,14 @@ public class KhachHangRepository {
                 khCu.setNgaySinh(khachHangMoi.getNgaySinh());
                 khCu.setGioiTinh(khachHangMoi.getGioiTinh());
 
+                em.createQuery("UPDATE DiaChiKhachHang dc "
+                                + "SET dc.tenNguoiNhan = :hoTen, dc.sdtNguoiNhan = :soDienThoai "
+                                + "WHERE dc.khachHang.id = :idKhachHang")
+                        .setParameter("hoTen", khCu.getHoTen())
+                        .setParameter("soDienThoai", khCu.getSoDienThoai())
+                        .setParameter("idKhachHang", khCu.getId())
+                        .executeUpdate();
+
                 // 3. Lưu thay đổi
                 em.merge(khCu);
             }

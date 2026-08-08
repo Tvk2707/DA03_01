@@ -19,11 +19,18 @@ import java.io.IOException;
 import java.security.SecureRandom;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Set;
 
 @WebServlet(name = "NhanVienServlet", value = {"/NhanVien","/NhanVien/new","/NhanVien/insert","/NhanVien/edit","/NhanVien/update","/NhanVien/delete","/NhanVien/search","/NhanVien/export"})
 public class NhanVienServlet extends HttpServlet {
     private final NhanVienService nhanVienService = new NhanVienServiceImpl();
     private final NhanVienDao nhanVienDao = new NhanVienDaoImpl();
+    private static final List<String> CHUC_VU_HOP_LE = List.of(
+            "Quản lý cửa hàng",
+            "Nhân viên bán hàng",
+            "Nhân viên thu ngân"
+    );
+    private static final Set<String> CHUC_VU_HOP_LE_SET = Set.copyOf(CHUC_VU_HOP_LE);
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -89,6 +96,7 @@ public class NhanVienServlet extends HttpServlet {
         // Set active menu for sidebar highlight
         request.setAttribute("activeMenu", "employee");
         request.setAttribute("action", "add");
+        request.setAttribute("chucVuHopLe", CHUC_VU_HOP_LE);
 
         // Tự sinh mã nhân viên
         String generatedMa = generateMaNhanVien();
@@ -113,13 +121,16 @@ public class NhanVienServlet extends HttpServlet {
         request.setAttribute("activeMenu", "employee");
         request.setAttribute("nhanVien", nv);
         request.setAttribute("action", "edit");
+        request.setAttribute("chucVuHopLe", CHUC_VU_HOP_LE);
         request.getRequestDispatcher("/Admin/QuanLyNhanVien/NhanVienEdit.jsp").forward(request, response);
     }
 
     private void insert(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             NhanVien nv = getNhanVienFrom(request);
+            validateChucVu(nv.getChucVu());
             // 1. Lưu nhân viên vào Database
+            nv.setMaNhanVien(generateMaNhanVien());
             nhanVienService.themNhanVien(nv);
 
             // 2. Gửi Email thông báo chạy ngầm cho nhân viên mới (kèm mật khẩu)
@@ -146,6 +157,7 @@ public class NhanVienServlet extends HttpServlet {
             request.setAttribute("error", e.getMessage());
             request.setAttribute("nhanVien", getNhanVienFrom(request));
             request.setAttribute("action", "add");
+            request.setAttribute("chucVuHopLe", CHUC_VU_HOP_LE);
             request.getRequestDispatcher("/Admin/QuanLyNhanVien/NhanVienAdd.jsp").forward(request, response);
         }
     }
@@ -153,6 +165,7 @@ public class NhanVienServlet extends HttpServlet {
     private void update(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             NhanVien nv = getNhanVienFrom(request);
+            validateChucVu(nv.getChucVu());
             nv.setId(Integer.parseInt(request.getParameter("id")));
             nhanVienService.capNhatNhanVien(nv);
             response.sendRedirect(request.getContextPath() + "/NhanVien");
@@ -160,6 +173,7 @@ public class NhanVienServlet extends HttpServlet {
             request.setAttribute("error", e.getMessage());
             request.setAttribute("nhanVien", getNhanVienFrom(request));
             request.setAttribute("action", "edit");
+            request.setAttribute("chucVuHopLe", CHUC_VU_HOP_LE);
             request.getRequestDispatcher("/Admin/QuanLyNhanVien/NhanVienEdit.jsp").forward(request, response);
         }
     }
@@ -225,10 +239,16 @@ public class NhanVienServlet extends HttpServlet {
         }
         nv.setGioiTinh((gioiTinhStr != null && !gioiTinhStr.isEmpty()) ? Integer.parseInt(gioiTinhStr) : 1);
         nv.setDiaChi(diaChi);
-        nv.setChucVu(chucVu);
+        nv.setChucVu(chucVu == null ? null : chucVu.trim());
         nv.setAnhDaiDien(anh);
         nv.setTrangThai((trangThaiStr != null && !trangThaiStr.isEmpty()) ? Integer.parseInt(trangThaiStr) : 1);
         return nv;
+    }
+
+    private void validateChucVu(String chucVu) {
+        if (chucVu == null || !CHUC_VU_HOP_LE_SET.contains(chucVu.trim())) {
+            throw new IllegalArgumentException("Vui lòng chọn chức vụ hợp lệ.");
+        }
     }
 
     /**
@@ -427,4 +447,4 @@ public class NhanVienServlet extends HttpServlet {
             workbook.write(response.getOutputStream());
         }
     }
-}
+}

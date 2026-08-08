@@ -263,8 +263,15 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Chức vụ</label>
-                        <input type="text" name="chucVu" value="${nhanVien.chucVu}">
+                        <label>Chức vụ <span style="color:#d32f2f;">*</span></label>
+                        <select name="chucVu" required>
+                            <option value="">-- Chọn chức vụ --</option>
+                            <c:forEach var="chucVu" items="${chucVuHopLe}">
+                                <option value="${chucVu}" ${nhanVien.chucVu == chucVu ? 'selected' : ''}>
+                                    <c:out value="${chucVu}"/>
+                                </option>
+                            </c:forEach>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label>Giới tính</label>

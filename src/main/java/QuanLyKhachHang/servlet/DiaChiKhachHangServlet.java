@@ -1,7 +1,9 @@
 package QuanLyKhachHang.servlet;
 
 import QuanLySanPham.Entity.DiaChiKhachHang;
+import QuanLySanPham.Entity.KhachHang;
 import QuanLyKhachHang.repository.DiaChiKhachHangRepository;
+import QuanLyKhachHang.repository.KhachHangRepository;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -19,6 +21,7 @@ import java.util.List;
 public class DiaChiKhachHangServlet extends HttpServlet {
 
     private DiaChiKhachHangRepository repo = new DiaChiKhachHangRepository();
+    private KhachHangRepository khachHangRepo = new KhachHangRepository();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -57,9 +60,11 @@ public class DiaChiKhachHangServlet extends HttpServlet {
     private void hienThi(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Integer idKhachHang = Integer.parseInt(req.getParameter("idKhachHang"));
         List<DiaChiKhachHang> listDiaChi = repo.getByKhachHangId(idKhachHang);
+        KhachHang khachHang = khachHangRepo.getById(idKhachHang);
 
         req.setAttribute("listDiaChi", listDiaChi);
         req.setAttribute("idKhachHang", idKhachHang);
+        req.setAttribute("khachHang", khachHang);
         req.getRequestDispatcher("/QuanLyKhachHang/dia_chi_khach_hang.jsp").forward(req, resp);
     }
 
@@ -67,8 +72,6 @@ public class DiaChiKhachHangServlet extends HttpServlet {
         Integer idKhachHang = Integer.parseInt(req.getParameter("idKhachHang"));
 
         DiaChiKhachHang diaChi = new DiaChiKhachHang();
-        diaChi.setTenNguoiNhan(req.getParameter("tenNguoiNhan"));
-        diaChi.setSdtNguoiNhan(req.getParameter("sdtNguoiNhan"));
         diaChi.setTinhThanh(req.getParameter("tinhThanh"));       // Tên tỉnh (từ hidden input)
         diaChi.setProvinceCode(req.getParameter("provinceCode"));  // Mã tỉnh từ API
         diaChi.setQuanHuyen("");                                   // Giữ NOT NULL, để trống vì form không còn thu thập

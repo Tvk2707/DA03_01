@@ -36,11 +36,12 @@ public class NhanVienDaoImpl extends GenericDaoImpl<NhanVien, Integer> implement
                 jpql = "SELECT n FROM NhanVien n WHERE n.trangThai = 1 AND (" +
                        "LOWER(n.hoTen) LIKE :kw OR " +
                        "LOWER(n.maNhanVien) LIKE :kw OR " +
-                       "LOWER(n.email) LIKE :kw)";
+                       "LOWER(n.email) LIKE :kw) " +
+                       "ORDER BY n.id DESC";
                 q = em.createQuery(jpql, NhanVien.class);
                 q.setParameter("kw", "%" + tuKhoa.trim().toLowerCase() + "%");
             } else {
-                jpql = "SELECT n FROM NhanVien n WHERE n.trangThai = 1";
+                jpql = "SELECT n FROM NhanVien n WHERE n.trangThai = 1 ORDER BY n.id DESC";
                 q = em.createQuery(jpql, NhanVien.class);
             }
             return q.getResultList();
@@ -89,7 +90,7 @@ public class NhanVienDaoImpl extends GenericDaoImpl<NhanVien, Integer> implement
         EntityManager em = EntityManagerUtlis.getEntityManager();
         try {
             TypedQuery<NhanVien> q = em.createQuery(
-                "SELECT n FROM NhanVien n WHERE n.trangThai = 1", NhanVien.class);
+                "SELECT n FROM NhanVien n WHERE n.trangThai = 1 ORDER BY n.id DESC", NhanVien.class);
             q.setFirstResult((pageNumber - 1) * pageSize);
             q.setMaxResults(pageSize);
             return q.getResultList();

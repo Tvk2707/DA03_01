@@ -1,4 +1,5 @@
 <%@ page import="QuanLySanPham.Entity.DiaChiKhachHang" %>
+<%@ page import="QuanLySanPham.Entity.KhachHang" %>
 <%@ page import="java.util.List" %>
 <%
     request.setAttribute("pageTitle", "Quản lý địa chỉ khách hàng");
@@ -195,6 +196,7 @@
         <%
             List<DiaChiKhachHang> listDiaChi = (List<DiaChiKhachHang>) request.getAttribute("listDiaChi");
             Integer idKhachHang = (Integer) request.getAttribute("idKhachHang");
+            KhachHang khachHang = (KhachHang) request.getAttribute("khachHang");
         %>
 
         <div class="address-page-heading">
@@ -217,17 +219,13 @@
                 <input type="hidden" name="wardCode"     id="hiddenWardCode">
 
                 <div class="form-group">
-                    <label>Tên người nhận <span class="required">*</span></label>
-                    <input type="text" name="tenNguoiNhan" id="tenNguoiNhan"
-                           placeholder="Nhập tên người nhận">
-                    <span class="error-msg" id="errTenNguoiNhan"></span>
+                    <label>Tên người nhận</label>
+                    <input type="text" value="<%= khachHang != null && khachHang.getHoTen() != null ? khachHang.getHoTen() : "" %>" readonly>
                 </div>
 
                 <div class="form-group">
-                    <label>SĐT người nhận <span class="required">*</span></label>
-                    <input type="text" name="sdtNguoiNhan" id="sdtNguoiNhan"
-                           placeholder="Nhập số điện thoại (10 chữ số)">
-                    <span class="error-msg" id="errSdtNguoiNhan"></span>
+                    <label>SĐT người nhận</label>
+                    <input type="text" value="<%= khachHang != null && khachHang.getSoDienThoai() != null ? khachHang.getSoDienThoai() : "" %>" readonly>
                 </div>
 
                 <div class="form-group">
@@ -470,7 +468,7 @@
             if (el) el.textContent = msg;
         }
         function clearErrors() {
-            ['errTenNguoiNhan', 'errSdtNguoiNhan', 'errTinhThanh', 'errPhuongXa', 'errDiaChiCuThe']
+            ['errTinhThanh', 'errPhuongXa', 'errDiaChiCuThe']
                 .forEach(function (id) { showError(id, ''); });
         }
 
@@ -480,26 +478,9 @@
             clearErrors();
 
             var valid  = true;
-            var ten    = document.getElementById('tenNguoiNhan').value.trim();
-            var sdt    = document.getElementById('sdtNguoiNhan').value.trim();
             var tinh   = hiddenProvCode.value;
             var phuong = hiddenWardCode.value;
             var diaChi = document.getElementById('diaChiCuThe').value.trim();
-
-            // Validate tên người nhận
-            if (!ten) {
-                showError('errTenNguoiNhan', 'Vui lòng nhập tên người nhận');
-                valid = false;
-            }
-
-            // Validate số điện thoại: đúng 10 chữ số
-            if (!sdt) {
-                showError('errSdtNguoiNhan', 'Vui lòng nhập số điện thoại');
-                valid = false;
-            } else if (!/^[0-9]{10}$/.test(sdt)) {
-                showError('errSdtNguoiNhan', 'Số điện thoại phải gồm đúng 10 chữ số');
-                valid = false;
-            }
 
             // Validate tỉnh/thành phố
             if (!tinh) {

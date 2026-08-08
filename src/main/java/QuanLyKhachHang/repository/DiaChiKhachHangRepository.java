@@ -40,6 +40,11 @@ public class DiaChiKhachHangRepository {
             tran.begin();
 
             KhachHang khachHang = em.find(KhachHang.class, idKhachHang);
+            if (khachHang == null) {
+                throw new IllegalArgumentException("Khong tim thay khach hang.");
+            }
+            diaChi.setTenNguoiNhan(khachHang.getHoTen());
+            diaChi.setSdtNguoiNhan(khachHang.getSoDienThoai());
             diaChi.setKhachHang(khachHang);
             em.persist(diaChi);
 
