@@ -134,6 +134,32 @@
             color: #b8956a;
         }
 
+        .readonly-info {
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 14px;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+            background: #f8fafc;
+            color: #475569;
+            font-weight: 600;
+        }
+
+        .readonly-info.role-manager {
+            background: #f5f3ff;
+            border-color: #ddd6fe;
+            color: #6d28d9;
+        }
+
+        .field-help {
+            margin-top: 7px;
+            color: #6b7280;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
         .form-actions {
             display: flex;
             justify-content: flex-end;
@@ -283,6 +309,17 @@
                     </div>
                 </div>
 
+                <div class="form-row full">
+                    <div class="form-group">
+                        <label>Quyền hệ thống</label>
+                        <div class="readonly-info ${nhanVien.vaiTro == 1 ? 'role-manager' : ''}">
+                            <i class="fas fa-user-shield"></i>
+                            ${nhanVien.vaiTro == 1 ? 'Quản lý' : 'Nhân viên'}
+                        </div>
+                        <div class="field-help">Quyền được thay đổi bằng chức năng Phân quyền tại danh sách nhân viên.</div>
+                    </div>
+                </div>
+
                 <div class="form-row">
                     <div class="form-group">
                         <label>Số điện thoại</label>
@@ -301,12 +338,11 @@
                     </div>
                     <div class="form-group">
                         <label>Mật khẩu</label>
-                        <div class="password-wrapper">
-                            <input type="password" name="matKhau" id="matKhauInput" value="${nhanVien.matKhau}">
-                            <button type="button" class="password-toggle-btn" id="toggleMatKhauBtn" onclick="toggleMatKhau()" title="Hiện/Ẩn mật khẩu">
-                                <i class="fas fa-eye" id="toggleMatKhauIcon"></i>
-                            </button>
+                        <div class="readonly-info">
+                            <i class="fas fa-lock"></i>
+                            Mật khẩu được bảo vệ và không hiển thị
                         </div>
+                        <div class="field-help">Cập nhật hồ sơ sẽ không thay đổi mật khẩu hiện tại.</div>
                     </div>
                 </div>
             </div>

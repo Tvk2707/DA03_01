@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="QuanLySanPham.Entity.NhanVien" %>
 <%
     // Lấy activeMenu một lần, xử lý null để tránh NullPointerException
     String activeMenu = (String) request.getAttribute("activeMenu");
@@ -7,6 +8,10 @@
     // Lấy activeSubMenu để highlight các mục con trong Quản lý sản phẩm
     String activeSubMenu = (String) request.getAttribute("activeSubMenu");
     if (activeSubMenu == null) activeSubMenu = "";
+
+    Object currentUserSidebarValue = session.getAttribute("nhanVienDangNhap");
+    boolean isManagerSidebar = currentUserSidebarValue instanceof NhanVien
+            && ((NhanVien) currentUserSidebarValue).isQuanLy();
 %>
 
 <aside class="sidebar" id="sidebar">
@@ -26,12 +31,21 @@
         <div class="menu-section">
             <div class="menu-title">Trang chủ</div>
             <ul class="menu-list">
+                <% if (isManagerSidebar) { %>
                 <li class="menu-item">
                     <a href="${pageContext.request.contextPath}/admin/thong-ke" class="menu-link <%= "dashboard".equals(activeMenu) ? "active" : "" %>">
                         <i class="fas fa-chart-bar"></i>
                         <span>Thống kê</span>
                     </a>
                 </li>
+                <% } else { %>
+                <li class="menu-item">
+                    <a href="${pageContext.request.contextPath}/SanPham" class="menu-link <%= "product".equals(activeMenu) ? "active" : "" %>">
+                        <i class="fas fa-house"></i>
+                        <span>Trang làm việc</span>
+                    </a>
+                </li>
+                <% } %>
             </ul>
         </div>
 
@@ -116,12 +130,14 @@
                         <span>Quản lý khách hàng</span>
                     </a>
                 </li>
+                <% if (isManagerSidebar) { %>
                 <li class="menu-item">
                     <a href="${pageContext.request.contextPath}/NhanVien" class="menu-link <%= "employee".equals(activeMenu) ? "active" : "" %>">
                         <i class="fas fa-user-tie"></i>
                         <span>Quản lý nhân viên</span>
                     </a>
                 </li>
+                <% } %>
             </ul>
         </div>
     </nav>

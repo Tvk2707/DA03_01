@@ -3,8 +3,6 @@ package QuanLySanPham.Entity;
 import jakarta.persistence.*;
 import java.util.List;
 import java.time.LocalDate;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "nhan_vien")
@@ -51,7 +49,7 @@ public class NhanVien {
     private Integer trangThai;
     // 0 = Nhân viên, 1 = Quản lý. Dùng để phân quyền, độc lập với "chucVu" (chỉ là chức danh hiển thị).
     @Column(name = "vai_tro")
-    private Integer vaiTro;
+    private Integer vaiTro = VAI_TRO_NHAN_VIEN;
 
     @OneToMany(mappedBy = "nhanVien")
     private List<HoaDon> hoaDons;
@@ -111,6 +109,20 @@ public class NhanVien {
 
     public boolean isQuanLy() {
         return vaiTro != null && vaiTro == VAI_TRO_QUAN_LY;
+    }
+
+    public String getTenVaiTro() {
+        return isQuanLy() ? "Quản lý" : "Nhân viên";
+    }
+
+    @PrePersist
+    private void ganGiaTriMacDinh() {
+        if (vaiTro == null) {
+            vaiTro = VAI_TRO_NHAN_VIEN;
+        }
+        if (trangThai == null) {
+            trangThai = 1;
+        }
     }
 
 }

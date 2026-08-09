@@ -9,7 +9,7 @@
     }
 
     String tenNhanVienHeader = "Chưa xác định";
-    String vaiTroNhanVienHeader = "Nhân viên bán hàng";
+    String vaiTroNhanVienHeader = "Chưa đăng nhập";
     String chuVietTatHeader = "NV";
 
     if (nhanVienHeaderValue instanceof NhanVien) {
@@ -26,11 +26,8 @@
         }
 
         String chucVu = nhanVienHeader.getChucVu() == null ? "" : nhanVienHeader.getChucVu().trim();
-        if (!chucVu.isEmpty()) {
-            vaiTroNhanVienHeader = chucVu;
-        } else if (nhanVienHeader.isQuanLy()) {
-            vaiTroNhanVienHeader = "Quản trị viên";
-        }
+        String tenQuyen = nhanVienHeader.isQuanLy() ? "Quyền Quản lý" : "Quyền Nhân viên";
+        vaiTroNhanVienHeader = chucVu.isEmpty() ? tenQuyen : chucVu + " • " + tenQuyen;
     }
 
     request.setAttribute("tenNhanVienHeader", tenNhanVienHeader);
@@ -88,7 +85,7 @@
                     </li>
                     <li class="dropdown-divider"></li>
                     <li class="dropdown-item">
-                        <a href="#" class="dropdown-link" style="color: #dc3545;">
+                        <a href="${pageContext.request.contextPath}/Logout" class="dropdown-link" style="color: #dc3545;">
                             <i class="fas fa-sign-out-alt"></i>
                             <span>Đăng xuất</span>
                         </a>

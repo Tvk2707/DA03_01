@@ -3,12 +3,15 @@ package QuanLySanPham.Utils;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.regex.Pattern;
 
 /**
  * Băm mật khẩu bằng SHA-256 - không cần thêm thư viện ngoài.
  * Mật khẩu lưu trong DB (cột mat_khau) sẽ ở dạng chuỗi hex đã băm, không phải plain text.
  */
 public class PasswordUtil {
+
+    private static final Pattern SHA_256_PATTERN = Pattern.compile("^[0-9a-fA-F]{64}$");
 
     private PasswordUtil() {}
 
@@ -29,6 +32,12 @@ public class PasswordUtil {
 
     public static boolean matches(String rawPassword, String hashedPassword) {
         if (rawPassword == null || hashedPassword == null) return false;
-        return hash(rawPassword).equalsIgnoreCase(hashedPassword);
+        byte[] actual = hash(rawPassword).toLowerCase().getBytes(StandardCharsets.UTF_8);
+        byte[] expected = hashedPassword.toLowerCase().getBytes(StandardCharsets.UTF_8);
+        return MessageDigest.isEqual(actual, expected);
+    }
+
+    public static boolean isHashed(String value) {
+        return value != null && SHA_256_PATTERN.matcher(value.trim()).matches();
     }
 }

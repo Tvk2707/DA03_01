@@ -134,6 +134,47 @@
             color: #b8956a;
         }
 
+        .field-help {
+            margin-top: 7px;
+            color: #6b7280;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .role-readonly {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-height: 44px;
+            padding: 0 14px;
+            border: 1px solid #dbeafe;
+            border-radius: 6px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-weight: 700;
+        }
+
+        .password-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .btn-inline {
+            border: 1px solid #d9c7ae;
+            border-radius: 6px;
+            background: #fff;
+            color: #8b6744;
+            padding: 7px 11px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .btn-inline:hover {
+            background: #faf7f2;
+        }
+
         .form-actions {
             display: flex;
             justify-content: flex-end;
@@ -300,6 +341,19 @@
                     </div>
                 </div>
 
+                <div class="form-row full">
+                    <div class="form-group">
+                        <label>Quyền hệ thống</label>
+                        <div class="role-readonly">
+                            <i class="fas fa-user-shield"></i>
+                            Nhân viên
+                        </div>
+                        <div class="field-help">
+                            Tài khoản mới luôn được cấp quyền Nhân viên. Quyền Quản lý chỉ được thay đổi tại danh sách nhân viên.
+                        </div>
+                    </div>
+                </div>
+
                 <div class="form-row">
                     <div class="form-group">
                         <label>Số điện thoại</label>
@@ -330,11 +384,20 @@
                             <c:otherwise>
                                 <div class="password-wrapper">
                                     <input type="password" id="matKhauInput" value="${generatedMatKhau}" readonly style="background-color:#f5f5f5;cursor:not-allowed;" autocomplete="new-password">
-                                    <input type="hidden" name="matKhau" value="${generatedMatKhau}">
+                                    <input type="hidden" name="matKhau" id="matKhauHidden" value="${generatedMatKhau}">
                                     <button type="button" class="password-toggle-btn" id="toggleMatKhauBtn" onclick="toggleMatKhau()" title="Hiện/Ẩn mật khẩu">
                                         <i class="fas fa-eye" id="toggleMatKhauIcon"></i>
                                     </button>
                                 </div>
+                                <div class="password-actions">
+                                    <button type="button" class="btn-inline" onclick="copyMatKhau()">
+                                        <i class="fas fa-copy"></i> Sao chép
+                                    </button>
+                                    <button type="button" class="btn-inline" onclick="regenerateMatKhau()">
+                                        <i class="fas fa-rotate"></i> Tạo lại
+                                    </button>
+                                </div>
+                                <div class="field-help">Đây là mật khẩu tạm để nhân viên đăng nhập lần đầu.</div>
                             </c:otherwise>
                         </c:choose>
                     </div>
@@ -429,6 +492,25 @@
             icon.classList.add('fa-eye');
         }
     }
+
+    function copyMatKhau() {
+        var input = document.getElementById('matKhauInput');
+        navigator.clipboard.writeText(input.value).then(function () {
+            alert('Đã sao chép mật khẩu tạm.');
+        });
+    }
+
+    function regenerateMatKhau() {
+        var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        var randomValues = new Uint32Array(8);
+        window.crypto.getRandomValues(randomValues);
+        var password = Array.from(randomValues, function (value) {
+            return chars[value % chars.length];
+        }).join('');
+        document.getElementById('matKhauInput').value = password;
+        document.getElementById('matKhauHidden').value = password;
+    }
+
 </script>
 
 </body>

@@ -12,5 +12,6 @@ public interface NhanVienService {
     List<NhanVien> layCoPhanTrang(int pageNumber, int pageSize);
     List<NhanVien> timKiem(String tuKhoa);
     NhanVien dangNhap(String taiKhoan, String matKhau) throws Exception;
+    NhanVien capNhatVaiTro(Integer nhanVienId, Integer vaiTroMoi, Integer nguoiThucHienId);
 }
 

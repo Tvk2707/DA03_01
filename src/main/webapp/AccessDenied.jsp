@@ -19,6 +19,7 @@
         .box i { font-size: 56px; color: #b3261e; }
         .box h2 { color: #4a4a4a; margin: 16px 0 8px; }
         .box p { color: #777; margin-bottom: 24px; }
+        .actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
         .box a {
             display: inline-block;
             padding: 10px 22px;
@@ -29,6 +30,7 @@
             font-weight: 600;
         }
         .box a:hover { background: #8b6744; }
+        .box a.secondary { background: #fff; color: #8b6744; border: 1px solid #d9c7ae; }
     </style>
 </head>
 <body>
@@ -36,7 +38,10 @@
         <i class="fas fa-lock"></i>
         <h2>Bạn không có quyền truy cập</h2>
         <p>${not empty error ? error : 'Chức năng này chỉ dành cho Quản lý.'}</p>
-        <a href="${pageContext.request.contextPath}/SanPham">Về trang chủ</a>
+        <div class="actions">
+            <a href="${pageContext.request.contextPath}/SanPham">Về trang làm việc</a>
+            <a href="${pageContext.request.contextPath}/Logout" class="secondary">Đăng nhập tài khoản khác</a>
+        </div>
     </div>
 </body>
 </html>

@@ -1,6 +1,7 @@
 package QuanLyNhanVien.controller;
 
 import QuanLySanPham.Entity.NhanVien;
+import QuanLySanPham.controller.LoginServlet;
 import QuanLyNhanVien.service.NhanVienService;
 import QuanLyNhanVien.service.impl.NhanVienServiceImpl;
 import QuanLySanPham.Utils.EmailService;
@@ -11,6 +12,8 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import com.google.gson.JsonObject;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -21,7 +24,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
 
-@WebServlet(name = "NhanVienServlet", value = {"/NhanVien","/NhanVien/new","/NhanVien/insert","/NhanVien/edit","/NhanVien/update","/NhanVien/delete","/NhanVien/search","/NhanVien/export"})
+@WebServlet(name = "NhanVienServlet", value = {"/NhanVien","/NhanVien/new","/NhanVien/insert","/NhanVien/edit","/NhanVien/update","/NhanVien/delete","/NhanVien/search","/NhanVien/export","/NhanVien/role"})
 public class NhanVienServlet extends HttpServlet {
     private final NhanVienService nhanVienService = new NhanVienServiceImpl();
     private final NhanVienDao nhanVienDao = new NhanVienDaoImpl();
@@ -69,6 +72,9 @@ public class NhanVienServlet extends HttpServlet {
                 break;
             case "/NhanVien/search":
                 search(request, response);
+                break;
+            case "/NhanVien/role":
+                updateRole(request, response);
                 break;
             default:
                 response.sendRedirect(request.getContextPath() + "/NhanVien");
@@ -129,13 +135,15 @@ public class NhanVienServlet extends HttpServlet {
         try {
             NhanVien nv = getNhanVienFrom(request);
             validateChucVu(nv.getChucVu());
+            String matKhauTam = nv.getMatKhau();
             // 1. Lưu nhân viên vào Database
             nv.setMaNhanVien(generateMaNhanVien());
+            nv.setVaiTro(NhanVien.VAI_TRO_NHAN_VIEN);
             nhanVienService.themNhanVien(nv);
 
             // 2. Gửi Email thông báo chạy ngầm cho nhân viên mới (kèm mật khẩu)
             if (nv.getEmail() != null && !nv.getEmail().trim().isEmpty()) {
-                final String matKhauGui = nv.getMatKhau();
+                final String matKhauGui = matKhauTam;
                 new Thread(() -> {
                     String tieuDe = "Thông báo: Tài khoản nhân viên mới đã được khởi tạo";
                     String noiDung = "<h3>Xin chào " + nv.getHoTen() + ",</h3>"
@@ -155,9 +163,12 @@ public class NhanVienServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/NhanVien");
         } catch (Exception e) {
             request.setAttribute("error", e.getMessage());
-            request.setAttribute("nhanVien", getNhanVienFrom(request));
+            NhanVien nhanVienForm = getNhanVienFrom(request);
+            request.setAttribute("nhanVien", nhanVienForm);
             request.setAttribute("action", "add");
             request.setAttribute("chucVuHopLe", CHUC_VU_HOP_LE);
+            request.setAttribute("generatedMaNV", nhanVienForm.getMaNhanVien());
+            request.setAttribute("generatedMatKhau", nhanVienForm.getMatKhau());
             request.getRequestDispatcher("/Admin/QuanLyNhanVien/NhanVienAdd.jsp").forward(request, response);
         }
     }
@@ -167,36 +178,86 @@ public class NhanVienServlet extends HttpServlet {
             NhanVien nv = getNhanVienFrom(request);
             validateChucVu(nv.getChucVu());
             nv.setId(Integer.parseInt(request.getParameter("id")));
+            NhanVien currentUser = getCurrentUser(request);
+            if (currentUser != null && currentUser.getId().equals(nv.getId())
+                    && nv.getTrangThai() != null && nv.getTrangThai() == 0) {
+                throw new IllegalArgumentException("Bạn không thể tự vô hiệu hóa tài khoản của chính mình");
+            }
             nhanVienService.capNhatNhanVien(nv);
             response.sendRedirect(request.getContextPath() + "/NhanVien");
         } catch (Exception e) {
             request.setAttribute("error", e.getMessage());
-            request.setAttribute("nhanVien", getNhanVienFrom(request));
+            NhanVien nhanVienForm = getNhanVienFrom(request);
+            String id = request.getParameter("id");
+            if (id != null && !id.isBlank()) {
+                nhanVienForm.setId(Integer.parseInt(id));
+            }
+            request.setAttribute("nhanVien", nhanVienForm);
             request.setAttribute("action", "edit");
             request.setAttribute("chucVuHopLe", CHUC_VU_HOP_LE);
             request.getRequestDispatcher("/Admin/QuanLyNhanVien/NhanVienEdit.jsp").forward(request, response);
         }
     }
 
+    private void updateRole(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("application/json;charset=UTF-8");
+        JsonObject result = new JsonObject();
+        try {
+            HttpSession session = request.getSession(false);
+            Object currentUser = session == null ? null : session.getAttribute(LoginServlet.SESSION_KEY);
+            if (!(currentUser instanceof NhanVien)) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                throw new IllegalStateException("Phiên đăng nhập đã hết hạn");
+            }
+
+            Integer nhanVienId = Integer.valueOf(request.getParameter("id"));
+            Integer vaiTroMoi = Integer.valueOf(request.getParameter("vaiTro"));
+            NhanVien updated = nhanVienService.capNhatVaiTro(
+                    nhanVienId, vaiTroMoi, ((NhanVien) currentUser).getId());
+
+            result.addProperty("success", true);
+            result.addProperty("message", "Đã cập nhật quyền thành " + updated.getTenVaiTro());
+            result.addProperty("vaiTro", updated.getVaiTro());
+            result.addProperty("tenVaiTro", updated.getTenVaiTro());
+        } catch (Exception e) {
+            if (response.getStatus() < 400) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            }
+            result.addProperty("success", false);
+            result.addProperty("message", e.getMessage());
+        }
+        response.getWriter().write(result.toString());
+    }
+
     private void delete(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         boolean isAjax = "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
         try {
             Integer id = Integer.parseInt(request.getParameter("id"));
+            NhanVien currentUser = getCurrentUser(request);
+            if (currentUser != null && currentUser.getId().equals(id)) {
+                throw new IllegalArgumentException("Bạn không thể tự vô hiệu hóa tài khoản của chính mình");
+            }
             // Lấy tên nhân viên trước khi xóa để hiện toast
             NhanVien nv = nhanVienService.timTheoId(id);
             String hoTen = (nv != null) ? nv.getHoTen() : "Nhân viên";
             nhanVienService.xoaNhanVien(id);
             if (isAjax) {
                 response.setContentType("application/json;charset=UTF-8");
-                response.getWriter().write("{\"success\":true,\"hoTen\":\"" + hoTen + "\"}");
+                JsonObject result = new JsonObject();
+                result.addProperty("success", true);
+                result.addProperty("hoTen", hoTen);
+                response.getWriter().write(result.toString());
             } else {
                 response.sendRedirect(request.getContextPath() + "/NhanVien");
             }
         } catch (Exception e) {
             if (isAjax) {
                 response.setContentType("application/json;charset=UTF-8");
-                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                response.getWriter().write("{\"success\":false,\"message\":\"" + e.getMessage() + "\"}");
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                JsonObject result = new JsonObject();
+                result.addProperty("success", false);
+                result.addProperty("message", e.getMessage());
+                response.getWriter().write(result.toString());
             } else {
                 request.setAttribute("error", e.getMessage());
                 showList(request, response);
@@ -245,6 +306,12 @@ public class NhanVienServlet extends HttpServlet {
         return nv;
     }
 
+    private NhanVien getCurrentUser(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        Object value = session == null ? null : session.getAttribute(LoginServlet.SESSION_KEY);
+        return value instanceof NhanVien ? (NhanVien) value : null;
+    }
+
     private void validateChucVu(String chucVu) {
         if (chucVu == null || !CHUC_VU_HOP_LE_SET.contains(chucVu.trim())) {
             throw new IllegalArgumentException("Vui lòng chọn chức vụ hợp lệ.");
@@ -252,17 +319,17 @@ public class NhanVienServlet extends HttpServlet {
     }
 
     /**
-     * Tự sinh mã nhân viên dạng NV0001, NV0002,...
+     * Tự sinh mã nhân viên dạng MNV0001, MNV0002,...
      */
     private String generateMaNhanVien() {
         String maxMa = nhanVienDao.findMaxMaNhanVien();
         int nextNumber = 1;
-        if (maxMa != null && maxMa.startsWith("NV")) {
+        if (maxMa != null && maxMa.startsWith("MNV")) {
             try {
-                nextNumber = Integer.parseInt(maxMa.substring(2)) + 1;
+                nextNumber = Integer.parseInt(maxMa.substring(3)) + 1;
             } catch (NumberFormatException ignored) {}
         }
-        return String.format("NV%04d", nextNumber);
+        return String.format("MNV%04d", nextNumber);
     }
 
     /**
@@ -345,7 +412,7 @@ public class NhanVienServlet extends HttpServlet {
             Cell titleCell = titleRow.createCell(0);
             titleCell.setCellValue("DANH SÁCH NHÂN VIÊN");
             titleCell.setCellStyle(titleStyle);
-            sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 8));
+            sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 9));
 
             // ── Row 1: Ngày xuất ────────────────────────────────
             Row dateRow = sheet.createRow(1);
@@ -359,13 +426,13 @@ public class NhanVienServlet extends HttpServlet {
             dateCell.setCellValue("Ngày xuất: " +
                 java.time.LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
             dateCell.setCellStyle(dateStyle);
-            sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, 8));
+            sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, 9));
 
             // ── Row 2: trống ────────────────────────────────────
             sheet.createRow(2);
 
             // ── Row 3: Header cột ───────────────────────────────
-            String[] headers = {"STT", "Mã NV", "Họ và tên", "Chức vụ",
+            String[] headers = {"STT", "Mã NV", "Họ và tên", "Chức vụ", "Quyền hệ thống",
                                  "Giới tính", "Ngày sinh", "Số điện thoại", "Email", "Địa chỉ"};
             Row headerRow = sheet.createRow(3);
             headerRow.setHeightInPoints(22);
@@ -403,36 +470,41 @@ public class NhanVienServlet extends HttpServlet {
                 chucVuCell.setCellValue(nv.getChucVu() != null ? nv.getChucVu() : "");
                 chucVuCell.setCellStyle(isAlt ? dataStyleAlt : dataStyle);
 
+                // Quyền hệ thống
+                Cell vaiTroCell = row.createCell(4);
+                vaiTroCell.setCellValue(nv.getTenVaiTro());
+                vaiTroCell.setCellStyle(isAlt ? centerStyleAlt : centerStyle);
+
                 // Giới tính
-                Cell gioiTinhCell = row.createCell(4);
+                Cell gioiTinhCell = row.createCell(5);
                 gioiTinhCell.setCellValue(
                     nv.getGioiTinh() != null && nv.getGioiTinh() == 1 ? "Nam" : "Nữ");
                 gioiTinhCell.setCellStyle(isAlt ? centerStyleAlt : centerStyle);
 
                 // Ngày sinh
-                Cell ngaySinhCell = row.createCell(5);
+                Cell ngaySinhCell = row.createCell(6);
                 ngaySinhCell.setCellValue(
                     nv.getNgaySinh() != null ? nv.getNgaySinh().format(dtf) : "");
                 ngaySinhCell.setCellStyle(isAlt ? centerStyleAlt : centerStyle);
 
                 // SĐT
-                Cell sdtCell = row.createCell(6);
+                Cell sdtCell = row.createCell(7);
                 sdtCell.setCellValue(nv.getSoDienThoai() != null ? nv.getSoDienThoai() : "");
                 sdtCell.setCellStyle(isAlt ? centerStyleAlt : centerStyle);
 
                 // Email
-                Cell emailCell = row.createCell(7);
+                Cell emailCell = row.createCell(8);
                 emailCell.setCellValue(nv.getEmail() != null ? nv.getEmail() : "");
                 emailCell.setCellStyle(isAlt ? dataStyleAlt : dataStyle);
 
                 // Địa chỉ
-                Cell diaChiCell = row.createCell(8);
+                Cell diaChiCell = row.createCell(9);
                 diaChiCell.setCellValue(nv.getDiaChi() != null ? nv.getDiaChi() : "");
                 diaChiCell.setCellStyle(isAlt ? dataStyleAlt : dataStyle);
             }
 
             // ── Auto-size cột ───────────────────────────────────
-            int[] colWidths = {8, 12, 25, 22, 12, 14, 16, 30, 22};
+            int[] colWidths = {8, 12, 25, 22, 18, 12, 14, 16, 30, 22};
             for (int i = 0; i < colWidths.length; i++) {
                 sheet.setColumnWidth(i, colWidths[i] * 256);
             }

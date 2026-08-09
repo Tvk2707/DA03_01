@@ -109,6 +109,45 @@
             color: #9ca3af;
         }
 
+        .filter-select {
+            min-width: 170px;
+            height: 42px;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            background: #fff;
+            color: #374151;
+            font-size: 14px;
+        }
+
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .role-employee {
+            color: #1d4ed8;
+            background: #dbeafe;
+        }
+
+        .role-manager {
+            color: #6d28d9;
+            background: #ede9fe;
+        }
+
+        .btn-role {
+            border: none;
+            cursor: pointer;
+            background: transparent;
+            color: #7c3aed;
+        }
+
         /* Nút bấm chuẩn */
         .btn-primary {
             background-color: #b4975a;
@@ -368,6 +407,75 @@
             }
         }
 
+        /* Phân trang danh sách nhân viên */
+        .sp-pagination {
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            box-sizing: border-box;
+            margin-top: 18px;
+            padding: 18px 4px 2px;
+            border-top: 1px solid #eee7dd;
+        }
+
+        .sp-page-btn {
+            min-width: 38px;
+            height: 38px;
+            padding: 0 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            border: 1px solid #e1d7c9;
+            border-radius: 9px;
+            background: #ffffff;
+            color: #6b5a45;
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 1;
+            text-decoration: none;
+            box-shadow: 0 2px 5px rgba(94, 72, 45, 0.08);
+            transition: transform 0.18s ease, background-color 0.18s ease,
+                        border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .sp-page-btn:hover {
+            transform: translateY(-1px);
+            border-color: #b4975a;
+            background: #faf7f2;
+            color: #8b6744;
+            box-shadow: 0 4px 10px rgba(180, 151, 90, 0.18);
+        }
+
+        .sp-page-btn.active {
+            border-color: #b4975a;
+            background: linear-gradient(135deg, #b4975a, #9a7942);
+            color: #ffffff;
+            box-shadow: 0 4px 10px rgba(154, 121, 66, 0.28);
+            pointer-events: none;
+        }
+
+        .sp-page-btn:focus-visible {
+            outline: 3px solid rgba(180, 151, 90, 0.25);
+            outline-offset: 2px;
+        }
+
+        @media (max-width: 768px) {
+            .sp-pagination {
+                gap: 6px;
+                padding-top: 14px;
+            }
+
+            .sp-page-btn {
+                min-width: 36px;
+                height: 36px;
+                padding: 0 10px;
+            }
+        }
+
         /* ========================================================== */
         /* 🖨️ CSS DÀNH CHO IN ẤN                                      */
         /* ========================================================== */
@@ -536,6 +644,12 @@
                                placeholder="Tìm theo tên, mã nhân viên, email...">
                     </div>
 
+                    <select id="roleFilter" class="filter-select" onchange="filterByRole()" aria-label="Lọc theo quyền">
+                        <option value="">Tất cả quyền</option>
+                        <option value="0">Nhân viên</option>
+                        <option value="1">Quản lý</option>
+                    </select>
+
                     <button type="submit" class="btn-primary">
                         <i class="fas fa-search"></i> Tìm kiếm
                     </button>
@@ -576,6 +690,7 @@
                 <th>STT</th>
                 <th>NHÂN VIÊN</th>
                 <th>CHỨC VỤ</th>
+                <th>QUYỀN HỆ THỐNG</th>
                 <th>GIỚI TÍNH</th>
                 <th>LIÊN HỆ</th>
                 <th>ĐỊA CHỈ</th>
@@ -585,7 +700,7 @@
             </thead>
             <tbody id="nhanVienBody">
             <c:forEach var="nv" items="${items}" varStatus="status">
-                <tr id="row-${nv.id}">
+                <tr id="row-${nv.id}" data-role="${nv.vaiTro == 1 ? '1' : '0'}">
                     <td><span class="category-id">${status.index + 1 + (currentPage - 1) * 10}</span></td>
 
                     <%-- Nhân viên: Mã + Tên --%>
@@ -594,6 +709,13 @@
                         <strong style="color: #1f2937;">${nv.hoTen}</strong>
                     </td>
                     <td title="${nv.chucVu}">${nv.chucVu}</td>
+                    <td>
+                        <span id="role-badge-${nv.id}"
+                              class="role-badge ${nv.vaiTro == 1 ? 'role-manager' : 'role-employee'}">
+                            <i class="fas ${nv.vaiTro == 1 ? 'fa-user-shield' : 'fa-user'}"></i>
+                            ${nv.vaiTro == 1 ? 'Quản lý' : 'Nhân viên'}
+                        </span>
+                    </td>
                     <td>${nv.gioiTinh == 1 ? 'Nam' : 'Nữ'}</td>
 
                     <%-- Liên hệ: SĐT + Email --%>
@@ -624,10 +746,21 @@
                                 <i class="fas fa-pen"></i>
                             </a>
                             <button type="button"
+                                    class="btn-icon-circle btn-role"
+                                    title="Phân quyền"
+                                    data-id="${nv.id}"
+                                    data-name="<c:out value='${nv.hoTen}'/>"
+                                    data-role="${nv.vaiTro == 1 ? '1' : '0'}"
+                                    onclick="openRoleModal(this)">
+                                <i class="fas fa-user-shield"></i>
+                            </button>
+                            <button type="button"
                                     class="btn-icon-circle"
                                     title="Xóa"
                                     style="border:none; cursor:pointer; background:transparent;"
-                                    onclick="openDeleteModal(${nv.id}, '${nv.hoTen}')">
+                                    data-id="${nv.id}"
+                                    data-name="<c:out value='${nv.hoTen}'/>"
+                                    onclick="openDeleteModal(this)">
                                 <i class="fas fa-trash-alt" style="color:#dc2626;"></i>
                             </button>
                         </div>
@@ -637,7 +770,7 @@
 
             <c:if test="${empty items}">
                 <tr id="emptyRow">
-                    <td colspan="8" style="text-align: center; padding: 40px; color: #9ca3af;">
+                    <td colspan="9" style="text-align: center; padding: 40px; color: #9ca3af;">
                         <i class="fas fa-users-slash" style="font-size: 28px; margin-bottom: 12px; display: block;"></i>
                         Không tìm thấy nhân viên nào.
                     </td>
@@ -691,17 +824,47 @@
     </div>
 </div>
 
+<!-- MODAL PHÂN QUYỀN -->
+<div class="modal-overlay" id="roleModal">
+    <div class="modal-box">
+        <div class="modal-icon" style="color:#7c3aed;background:#f5f3ff;">
+            <i class="fas fa-user-shield"></i>
+        </div>
+        <div class="modal-title">Thay đổi quyền hệ thống</div>
+        <div class="modal-desc">
+            Cập nhật quyền cho <strong id="roleEmployeeName"></strong>.
+            <div style="margin-top:16px;text-align:left;">
+                <label for="roleSelect" style="display:block;font-weight:700;margin-bottom:8px;">Quyền mới</label>
+                <select id="roleSelect" class="filter-select" style="width:100%;">
+                    <option value="0">Nhân viên</option>
+                    <option value="1">Quản lý</option>
+                </select>
+                <div style="font-size:12px;color:#6b7280;margin-top:8px;line-height:1.5;">
+                    Quản lý có thể xem thống kê, quản lý nhân viên và thay đổi quyền tài khoản.
+                </div>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-modal-cancel" onclick="closeRoleModal()">Hủy bỏ</button>
+            <button class="btn-modal-confirm" id="confirmRoleBtn" style="background:#7c3aed;">
+                <i class="fas fa-check"></i> Lưu quyền
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
     const CTX = '${pageContext.request.contextPath}';
     let pendingDeleteId = null;
     let pendingDeleteName = '';
+    let pendingRoleId = null;
 
     /* Mở modal xác nhận xóa */
-    function openDeleteModal(id, hoTen) {
-        pendingDeleteId = id;
-        pendingDeleteName = hoTen;
+    function openDeleteModal(button) {
+        pendingDeleteId = button.dataset.id;
+        pendingDeleteName = button.dataset.name;
         document.getElementById('modalDesc').innerHTML =
-            'Bạn có chắc muốn xóa nhân viên <strong>' + hoTen + '</strong> khỏi danh sách?<br>' +
+            'Bạn có chắc muốn xóa nhân viên <strong>' + escapeHtml(pendingDeleteName) + '</strong> khỏi danh sách?<br>' +
             '<span style="font-size:13px;color:#9ca3af;">Dữ liệu vẫn được bảo toàn trong hệ thống.</span>';
         document.getElementById('deleteModal').classList.add('show');
     }
@@ -716,6 +879,73 @@
     document.getElementById('deleteModal').addEventListener('click', function(e) {
         if (e.target === this) closeDeleteModal();
     });
+
+    function openRoleModal(button) {
+        pendingRoleId = button.dataset.id;
+        document.getElementById('roleEmployeeName').textContent = button.dataset.name;
+        document.getElementById('roleSelect').value = button.dataset.role;
+        document.getElementById('roleModal').classList.add('show');
+    }
+
+    function closeRoleModal() {
+        document.getElementById('roleModal').classList.remove('show');
+        pendingRoleId = null;
+    }
+
+    document.getElementById('roleModal').addEventListener('click', function(e) {
+        if (e.target === this) closeRoleModal();
+    });
+
+    document.getElementById('confirmRoleBtn').addEventListener('click', function () {
+        if (!pendingRoleId) return;
+        const id = pendingRoleId;
+        const role = document.getElementById('roleSelect').value;
+        closeRoleModal();
+
+        fetch(CTX + '/NhanVien/role', {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: 'id=' + encodeURIComponent(id) + '&vaiTro=' + encodeURIComponent(role)
+        })
+        .then(async response => {
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Không thể cập nhật quyền');
+            return data;
+        })
+        .then(data => {
+            const row = document.getElementById('row-' + id);
+            const badge = document.getElementById('role-badge-' + id);
+            const button = row.querySelector('.btn-role');
+            row.dataset.role = String(data.vaiTro);
+            button.dataset.role = String(data.vaiTro);
+            badge.className = 'role-badge ' + (data.vaiTro === 1 ? 'role-manager' : 'role-employee');
+            badge.innerHTML = '<i class="fas ' + (data.vaiTro === 1 ? 'fa-user-shield' : 'fa-user') + '"></i> ' + data.tenVaiTro;
+            filterByRole();
+            showToast('success', '✓ ' + data.message);
+        })
+        .catch(error => showToast('error', '✕ ' + error.message));
+    });
+
+    function filterByRole() {
+        const selectedRole = document.getElementById('roleFilter').value;
+        const rows = document.querySelectorAll('#nhanVienBody tr[id^="row-"]');
+        let visible = 0;
+        rows.forEach(row => {
+            const show = !selectedRole || row.dataset.role === selectedRole;
+            row.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+        document.getElementById('countNum').textContent = visible;
+    }
+
+    function escapeHtml(value) {
+        const div = document.createElement('div');
+        div.textContent = value || '';
+        return div.innerHTML;
+    }
 
     /* Xác nhận xóa — AJAX */
     document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
@@ -745,7 +975,7 @@
                         updateCount();
                     }, 420);
                 }
-                showToast('success', '✓ Đã xóa nhân viên <strong>' + name + '</strong> khỏi danh sách');
+                showToast('success', '✓ Đã xóa nhân viên <strong>' + escapeHtml(name) + '</strong> khỏi danh sách');
             } else {
                 showToast('error', '✕ Lỗi: ' + (data.message || 'Không thể xóa'));
             }
@@ -758,7 +988,6 @@
     /* Cập nhật số đếm + đánh lại STT sau khi ẩn dòng */
     function updateCount() {
         const rows = document.querySelectorAll('#nhanVienBody tr[id^="row-"]');
-        document.getElementById('countNum').textContent = rows.length;
 
         // Đánh lại số thứ tự liên tục
         rows.forEach(function(row, index) {
@@ -770,9 +999,11 @@
 
         if (rows.length === 0) {
             const tbody = document.getElementById('nhanVienBody');
-            tbody.innerHTML = '<tr id="emptyRow"><td colspan="8" style="text-align:center;padding:40px;color:#9ca3af;">' +
+            tbody.innerHTML = '<tr id="emptyRow"><td colspan="9" style="text-align:center;padding:40px;color:#9ca3af;">' +
                 '<i class="fas fa-users-slash" style="font-size:28px;margin-bottom:12px;display:block;"></i>' +
                 'Không tìm thấy nhân viên nào.</td></tr>';
+        } else {
+            filterByRole();
         }
     }
 
