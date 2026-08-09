@@ -103,12 +103,16 @@ public class NhanVienDaoImpl extends GenericDaoImpl<NhanVien, Integer> implement
     public String findMaxMaNhanVien() {
         EntityManager em = EntityManagerUtlis.getEntityManager();
         try {
-            TypedQuery<String> q = em.createQuery(
-                "SELECT n.maNhanVien FROM NhanVien n WHERE n.maNhanVien LIKE 'MNV%' ORDER BY n.maNhanVien DESC",
-                String.class);
-            q.setMaxResults(1);
-            List<String> list = q.getResultList();
-            return list.isEmpty() ? null : list.get(0);
+            // SQL Server: sắp xếp theo phần số thay vì theo chuỗi để MNV10000 > MNV9999.
+            // Không lọc trạng thái để mã của nhân viên đã vô hiệu hóa cũng không bị tái sử dụng.
+            List<?> result = em.createNativeQuery(
+                    "SELECT TOP 1 ma_nhan_vien " +
+                    "FROM nhan_vien " +
+                    "WHERE ma_nhan_vien LIKE 'MNV%' " +
+                    "AND TRY_CONVERT(INT, SUBSTRING(ma_nhan_vien, 4, LEN(ma_nhan_vien) - 3)) IS NOT NULL " +
+                    "ORDER BY TRY_CONVERT(INT, SUBSTRING(ma_nhan_vien, 4, LEN(ma_nhan_vien) - 3)) DESC")
+                .getResultList();
+            return result.isEmpty() ? null : String.valueOf(result.get(0));
         } finally {
             em.close();
         }
