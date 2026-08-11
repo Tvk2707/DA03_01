@@ -612,6 +612,14 @@
 </head>
 <body>
 <%@ include file="../layout/sidebar.jsp" %>
+
+<c:if test="${not empty successMessage}">
+    <div id="employeeFlashToast" class="toast-custom toast-success" role="status" aria-live="polite">
+        <i class="fas fa-circle-check" aria-hidden="true"></i>
+        <span><c:out value="${successMessage}" /></span>
+    </div>
+</c:if>
+
 <div class="dashboard-container">
     <%@ include file="../layout/header.jsp" %>
 
@@ -1023,6 +1031,16 @@
             toast.style.opacity = '0';
             toast.style.transform = 'translateX(60px)';
             setTimeout(() => toast.remove(), 420);
+        }, 3500);
+    }
+
+    const employeeFlashToast = document.getElementById('employeeFlashToast');
+    if (employeeFlashToast) {
+        setTimeout(() => {
+            employeeFlashToast.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+            employeeFlashToast.style.opacity = '0';
+            employeeFlashToast.style.transform = 'translateX(60px)';
+            setTimeout(() => employeeFlashToast.remove(), 420);
         }, 3500);
     }
 

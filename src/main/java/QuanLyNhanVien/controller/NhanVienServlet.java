@@ -26,6 +26,7 @@ import java.util.Set;
 
 @WebServlet(name = "NhanVienServlet", value = {"/NhanVien","/NhanVien/new","/NhanVien/insert","/NhanVien/edit","/NhanVien/update","/NhanVien/delete","/NhanVien/search","/NhanVien/export","/NhanVien/role"})
 public class NhanVienServlet extends HttpServlet {
+    private static final String FLASH_SUCCESS_KEY = "nhanVienSuccessMessage";
     private final NhanVienService nhanVienService = new NhanVienServiceImpl();
     private final NhanVienDao nhanVienDao = new NhanVienDaoImpl();
     private static final List<String> CHUC_VU_HOP_LE = List.of(
@@ -82,6 +83,8 @@ public class NhanVienServlet extends HttpServlet {
     }
 
     private void showList(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        moveFlashMessageToRequest(request, FLASH_SUCCESS_KEY, "successMessage");
+
         String pageStr = request.getParameter("page");
         int page = (pageStr != null && !pageStr.isEmpty()) ? Integer.parseInt(pageStr) : 1;
         int pageSize = 10;
@@ -160,6 +163,7 @@ public class NhanVienServlet extends HttpServlet {
                 }).start();
             }
 
+            request.getSession().setAttribute(FLASH_SUCCESS_KEY, "Thêm nhân viên thành công.");
             response.sendRedirect(request.getContextPath() + "/NhanVien");
         } catch (Exception e) {
             request.setAttribute("error", e.getMessage());
@@ -170,6 +174,19 @@ public class NhanVienServlet extends HttpServlet {
             request.setAttribute("generatedMaNV", nhanVienForm.getMaNhanVien());
             request.setAttribute("generatedMatKhau", nhanVienForm.getMatKhau());
             request.getRequestDispatcher("/Admin/QuanLyNhanVien/NhanVienAdd.jsp").forward(request, response);
+        }
+    }
+
+    private void moveFlashMessageToRequest(HttpServletRequest request, String sessionKey, String requestKey) {
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            return;
+        }
+
+        Object message = session.getAttribute(sessionKey);
+        if (message != null) {
+            request.setAttribute(requestKey, message);
+            session.removeAttribute(sessionKey);
         }
     }
 
