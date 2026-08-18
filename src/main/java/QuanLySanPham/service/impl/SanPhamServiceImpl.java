@@ -165,8 +165,9 @@ public class SanPhamServiceImpl implements SanPhamService {
     }
 
     @Override
-    public List<SanPham> timKiem(String tenSanPham, Integer danhMucId, Integer thuongHieuId, Double giaTu, Double giaDen) {
-        return sanPhamDao.search(tenSanPham, danhMucId, thuongHieuId, giaTu, giaDen);
+    public List<SanPham> timKiem(String tuKhoa, Integer danhMucId, Integer thuongHieuId,
+                                Double giaTu, Double giaDen, Integer trangThai) {
+        return sanPhamDao.search(tuKhoa, danhMucId, thuongHieuId, giaTu, giaDen, trangThai);
     }
 
     @Override

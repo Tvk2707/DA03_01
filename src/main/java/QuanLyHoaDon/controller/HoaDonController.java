@@ -24,6 +24,7 @@ public class HoaDonController extends HttpServlet {
             // GET /admin/hoa-don: lấy danh sách hóa đơn và chuyển sang trang JSP.
             String pageStr = request.getParameter("page");
             String sizeStr = request.getParameter("size");
+            String keyword = normalizeKeyword(request.getParameter("keyword"));
 
             int currentPage = parseInt(pageStr, 1);
             int pageSize = parseInt(sizeStr, 10);
@@ -36,7 +37,7 @@ public class HoaDonController extends HttpServlet {
                 pageSize = 10;
             }
 
-            long totalCount = hoaDonService.countHoaDon();
+            long totalCount = hoaDonService.countHoaDon(keyword);
             int totalPages = (int) Math.ceil((double) totalCount / pageSize);
 
             if (totalPages < 1) {
@@ -47,11 +48,12 @@ public class HoaDonController extends HttpServlet {
                 currentPage = totalPages;
             }
 
-            request.setAttribute("hoaDonList", hoaDonService.getHoaDonWithPaging(currentPage, pageSize));
+            request.setAttribute("hoaDonList", hoaDonService.getHoaDonWithPaging(currentPage, pageSize, keyword));
             request.setAttribute("currentPage", currentPage);
             request.setAttribute("pageSize", pageSize);
             request.setAttribute("totalCount", totalCount);
             request.setAttribute("totalPages", totalPages);
+            request.setAttribute("keyword", keyword);
 
             request.getRequestDispatcher("/FE/Admin/QuanLyHoaDon/quan_ly_hoa_don.jsp").forward(request, response);
         } catch (SQLException exception) {
@@ -89,6 +91,10 @@ public class HoaDonController extends HttpServlet {
         } catch (NumberFormatException exception) {
             return defaultValue;
         }
+    }
+
+    private String normalizeKeyword(String value) {
+        return value == null ? "" : value.trim();
     }
 
 }

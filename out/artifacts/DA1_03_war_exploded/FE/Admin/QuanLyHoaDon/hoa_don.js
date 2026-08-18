@@ -27,6 +27,7 @@
         }
 
         const rows = Array.from(table.querySelectorAll('tbody tr'));
+        const searchForm = document.getElementById('filterBody');
         const searchInput = document.getElementById('orderSearch');
         const typeFilter = document.getElementById('orderTypeFilter');
         const statusFilter = document.getElementById('statusFilter');
@@ -39,7 +40,9 @@
         const exportButton = document.getElementById('btnExportOrders');
         const resetButton = document.getElementById('btnResetFilters');
         const tabs = Array.from(document.querySelectorAll('#statusTabs .invoice-tab'));
+        const serverTotalCount = Number(orderCount.dataset.totalCount || rows.length);
         let selectedTabStatus = 'all';
+        let searchTimer;
 
         // Mặc định bộ lọc "Đến ngày" là ngày hiện tại mỗi khi mở trang.
         if (toDate && !toDate.value) {
@@ -80,7 +83,7 @@
 
             emptyState.classList.toggle('is-visible', visibleCount === 0);
             table.style.display = visibleCount === 0 ? 'none' : 'table';
-            orderCount.textContent = 'Hiển thị ' + visibleCount + ' / tổng ' + rows.length + ' hóa đơn';
+            orderCount.textContent = 'Hiển thị ' + visibleCount + ' / tổng ' + serverTotalCount + ' hóa đơn';
         }
 
         // Xuất các dòng đang hiển thị ra file CSV.
@@ -108,7 +111,19 @@
             showToast('Đã xuất danh sách hóa đơn hiện tại');
         }
 
-        searchInput.addEventListener('input', filterRows);
+        searchInput.addEventListener('input', () => {
+            // Lọc tức thời các dòng đang có, sau đó tìm trên toàn bộ database.
+            filterRows();
+            window.clearTimeout(searchTimer);
+            searchTimer = window.setTimeout(() => {
+                const currentKeyword = new URLSearchParams(window.location.search).get('keyword') || '';
+                const nextKeyword = (searchInput.value || '').trim();
+
+                if (nextKeyword !== currentKeyword.trim()) {
+                    searchForm.requestSubmit();
+                }
+            }, 500);
+        });
         typeFilter.addEventListener('change', filterRows);
         statusFilter.addEventListener('change', filterRows);
         fromDate.addEventListener('change', filterRows);
@@ -121,15 +136,9 @@
 
         // Xóa tất cả điều kiện lọc và hiện lại toàn bộ hóa đơn.
         resetButton.addEventListener('click', () => {
-            searchInput.value = '';
-            typeFilter.value = 'all';
-            statusFilter.value = 'all';
-            fromDate.value = '';
-            toDate.value = '';
-            selectedTabStatus = 'all';
-            tabs.forEach((tab) => tab.classList.toggle('is-active', tab.dataset.status === 'all'));
-            filterRows();
-            showToast('Đã đặt lại bộ lọc hóa đơn');
+            const sizeInput = searchForm.querySelector('input[name="size"]');
+            const pageSize = sizeInput ? sizeInput.value : '10';
+            window.location.href = searchForm.action + '?page=1&size=' + encodeURIComponent(pageSize);
         });
 
         // Lọc nhanh theo các tab trạng thái.

@@ -24,12 +24,12 @@ public interface SanPhamDao extends GenericDao<SanPham, Integer> {
     List<SanPham> findByThuongHieu(Integer thuongHieuId);
 
     /**
-     * Tìm kiếm sản phẩm theo tên, danh mục, thương hiệu, và khoảng giá
+     * Tìm kiếm sản phẩm theo mã hoặc tên, danh mục, thương hiệu, khoảng giá và trạng thái.
      * Nếu giá trị nào là null, bỏ qua điều kiện đó
      * (Chỉ trả về các sản phẩm chưa bị xóa)
      */
-    List<SanPham> search(String tenSanPham, Integer danhMucId, Integer thuongHieuId,
-                         Double giaMin, Double giaMax);
+    List<SanPham> search(String tuKhoa, Integer danhMucId, Integer thuongHieuId,
+                         Double giaMin, Double giaMax, Integer trangThai);
 
     // --- CÁC HÀM CƠ BẢN ĐƯỢC OVERRIDE ĐỂ LỌC XÓA MỀM ---
     // Nếu GenericDao đã có sẵn thì không cần khai báo lại cũng được,

@@ -154,8 +154,8 @@ public class SanPhamDaoImpl extends GenericDaoImpl<SanPham, Integer> implements 
     }
 
     @Override
-    public List<SanPham> search(String tenSanPham, Integer danhMucId, Integer thuongHieuId,
-                                Double giaMin, Double giaMax) {
+    public List<SanPham> search(String tuKhoa, Integer danhMucId, Integer thuongHieuId,
+                                Double giaMin, Double giaMax, Integer trangThai) {
         EntityManager em = EntityManagerUtlis.getEntityManager();
         try {
             // 1. Khởi tạo câu JPQL chính: Cần JOIN sang SanPhamChiTiet (đặt alias là ct) để tính khoảng giá
@@ -173,14 +173,18 @@ public class SanPhamDaoImpl extends GenericDaoImpl<SanPham, Integer> implements 
             );
 
             // 2. Thêm các điều kiện lọc cơ bản
-            if (tenSanPham != null && !tenSanPham.trim().isEmpty()) {
-                jpql.append(" AND LOWER(s.tenSanPham) LIKE LOWER(:tenSanPham)");
+            if (tuKhoa != null && !tuKhoa.trim().isEmpty()) {
+                jpql.append(" AND (LOWER(s.tenSanPham) LIKE LOWER(:tuKhoa)"
+                        + " OR LOWER(s.maSanPham) LIKE LOWER(:tuKhoa))");
             }
             if (danhMucId != null) {
                 jpql.append(" AND s.danhMuc.id = :danhMucId");
             }
             if (thuongHieuId != null) {
                 jpql.append(" AND s.thuongHieu.id = :thuongHieuId");
+            }
+            if (trangThai != null) {
+                jpql.append(" AND s.trangThai = :trangThai");
             }
 
             // 3. Sử dụng SUBQUERY với HAVING để lọc chính xác khoảng giá dựa trên bảng con SanPhamChiTiet
@@ -205,14 +209,17 @@ public class SanPhamDaoImpl extends GenericDaoImpl<SanPham, Integer> implements 
             TypedQuery<SanPham> query = em.createQuery(jpql.toString(), SanPham.class);
 
             // 4. Truyền tham số (Set Parameter) vào câu Query
-            if (tenSanPham != null && !tenSanPham.trim().isEmpty()) {
-                query.setParameter("tenSanPham", "%" + tenSanPham + "%");
+            if (tuKhoa != null && !tuKhoa.trim().isEmpty()) {
+                query.setParameter("tuKhoa", "%" + tuKhoa.trim() + "%");
             }
             if (danhMucId != null) {
                 query.setParameter("danhMucId", danhMucId);
             }
             if (thuongHieuId != null) {
                 query.setParameter("thuongHieuId", thuongHieuId);
+            }
+            if (trangThai != null) {
+                query.setParameter("trangThai", trangThai);
             }
 
             // Truyền tham số khoảng giá kiểu BigDecimal (vì cột giaBan trong DB của bạn dùng BigDecimal)

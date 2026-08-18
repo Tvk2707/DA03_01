@@ -25,16 +25,16 @@ public class HoaDonService {
         return hoaDonDAO.findAll();
     }
 
-    public List<HoaDonView> getHoaDonWithPaging(int pageNumber, int pageSize) throws SQLException {
+    public List<HoaDonView> getHoaDonWithPaging(int pageNumber, int pageSize, String keyword) throws SQLException {
         if (pageNumber < 1 || pageSize < 1) {
             throw new IllegalArgumentException("Số trang và kích thước trang phải >= 1");
         }
 
-        return hoaDonDAO.findWithPaging(pageNumber, pageSize);
+        return hoaDonDAO.findWithPaging(pageNumber, pageSize, keyword);
     }
 
-    public long countHoaDon() throws SQLException {
-        return hoaDonDAO.countAll();
+    public long countHoaDon(String keyword) throws SQLException {
+        return hoaDonDAO.countAll(keyword);
     }
 
     public HoaDonView getHoaDonById(int id) throws SQLException {

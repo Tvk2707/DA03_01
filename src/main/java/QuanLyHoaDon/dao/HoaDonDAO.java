@@ -52,7 +52,7 @@ public class HoaDonDAO {
         }
     }
 
-    public List<HoaDonView> findWithPaging(int pageNumber, int pageSize) throws SQLException {
+    public List<HoaDonView> findWithPaging(int pageNumber, int pageSize, String keyword) throws SQLException {
         String sql = "SELECT hd.id, hd.ma_hoa_don, hd.ten_nguoi_nhan, hd.sdt_nguoi_nhan, "
                 + "hd.id_nhan_vien, hd.tong_tien_thanh_toan, hd.trang_thai, hd.ngay_tao, hd.ghi_chu, "
                 + "nv.ho_ten AS ten_nhan_vien, nv.ma_nhan_vien AS ma_nhan_vien, "
@@ -64,16 +64,31 @@ public class HoaDonDAO {
                 + "LEFT JOIN khach_hang kh ON hd.id_khach_hang = kh.id "
                 + "LEFT JOIN phieu_giam_gia pgg ON hd.id_phieu_giam_gia = pgg.id "
                 + "WHERE NOT (hd.trang_thai = 5 AND hd.ly_do_huy LIKE N'Xóa mềm%') "
+                + "AND (? = '' "
+                + "OR hd.ma_hoa_don LIKE ? "
+                + "OR hd.ten_nguoi_nhan LIKE ? "
+                + "OR kh.ho_ten LIKE ? "
+                + "OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(hd.sdt_nguoi_nhan, ' ', ''), '-', ''), '.', ''), '(', ''), ')', '') LIKE ? "
+                + "OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(kh.so_dien_thoai, ' ', ''), '-', ''), '.', ''), '(', ''), ')', '') LIKE ?) "
                 + "ORDER BY hd.id DESC "
                 + "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
         int offset = (pageNumber - 1) * pageSize;
+        String normalizedKeyword = normalizeKeyword(keyword);
+        String textPattern = "%" + normalizedKeyword + "%";
+        String phonePattern = "%" + normalizePhone(normalizedKeyword) + "%";
 
         try (Connection connection = connectionManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
 
-            statement.setInt(1, offset);
-            statement.setInt(2, pageSize);
+            statement.setString(1, normalizedKeyword);
+            statement.setString(2, textPattern);
+            statement.setString(3, textPattern);
+            statement.setString(4, textPattern);
+            statement.setString(5, phonePattern);
+            statement.setString(6, phonePattern);
+            statement.setInt(7, offset);
+            statement.setInt(8, pageSize);
 
             try (ResultSet resultSet = statement.executeQuery()) {
                 List<HoaDonView> invoices = new ArrayList<>();
@@ -87,17 +102,36 @@ public class HoaDonDAO {
         }
     }
 
-    public long countAll() throws SQLException {
+    public long countAll(String keyword) throws SQLException {
         String sql = "SELECT COUNT(*) "
                 + "FROM hoa_don hd "
-                + "WHERE NOT (hd.trang_thai = 5 AND hd.ly_do_huy LIKE N'Xóa mềm%')";
+                + "LEFT JOIN khach_hang kh ON hd.id_khach_hang = kh.id "
+                + "WHERE NOT (hd.trang_thai = 5 AND hd.ly_do_huy LIKE N'Xóa mềm%') "
+                + "AND (? = '' "
+                + "OR hd.ma_hoa_don LIKE ? "
+                + "OR hd.ten_nguoi_nhan LIKE ? "
+                + "OR kh.ho_ten LIKE ? "
+                + "OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(hd.sdt_nguoi_nhan, ' ', ''), '-', ''), '.', ''), '(', ''), ')', '') LIKE ? "
+                + "OR REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(kh.so_dien_thoai, ' ', ''), '-', ''), '.', ''), '(', ''), ')', '') LIKE ?)";
+
+        String normalizedKeyword = normalizeKeyword(keyword);
+        String textPattern = "%" + normalizedKeyword + "%";
+        String phonePattern = "%" + normalizePhone(normalizedKeyword) + "%";
 
         try (Connection connection = connectionManager.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql);
-             ResultSet resultSet = statement.executeQuery()) {
+             PreparedStatement statement = connection.prepareStatement(sql)) {
 
-            if (resultSet.next()) {
-                return resultSet.getLong(1);
+            statement.setString(1, normalizedKeyword);
+            statement.setString(2, textPattern);
+            statement.setString(3, textPattern);
+            statement.setString(4, textPattern);
+            statement.setString(5, phonePattern);
+            statement.setString(6, phonePattern);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getLong(1);
+                }
             }
 
             return 0;
@@ -350,6 +384,18 @@ public class HoaDonDAO {
 
     private BigDecimal defaultMoney(BigDecimal value) {
         return value == null ? BigDecimal.ZERO : value;
+    }
+
+    private String normalizeKeyword(String keyword) {
+        return keyword == null ? "" : keyword.trim();
+    }
+
+    private String normalizePhone(String value) {
+        return value.replace(" ", "")
+                .replace("-", "")
+                .replace(".", "")
+                .replace("(", "")
+                .replace(")", "");
     }
 
     private String normalizeImagePath(String value, String defaultDirectory) {

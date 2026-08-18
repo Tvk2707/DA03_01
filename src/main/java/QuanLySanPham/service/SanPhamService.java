@@ -48,10 +48,11 @@ public interface SanPhamService {
     List<SanPham> layCoPhanTrang(int pageNumber, int pageSize);
     
     /**
-     * Tìm kiếm sản phẩm theo tên, danh mục, thương hiệu
-     * Các tham số có thể null - nếu null thì bỏ qua điều kiện đó
+     * Tìm kiếm sản phẩm theo mã hoặc tên, danh mục, thương hiệu, khoảng giá và trạng thái.
+     * Các tham số có thể null - nếu null thì bỏ qua điều kiện đó.
      */
-    List<SanPham> timKiem(String tenSanPham, Integer danhMucId, Integer thuongHieuId, Double giaTu, Double giaDen);
+    List<SanPham> timKiem(String tuKhoa, Integer danhMucId, Integer thuongHieuId,
+                         Double giaTu, Double giaDen, Integer trangThai);
     void softdelete(Integer id);
 
     /**

@@ -144,17 +144,20 @@ public class SanPhamServlet extends HttpServlet {
         String tenSanPham = request.getParameter("tenSanPham");
         String danhMucIdStr = request.getParameter("danhMucId");
         String thuongHieuIdStr = request.getParameter("thuongHieuId");
+        String trangThaiStr = request.getParameter("trangThai");
 
         String giaTuStr = request.getParameter("giaTu");
         String giaDenStr = request.getParameter("giaDen");
 
         Integer danhMucId = (danhMucIdStr != null && !danhMucIdStr.isEmpty()) ? Integer.parseInt(danhMucIdStr) : null;
         Integer thuongHieuId = (thuongHieuIdStr != null && !thuongHieuIdStr.isEmpty()) ? Integer.parseInt(thuongHieuIdStr) : null;
+        Integer trangThai = (trangThaiStr != null && !trangThaiStr.isEmpty()) ? Integer.parseInt(trangThaiStr) : null;
 
         Double giaTu = (giaTuStr != null && !giaTuStr.isEmpty()) ? Double.parseDouble(giaTuStr) : null;
         Double giaDen = (giaDenStr != null && !giaDenStr.isEmpty()) ? Double.parseDouble(giaDenStr) : null;
 
-        List<SanPham> items = sanPhamService.timKiem(tenSanPham, danhMucId, thuongHieuId, giaTu, giaDen);
+        List<SanPham> items = sanPhamService.timKiem(
+                tenSanPham, danhMucId, thuongHieuId, giaTu, giaDen, trangThai);
 
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setHeader("Content-Disposition", "attachment; filename=Danh_Sach_San_Pham.xlsx");
@@ -222,7 +225,7 @@ public class SanPhamServlet extends HttpServlet {
         int pageSize = 10;
 
         List<SanPham> items = sanPhamService.layCoPhanTrang(page, pageSize);
-        long totalCount = sanPhamService.timKiem("", null, null, null, null).size();
+        long totalCount = sanPhamService.timKiem("", null, null, null, null, null).size();
         int totalPages = (int) Math.ceil((double) totalCount / pageSize);
 
         setLookupAttributes(request);
@@ -236,7 +239,7 @@ public class SanPhamServlet extends HttpServlet {
     }
 
     private void showAddSanPham(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        int count = sanPhamService.timKiem("", null, null, null, null).size();
+        int count = sanPhamService.timKiem("", null, null, null, null, null).size();
         String autoMa = String.format("SCPP%03d", count + 1);
         request.setAttribute("autoMaSanPham", autoMa);
 
@@ -392,19 +395,22 @@ public class SanPhamServlet extends HttpServlet {
         String tenSanPham = request.getParameter("tenSanPham");
         String danhMucIdStr = request.getParameter("danhMucId");
         String thuongHieuIdStr = request.getParameter("thuongHieuId");
+        String trangThaiStr = request.getParameter("trangThai");
 
         String giaTuStr = request.getParameter("giaTu");
         String giaDenStr = request.getParameter("giaDen");
 
         Integer danhMucId = (danhMucIdStr != null && !danhMucIdStr.isEmpty()) ? Integer.parseInt(danhMucIdStr) : null;
         Integer thuongHieuId = (thuongHieuIdStr != null && !thuongHieuIdStr.isEmpty()) ? Integer.parseInt(thuongHieuIdStr) : null;
+        Integer trangThai = (trangThaiStr != null && !trangThaiStr.isEmpty()) ? Integer.parseInt(trangThaiStr) : null;
         String pageStr = request.getParameter("page");
         int page = (pageStr != null && !pageStr.isEmpty()) ? Integer.parseInt(pageStr) : 1;
 
         Double giaTu = (giaTuStr != null && !giaTuStr.isEmpty()) ? Double.parseDouble(giaTuStr) : null;
         Double giaDen = (giaDenStr != null && !giaDenStr.isEmpty()) ? Double.parseDouble(giaDenStr) : null;
 
-        List<SanPham> items = sanPhamService.timKiem(tenSanPham, danhMucId, thuongHieuId, giaTu, giaDen);
+        List<SanPham> items = sanPhamService.timKiem(
+                tenSanPham, danhMucId, thuongHieuId, giaTu, giaDen, trangThai);
 
         request.setAttribute("items", items);
         request.setAttribute("currentPage", page);
@@ -413,6 +419,7 @@ public class SanPhamServlet extends HttpServlet {
         request.setAttribute("searchTenSanPham", tenSanPham);
         request.setAttribute("searchDanhMucId", danhMucId);
         request.setAttribute("searchThuongHieuId", thuongHieuId);
+        request.setAttribute("searchTrangThai", trangThaiStr);
 
         request.setAttribute("searchGiaTu", giaTuStr);
         request.setAttribute("searchGiaDen", giaDenStr);

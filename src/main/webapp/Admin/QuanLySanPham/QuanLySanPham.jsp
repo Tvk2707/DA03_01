@@ -537,12 +537,12 @@
             <form action="${pageContext.request.contextPath}/SanPham/search" method="post" id="filterForm">
                 <div class="filter-grid">
                     <div class="filter-group">
-                        <label class="filter-label">Tìm kiếm</label>
+                        <label class="filter-label">Mã hoặc tên sản phẩm</label>
                         <input type="text"
                                name="tenSanPham"
                                value="${searchTenSanPham}"
                                class="filter-input"
-                               placeholder="Tìm kiếm ...">
+                               placeholder="Nhập mã hoặc tên sản phẩm...">
                     </div>
 
                     <div class="filter-group">
@@ -573,7 +573,7 @@
                         <label class="filter-label">Trạng thái</label>
                         <select name="trangThai" class="filter-select">
                             <option value="">Tất cả</option>
-                            <option value="1" ${'1' == searchTrangThai ? 'selected' : ''}>Hoạt động</option>
+                            <option value="1" ${'1' == searchTrangThai ? 'selected' : ''}>Đang kinh doanh</option>
                             <option value="0" ${'0' == searchTrangThai ? 'selected' : ''}>Ngừng bán</option>
                         </select>
                     </div>
@@ -634,7 +634,7 @@
 
                 <div class="filter-action-row">
                     <div class="filter-action-left">
-                        <c:if test="${not empty searchTenSanPham || not empty searchDanhMucId || not empty searchThuongHieuId || not empty searchGiaTu || not empty searchGiaDen}">
+                        <c:if test="${not empty searchTenSanPham || not empty searchDanhMucId || not empty searchThuongHieuId || not empty searchTrangThai || not empty searchGiaTu || not empty searchGiaDen}">
                             <a href="${pageContext.request.contextPath}/SanPham"
                                style="padding: 10px 20px; background: #fee2e2; color: #dc2626; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 14px;">
                                 <i class="fas fa-xmark"></i> Xóa bộ lọc nâng cao
@@ -660,7 +660,15 @@
                 Hiển thị <span>${fn:length(items)}</span> sản phẩm
             </div>
             <div style="display: flex; gap: 12px; align-items: center;">
-                <a href="${pageContext.request.contextPath}/SanPham/export" class="btn-secondary-outline">
+                <c:url var="exportUrl" value="/SanPham/export">
+                    <c:param name="tenSanPham" value="${searchTenSanPham}"/>
+                    <c:param name="danhMucId" value="${searchDanhMucId}"/>
+                    <c:param name="thuongHieuId" value="${searchThuongHieuId}"/>
+                    <c:param name="trangThai" value="${searchTrangThai}"/>
+                    <c:param name="giaTu" value="${searchGiaTu}"/>
+                    <c:param name="giaDen" value="${searchGiaDen}"/>
+                </c:url>
+                <a href="${exportUrl}" class="btn-secondary-outline">
                     <i class="fas fa-file-export"></i> Xuất Excel
                 </a>
 

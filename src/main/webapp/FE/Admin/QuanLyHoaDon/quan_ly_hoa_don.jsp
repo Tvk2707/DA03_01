@@ -3,6 +3,8 @@
 <%@ page import="java.time.LocalDate" %>
 <%@ page import="java.time.format.DateTimeFormatter" %>
 <%@ page import="java.util.List" %>
+<%@ page import="java.net.URLEncoder" %>
+<%@ page import="java.nio.charset.StandardCharsets" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
     // Nếu người dùng mở trực tiếp JSP thì chuyển về controller để nạp dữ liệu trước.
@@ -19,11 +21,15 @@
     Integer pageSize = (Integer) request.getAttribute("pageSize");
     Integer totalPages = (Integer) request.getAttribute("totalPages");
     Long totalCount = (Long) request.getAttribute("totalCount");
+    String keyword = (String) request.getAttribute("keyword");
 
     if (currentPage == null) currentPage = 1;
     if (pageSize == null) pageSize = 10;
     if (totalPages == null) totalPages = 1;
     if (totalCount == null) totalCount = 0L;
+    if (keyword == null) keyword = "";
+
+    String encodedKeyword = URLEncoder.encode(keyword, StandardCharsets.UTF_8);
 
     DecimalFormat moneyFormat = new DecimalFormat("#,###");
     DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -35,6 +41,14 @@
 
     private String attr(String value) {
         return text(value)
+                .replace("&", "&amp;")
+                .replace("\"", "&quot;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;");
+    }
+
+    private String attrValue(String value) {
+        return (value == null ? "" : value)
                 .replace("&", "&amp;")
                 .replace("\"", "&quot;")
                 .replace("<", "&lt;")
@@ -114,10 +128,14 @@
                 </span>
                 <span class="toggle-note">Nhấn để thu gọn/mở rộng</span>
             </button>
-            <div class="invoice-filter-body" id="filterBody">
+            <form class="invoice-filter-body" id="filterBody" action="<%= request.getContextPath() %>/admin/hoa-don" method="get">
+                <input type="hidden" name="page" value="1">
+                <input type="hidden" name="size" value="<%= pageSize %>">
                 <label class="invoice-field">
                     <span>Tìm kiếm</span>
-                    <input id="orderSearch" type="search" placeholder="Nhập mã hóa đơn, khách hàng hoặc SĐT">
+                    <input id="orderSearch" name="keyword" type="search"
+                           value="<%= attrValue(keyword) %>"
+                           placeholder="Nhập mã hóa đơn, khách hàng hoặc SĐT">
                 </label>
                 <label class="invoice-field">
                     <span>Loại hóa đơn</span>
@@ -144,7 +162,7 @@
                     <span>Đến ngày</span>
                     <input id="toDateFilter" type="date">
                 </label>
-            </div>
+            </form>
         </section>
 
         <%-- Bảng danh sách hóa đơn lấy từ request attribute hoaDonList. --%>
@@ -192,19 +210,23 @@
                         String customerName = hoaDon.getTenNguoiNhan() == null || hoaDon.getTenNguoiNhan().trim().isEmpty()
                                 ? hoaDon.getTenKhachHang()
                                 : hoaDon.getTenNguoiNhan();
+                        String customerPhone = hoaDon.getSoDienThoai() == null || hoaDon.getSoDienThoai().trim().isEmpty()
+                                ? hoaDon.getSoDienThoaiKhachHang()
+                                : hoaDon.getSoDienThoai();
                         String searchText = (hoaDon.getMaHoaDon() + " "
                                 + text(customerName) + " "
                                 + text(hoaDon.getTenNguoiNhan()) + " "
                                 + text(hoaDon.getTenKhachHang()) + " "
-                                + text(hoaDon.getSoDienThoai())).toLowerCase();
+                                + text(hoaDon.getSoDienThoai()) + " "
+                                + text(hoaDon.getSoDienThoaiKhachHang())).toLowerCase();
                     %>
                     <%-- Mỗi dòng table tương ứng với 1 hóa đơn trong database. --%>
-                    <tr data-search="<%= searchText %>" data-status="<%= statusLabel %>" data-type="<%= invoiceType %>" data-date="<%= dateValue %>">
+                    <tr data-search="<%= attr(searchText) %>" data-status="<%= statusLabel %>" data-type="<%= invoiceType %>" data-date="<%= dateValue %>">
                         <td><%= i + 1 + ((currentPage - 1) * pageSize) %></td>
                         <td><strong><%= hoaDon.getMaHoaDon() %></strong></td>
                         <td><%= text(hoaDon.getMaNhanVien()) %></td>
                         <td><%= text(customerName) %></td>
-                        <td><%= text(hoaDon.getSoDienThoai()) %></td>
+                        <td><%= text(customerPhone) %></td>
                         <td><span class="invoice-pill"><%= invoiceType %></span></td>
                         <td class="invoice-money"><%= moneyFormat.format(hoaDon.getTongTienThanhToan()) %> đ</td>
                         <td><%= hoaDon.getNgayTao() == null ? "-" : hoaDon.getNgayTao().format(dateFormat) %></td>
@@ -233,13 +255,13 @@
             </div>
 
             <div class="invoice-table-footer">
-                <span id="orderCount">
+                <span id="orderCount" data-total-count="<%= totalCount %>">
                     Hiển thị <%= hoaDonList.size() %> / tổng <%= totalCount %> hóa đơn
                 </span>
 
                 <div class="invoice-pagination">
                     <% if (currentPage > 1) { %>
-                        <a href="<%= request.getContextPath() %>/admin/hoa-don?page=<%= currentPage - 1 %>&size=<%= pageSize %>">
+                        <a href="<%= request.getContextPath() %>/admin/hoa-don?page=<%= currentPage - 1 %>&size=<%= pageSize %>&keyword=<%= encodedKeyword %>">
                             <i class="fas fa-chevron-left"></i>
                         </a>
                     <% } else { %>
@@ -249,7 +271,7 @@
                     <span>Trang <strong><%= currentPage %></strong> / <%= totalPages %></span>
 
                     <% if (currentPage < totalPages) { %>
-                        <a href="<%= request.getContextPath() %>/admin/hoa-don?page=<%= currentPage + 1 %>&size=<%= pageSize %>">
+                        <a href="<%= request.getContextPath() %>/admin/hoa-don?page=<%= currentPage + 1 %>&size=<%= pageSize %>&keyword=<%= encodedKeyword %>">
                             <i class="fas fa-chevron-right"></i>
                         </a>
                     <% } else { %>
@@ -258,7 +280,7 @@
                 </div>
 
                 <select aria-label="Số bản ghi mỗi trang"
-                        onchange="window.location.href='<%= request.getContextPath() %>/admin/hoa-don?page=1&size=' + this.value">
+                        onchange="window.location.href='<%= request.getContextPath() %>/admin/hoa-don?page=1&keyword=<%= encodedKeyword %>&size=' + this.value">
                     <option value="10" <%= pageSize == 10 ? "selected" : "" %>>10 bản ghi / trang</option>
                     <option value="20" <%= pageSize == 20 ? "selected" : "" %>>20 bản ghi / trang</option>
                     <option value="50" <%= pageSize == 50 ? "selected" : "" %>>50 bản ghi / trang</option>
@@ -277,6 +299,6 @@
     </div>
 </div>
 
-<script src="<%= request.getContextPath() %>/FE/Admin/QuanLyHoaDon/hoa_don.js"></script>
+<script src="<%= request.getContextPath() %>/FE/Admin/QuanLyHoaDon/hoa_don.js?v=20260818-phone-search"></script>
 </body>
 </html>
