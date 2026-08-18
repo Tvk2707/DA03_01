@@ -245,6 +245,19 @@
             font-size: 16px;
         }
 
+        .form-group input.is-invalid,
+        .form-group select.is-invalid {
+            border-color: #dc2626;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.08);
+        }
+
+        .field-error {
+            min-height: 18px;
+            margin-top: 6px;
+            color: #dc2626;
+            font-size: 12px;
+        }
+
         @media (max-width: 768px) {
             .form-row {
                 grid-template-columns: 1fr;
@@ -356,12 +369,19 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Số điện thoại</label>
-                        <input type="text" name="soDienThoai" value="${nhanVien.soDienThoai}">
+                        <label>Số điện thoại <span style="color:#d32f2f;">*</span></label>
+                        <input type="text" name="soDienThoai" value="${nhanVien.soDienThoai}"
+                               class="${not empty errors.soDienThoai ? 'is-invalid' : ''}"
+                               aria-invalid="${not empty errors.soDienThoai}"
+                               inputmode="numeric" maxlength="10" pattern="0[0-9]{9}" required>
+                        <small class="field-error" data-error-for="soDienThoai"><c:out value="${errors.soDienThoai}"/></small>
                     </div>
                     <div class="form-group">
-                        <label>Email liên hệ</label>
-                        <input type="email" name="email" value="${nhanVien.email}" autocomplete="new-password">
+                        <label>Email liên hệ <span style="color:#d32f2f;">*</span></label>
+                        <input type="email" name="email" value="${nhanVien.email}" autocomplete="new-password"
+                               class="${not empty errors.email ? 'is-invalid' : ''}"
+                               aria-invalid="${not empty errors.email}" maxlength="150" required>
+                        <small class="field-error" data-error-for="email"><c:out value="${errors.email}"/></small>
                     </div>
                 </div>
 
@@ -413,8 +433,9 @@
 
                 <div class="form-row full">
                     <div class="form-group">
-                        <label>Địa chỉ (Tỉnh/Thành phố)</label>
-                        <select name="diaChi">
+                        <label>Địa chỉ (Tỉnh/Thành phố) <span style="color:#d32f2f;">*</span></label>
+                        <select name="diaChi" class="${not empty errors.diaChi ? 'is-invalid' : ''}"
+                                aria-invalid="${not empty errors.diaChi}" required>
                             <option value="">-- Chọn tỉnh/thành phố --</option>
                             <option value="Tuyên Quang" ${nhanVien.diaChi == 'Tuyên Quang' ? 'selected' : ''}>Tuyên Quang</option>
                             <option value="Cao Bằng" ${nhanVien.diaChi == 'Cao Bằng' ? 'selected' : ''}>Cao Bằng</option>
@@ -451,6 +472,7 @@
                             <option value="TP. Cần Thơ" ${nhanVien.diaChi == 'TP. Cần Thơ' ? 'selected' : ''}>TP. Cần Thơ</option>
                             <option value="Cà Mau" ${nhanVien.diaChi == 'Cà Mau' ? 'selected' : ''}>Cà Mau</option>
                         </select>
+                        <small class="field-error" data-error-for="diaChi"><c:out value="${errors.diaChi}"/></small>
                     </div>
                 </div>
 
@@ -510,6 +532,68 @@
         document.getElementById('matKhauInput').value = password;
         document.getElementById('matKhauHidden').value = password;
     }
+
+    (function () {
+        var form = document.getElementById('nhanVienForm');
+        var requiredFields = {
+            soDienThoai: 'Vui lòng nhập số điện thoại.',
+            email: 'Vui lòng nhập email.',
+            diaChi: 'Vui lòng chọn địa chỉ.'
+        };
+        var phonePattern = /^0\d{9}$/;
+        var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        function getValidationMessage(fieldName, value) {
+            var normalizedValue = value.trim();
+            if (!normalizedValue) return requiredFields[fieldName];
+            if (fieldName === 'soDienThoai' && !phonePattern.test(normalizedValue)) {
+                return 'Số điện thoại phải gồm 10 chữ số và bắt đầu bằng 0.';
+            }
+            if (fieldName === 'email' && !emailPattern.test(normalizedValue)) {
+                return 'Email không đúng định dạng.';
+            }
+            return '';
+        }
+
+        function setFieldError(field, message) {
+            var errorElement = form.querySelector('[data-error-for="' + field.name + '"]');
+            field.classList.toggle('is-invalid', Boolean(message));
+            field.setAttribute('aria-invalid', message ? 'true' : 'false');
+            if (errorElement) {
+                errorElement.textContent = message || '';
+            }
+        }
+
+        Object.keys(requiredFields).forEach(function (fieldName) {
+            var field = form.elements[fieldName];
+            if (!field) return;
+            field.addEventListener(field.tagName === 'SELECT' ? 'change' : 'input', function () {
+                if (field.classList.contains('is-invalid')) {
+                    setFieldError(field, getValidationMessage(fieldName, field.value));
+                }
+            });
+            field.addEventListener('invalid', function (event) {
+                event.preventDefault();
+                setFieldError(field, getValidationMessage(fieldName, field.value));
+            });
+        });
+
+        form.addEventListener('submit', function (event) {
+            var firstInvalidField = null;
+            Object.keys(requiredFields).forEach(function (fieldName) {
+                var field = form.elements[fieldName];
+                var message = field ? getValidationMessage(fieldName, field.value) : '';
+                if (field && message) {
+                    event.preventDefault();
+                    setFieldError(field, message);
+                    if (!firstInvalidField) firstInvalidField = field;
+                }
+            });
+            if (firstInvalidField) {
+                firstInvalidField.focus();
+            }
+        });
+    })();
 
 </script>
 

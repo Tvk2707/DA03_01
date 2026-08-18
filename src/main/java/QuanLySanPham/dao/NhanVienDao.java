@@ -8,6 +8,7 @@ public interface NhanVienDao extends GenericDao<NhanVien, Integer> {
     List<NhanVien> search(String tuKhoa);
     void softDelete(Integer id);
     NhanVien findByEmail(String email);
+    NhanVien findBySoDienThoai(String soDienThoai);
     String findMaxMaNhanVien();
 }
 

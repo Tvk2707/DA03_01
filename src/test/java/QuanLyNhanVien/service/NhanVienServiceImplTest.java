@@ -3,6 +3,7 @@ package QuanLyNhanVien.service;
 import QuanLyNhanVien.service.impl.NhanVienServiceImpl;
 import QuanLySanPham.Entity.NhanVien;
 import QuanLySanPham.Utils.PasswordUtil;
+import QuanLySanPham.Utils.ValidationException;
 import QuanLySanPham.dao.NhanVienDao;
 import org.junit.jupiter.api.Test;
 
@@ -27,6 +28,54 @@ class NhanVienServiceImplTest {
         assertEquals(NhanVien.VAI_TRO_NHAN_VIEN, saved.getVaiTro());
         assertNotEquals("MatKhau123", saved.getMatKhau());
         assertTrue(PasswordUtil.matches("MatKhau123", saved.getMatKhau()));
+    }
+
+    @Test
+    void themNhanVienBatBuocSoDienThoaiEmailVaDiaChi() {
+        NhanVienService service = new NhanVienServiceImpl(new FakeNhanVienDao());
+        NhanVien nhanVien = taoNhanVien("NV0006", "Nhân viên thiếu liên hệ", "MatKhau123");
+        nhanVien.setSoDienThoai(" ");
+        nhanVien.setEmail(null);
+        nhanVien.setDiaChi("");
+
+        ValidationException error = assertThrows(ValidationException.class,
+                () -> service.themNhanVien(nhanVien));
+
+        assertEquals("Vui lòng nhập số điện thoại.", error.getErrors().get("soDienThoai"));
+        assertEquals("Vui lòng nhập email.", error.getErrors().get("email"));
+        assertEquals("Vui lòng chọn địa chỉ.", error.getErrors().get("diaChi"));
+    }
+
+    @Test
+    void themNhanVienKiemTraDinhDangSoDienThoaiVaEmail() {
+        NhanVienService service = new NhanVienServiceImpl(new FakeNhanVienDao());
+        NhanVien nhanVien = taoNhanVien("NV0007", "Nhân viên sai liên hệ", "MatKhau123");
+        nhanVien.setSoDienThoai("09123");
+        nhanVien.setEmail("email-sai");
+
+        ValidationException error = assertThrows(ValidationException.class,
+                () -> service.themNhanVien(nhanVien));
+
+        assertEquals("Số điện thoại phải gồm 10 chữ số và bắt đầu bằng 0.",
+                error.getErrors().get("soDienThoai"));
+        assertEquals("Email không đúng định dạng.", error.getErrors().get("email"));
+    }
+
+    @Test
+    void themNhanVienKhongChoTrungSoDienThoaiVaEmail() {
+        FakeNhanVienDao dao = new FakeNhanVienDao();
+        NhanVien existing = taoNhanVien("NV0008", "Nhân viên đã có", "MatKhau123");
+        existing.setEmail("DaCo@Example.com");
+        dao.save(existing);
+        NhanVienService service = new NhanVienServiceImpl(dao);
+        NhanVien nhanVien = taoNhanVien("NV0009", "Nhân viên bị trùng", "MatKhau123");
+        nhanVien.setEmail("daco@example.com");
+
+        ValidationException error = assertThrows(ValidationException.class,
+                () -> service.themNhanVien(nhanVien));
+
+        assertEquals("Số điện thoại đã được sử dụng.", error.getErrors().get("soDienThoai"));
+        assertEquals("Email đã được sử dụng.", error.getErrors().get("email"));
     }
 
     @Test
@@ -99,6 +148,9 @@ class NhanVienServiceImplTest {
         nhanVien.setMaNhanVien(ma);
         nhanVien.setHoTen(hoTen);
         nhanVien.setMatKhau(matKhau);
+        nhanVien.setSoDienThoai("0900000000");
+        nhanVien.setEmail("nhanvien@example.com");
+        nhanVien.setDiaChi("TP. Hà Nội");
         nhanVien.setTrangThai(1);
         return nhanVien;
     }
@@ -145,7 +197,15 @@ class NhanVienServiceImplTest {
         @Override
         public NhanVien findByEmail(String email) {
             return data.values().stream()
-                    .filter(item -> email.equals(item.getEmail()))
+                    .filter(item -> item.getEmail() != null && email.trim().equalsIgnoreCase(item.getEmail().trim()))
+                    .findFirst().orElse(null);
+        }
+
+        @Override
+        public NhanVien findBySoDienThoai(String soDienThoai) {
+            return data.values().stream()
+                    .filter(item -> item.getSoDienThoai() != null
+                            && soDienThoai.trim().equals(item.getSoDienThoai().trim()))
                     .findFirst().orElse(null);
         }
 

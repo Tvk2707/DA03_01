@@ -5,6 +5,7 @@ import QuanLySanPham.controller.LoginServlet;
 import QuanLyNhanVien.service.NhanVienService;
 import QuanLyNhanVien.service.impl.NhanVienServiceImpl;
 import QuanLySanPham.Utils.EmailService;
+import QuanLySanPham.Utils.ValidationException;
 import QuanLySanPham.dao.NhanVienDao;
 import QuanLySanPham.dao.impl.NhanVienDaoImpl;
 import jakarta.servlet.ServletException;
@@ -166,7 +167,11 @@ public class NhanVienServlet extends HttpServlet {
             request.getSession().setAttribute(FLASH_SUCCESS_KEY, "Thêm nhân viên thành công.");
             response.sendRedirect(request.getContextPath() + "/NhanVien");
         } catch (Exception e) {
-            request.setAttribute("error", e.getMessage());
+            if (e instanceof ValidationException) {
+                request.setAttribute("errors", ((ValidationException) e).getErrors());
+            } else {
+                request.setAttribute("error", e.getMessage());
+            }
             NhanVien nhanVienForm = getNhanVienFrom(request);
             request.setAttribute("nhanVien", nhanVienForm);
             request.setAttribute("action", "add");

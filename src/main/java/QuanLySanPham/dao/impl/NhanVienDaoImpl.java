@@ -73,8 +73,25 @@ public class NhanVienDaoImpl extends GenericDaoImpl<NhanVien, Integer> implement
     public NhanVien findByEmail(String email) {
         EntityManager em = EntityManagerUtlis.getEntityManager();
         try {
-            TypedQuery<NhanVien> q = em.createQuery("SELECT n FROM NhanVien n WHERE n.email = :email", NhanVien.class);
-            q.setParameter("email", email);
+            TypedQuery<NhanVien> q = em.createQuery(
+                    "SELECT n FROM NhanVien n WHERE LOWER(TRIM(n.email)) = LOWER(:email)",
+                    NhanVien.class);
+            q.setParameter("email", email.trim());
+            List<NhanVien> list = q.getResultList();
+            return list.isEmpty() ? null : list.get(0);
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public NhanVien findBySoDienThoai(String soDienThoai) {
+        EntityManager em = EntityManagerUtlis.getEntityManager();
+        try {
+            TypedQuery<NhanVien> q = em.createQuery(
+                    "SELECT n FROM NhanVien n WHERE TRIM(n.soDienThoai) = :soDienThoai",
+                    NhanVien.class);
+            q.setParameter("soDienThoai", soDienThoai.trim());
             List<NhanVien> list = q.getResultList();
             return list.isEmpty() ? null : list.get(0);
         } finally {

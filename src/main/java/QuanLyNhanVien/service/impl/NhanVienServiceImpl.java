@@ -4,11 +4,18 @@ import QuanLySanPham.Entity.NhanVien;
 import QuanLySanPham.dao.NhanVienDao;
 import QuanLySanPham.dao.impl.NhanVienDaoImpl;
 import QuanLySanPham.Utils.PasswordUtil;
+import QuanLySanPham.Utils.ValidationException;
 import QuanLyNhanVien.service.NhanVienService;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 public class NhanVienServiceImpl implements NhanVienService {
+
+    private static final Pattern PHONE_PATTERN = Pattern.compile("^0\\d{9}$");
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
 
     private final NhanVienDao nhanVienDao;
 
@@ -23,9 +30,37 @@ public class NhanVienServiceImpl implements NhanVienService {
     @Override
     public NhanVien themNhanVien(NhanVien nhanVien) {
         if (nhanVien == null) throw new RuntimeException("Nhân viên không được để trống");
+        Map<String, String> errors = new LinkedHashMap<>();
+        String soDienThoai = nhanVien.getSoDienThoai() == null ? "" : nhanVien.getSoDienThoai().trim();
+        String email = nhanVien.getEmail() == null ? "" : nhanVien.getEmail().trim();
+        String diaChi = nhanVien.getDiaChi() == null ? "" : nhanVien.getDiaChi().trim();
         if (nhanVien.getHoTen() == null || nhanVien.getHoTen().trim().isEmpty()) {
-            throw new RuntimeException("Họ tên không được để trống");
+            errors.put("hoTen", "Vui lòng nhập họ và tên.");
         }
+        if (soDienThoai.isEmpty()) {
+            errors.put("soDienThoai", "Vui lòng nhập số điện thoại.");
+        } else if (!PHONE_PATTERN.matcher(soDienThoai).matches()) {
+            errors.put("soDienThoai", "Số điện thoại phải gồm 10 chữ số và bắt đầu bằng 0.");
+        } else if (nhanVienDao.findBySoDienThoai(soDienThoai) != null) {
+            errors.put("soDienThoai", "Số điện thoại đã được sử dụng.");
+        }
+        if (email.isEmpty()) {
+            errors.put("email", "Vui lòng nhập email.");
+        } else if (!EMAIL_PATTERN.matcher(email).matches()) {
+            errors.put("email", "Email không đúng định dạng.");
+        } else if (nhanVienDao.findByEmail(email) != null) {
+            errors.put("email", "Email đã được sử dụng.");
+        }
+        if (diaChi.isEmpty()) {
+            errors.put("diaChi", "Vui lòng chọn địa chỉ.");
+        }
+        if (!errors.isEmpty()) {
+            throw new ValidationException("Thông tin nhân viên chưa hợp lệ.", errors);
+        }
+        nhanVien.setHoTen(nhanVien.getHoTen().trim());
+        nhanVien.setSoDienThoai(soDienThoai);
+        nhanVien.setEmail(email);
+        nhanVien.setDiaChi(diaChi);
         if (nhanVien.getMaNhanVien() != null) {
             NhanVien existing = nhanVienDao.findByMaNhanVien(nhanVien.getMaNhanVien());
             if (existing != null) throw new RuntimeException("Mã nhân viên đã tồn tại");
