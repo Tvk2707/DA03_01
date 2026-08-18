@@ -75,7 +75,8 @@ public class SanPhamDaoImpl extends GenericDaoImpl<SanPham, Integer> implements 
     public SanPham findByTenSanPham(String ten) {
         EntityManager em = EntityManagerUtlis.getEntityManager();
         try {
-            String jpql = "SELECT s FROM SanPham s WHERE s.tenSanPham = :ten AND s.isDeleted = false";
+            String jpql = "SELECT s FROM SanPham s "
+                    + "WHERE LOWER(TRIM(s.tenSanPham)) = LOWER(:ten) AND s.isDeleted = false";
             TypedQuery<SanPham> query = em.createQuery(jpql, SanPham.class);
             query.setParameter("ten", ten);
             List<SanPham> results = query.getResultList();

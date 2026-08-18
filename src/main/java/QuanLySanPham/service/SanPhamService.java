@@ -19,6 +19,12 @@ public interface SanPhamService {
      * Cập nhật sản phẩm
      */
     SanPham capNhatSanPham(SanPham sanPham);
+
+    /**
+     * Kiểm tra riêng tên sản phẩm trước khi xử lý ảnh và biến thể.
+     * Ném ValidationException nếu tên không hợp lệ hoặc đã tồn tại.
+     */
+    void kiemTraTenSanPham(SanPham sanPham);
     
     /**
      * Xóa sản phẩm theo ID

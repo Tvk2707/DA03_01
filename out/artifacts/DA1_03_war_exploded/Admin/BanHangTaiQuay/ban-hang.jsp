@@ -1396,7 +1396,7 @@
     window.idHoaDonHienTai = ${empty idHoaDonDangTao ? 'null' : idHoaDonDangTao};
 </script>
 <script src="https://unpkg.com/html5-qrcode"></script>
-<script src="${pageContext.request.contextPath}/assets/js/banhang.js?v=202607303"></script>
+<script src="${pageContext.request.contextPath}/assets/js/banhang.js?v=202608181"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

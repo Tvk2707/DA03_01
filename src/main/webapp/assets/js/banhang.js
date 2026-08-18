@@ -384,8 +384,22 @@ async function doiSoLuong(idChiTiet, soLuongMoi, button) {
     const cartItem = button?.closest?.('.cart-item');
     const idSpct = cartItem?.dataset.spct || button?.dataset.spct;
     await withLoading(button, async () => {
-        await BanHangAPI.goi('capNhatSoLuong', { idChiTiet, soLuongMoi });
-        await capNhatGioHangTuServer(idSpct);
+        let loiCapNhat = null;
+        try {
+            await BanHangAPI.goi('capNhatSoLuong', { idChiTiet, soLuongMoi });
+        } catch (error) {
+            loiCapNhat = error;
+        }
+
+        // Luôn đồng bộ lại giỏ hàng để ô số lượng không giữ giá trị bị máy chủ từ chối.
+        try {
+            await capNhatGioHangTuServer(idSpct);
+        } catch (error) {
+            if (!loiCapNhat) throw error;
+            console.error('Không thể đồng bộ lại giỏ hàng sau khi cập nhật số lượng thất bại:', error);
+        }
+
+        if (loiCapNhat) throw loiCapNhat;
     });
 }
 

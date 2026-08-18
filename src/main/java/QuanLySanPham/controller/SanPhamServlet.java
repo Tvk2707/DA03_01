@@ -7,6 +7,8 @@ import QuanLySanPham.service.LookupService;
 import QuanLySanPham.service.impl.SanPhamChiTietServiceImpl;
 import QuanLySanPham.service.impl.SanPhamServiceImpl;
 import QuanLySanPham.service.impl.LookupServiceImpl;
+import QuanLySanPham.Utils.ValidationException;
+import com.google.gson.Gson;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
@@ -36,6 +38,7 @@ import java.util.stream.Collectors;
 @WebServlet(name = "SanPhamServlet", value = {
         "/SanPham",
         "/SanPham/new",
+        "/SanPham/check-name",
         "/SanPham/insert",
         "/SanPham/edit",
         "/SanPham/update",
@@ -53,6 +56,7 @@ public class SanPhamServlet extends HttpServlet {
     private SanPhamService sanPhamService = new SanPhamServiceImpl();
     private LookupService lookupService = new LookupServiceImpl();
     private SanPhamChiTietService sanPhamChiTietService = new SanPhamChiTietServiceImpl();
+    private final Gson gson = new Gson();
 
     private static final String UPLOAD_DIR = "File_Anh/images";
 
@@ -65,6 +69,9 @@ public class SanPhamServlet extends HttpServlet {
                 break;
             case "/SanPham/new":
                 showAddSanPham(request, response);
+                break;
+            case "/SanPham/check-name":
+                checkTenSanPham(request, response);
                 break;
             case "/SanPham/edit":
                 showEditSanPham(request, response);
@@ -238,6 +245,28 @@ public class SanPhamServlet extends HttpServlet {
         request.getRequestDispatcher("/Admin/QuanLySanPham/SanPhamAdd.jsp").forward(request, response);
     }
 
+    private void checkTenSanPham(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        Map<String, Object> result = new HashMap<>();
+        SanPham sanPham = new SanPham();
+        sanPham.setTenSanPham(request.getParameter("tenSanPham"));
+
+        try {
+            sanPhamService.kiemTraTenSanPham(sanPham);
+            result.put("valid", true);
+        } catch (ValidationException e) {
+            result.put("valid", false);
+            result.put("message", e.getErrors().getOrDefault(
+                    "tenSanPham",
+                    "Tên sản phẩm không hợp lệ."
+            ));
+        }
+
+        response.getWriter().write(gson.toJson(result));
+    }
+
     private void showEditSanPham(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Integer id = Integer.parseInt(request.getParameter("id"));
         SanPham sanPham = sanPhamService.timTheoId(id);
@@ -263,6 +292,9 @@ public class SanPhamServlet extends HttpServlet {
         sanPham.setNgaySua(LocalDateTime.now());
 
         try {
+            // Kiểm tra tên trước khi ghi file để lần thêm thất bại không tạo ảnh rác.
+            sanPhamService.kiemTraTenSanPham(sanPham);
+
             Map<String, String> anhTheoMau = xuLyUploadAnhTheoMau(request);
             List<SanPhamChiTiet> danhSachBienThe = getDanhSachBienTheFromRequest(request, null, anhTheoMau);
 
@@ -270,6 +302,12 @@ public class SanPhamServlet extends HttpServlet {
 
             response.sendRedirect(request.getContextPath() + "/SanPham?success=Th%C3%AAm%20s%E1%BA%A3n%20ph%E1%BA%A9m%20th%C3%A0nh%20c%C3%B4ng");
 
+        } catch (ValidationException e) {
+            request.setAttribute("errors", e.getErrors());
+            request.setAttribute("sanPham", sanPham);
+            setLookupAttributes(request);
+            request.setAttribute("action", "add");
+            request.getRequestDispatcher("/Admin/QuanLySanPham/SanPhamAdd.jsp").forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("error", e.getMessage());

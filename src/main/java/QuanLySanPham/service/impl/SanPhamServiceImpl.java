@@ -32,8 +32,7 @@ public class SanPhamServiceImpl implements SanPhamService {
         }
     }
 
-    private void validateSanPham(SanPham sanPham, Map<String, String> errors) {
-        ValidationUtils.validateMa(errors, "maSanPham", sanPham.getMaSanPham());
+    private void validateTenSanPham(SanPham sanPham, Map<String, String> errors) {
         ValidationUtils.validateTenSanPham(errors, "tenSanPham", sanPham.getTenSanPham());
 
         if (!errors.containsKey("tenSanPham")) {
@@ -44,6 +43,12 @@ public class SanPhamServiceImpl implements SanPhamService {
             }
             sanPham.setTenSanPham(normalizedTen);
         }
+    }
+
+    private void validateSanPham(SanPham sanPham, Map<String, String> errors) {
+        ValidationUtils.validateMa(errors, "maSanPham", sanPham.getMaSanPham());
+        validateTenSanPham(sanPham, errors);
+
         if (!errors.containsKey("maSanPham")) {
             sanPham.setMaSanPham(sanPham.getMaSanPham().trim());
         }
@@ -53,6 +58,17 @@ public class SanPhamServiceImpl implements SanPhamService {
         ValidationUtils.checkNull(errors, "chatLieu", sanPham.getChatLieu(), "Vui lòng chọn chất liệu.");
         ValidationUtils.checkNull(errors, "kieuDang", sanPham.getKieuDang(), "Vui lòng chọn kiểu dáng.");
         ValidationUtils.checkNull(errors, "trongKinh", sanPham.getTrongKinh(), "Vui lòng chọn tròng kính.");
+    }
+
+    @Override
+    public void kiemTraTenSanPham(SanPham sanPham) {
+        Map<String, String> errors = new HashMap<>();
+        if (sanPham == null) {
+            errors.put("tenSanPham", "Tên sản phẩm không hợp lệ.");
+        } else {
+            validateTenSanPham(sanPham, errors);
+        }
+        validateAndThrow(errors);
     }
 
     @Override

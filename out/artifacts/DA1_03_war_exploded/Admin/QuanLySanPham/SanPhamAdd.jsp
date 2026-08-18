@@ -55,6 +55,9 @@
         <form action="${pageContext.request.contextPath}/SanPham/${formActionUrl}"
               method="post" enctype="multipart/form-data" id="sanPhamForm">
 
+            <input type="hidden" id="variantStateJson" name="variantStateJson"
+                   value="${fn:escapeXml(param.variantStateJson)}">
+
             <c:if test="${isEdit}">
                 <input type="hidden" name="id" value="${sanPham.id}">
             </c:if>
@@ -70,7 +73,7 @@
                     <div class="filter-group">
                         <label class="filter-label">Mã sản phẩm <span class="required">*</span></label>
                         <input type="text" class="filter-input" id="maSanPham" name="maSanPham"
-                               value="${isEdit ? sanPham.maSanPham : autoMaSanPham}"
+                               value="${isEdit ? sanPham.maSanPham : (not empty sanPham.maSanPham ? sanPham.maSanPham : autoMaSanPham)}"
                                readonly required maxlength="60"
                                style="background-color: #f3f4f6; cursor: not-allowed; font-weight: 600; color: #4b5563;"
                                placeholder="Mã tự động sinh...">
@@ -78,9 +81,14 @@
 
                     <div class="filter-group">
                         <label class="filter-label">Tên sản phẩm <span class="required">*</span></label>
-                        <input type="text" class="filter-input" name="tenSanPham"
+                        <input type="text" id="tenSanPham" class="filter-input ${not empty errors.tenSanPham ? 'is-invalid' : ''}"
+                               name="tenSanPham"
                                value="${sanPham.tenSanPham}" required maxlength="200"
+                               aria-describedby="tenSanPhamError"
+                               aria-invalid="${not empty errors.tenSanPham}"
                                placeholder="Nhập tên sản phẩm">
+                        <small id="tenSanPhamError"
+                               class="sp-field-error ${empty errors.tenSanPham ? 'sp-hidden' : ''}">${errors.tenSanPham}</small>
                     </div>
                 </div>
 
@@ -330,6 +338,15 @@
         color: #b3261e;
     }
     .required { color: #dc2626; }
+    .filter-input.is-invalid {
+        border-color: #dc2626;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.10);
+    }
+    .sp-field-error {
+        color: #dc2626;
+        font-size: 12px;
+        line-height: 1.4;
+    }
 
     /* --- FORM GRID --- */
     .sp-form-grid {
@@ -846,12 +863,15 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
+    const submittedVariantState = readSubmittedVariantState();
     const variantState = {
-        colors: [],
-        sizes: [],
-        variants: [],
+        colors: submittedVariantState.colors,
+        sizes: submittedVariantState.sizes,
+        variants: submittedVariantState.variants,
         imageFilesByColor: new Map()
     };
+    let checkedProductName = null;
+    let productNameCheckPromise = null;
 
     const sourceOptions = {
         colors: readSourceOptions('mauSacSource'),
@@ -876,11 +896,27 @@
     document.addEventListener('DOMContentLoaded', function () {
         initCustomSelect('colors', 'colorInputBox', 'colorDropdown', 'colorOptions', 'colorSelectedTags', 'colorSearch');
         initCustomSelect('sizes', 'sizeInputBox', 'sizeDropdown', 'sizeOptions', 'sizeSelectedTags', 'sizeSearch');
+        restoreVariantStateOnScreen();
 
         bindVariantActions();
         updateVariantSummary();
         initModalEvents();
         initCurrencyFormatter(); // KHỞI TẠO ĐỊNH DẠNG TIỀN TỆ ĐỘNG
+
+        const productNameInput = document.getElementById('tenSanPham');
+        productNameInput.addEventListener('input', clearProductNameError);
+        productNameInput.addEventListener('blur', function () {
+            if (productNameInput.value.trim()) {
+                checkProductName().catch(showProductNameCheckFailure);
+            }
+        });
+
+        if (productNameInput.classList.contains('is-invalid')) {
+            setTimeout(function () {
+                productNameInput.focus();
+                productNameInput.select();
+            }, 0);
+        }
     });
 
     // --- HÀM TỰ ĐỘNG THÊM DẤU PHÂN CÁCH HÀNG NGHÌN REAL-TIME ---
@@ -921,6 +957,92 @@
                 code: option.dataset.code || option.text.trim()
             };
         });
+    }
+
+    function readSubmittedVariantState() {
+        const hiddenInput = document.getElementById('variantStateJson');
+        if (!hiddenInput || !hiddenInput.value) {
+            return { colors: [], sizes: [], variants: [] };
+        }
+
+        try {
+            const parsed = JSON.parse(hiddenInput.value);
+            return {
+                colors: Array.isArray(parsed.colors) ? parsed.colors : [],
+                sizes: Array.isArray(parsed.sizes) ? parsed.sizes : [],
+                variants: Array.isArray(parsed.variants) ? parsed.variants : []
+            };
+        } catch (error) {
+            console.error('Không thể khôi phục dữ liệu biến thể đã nhập:', error);
+            return { colors: [], sizes: [], variants: [] };
+        }
+    }
+
+    function restoreVariantStateOnScreen() {
+        if (variantState.colors.length === 0 && variantState.sizes.length === 0) return;
+
+        renderSelectedTags('colors', 'colorSelectedTags', 'colorOptions', document.getElementById('colorSearch'));
+        renderSelectedTags('sizes', 'sizeSelectedTags', 'sizeOptions', document.getElementById('sizeSearch'));
+        renderColorCards();
+        renderColorUploadCards();
+        toggleGeneratedCards();
+    }
+
+    function setProductNameError(message) {
+        const input = document.getElementById('tenSanPham');
+        const errorElement = document.getElementById('tenSanPhamError');
+        input.classList.add('is-invalid');
+        input.setAttribute('aria-invalid', 'true');
+        errorElement.textContent = message;
+        errorElement.classList.remove('sp-hidden');
+    }
+
+    function clearProductNameError() {
+        const input = document.getElementById('tenSanPham');
+        const errorElement = document.getElementById('tenSanPhamError');
+        input.classList.remove('is-invalid');
+        input.setAttribute('aria-invalid', 'false');
+        errorElement.textContent = '';
+        errorElement.classList.add('sp-hidden');
+        checkedProductName = null;
+        productNameCheckPromise = null;
+    }
+
+    function checkProductName() {
+        const input = document.getElementById('tenSanPham');
+        const productName = input.value.trim();
+        if (!productName) {
+            setProductNameError('Tên sản phẩm không được để trống.');
+            return Promise.resolve(false);
+        }
+
+        if (checkedProductName === productName && productNameCheckPromise) {
+            return productNameCheckPromise;
+        }
+
+        checkedProductName = productName;
+        const query = new URLSearchParams({ tenSanPham: productName });
+        productNameCheckPromise = fetch('${pageContext.request.contextPath}/SanPham/check-name?' + query)
+            .then(function (response) {
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                return response.json();
+            })
+            .then(function (data) {
+                if (!data.valid) {
+                    setProductNameError(data.message || 'Tên sản phẩm đã tồn tại.');
+                    return false;
+                }
+                clearProductNameError();
+                checkedProductName = productName;
+                productNameCheckPromise = Promise.resolve(true);
+                return true;
+            });
+        return productNameCheckPromise;
+    }
+
+    function showProductNameCheckFailure(error) {
+        console.error('Không thể kiểm tra tên sản phẩm:', error);
+        setProductNameError('Không thể kiểm tra tên sản phẩm. Vui lòng thử lại.');
     }
 
     // --- HÀM XỬ LÝ DROPDOWN & TAGS GỌN GÀNG ---
@@ -1287,17 +1409,43 @@
     }
 
     // --- LOẠI BỎ HẾT DẤU CHẤM TRƯỚC KHI SUBMIT FORM ĐỂ GỬI LÊN SERVER CHUẨN SỐ NGUYÊN ---
-    function validateBeforeSubmit(event) {
+    async function validateBeforeSubmit(event) {
+        event.preventDefault();
+
         if (variantState.variants.length === 0) {
-            event.preventDefault();
             alert('Vui lòng tạo ít nhất một biến thể trước khi lưu sản phẩm.');
             return;
         }
 
-        // Trước khi submit gửi dữ liệu đi, ta dọn sạch mọi dấu chấm phân cách hiển thị ở các ô input
-        document.querySelectorAll('.currency-input').forEach(function(input) {
-            input.value = input.value.replace(/\./g, "");
+        document.getElementById('variantStateJson').value = JSON.stringify({
+            colors: variantState.colors,
+            sizes: variantState.sizes,
+            variants: variantState.variants
         });
+
+        const saveButton = document.getElementById('saveBtn');
+        saveButton.disabled = true;
+
+        try {
+            const validName = await checkProductName();
+            if (!validName) {
+                const productNameInput = document.getElementById('tenSanPham');
+                productNameInput.focus();
+                productNameInput.select();
+                return;
+            }
+
+            // Trước khi submit gửi dữ liệu đi, ta dọn sạch mọi dấu chấm phân cách hiển thị ở các ô input
+            document.querySelectorAll('.currency-input').forEach(function(input) {
+                input.value = input.value.replace(/\./g, "");
+            });
+
+            event.currentTarget.submit();
+        } catch (error) {
+            showProductNameCheckFailure(error);
+        } finally {
+            saveButton.disabled = false;
+        }
     }
 
     function normalizeText(value) {
